@@ -45,47 +45,47 @@ public class RestImpl extends DefaultPlatformImpl {
 
     // HTML interface
     
-	@GET
+    @GET
     @Produces(MediaType.TEXT_HTML)
     public String getRootHtml() {
         StringWriter so = new StringWriter();
-		so.append("<html><head><title>Jason Mind Inspector -- Web View</title></head><body>");
-		so.append("<iframe width=\"20%\" height=\"100%\" align=left src=\"/agents\" border=5 frameborder=0 ></iframe>");
-		so.append("<iframe width=\"78%\" height=\"100%\" align=left src=\"/agent-mind/no_ag\" name=\"am\" border=5 frameborder=0></iframe>");
-		so.append("</body></html>");
-		return so.toString();
+        so.append("<html><head><title>Jason Mind Inspector -- Web View</title></head><body>");
+        so.append("<iframe width=\"20%\" height=\"100%\" align=left src=\"/agents\" border=5 frameborder=0 ></iframe>");
+        so.append("<iframe width=\"78%\" height=\"100%\" align=left src=\"/agent-mind/no_ag\" name=\"am\" border=5 frameborder=0></iframe>");
+        so.append("</body></html>");
+        return so.toString();
     }
 
     @Path("/agents")
-	@GET
+    @GET
     @Produces(MediaType.TEXT_HTML)
     public String getAgentsHtml() {
         StringWriter so = new StringWriter();
 
-    	so.append("<html><head><title>Jason (list of agents)</title> <meta http-equiv=\"refresh\" content=\"3\"/> </head><body>");
-    	so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Agents</p></font>");
-    	if (JCMRest.getZKHost() == null) {
-	        for (String a: JaCaMoLauncher.getRunner().getAgs().keySet()) {
-	            so.append("- <a href=\"/agents/"+a+"/all\" target=\"am\" style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
-	        }
-	    } else {
-	    	// get agents from ZK
-	    	try {
-				for (String a: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
-					String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId+"/"+a));
-		            so.append("- <a href=\""+url+"/all\" target=\"am\" style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-	    }
+        so.append("<html><head><title>Jason (list of agents)</title> <meta http-equiv=\"refresh\" content=\"3\"/> </head><body>");
+        so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Agents</p></font>");
+        if (JCMRest.getZKHost() == null) {
+            for (String a: JaCaMoLauncher.getRunner().getAgs().keySet()) {
+                so.append("- <a href=\"/agents/"+a+"/all\" target=\"am\" style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
+            }
+        } else {
+            // get agents from ZK
+            try {
+                for (String a: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
+                    String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId+"/"+a));
+                    so.append("- <a href=\""+url+"/all\" target=\"am\" style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         
-    	so.append("<br/><a href=\"/new_agent_form\" target=\"am\" style=\"font-family: arial; text-decoration: none\">new agent</a>");                            
-    	so.append("<br/><a href=\"/services\" target=\"am\" style=\"font-family: arial; text-decoration: none\">DF</a><br/>");                            
+        so.append("<br/><a href=\"/new_agent_form\" target=\"am\" style=\"font-family: arial; text-decoration: none\">new agent</a>");                            
+        so.append("<br/><a href=\"/services\" target=\"am\" style=\"font-family: arial; text-decoration: none\">DF</a><br/>");                            
 
         so.append("<hr/>by <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>");
-        so.append("</body></html>");		
-		return so.toString();
+        so.append("</body></html>");        
+        return so.toString();
     }
     
 
@@ -97,88 +97,88 @@ public class RestImpl extends DefaultPlatformImpl {
     static String helpMsg1 = "Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });";
 
     @Path("/new_agent_form")
-	@GET
+    @GET
     @Produces(MediaType.TEXT_HTML)
     public String getNewAgentForm() {
-    	return  "<html><head><title>new agent form</title></head>"+
-		    	"<form action=\"/new_agent\" method=\"post\">" +
-				"Name: <input type=\"text\" name=\"name\" />"+
-		    	"<input type=\"submit\" value=\"Submit\">"+
-		    	"</form></html>";
+        return  "<html><head><title>new agent form</title></head>"+
+                "<form action=\"/new_agent\" method=\"post\">" +
+                "Name: <input type=\"text\" name=\"name\" />"+
+                "<input type=\"submit\" value=\"Submit\">"+
+                "</form></html>";
     }
     
     @Path("/new_agent")
-	@POST
+    @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_HTML)
     public String createNewAgent(@FormParam("name") String agName) {
-    	try {
-    		List<String> archs = new ArrayList<>();
-    		archs.add(RestAgArch.class.getName());
-			String name = JaCaMoLauncher.getRunner().getRuntimeServices().createAgent(agName, null, null, archs, null, null, null);
-			JaCaMoLauncher.getRunner().getRuntimeServices().startAgent(name);
-	    	return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+name+"/all'\" /></head>ok for "+name;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "error "+e.getMessage();
-		}
+        try {
+            List<String> archs = new ArrayList<>();
+            archs.add(RestAgArch.class.getName());
+            String name = JaCaMoLauncher.getRunner().getRuntimeServices().createAgent(agName, null, null, archs, null, null, null);
+            JaCaMoLauncher.getRunner().getRuntimeServices().startAgent(name);
+            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+name+"/all'\" /></head>ok for "+name;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error "+e.getMessage();
+        }
     }
 
     @Path("/agents/{agentname}/all")
-	@GET
+    @GET
     @Produces(MediaType.TEXT_HTML)
     public String getAgentHtml(@PathParam("agentname") String agName) {
-    	StringWriter so = new StringWriter();
+        StringWriter so = new StringWriter();
         so.append("<html><head><title>"+agName+"</title></head>");
 
         // REPL part
         so.append(
-        		"<input type=\"text\" name=\"c\"  size=\"70\" id=\"inputcmd\" placeholder=\""+helpMsg1+"\" onkeydown=\"if (event.keyCode == 13) runCMD()\" />" + 
-        		//"</form>"+
-        		//"<input type=\"submit\" onclick=\"runCMD();\" value=\"Submit\" />"+
-        		"<code><span id='display'></span></code>  <span id='plog'></span>"+
-        		"<pre><span id='log'></span></pre>"+
-        		
-        		"<script language=\"JavaScript\">\n" + 
-        		"    function runCMD() {\n" +
-        		"        http = new XMLHttpRequest();\n" + 
-        		"        http.onreadystatechange = function() { \n" + 
-        		"          if (http.readyState == 4 && http.status == 200) {\n" +
-        		"                location.reload();\n" + 
-        		"                document.getElementById('display').innerHTML = \"  result: \" + http.responseText;\n" + 
-        		"        } }\n" + 
-        		"        http.open(\"POST\", \"cmd\", true); // true for asynchronous \n" +
-        		"        http.setRequestHeader(\"Content-type\", \"application/x-www-form-urlencoded\");\n" +
-        		"        data = 'c='+encodeURIComponent(document.getElementById(\"inputcmd\").value); \n"+
-        		//"        document.getElementById('debug').innerHTML = data\n" + 
-        		"        http.send(data);\n"+
-        		"    }\n" + 
-        		"    function delLog() {\n" +
-        		"        h2 = new XMLHttpRequest();\n" + 
-        		"        h2.open('DELETE', 'log', false); \n" +
-        		"        h2.send(); \n" +
-        		"    }\n" + 
-        		"    function showLog() {\n" +
-        		"        http = new XMLHttpRequest();\n" + 
-        		"        http.onreadystatechange = function() { \n" + 
-        		"          if (http.readyState == 4 && http.status == 200) {\n" +
-        		"                document.getElementById('log').innerHTML = http.responseText;\n" + 
-        		"                if (http.responseText.length > 10) {\n" + 
-        		"                      var btn = document.createElement(\"BUTTON\"); \n" + 
-        		"                      var t = document.createTextNode(\"clear log\");\n" + 
-        		"                      btn.appendChild(t); \n" +
-        		"                      btn.onclick = function() { delLog(); location.reload(); }; \n" +
-        		"                      document.getElementById('plog').appendChild(btn);  "+
-        		"                }\n" + 
-        		"        } }\n" + 
-        		"        http.open('GET', 'log', true); \n" +
-        		"        http.send();\n"+
-        		"    }\n" + 
-        		"    showLog(); \n" +
-        		"</script>");
+                "<input type=\"text\" name=\"c\"  size=\"70\" id=\"inputcmd\" placeholder=\""+helpMsg1+"\" onkeydown=\"if (event.keyCode == 13) runCMD()\" />" + 
+                //"</form>"+
+                //"<input type=\"submit\" onclick=\"runCMD();\" value=\"Submit\" />"+
+                "<code><span id='display'></span></code>  <span id='plog'></span>"+
+                "<pre><span id='log'></span></pre>"+
+                
+                "<script language=\"JavaScript\">\n" + 
+                "    function runCMD() {\n" +
+                "        http = new XMLHttpRequest();\n" + 
+                "        http.onreadystatechange = function() { \n" + 
+                "          if (http.readyState == 4 && http.status == 200) {\n" +
+                "                location.reload();\n" + 
+                "                document.getElementById('display').innerHTML = \"  result: \" + http.responseText;\n" + 
+                "        } }\n" + 
+                "        http.open(\"POST\", \"cmd\", true); // true for asynchronous \n" +
+                "        http.setRequestHeader(\"Content-type\", \"application/x-www-form-urlencoded\");\n" +
+                "        data = 'c='+encodeURIComponent(document.getElementById(\"inputcmd\").value); \n"+
+                //"        document.getElementById('debug').innerHTML = data\n" + 
+                "        http.send(data);\n"+
+                "    }\n" + 
+                "    function delLog() {\n" +
+                "        h2 = new XMLHttpRequest();\n" + 
+                "        h2.open('DELETE', 'log', false); \n" +
+                "        h2.send(); \n" +
+                "    }\n" + 
+                "    function showLog() {\n" +
+                "        http = new XMLHttpRequest();\n" + 
+                "        http.onreadystatechange = function() { \n" + 
+                "          if (http.readyState == 4 && http.status == 200) {\n" +
+                "                document.getElementById('log').innerHTML = http.responseText;\n" + 
+                "                if (http.responseText.length > 10) {\n" + 
+                "                      var btn = document.createElement(\"BUTTON\"); \n" + 
+                "                      var t = document.createTextNode(\"clear log\");\n" + 
+                "                      btn.appendChild(t); \n" +
+                "                      btn.onclick = function() { delLog(); location.reload(); }; \n" +
+                "                      document.getElementById('plog').appendChild(btn);  "+
+                "                }\n" + 
+                "        } }\n" + 
+                "        http.open('GET', 'log', true); \n" +
+                "        http.send();\n"+
+                "    }\n" + 
+                "    showLog(); \n" +
+                "</script>");
         
-    	try {
-    		if (mindInspectorTransformerHTML == null) {
+        try {
+            if (mindInspectorTransformerHTML == null) {
                 mindInspectorTransformerHTML = new asl2html("/xml/agInspection.xsl");
             }
             show.put("bels", true);
@@ -191,45 +191,45 @@ public class RestImpl extends DefaultPlatformImpl {
             //show.put("plan", plan);
             //show.put("plan-details", plan);
             for (String p: show.keySet())
-            	mindInspectorTransformerHTML.setParameter("show-"+p, show.get(p)+"");
+                mindInspectorTransformerHTML.setParameter("show-"+p, show.get(p)+"");
             so.append( mindInspectorTransformerHTML.transform( JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getAgState() )); // transform to HTML
-    	} catch (Exception e) {
-    		if (JaCaMoLauncher.getRunner().getAg(agName) != null)
-    			e.printStackTrace();
-    		so.append("Agent "+agName+" does not exist or cannot be observed.");
-    	}
+        } catch (Exception e) {
+            if (JaCaMoLauncher.getRunner().getAg(agName) != null)
+                e.printStackTrace();
+            so.append("Agent "+agName+" does not exist or cannot be observed.");
+        }
 
         so.append("</body></html>");
         return so.toString();
     }
     
     @Path("/agents/{agentname}/all")
-	@GET
+    @GET
     @Produces(MediaType.APPLICATION_XML)
     public Document getAgentXml(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
-    	try {
+        try {
             return JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getAgState();
-    	} catch (Exception e) {
-    		throw new ReceiverNotFoundException("Agent "+agName+" in unknown");
-    	}
+        } catch (Exception e) {
+            throw new ReceiverNotFoundException("Agent "+agName+" in unknown");
+        }
     }
 
     
     @Path("/agents/{agentname}/plans")
-	@GET
+    @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getAgentPlansTxt(@PathParam("agentname") String agName,
-    		@DefaultValue("all") @QueryParam("label") String label) {
-    	StringWriter so = new StringWriter();
-    	try {
-    		for (Plan p: JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getPL()) {
-    			if (p.getLabel().getFunctor().equals(label) || label.equals("all"))
-    				so.append(p+"\n");
-    		}
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    		so.append("Agent "+agName+" does not exist or cannot be observed.");
-    	}
+            @DefaultValue("all") @QueryParam("label") String label) {
+        StringWriter so = new StringWriter();
+        try {
+            for (Plan p: JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getPL()) {
+                if (p.getLabel().getFunctor().equals(label) || label.equals("all"))
+                    so.append(p+"\n");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            so.append("Agent "+agName+" does not exist or cannot be observed.");
+        }
         return so.toString();
     }
 
@@ -240,29 +240,29 @@ public class RestImpl extends DefaultPlatformImpl {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
     public String runCmdPost(@FormParam("c") String cmd, @PathParam("agentname") String agName) {
-    	String r = execCmd(agName, cmd.trim());
-    	addAgLog(agName, "Command "+cmd+": "+r);
-    	return r;
+        String r = execCmd(agName, cmd.trim());
+        addAgLog(agName, "Command "+cmd+": "+r);
+        return r;
     }
 
     @Path("/agents/{agentname}/log")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getLogOutput(@PathParam("agentname") String agName) {
-    	StringBuilder o = agLog.get(agName);
-    	if (o != null) {
-    		//agLog.put(agName, new StringBuilder());
-    		return o.toString();
-    	}
-    	return "";
+        StringBuilder o = agLog.get(agName);
+        if (o != null) {
+            //agLog.put(agName, new StringBuilder());
+            return o.toString();
+        }
+        return "";
     }
     
     @Path("/agents/{agentname}/log")
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     public String delLogOutput(@PathParam("agentname") String agName) {
-    	agLog.put(agName, new StringBuilder());
-    	return "ok";
+        agLog.put(agName, new StringBuilder());
+        return "ok";
     }
 
     String execCmd(String agName, String sCmd) {
@@ -278,18 +278,18 @@ public class RestImpl extends DefaultPlatformImpl {
                            new Unifier()),
                        te));
 
-        	TransitionSystem ts = JaCaMoLauncher.getRunner().getAg(agName).getTS();
-        	ts.getC().addRunningIntention(i);
+            TransitionSystem ts = JaCaMoLauncher.getRunner().getAg(agName).getTS();
+            ts.getC().addRunningIntention(i);
             ts.getUserAgArch().wake();
             
             // adds a log for the agent
             if (agLog.get(agName) == null) {
-	            ts.getLogger().addHandler( new StreamHandler() {
-	                @Override
-	                public void publish(LogRecord l) {
-	                	addAgLog(agName, l.getMessage());
-	                }
-	            });
+                ts.getLogger().addHandler( new StreamHandler() {
+                    @Override
+                    public void publish(LogRecord l) {
+                        addAgLog(agName, l.getMessage());
+                    }
+                });
             }
 
             return "included for execution";
@@ -299,70 +299,70 @@ public class RestImpl extends DefaultPlatformImpl {
     }
 
     protected void addAgLog(String agName, String msg) {
-    	StringBuilder o = agLog.get(agName);
-    	if (o == null) {
-    		o = new StringBuilder();
-    		agLog.put(agName, o);
-    	}
-    	o.append(msg+"\n");    	
+        StringBuilder o = agLog.get(agName);
+        if (o == null) {
+            o = new StringBuilder();
+            agLog.put(agName, o);
+        }
+        o.append(msg+"\n");     
     }
     
     
     // XML interface
     
     @Path("/agents/{agentname}/mb")
-	@POST
+    @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.TEXT_PLAIN)
     public String addAgMsg(Message m, @PathParam("agentname") String agName) {
-    	CentralisedAgArch a = JaCaMoLauncher.getRunner().getAg(agName);
-    	if (a != null) {
-    		a.receiveMsg(m.getAsJasonMsg());
-    		return "ok";
-    	} else {
-    		return "receiver not found";
-    	}
+        CentralisedAgArch a = JaCaMoLauncher.getRunner().getAg(agName);
+        if (a != null) {
+            a.receiveMsg(m.getAsJasonMsg());
+            return "ok";
+        } else {
+            return "receiver not found";
+        }
     }
     
 
     /** DF **/
 
     @Path("/services")
-	@GET
+    @GET
     @Produces(MediaType.TEXT_HTML)
     public String getAgentHtml() {
-    	StringWriter so = new StringWriter();
-	    so.append("<html><head><title>Directory Facilitator State</title></head><body>");
-	    so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Directory Facilitator State</p></font>");
-	                        
-	    so.append("<table border=\"0\" cellspacing=\"3\" cellpadding=\"6\" >");
-	    so.append("<tr style='background-color: #ece7e6; font-family: arial;'><td><b>Agent</b></td><td><b>Services</b></td></tr>");
-	    if (JCMRest.getZKHost() == null) {
-	    	// get DF locally 
-		    Map<String, Set<String>> df = JaCaMoLauncher.getRunner().getDF();
-		    for (String a: df.keySet()) {
-		    	so.append("<tr style='font-family: arial;'><td>"+a+"</td>");
-		        for (String s: df.get(a)) {
-		        	so.append("<td>"+s+"<br/></td>");
-		        }
-		        so.append("</tr>");
-		            
-		    }
-	    } else {
-	    	// get DF from ZK
-	    	try {
-				for (String s: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKDFNodeId)) {
-					for (String a: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKDFNodeId+"/"+s)) {
-						so.append("<tr style='font-family: arial;'><td>"+a+"</td>");
-						so.append("<td>"+s+"<br/></td>");
-				        so.append("</tr>");	    			
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-	    }
-	    so.append("</table></body></html>");
+        StringWriter so = new StringWriter();
+        so.append("<html><head><title>Directory Facilitator State</title></head><body>");
+        so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Directory Facilitator State</p></font>");
+                            
+        so.append("<table border=\"0\" cellspacing=\"3\" cellpadding=\"6\" >");
+        so.append("<tr style='background-color: #ece7e6; font-family: arial;'><td><b>Agent</b></td><td><b>Services</b></td></tr>");
+        if (JCMRest.getZKHost() == null) {
+            // get DF locally 
+            Map<String, Set<String>> df = JaCaMoLauncher.getRunner().getDF();
+            for (String a: df.keySet()) {
+                so.append("<tr style='font-family: arial;'><td>"+a+"</td>");
+                for (String s: df.get(a)) {
+                    so.append("<td>"+s+"<br/></td>");
+                }
+                so.append("</tr>");
+                    
+            }
+        } else {
+            // get DF from ZK
+            try {
+                for (String s: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKDFNodeId)) {
+                    for (String a: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKDFNodeId+"/"+s)) {
+                        so.append("<tr style='font-family: arial;'><td>"+a+"</td>");
+                        so.append("<td>"+s+"<br/></td>");
+                        so.append("</tr>");                 
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        so.append("</table></body></html>");
 
         return so.toString();            
     }

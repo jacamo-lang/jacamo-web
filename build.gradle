@@ -103,6 +103,13 @@ task test1 (type: JavaExec, dependsOn: 'classes') {
     classpath sourceSets.main.runtimeClasspath
 }
 
+task fixTab {
+    ant.fixcrlf(eol: 'lf',  includes: '**/*.txt,**/*.bat, **/*.adoc', srcdir: '.')
+    ant.fixcrlf(tab: 'remove', tablength: '4', javafiles: 'true', includes: '**/*.java,**/*.xml', srcdir: 'src')
+    ant.fixcrlf(tab: 'remove', tablength: '4', javafiles: 'true', includes: '**/*.java,**/*.xml,**/*.asl,**/*.jcm', srcdir: '.')
+    //ant.fixcrlf(tab: 'remove', tablength: '4', javafiles: 'true', includes: '**/*.java,**/*.xml,**/*.asl,**/*.jcm,**/*.txt', srcdir: 'doc')
+}
+
 clean {
     delete 'bin'
     delete 'build'
