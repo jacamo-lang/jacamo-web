@@ -1,0 +1,8 @@
+mas marcos {
+
+    agent marcos
+
+    //platform: jacamo.web.JCMRest("--connect localhost:2181") // connects to platform at 2181
+    platform: jacamo.web.JCMRest("--main 2181") // connects to platform at 2181
+
+}

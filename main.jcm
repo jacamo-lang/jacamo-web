@@ -1,0 +1,9 @@
+/*
+    simply runs the platform with no agent
+*/
+
+mas plat {
+
+    platform: jacamo.web.JCMRest("--main 2181") // starts platform on port 2181
+
+}

@@ -1,0 +1,110 @@
+/*
+   Project JaCaMo REST
+
+   Gradle build file for JaCaMo Applications
+   October 13, 2018 - 16:23:38
+*/
+
+defaultTasks 'run'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+version '1.0'
+group   'org.jacamo'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+
+    maven { url "http://jacamo.sourceforge.net/maven2" }
+    maven { url "http://jade.tilab.com/maven/" }
+
+    flatDir {
+       dirs 'lib'
+    }
+}
+
+dependencies {
+    compile 'org.jacamo:jacamo:0.8-SNAPSHOT'
+    compile 'javax.xml.bind:jaxb-api:+'
+	compile 'com.sun.xml.bind:jaxb-core:+'
+    compile 'com.sun.xml.bind:jaxb-impl:+'
+
+    compile 'org.glassfish.jersey.containers:jersey-container-servlet:2.27'
+    compile 'org.glassfish.jersey.inject:jersey-hk2:2.27'
+    compile 'org.glassfish.jersey:jersey-bom:2.27'
+
+    compile 'org.glassfish.jersey.core:jersey-client:+'
+
+	// containers:
+	//compile 'org.glassfish.jersey.containers:jersey-container-jetty-http:2.27'
+    compile 'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.27'
+    //compile 'org.glassfish.jersey.containers:jersey-container-jdk-http:2.27'
+    
+    compile 'org.apache.zookeeper:zookeeper:3.5.4-beta'
+    compile 'org.apache.curator:curator-framework:4.0.1'
+    compile 'org.apache.curator:curator-x-async:4.0.1'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/env'
+            srcDir 'src/agt'
+            srcDir 'src/org'
+            srcDir 'src/java'
+        }
+        resources {
+            srcDir 'src/resources'
+        }
+    }
+}
+
+task run (type: JavaExec, dependsOn: 'classes') {
+    group      ' JaCaMo'
+    description 'runs the JaCaMo platform'
+    doFirst {
+        mkdir 'log'
+    }
+    main 'jacamo.infra.JaCaMoLauncher'
+    args 'main.jcm'
+    classpath sourceSets.main.runtimeClasspath
+}
+
+task bob (type: JavaExec, dependsOn: 'classes') {
+    group      ' JaCaMo'
+    description 'runs the JaCaMo application'
+    doFirst {
+        mkdir 'log'
+    }
+    main 'jacamo.infra.JaCaMoLauncher'
+    args 'bob.jcm'
+    classpath sourceSets.main.runtimeClasspath
+}
+
+task marcos (type: JavaExec, dependsOn: 'classes') {
+    group      ' JaCaMo'
+    description 'runs agent marcos'
+    doFirst {
+        mkdir 'log'
+    }
+    main 'jacamo.infra.JaCaMoLauncher'
+    args 'marcos.jcm'
+    classpath sourceSets.main.runtimeClasspath
+}
+
+task test1 (type: JavaExec, dependsOn: 'classes') {
+    group      ' JaCaMo'
+    description 'runs test'
+    main 'jacamo.web.ClientTest'
+    classpath sourceSets.main.runtimeClasspath
+}
+
+clean {
+    delete 'bin'
+    delete 'build'
+    delete 'log'
+}
