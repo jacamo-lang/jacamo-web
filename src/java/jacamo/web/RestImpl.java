@@ -106,7 +106,7 @@ public class RestImpl extends DefaultPlatformImpl {
                 "<input type=\"submit\" value=\"Submit\">"+
                 "</form></html>";
     }
-    
+
     @Path("/new_agent")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -193,6 +193,10 @@ public class RestImpl extends DefaultPlatformImpl {
             for (String p: show.keySet())
                 mindInspectorTransformerHTML.setParameter("show-"+p, show.get(p)+"");
             so.append( mindInspectorTransformerHTML.transform( JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getAgState() )); // transform to HTML
+            
+            so.append("<hr/><a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;");
+            so.append("<a href='load_plans_form' style='font-family: arial; text-decoration: none'>load plans</a>, &nbsp;");
+            so.append("<a href='kill'            style='font-family: arial; text-decoration: none'>kill this agent</a>");
         } catch (Exception e) {
             if (JaCaMoLauncher.getRunner().getAg(agName) != null)
                 e.printStackTrace();
@@ -202,7 +206,30 @@ public class RestImpl extends DefaultPlatformImpl {
         so.append("</body></html>");
         return so.toString();
     }
-    
+
+    @Path("/agents/{agentname}/kill")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
+        try {
+            return "result of kill: "+JaCaMoLauncher.getRunner().getRuntimeServices().killAgent(agName,"web");
+        } catch (Exception e) {
+            return "Agent "+agName+" in unknown."+e.getMessage();
+        }
+    }
+
+    @Path("/agents/{agentname}/load_plans_form")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getLoadPlansForm(@PathParam("agentname") String agName) {
+        return  "<html><head><title>load plans for "+agName+"</title></head>"+
+                "NOT IMPLEMETNED<form action=\"/new_agent\" method=\"post\">" +
+                "File: <input type=\"text\" name=\"name\" />"+
+                "Paste: text area here" +
+                "<input type=\"submit\" value=\"Submit\">"+
+                "</form></html>";
+    }
+
     @Path("/agents/{agentname}/all")
     @GET
     @Produces(MediaType.APPLICATION_XML)
