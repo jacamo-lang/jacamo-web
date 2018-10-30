@@ -26,10 +26,10 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import jacamo.infra.JaCaMoLauncher;
 import jacamo.infra.JaCaMoRuntimeServices;
 import jacamo.platform.DefaultPlatformImpl;
 import jason.asSemantics.Agent;
+import jason.infra.centralised.BaseCentralisedMAS;
 import jason.mas2j.AgentParameters;
 import jason.mas2j.ClassParameters;
 import jason.runtime.Settings;
@@ -40,7 +40,6 @@ public class JCMRest extends DefaultPlatformImpl {
     public static String JaCaMoZKAgNodeId = "/jacamo/agents";
     public static String JaCaMoZKDFNodeId = "/jacamo/df";
     
-    JaCaMoLauncher runner = null;
     HttpServer restHttpServer = null;
 
     static URI restServerURI = null;
@@ -116,7 +115,7 @@ public class JCMRest extends DefaultPlatformImpl {
         }
         
         // replace createAgent service (to add RestAgArch)
-        ((JaCaMoLauncher)JaCaMoLauncher.getRunner()).setRuntimeServives(new JaCaMoRuntimeServices(JaCaMoLauncher.getRunner()) {
+        BaseCentralisedMAS.getRunner().setRuntimeServives(new JaCaMoRuntimeServices(BaseCentralisedMAS.getRunner()) {
             @Override
             public String createAgent(String agName, String agSource, String agClass, List<String> archClasses, ClassParameters bbPars, Settings stts, Agent father) throws Exception {
                 if (archClasses == null)
@@ -127,7 +126,7 @@ public class JCMRest extends DefaultPlatformImpl {
             }
         });
         
-        this.runner = (JaCaMoLauncher)JaCaMoLauncher.getRunner();
+        //this.runner = (JaCaMoLauncher)JaCaMoLauncher.getRunner();
     }
     
     @Override

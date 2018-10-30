@@ -26,6 +26,12 @@ See ClientTest.java for an example of Java client. It can be run with `gradle te
 
 ## for machine (or intelligent humans)
 
+* POST `/agents/{agentname}`
+    creates a new agent.
+
+* DELETE `/agents/{agentname}`
+    Kills the agent.
+
 * POST XML `/agents/{agentname}/mb`
     Adds a message in the agent's mailbox. See class Message.java for details of the fields.
 
@@ -33,6 +39,11 @@ See ClientTest.java for an example of Java client. It can be run with `gradle te
     returns the mind state of the agent
 
 * GET TXT /agents/{agentname}/plans
-    return the agent's plans
+    returns the agent's plans. A label can be used as argument:
+    /agents/{agentname}/plans?label=planT
+
+* POST FORM /agents/{agentname}/plans
+    upload some plans in the agent's plan library
+
 
 See RestImpl.java for more

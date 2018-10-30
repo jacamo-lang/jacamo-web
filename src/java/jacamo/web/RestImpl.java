@@ -3,9 +3,7 @@ package jacamo.web;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.LogRecord;
@@ -29,7 +27,6 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.w3c.dom.Document;
 
-import jacamo.infra.JaCaMoLauncher;
 import jason.ReceiverNotFoundException;
 import jason.asSemantics.Agent;
 import jason.asSemantics.IntendedMeans;
@@ -42,6 +39,7 @@ import jason.asSyntax.Plan;
 import jason.asSyntax.PlanBody;
 import jason.asSyntax.PlanLibrary;
 import jason.asSyntax.Trigger;
+import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
 import jason.util.Config;
 import jason.util.asl2html;
@@ -78,7 +76,7 @@ public class RestImpl extends AbstractBinder {
         so.append("<html><head><title>Jason (list of agents)</title> <meta http-equiv=\"refresh\" content=\"3\"/> </head><body>");
         so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Agents</p></font>");
         if (JCMRest.getZKHost() == null) {
-            for (String a: JaCaMoLauncher.getRunner().getAgs().keySet()) {
+            for (String a: BaseCentralisedMAS.getRunner().getAgs().keySet()) {
                 so.append("- <a href=\"/agents/"+a+"/all\" target=\"am\" style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
             }
         } else {
@@ -87,13 +85,15 @@ public class RestImpl extends AbstractBinder {
                 for (String a: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId+"/"+a));
                     so.append("- <a href=\""+url+"/all\" target=\"am\" style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
+                    Agent ag = getAgent(a);
+                    if (ag != null) createAgLog(a, ag);                    
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         
-        so.append("<br/><a href=\"/new_agent_form\" target=\"am\" style=\"font-family: arial; text-decoration: none\">new agent</a>");                            
+        so.append("<br/><a href=\"/forms/new_agent\" target=\"am\" style=\"font-family: arial; text-decoration: none\">new agent</a>");                            
         so.append("<br/><a href=\"/services\" target=\"am\" style=\"font-family: arial; text-decoration: none\">DF</a><br/>");                            
 
         so.append("<hr/>by <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>");
@@ -101,6 +101,13 @@ public class RestImpl extends AbstractBinder {
         return so.toString();
     }
     
+    private Agent getAgent(String agName) {
+        CentralisedAgArch cag = BaseCentralisedMAS.getRunner().getAg(agName);
+        if (cag != null)
+            return cag.getTS().getAg();
+        else
+            return null;
+    }
 
     /** AGENT **/
 
@@ -148,27 +155,37 @@ public class RestImpl extends AbstractBinder {
 
     static String helpMsg1 = "Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });";
 
-    @Path("/new_agent_form")
+    @Path("/forms/new_agent")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getNewAgentForm() {
         return  "<html><head><title>new agent form</title></head>"+
-                "<form action=\"/new_agent\" method=\"post\">" +
-                "Name: <input type=\"text\" name=\"name\" />"+
-                "<input type=\"submit\" value=\"create\">"+
+                "<input type=\"text\" name=\"name\"  size=\"43\" id=\"inputcmd\" placeholder='enter the name of the agent' onkeydown=\"if (event.keyCode == 13) runCMD()\" />\n" + 
+                "<script language=\"JavaScript\">\n" + 
+                "    function runCMD() {\n" +
+                "        http = new XMLHttpRequest();\n" + 
+                "        http.open(\"POST\", '/agents/'+document.getElementById('inputcmd').value, false); \n" +
+                "        http.send();\n"+
+                "        window.location.href = '/agents/'+document.getElementById('inputcmd').value+'/all';\n"+
+                "    }\n" + 
+                "</script>"+
                 "</form></html>";
     }
 
-    @Path("/new_agent")
+    @Path("/agents/{agentname}")
     @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    //@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    //@Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_HTML)
-    public String createNewAgent(@FormParam("name") String agName) {
+    public String createNewAgent(@PathParam("agentname") String agName) { //@FormParam("name") String agName) {
         try {
-            String name = JaCaMoLauncher.getRunner().getRuntimeServices().createAgent(agName, null, null, null, null, null, null);
-            JaCaMoLauncher.getRunner().getRuntimeServices().startAgent(name);
+            String name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent(agName, null, null, null, null, null, null);
+            BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
             // set some source for the agent
-            JaCaMoLauncher.getRunner().getAg(name).getTS().getAg().setASLSrc("no-inicial.asl");
+            Agent ag = getAgent(name);
+            ag.setASLSrc("no-inicial.asl");
+            createAgLog(agName, ag);
+            
             return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+name+"/all'\" /></head>ok for "+name;
         } catch (Exception e) {
             e.printStackTrace();
@@ -205,6 +222,11 @@ public class RestImpl extends AbstractBinder {
                 //"        document.getElementById('debug').innerHTML = data\n" + 
                 "        http.send(data);\n"+
                 "    }\n" + 
+                "    function killAg() {\n" +
+                "        h2 = new XMLHttpRequest();\n" + 
+                "        h2.open('DELETE', '/agents/"+agName+"', false); \n" +
+                "        h2.send(); \n" +
+                "    }\n" + 
                 "    function delLog() {\n" +
                 "        h2 = new XMLHttpRequest();\n" + 
                 "        h2.open('DELETE', 'log', false); \n" +
@@ -215,7 +237,7 @@ public class RestImpl extends AbstractBinder {
                 "        http.onreadystatechange = function() { \n" + 
                 "          if (http.readyState == 4 && http.status == 200) {\n" +
                 "                document.getElementById('log').innerHTML = http.responseText;\n" + 
-                "                if (http.responseText.length > 10) {\n" + 
+                "                if (http.responseText.length > 1) {\n" + 
                 "                      var btn = document.createElement(\"BUTTON\"); \n" + 
                 "                      var t = document.createTextNode(\"clear log\");\n" + 
                 "                      btn.appendChild(t); \n" +
@@ -235,14 +257,18 @@ public class RestImpl extends AbstractBinder {
             }
             for (String p: show.keySet())
                 mindInspectorTransformerHTML.setParameter("show-"+p, show.get(p)+"");
-            so.append( mindInspectorTransformerHTML.transform( JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getAgState() )); // transform to HTML
+            Agent ag = getAgent(agName);
+            if (ag != null) {
+                so.append( mindInspectorTransformerHTML.transform( ag.getAgState() )); // transform to HTML
+            } else {
+                // TODO: use the rest API to get the agent HTML in the remote host
+            }
             
             so.append("<hr/><a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;");
             so.append("<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;");
-            so.append("<a href='kill'            style='font-family: arial; text-decoration: none'>kill this agent</a>");
+            so.append("<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>");
         } catch (Exception e) {
-            if (JaCaMoLauncher.getRunner().getAg(agName) != null)
-                e.printStackTrace();
+            e.printStackTrace();
             so.append("Agent "+agName+" does not exist or cannot be observed.");
         }
 
@@ -250,12 +276,12 @@ public class RestImpl extends AbstractBinder {
         return so.toString();
     }
 
-    @Path("/agents/{agentname}/kill")
-    @GET
+    @Path("/agents/{agentname}")
+    @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     public String killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
         try {
-            return "result of kill: "+JaCaMoLauncher.getRunner().getRuntimeServices().killAgent(agName,"web");
+            return "result of kill: "+BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web");
         } catch (Exception e) {
             return "Agent "+agName+" in unknown."+e.getMessage();
         }
@@ -266,14 +292,14 @@ public class RestImpl extends AbstractBinder {
     @Produces(MediaType.TEXT_HTML)
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
         return  "<html><head><title>load plans for "+agName+"</title></head>"+
-                "<form action=\"/agents/"+agName+"/load_plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
+                "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
                 "Enter Jason code below:<br/><textarea name=\"plans\" form=\"usrform\" placeholder=\"optinally, write plans here\" rows=\"13\" cols=\"62\" ></textarea>" +
                 "<br/>or upload a file: <input type=\"file\" name=\"file\">"+
                 "<br/><input type=\"submit\" value=\"Upload it\">"+
                 "</form></html>";
     }
 
-    @Path("/agents/{agentname}/load_plans")
+    @Path("/agents/{agentname}/plans")
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
@@ -283,10 +309,16 @@ public class RestImpl extends AbstractBinder {
             @FormDataParam("file") FormDataContentDisposition fileDetail
             ) {
         try {
-            Agent ag = JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg();
-            ag.parseAS(new StringReader(plans), "RrestAPI");
-            ag.load(uploadedInputStream, "restAPI://"+fileDetail.getFileName());
-            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"/all'\" /></head>ok, code uploaded!";
+            String r = "nok";
+            Agent ag = getAgent(agName);
+            if (ag != null) {
+                ag.parseAS(new StringReader(plans), "RrestAPI");
+                ag.load(uploadedInputStream, "restAPI://"+fileDetail.getFileName());
+                r = "ok, code uploaded!";
+            } else {
+                // TODO: use rest API to load in the remote agent
+            }
+            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"/all'\" /></head>"+r;
         } catch (Exception e) {
             e.printStackTrace();
             return "error "+e.getMessage();
@@ -298,7 +330,12 @@ public class RestImpl extends AbstractBinder {
     @Produces(MediaType.APPLICATION_XML)
     public Document getAgentXml(@PathParam("agentname") String agName) {
         try {
-            return JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getAgState();
+            Agent ag = getAgent(agName);
+            if (ag != null)
+                return ag.getAgState();
+            else
+                // TODO: use rest API to load in the remote agent
+                return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -313,11 +350,16 @@ public class RestImpl extends AbstractBinder {
             @DefaultValue("all") @QueryParam("label") String label) {
         StringWriter so = new StringWriter();
         try {
-            PlanLibrary pl = JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getPL();
-            if (label.equals("all"))
-                so.append(pl.getAsTxt(false));
-            else
-                so.append(pl.get(label).toASString());
+            Agent ag = getAgent(agName);
+            if (ag != null) {
+                PlanLibrary pl = ag.getPL();
+                if (label.equals("all"))
+                    so.append(pl.getAsTxt(false));
+                else
+                    so.append(pl.get(label).toASString());
+            } else {
+                // TODO: use rest API to load in the remote agent               
+            }
         } catch (Exception e) {
             e.printStackTrace();
             so.append("Agent "+agName+" does not exist or cannot be observed.");
@@ -343,7 +385,6 @@ public class RestImpl extends AbstractBinder {
     public String getLogOutput(@PathParam("agentname") String agName) {
         StringBuilder o = agLog.get(agName);
         if (o != null) {
-            //agLog.put(agName, new StringBuilder());
             return o.toString();
         }
         return "";
@@ -370,26 +411,35 @@ public class RestImpl extends AbstractBinder {
                            new Unifier()),
                        te));
 
-            TransitionSystem ts = JaCaMoLauncher.getRunner().getAg(agName).getTS();
-            ts.getC().addRunningIntention(i);
-            ts.getUserAgArch().wake();
-            
-            // adds a log for the agent
-            if (agLog.get(agName) == null) {
-                ts.getLogger().addHandler( new StreamHandler() {
-                    @Override
-                    public void publish(LogRecord l) {
-                        addAgLog(agName, l.getMessage());
-                    }
-                });
+            Agent ag = getAgent(agName);
+            if (ag != null) {
+                TransitionSystem ts = ag.getTS();
+                ts.getC().addRunningIntention(i);
+                ts.getUserAgArch().wake();
+                createAgLog(agName, ag);
+                return "included for execution";
+            } else {
+                // TODO: use rest API to load in the remote agent               
+                return "not implemented";
             }
-
-            return "included for execution";
         } catch (Exception e) {
             return("Error parsing "+sCmd+"\n"+e);
         }
     }
 
+    protected void createAgLog(String agName, Agent ag) {
+        // adds a log for the agent
+        if (agLog.get(agName) == null) {
+            agLog.put(agName, new StringBuilder());
+            ag.getTS().getLogger().addHandler( new StreamHandler() {
+                @Override
+                public void publish(LogRecord l) {
+                    addAgLog(agName, l.getMessage());
+                }
+            });
+        }       
+    }
+    
     protected void addAgLog(String agName, String msg) {
         StringBuilder o = agLog.get(agName);
         if (o == null) {
@@ -407,7 +457,7 @@ public class RestImpl extends AbstractBinder {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.TEXT_PLAIN)
     public String addAgMsg(Message m, @PathParam("agentname") String agName) {
-        CentralisedAgArch a = JaCaMoLauncher.getRunner().getAg(agName);
+        CentralisedAgArch a = BaseCentralisedMAS.getRunner().getAg(agName);
         if (a != null) {
             a.receiveMsg(m.getAsJasonMsg());
             return "ok";
@@ -431,7 +481,7 @@ public class RestImpl extends AbstractBinder {
         so.append("<tr style='background-color: #ece7e6; font-family: arial;'><td><b>Agent</b></td><td><b>Services</b></td></tr>");
         if (JCMRest.getZKHost() == null) {
             // get DF locally 
-            Map<String, Set<String>> df = JaCaMoLauncher.getRunner().getDF();
+            Map<String, Set<String>> df = BaseCentralisedMAS.getRunner().getDF();
             for (String a: df.keySet()) {
                 so.append("<tr style='font-family: arial;'><td>"+a+"</td>");
                 for (String s: df.get(a)) {
