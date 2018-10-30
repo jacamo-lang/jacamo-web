@@ -1,4 +1,4 @@
-price(banana,20).
+price(banana,X) :- X = math.random * 100 + 20.
 
 !start.
 +!start 

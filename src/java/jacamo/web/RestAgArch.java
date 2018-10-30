@@ -17,8 +17,6 @@ import org.apache.curator.x.async.AsyncCuratorFramework;
 import org.apache.curator.x.async.WatchMode;
 import org.apache.zookeeper.CreateMode;
 
-import jacamo.infra.JaCaMoLauncher;
-import jacamo.infra.JaCaMoRuntimeServices;
 import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
@@ -30,6 +28,8 @@ import jason.asSyntax.Literal;
 import jason.asSyntax.StringTermImpl;
 import jason.asSyntax.Term;
 import jason.asSyntax.UnnamedVar;
+import jason.infra.centralised.BaseCentralisedMAS;
+import jason.infra.centralised.CentralisedRuntimeServices;
 import jason.mas2j.ClassParameters;
 import jason.runtime.RuntimeServices;
 import jason.runtime.Settings;
@@ -76,7 +76,7 @@ public class RestAgArch extends AgArch {
     public RuntimeServices getRuntimeServices() {
         if (singRTS == null) {
             if (JCMRest.getZKHost() != null) {
-                singRTS = new JaCaMoRuntimeServices(JaCaMoLauncher.getRunner()) {
+                singRTS = new CentralisedRuntimeServices(BaseCentralisedMAS.getRunner()) {
                     @Override
                     public void dfRegister(String agName, String service, String type) {
                         RestAgArch.this.dfRegister(agName, service, type);
@@ -95,7 +95,7 @@ public class RestAgArch extends AgArch {
                     }
                     @Override
                     public String createAgent(String agName, String agSource, String agClass, List<String> archClasses, ClassParameters bbPars, Settings stts, Agent father) throws Exception {
-                        // delegate the to RTS defined in JaCaMo Launcher
+                        // delegate the to RTS defined, for instance, in JaCaMo Launcher
                         return masRunner.getRuntimeServices().createAgent(agName, agSource, agClass, archClasses, bbPars, stts, father);
                     }
                 };

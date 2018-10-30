@@ -106,7 +106,46 @@ public class RestImpl extends AbstractBinder {
 
     protected asl2html  mindInspectorTransformerHTML = null;
     Map<String,Boolean> show = new HashMap<>();
-    
+    {
+        show.put("bels", true);
+        show.put("annots", Config.get().getBoolean(Config.SHOW_ANNOTS));
+        show.put("rules", false);
+        show.put("evt", true);
+        show.put("mb", true);
+        show.put("int", true);
+        show.put("int-details", false);
+    }
+
+    @Path("/agents/{agentname}/hide")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String setHide(@PathParam("agentname") String agName,
+            @QueryParam("bels") String bels,
+            @QueryParam("rules") String rules,
+            @QueryParam("int-details") String intd,
+            @QueryParam("annots") String annots) {
+        if (bels != null) show.put("bels",false);
+        if (rules != null) show.put("rules",false);
+        if (intd != null) show.put("int-details",false);
+        if (annots != null) show.put("annots",false);
+        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/all'\" /></head>ok";
+    }
+
+    @Path("/agents/{agentname}/show")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String setShow(@PathParam("agentname") String agName,
+            @QueryParam("bels") String bels,
+            @QueryParam("rules") String rules,
+            @QueryParam("int-details") String intd,
+            @QueryParam("annots") String annots) {
+        if (bels != null) show.put("bels",true);
+        if (rules != null) show.put("rules",true);
+        if (intd != null) show.put("int-details",true);
+        if (annots != null) show.put("annots",true);
+        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/all'\" /></head>ok";
+    }
+
     static String helpMsg1 = "Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });";
 
     @Path("/new_agent_form")
@@ -194,15 +233,6 @@ public class RestImpl extends AbstractBinder {
             if (mindInspectorTransformerHTML == null) {
                 mindInspectorTransformerHTML = new asl2html("/xml/agInspection.xsl");
             }
-            show.put("bels", true);
-            show.put("annots", Config.get().getBoolean(Config.SHOW_ANNOTS));
-            show.put("rules", true);
-            show.put("evt", true);
-            show.put("mb", true);
-            show.put("int", true);
-            show.put("int-details", true);
-            //show.put("plan", plan);
-            //show.put("plan-details", plan);
             for (String p: show.keySet())
                 mindInspectorTransformerHTML.setParameter("show-"+p, show.get(p)+"");
             so.append( mindInspectorTransformerHTML.transform( JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getAgState() )); // transform to HTML
