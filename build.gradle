@@ -9,8 +9,9 @@ defaultTasks 'run'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
-version '1.0'
+version '0.1-SNAPSHOT'
 group   'org.jacamo'
 
 sourceCompatibility = 1.8
@@ -111,8 +112,67 @@ task fixTab {
     //ant.fixcrlf(tab: 'remove', tablength: '4', javafiles: 'true', includes: '**/*.java,**/*.xml,**/*.asl,**/*.jcm,**/*.txt', srcdir: 'doc')
 }
 
+
 clean {
     delete 'bin'
     delete 'build'
     delete 'log'
+}
+
+
+jar {
+    baseName 'jacamo-rest'
+}
+
+// the following lines is used to avoid errors while generating javadoc
+if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+      tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+      }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+
+            artifactId 'jacamo-rest'
+        }
+    }
+}
+
+task javadocJar (type: Jar, dependsOn: javadoc) {
+    baseName 'jacamo-rest'
+    classifier = 'javadoc'
+    from '${docsDir}/../../doc/api'
+}
+
+task sourceJar (type : Jar) {
+    baseName 'jacamo-rest'
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+// transfer local maven artifact to our maven2 repository at sourceforge
+task publishMavenSF(dependsOn: [ 'build', 'publishToMavenLocal']) {
+  doLast {
+    def wdir = System.getProperty("user.home")+'/.m2/repository/org/jacamo/jacamo-rest'
+    def tdir = 'jomifred,jacamo@web.sf.net:/home/project-web/jacamo/htdocs/maven2/org/jacamo/jacamo-rest'
+    exec {
+        commandLine 'scp', '-r', project.version, tdir
+        workingDir wdir
+    }
+    exec {
+        commandLine 'cp', 'maven-metadata-local.xml', 'maven-metadata.xml'
+        workingDir wdir
+    }
+    exec {
+        commandLine 'scp', 'maven-metadata.xml', tdir
+        workingDir wdir
+    }
+  }
 }

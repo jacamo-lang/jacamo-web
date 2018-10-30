@@ -24,7 +24,7 @@ See ClientTest.java for an example of Java client. It can be run with `gradle te
 * GET HTML `/services`
     returns the DF state
 
-# for machine (or intelligent humans)
+## for machine (or intelligent humans)
 
 * POST XML `/agents/{agentname}/mb`
     Adds a message in the agent's mailbox. See class Message.java for details of the fields.
