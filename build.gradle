@@ -29,7 +29,8 @@ repositories {
 }
 
 dependencies {
-    compile 'org.jacamo:jacamo:0.8-SNAPSHOT'
+    compile group: 'org.jacamo' , name: 'jacamo'   , version: '0.8-SNAPSHOT'  , changing: true , transitive: true
+
     compile 'javax.xml.bind:jaxb-api:+'
 	compile 'com.sun.xml.bind:jaxb-core:+'
     compile 'com.sun.xml.bind:jaxb-impl:+'

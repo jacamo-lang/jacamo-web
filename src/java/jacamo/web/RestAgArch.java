@@ -71,7 +71,7 @@ public class RestAgArch extends AgArch {
 
     RuntimeServices singRTS = null;
 
-    // place DSF services based on ZK
+    // place DF services based on ZK
     @Override
     public RuntimeServices getRuntimeServices() {
         if (singRTS == null) {
@@ -95,9 +95,8 @@ public class RestAgArch extends AgArch {
                     }
                     @Override
                     public String createAgent(String agName, String agSource, String agClass, List<String> archClasses, ClassParameters bbPars, Settings stts, Agent father) throws Exception {
-                        String r = super.createAgent(agName, agSource, agClass, archClasses, bbPars, stts, father);
-                        archClasses.add(RestAgArch.class.getName());
-                        return r;
+                        // delegate the to RTS defined in JaCaMo Launcher
+                        return masRunner.getRuntimeServices().createAgent(agName, agSource, agClass, archClasses, bbPars, stts, father);
                     }
                 };
             } else {

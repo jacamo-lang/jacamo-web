@@ -27,9 +27,12 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import jacamo.infra.JaCaMoLauncher;
+import jacamo.infra.JaCaMoRuntimeServices;
 import jacamo.platform.DefaultPlatformImpl;
+import jason.asSemantics.Agent;
 import jason.mas2j.AgentParameters;
 import jason.mas2j.ClassParameters;
+import jason.runtime.Settings;
 
 
 public class JCMRest extends DefaultPlatformImpl {
@@ -60,6 +63,8 @@ public class JCMRest extends DefaultPlatformImpl {
     
     @Override
     public void init(String[] args) throws Exception {
+        
+        // adds RestAgArch in the configuration of all agents in the project
         List<AgentParameters> lags = new ArrayList<>();
         for (AgentParameters ap: project.getAgents()) {
             if (ap.getNbInstances() > 0) {
@@ -109,6 +114,18 @@ public class JCMRest extends DefaultPlatformImpl {
                 System.out.println("Platform (zookeeper) running on "+zkHost);
             }
         }
+        
+        // replace createAgent service (to add RestAgArch)
+        ((JaCaMoLauncher)JaCaMoLauncher.getRunner()).setRuntimeServives(new JaCaMoRuntimeServices(JaCaMoLauncher.getRunner()) {
+            @Override
+            public String createAgent(String agName, String agSource, String agClass, List<String> archClasses, ClassParameters bbPars, Settings stts, Agent father) throws Exception {
+                if (archClasses == null)
+                    archClasses = new ArrayList<>();
+                if (!archClasses.contains(RestAgArch.class.getName()))
+                    archClasses.add(RestAgArch.class.getName());
+                return super.createAgent(agName, agSource, agClass, archClasses, bbPars, stts, father);
+            }
+        });
         
         this.runner = (JaCaMoLauncher)JaCaMoLauncher.getRunner();
     }

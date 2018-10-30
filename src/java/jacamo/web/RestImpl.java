@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
+import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -22,14 +23,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.w3c.dom.Document;
 
 import jacamo.infra.JaCaMoLauncher;
-import jacamo.platform.DefaultPlatformImpl;
 import jason.ReceiverNotFoundException;
 import jason.asSemantics.Agent;
 import jason.asSemantics.IntendedMeans;
@@ -47,8 +47,14 @@ import jason.util.Config;
 import jason.util.asl2html;
 
 
+@Singleton
 @Path("/")
-public class RestImpl extends DefaultPlatformImpl {
+public class RestImpl extends AbstractBinder {
+
+    @Override
+    protected void configure() {
+        bind(new RestImpl()).to(RestImpl.class);
+    }
 
     // HTML interface
     
@@ -120,10 +126,10 @@ public class RestImpl extends DefaultPlatformImpl {
     @Produces(MediaType.TEXT_HTML)
     public String createNewAgent(@FormParam("name") String agName) {
         try {
-            List<String> archs = new ArrayList<>();
-            archs.add(RestAgArch.class.getName());
-            String name = JaCaMoLauncher.getRunner().getRuntimeServices().createAgent(agName, null, null, archs, null, null, null);
+            String name = JaCaMoLauncher.getRunner().getRuntimeServices().createAgent(agName, null, null, null, null, null, null);
             JaCaMoLauncher.getRunner().getRuntimeServices().startAgent(name);
+            // set some source for the agent
+            JaCaMoLauncher.getRunner().getAg(name).getTS().getAg().setASLSrc("no-inicial.asl");
             return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+name+"/all'\" /></head>ok for "+name;
         } catch (Exception e) {
             e.printStackTrace();
