@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.ws.rs.core.UriBuilder;
@@ -160,7 +161,7 @@ public class JCMRest extends DefaultPlatformImpl {
     public HttpServer startRestServer(int port) {
         ResourceConfig config = new ResourceConfig(); //RestAgArch.class);
         config.registerInstances(new RestImpl());
-
+        config.addProperties(new HashMap<String,Object>() {{ put("jersey.config.server.provider.classnames", "org.glassfish.jersey.media.multipart.MultiPartFeature"); }} );
         try {
             restServerURI = UriBuilder.fromUri("http://"+InetAddress.getLocalHost().getHostAddress()+"/").port(port).build();
             HttpServer s = GrizzlyHttpServerFactory.createHttpServer(restServerURI, config);

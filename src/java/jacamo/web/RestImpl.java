@@ -1,5 +1,7 @@
 package jacamo.web;
 
+import java.io.InputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,12 +22,16 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.w3c.dom.Document;
 
 import jacamo.infra.JaCaMoLauncher;
 import jacamo.platform.DefaultPlatformImpl;
 import jason.ReceiverNotFoundException;
+import jason.asSemantics.Agent;
 import jason.asSemantics.IntendedMeans;
 import jason.asSemantics.Intention;
 import jason.asSemantics.Option;
@@ -34,6 +40,7 @@ import jason.asSemantics.Unifier;
 import jason.asSyntax.ASSyntax;
 import jason.asSyntax.Plan;
 import jason.asSyntax.PlanBody;
+import jason.asSyntax.PlanLibrary;
 import jason.asSyntax.Trigger;
 import jason.infra.centralised.CentralisedAgArch;
 import jason.util.Config;
@@ -103,7 +110,7 @@ public class RestImpl extends DefaultPlatformImpl {
         return  "<html><head><title>new agent form</title></head>"+
                 "<form action=\"/new_agent\" method=\"post\">" +
                 "Name: <input type=\"text\" name=\"name\" />"+
-                "<input type=\"submit\" value=\"Submit\">"+
+                "<input type=\"submit\" value=\"create\">"+
                 "</form></html>";
     }
 
@@ -195,7 +202,7 @@ public class RestImpl extends DefaultPlatformImpl {
             so.append( mindInspectorTransformerHTML.transform( JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getAgState() )); // transform to HTML
             
             so.append("<hr/><a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;");
-            so.append("<a href='load_plans_form' style='font-family: arial; text-decoration: none'>load plans</a>, &nbsp;");
+            so.append("<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;");
             so.append("<a href='kill'            style='font-family: arial; text-decoration: none'>kill this agent</a>");
         } catch (Exception e) {
             if (JaCaMoLauncher.getRunner().getAg(agName) != null)
@@ -223,21 +230,42 @@ public class RestImpl extends DefaultPlatformImpl {
     @Produces(MediaType.TEXT_HTML)
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
         return  "<html><head><title>load plans for "+agName+"</title></head>"+
-                "NOT IMPLEMETNED<form action=\"/new_agent\" method=\"post\">" +
-                "File: <input type=\"text\" name=\"name\" />"+
-                "Paste: text area here" +
-                "<input type=\"submit\" value=\"Submit\">"+
+                "<form action=\"/agents/"+agName+"/load_plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
+                "Enter Jason code below:<br/><textarea name=\"plans\" form=\"usrform\" placeholder=\"optinally, write plans here\" rows=\"13\" cols=\"62\" ></textarea>" +
+                "<br/>or upload a file: <input type=\"file\" name=\"file\">"+
+                "<br/><input type=\"submit\" value=\"Upload it\">"+
                 "</form></html>";
+    }
+
+    @Path("/agents/{agentname}/load_plans")
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.TEXT_HTML)
+    public String loadPlans(@PathParam("agentname") String agName,
+            @DefaultValue("") @FormDataParam("plans") String plans,
+            @FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileDetail
+            ) {
+        try {
+            Agent ag = JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg();
+            ag.parseAS(new StringReader(plans), "RrestAPI");
+            ag.load(uploadedInputStream, "restAPI://"+fileDetail.getFileName());
+            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"/all'\" /></head>ok, code uploaded!";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error "+e.getMessage();
+        }
     }
 
     @Path("/agents/{agentname}/all")
     @GET
     @Produces(MediaType.APPLICATION_XML)
-    public Document getAgentXml(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
+    public Document getAgentXml(@PathParam("agentname") String agName) {
         try {
             return JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getAgState();
         } catch (Exception e) {
-            throw new ReceiverNotFoundException("Agent "+agName+" in unknown");
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -249,10 +277,11 @@ public class RestImpl extends DefaultPlatformImpl {
             @DefaultValue("all") @QueryParam("label") String label) {
         StringWriter so = new StringWriter();
         try {
-            for (Plan p: JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getPL()) {
-                if (p.getLabel().getFunctor().equals(label) || label.equals("all"))
-                    so.append(p+"\n");
-            }
+            PlanLibrary pl = JaCaMoLauncher.getRunner().getAg(agName).getTS().getAg().getPL();
+            if (label.equals("all"))
+                so.append(pl.getAsTxt(false));
+            else
+                so.append(pl.get(label).toASString());
         } catch (Exception e) {
             e.printStackTrace();
             so.append("Agent "+agName+" does not exist or cannot be observed.");

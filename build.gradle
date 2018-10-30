@@ -38,6 +38,7 @@ dependencies {
     compile 'org.glassfish.jersey:jersey-bom:2.27'
 
     compile 'org.glassfish.jersey.core:jersey-client:+'
+    compile 'org.glassfish.jersey.media:jersey-media-multipart:2.27'
 
 	// containers:
 	//compile 'org.glassfish.jersey.containers:jersey-container-jetty-http:2.27'
