@@ -260,8 +260,6 @@ public class RestImpl extends AbstractBinder {
             Agent ag = getAgent(agName);
             if (ag != null) {
                 so.append( mindInspectorTransformerHTML.transform( ag.getAgState() )); // transform to HTML
-            } else {
-                // TODO: use the rest API to get the agent HTML in the remote host
             }
             
             so.append("<hr/><a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;");
@@ -315,8 +313,6 @@ public class RestImpl extends AbstractBinder {
                 ag.parseAS(new StringReader(plans), "RrestAPI");
                 ag.load(uploadedInputStream, "restAPI://"+fileDetail.getFileName());
                 r = "ok, code uploaded!";
-            } else {
-                // TODO: use rest API to load in the remote agent
             }
             return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"/all'\" /></head>"+r;
         } catch (Exception e) {
@@ -334,7 +330,6 @@ public class RestImpl extends AbstractBinder {
             if (ag != null)
                 return ag.getAgState();
             else
-                // TODO: use rest API to load in the remote agent
                 return null;
         } catch (Exception e) {
             e.printStackTrace();
@@ -357,8 +352,6 @@ public class RestImpl extends AbstractBinder {
                     so.append(pl.getAsTxt(false));
                 else
                     so.append(pl.get(label).toASString());
-            } else {
-                // TODO: use rest API to load in the remote agent               
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -419,7 +412,6 @@ public class RestImpl extends AbstractBinder {
                 createAgLog(agName, ag);
                 return "included for execution";
             } else {
-                // TODO: use rest API to load in the remote agent               
                 return "not implemented";
             }
         } catch (Exception e) {

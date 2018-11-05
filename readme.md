@@ -38,11 +38,11 @@ See ClientTest.java for an example of Java client. It can be run with `gradle te
 * GET XML `/agents/{agentname}/all`
     returns the mind state of the agent
 
-* GET TXT /agents/{agentname}/plans
+* GET TXT `/agents/{agentname}/plans`
     returns the agent's plans. A label can be used as argument:
     /agents/{agentname}/plans?label=planT
 
-* POST FORM /agents/{agentname}/plans
+* POST FORM `/agents/{agentname}/plans`
     upload some plans in the agent's plan library
 
 
