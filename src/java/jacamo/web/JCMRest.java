@@ -175,12 +175,12 @@ public class JCMRest extends DefaultPlatformImpl {
     }
     
     public HttpServer startRestServer(int port) {
-        ResourceConfig config = new ResourceConfig(); //RestAgArch.class);
-        config.registerInstances(new RestImpl());
-        config.addProperties(new HashMap<String,Object>() {{ put("jersey.config.server.provider.classnames", "org.glassfish.jersey.media.multipart.MultiPartFeature"); }} );
+        //ResourceConfig config = new RestAppConfig(); //RestAgArch.class);
+        //config.registerInstances(new RestImpl());
+        //config.addProperties(new HashMap<String,Object>() {{ put("jersey.config.server.provider.classnames", "org.glassfish.jersey.media.multipart.MultiPartFeature"); }} );
         try {
             restServerURI = UriBuilder.fromUri("http://"+InetAddress.getLocalHost().getHostAddress()+"/").port(port).build();
-            HttpServer s = GrizzlyHttpServerFactory.createHttpServer(restServerURI, config);
+            HttpServer s = GrizzlyHttpServerFactory.createHttpServer(restServerURI, new RestAppConfig());
             // other possiblecontainers:
             //JettyHttpContainerFactory.createServer(baseUri, config);
             //JdkHttpServerFactory.createHttpServer(baseUri, config);

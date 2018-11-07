@@ -54,6 +54,7 @@ public class RestAgArch extends AgArch {
             // register the agent in ZK
             if (zkClient.checkExists().forPath(JCMRest.JaCaMoZKAgNodeId+"/"+getAgName()) != null) {
                 System.err.println("Agent "+getAgName()+" is already registered in zookeeper!");
+                
             } else {
                 zkClient.create().withMode(CreateMode.EPHEMERAL).forPath(JCMRest.JaCaMoZKAgNodeId+"/"+getAgName(), (JCMRest.getRestHost()+"agents/"+getAgName()).getBytes());
                 zkAsync  = AsyncCuratorFramework.wrap(zkClient);
@@ -95,7 +96,7 @@ public class RestAgArch extends AgArch {
                     }
                     @Override
                     public String createAgent(String agName, String agSource, String agClass, List<String> archClasses, ClassParameters bbPars, Settings stts, Agent father) throws Exception {
-                        // delegate the to RTS defined, for instance, in JaCaMo Launcher
+                        // delegate agent creation to RTS defined in JaCaMo Launcher
                         return masRunner.getRuntimeServices().createAgent(agName, agSource, agClass, archClasses, bbPars, stts, father);
                     }
                 };
@@ -141,8 +142,7 @@ public class RestAgArch extends AgArch {
             } else {
                 throw e;
             }
-        }
-        
+        }        
     }
     
     public void dfRegister(String agName, String service, String type) {
