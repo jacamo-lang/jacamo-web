@@ -60,17 +60,17 @@ public class RestImplAg extends AbstractBinder {
         StringWriter so = new StringWriter();
 
         so.append("<html><head><title>Jason (list of agents)</title> <meta http-equiv=\"refresh\" content=\"3\"/> </head><body>");
-        so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Agents</p></font>");
+        //so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Agents</p></font>");
         if (JCMRest.getZKHost() == null) {
             for (String a: BaseCentralisedMAS.getRunner().getAgs().keySet()) {
-                so.append("- <a href=\"/agents/"+a+"/all\" target=\"am\" style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
+                so.append("<a href=\"/agents/"+a+"/all\" target='cf' style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
             }
         } else {
             // get agents from ZK
             try {
                 for (String a: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId+"/"+a));
-                    so.append("- <a href=\""+url+"/all\" target=\"am\" style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
+                    so.append("<a href=\""+url+"/all\" target='cf' style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
                     Agent ag = getAgent(a);
                     if (ag != null) createAgLog(a, ag);                    
                 }
@@ -79,8 +79,8 @@ public class RestImplAg extends AbstractBinder {
             }
         }
         
-        so.append("<br/><a href=\"/forms/new_agent\" target=\"am\" style=\"font-family: arial; text-decoration: none\">new agent</a>");                            
-        so.append("<br/><a href=\"/services\" target=\"am\" style=\"font-family: arial; text-decoration: none\">DF</a><br/>");                            
+        so.append("<br/><a href=\"/forms/new_agent\" target='cf' style=\"font-family: arial; text-decoration: none\">new agent</a>");                            
+        so.append("<br/><a href=\"/services\" target='cf' style=\"font-family: arial; text-decoration: none\">directory facilitator</a><br/>");                            
 
         so.append("<hr/>by <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>");
         so.append("</body></html>");        

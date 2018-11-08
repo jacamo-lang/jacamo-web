@@ -2,6 +2,16 @@ mas marcos {
 
     agent marcos
 
+    workspace testwks {
+        artifact a: tools.Counter(10)
+    }
+
+    organisation testOrg : org.xml {
+        group g: group1 {
+            players: role1 marcos
+        }
+    }
+
     //platform: jacamo.web.JCMRest("--connect localhost:2181") // connects to platform at 2181
     platform: jacamo.web.JCMRest("--main 2181 --restPort 8080") // connects to platform at 2181
 
