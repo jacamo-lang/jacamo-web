@@ -28,12 +28,12 @@ public class RestImpl extends AbstractBinder {
         StringWriter so = new StringWriter();
         so.append("<html><head><title>JaCaMo Web Interface</title></head><body>");
         so.append("<font size=\"+2\">");
-        so.append("<a href='/agents' target='lf' style='color: red; font-family: arial; text-decoration: none;'> Agents </a>");
-        so.append("| <a href='http://localhost:3273/indexarts' target='lf' style='color: red; font-family: arial; text-decoration: none;'> Environment </a>");
+        so.append("  <a href='/agents'     target='lf' style='color: red; font-family: arial; text-decoration: none;'> Agents </a>");
+        so.append("| <a href='/workspaces' target='lf' style='color: red; font-family: arial; text-decoration: none;'> Environment </a>");
         so.append("| <a href='http://localhost:3271/oe' target='lf' style='color: red; font-family: arial; text-decoration: none;'> Organisation </a>");
         so.append("</font><hr/>");
-        so.append("<iframe width=\"20%\" height=\"100%\" align=left name='lf' src=\"/agents\" border=5 frameborder=0 ></iframe>");
-        so.append("<iframe width=\"78%\" height=\"100%\" align=left name='cf' border=5 frameborder=0></iframe>");
+        so.append("<iframe width=\"20%\" height=\"100%\" align=left id='lf' name='lf' src=\"/agents\" border=5 frameborder=0 ></iframe>");
+        so.append("<iframe width=\"78%\" height=\"100%\" align=left id='cf' name='cf' border=5 frameborder=0></iframe>");
         so.append("</body></html>");
         return so.toString();
     }
