@@ -80,7 +80,8 @@ public class RestImplEnv extends AbstractBinder {
     @Produces(MediaType.TEXT_HTML)
     public String getArtifactHtml(@PathParam("wrksname") String wrksName, @PathParam("artname") String artName) {
         try {
-            return EnvironmentWebInspector.getArtHtml(wrksName, 
+            String img = "<img src='"+artName+"/img.svg' /><br/>";
+            return img+EnvironmentWebInspector.getArtHtml(wrksName, 
                         CartagoService.getController(wrksName).getArtifactInfo(artName)
                    );
         } catch (CartagoException e) {

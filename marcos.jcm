@@ -1,14 +1,18 @@
 mas marcos {
 
-    agent marcos
+    agent marcos {
+        focus: testwks.a
+               testwks.b
+    }
 
     workspace testwks {
         artifact a: tools.Counter(10)
+        artifact b: tools.Counter(02)
     }
 
     organisation testOrg : org.xml {
         group g: group1 {
-            players: role1 marcos
+            players: marcos role1
         }
     }
 
