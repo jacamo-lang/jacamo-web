@@ -163,9 +163,15 @@ public class RestImplEnv extends AbstractBinder {
                 info.getObservers().forEach(y -> {
                     // do not print agents_body observation
                     if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
-                        sb.append("\t\t\"" + y.getAgentId().getAgentName() + "\" -> \"" 
-                            + info.getId().getName() + "\" [arrowhead=\"odot\"];\n");
-                    });
+                        sb.append("\t\t\"" + y.getAgentId().getAgentName() + "\" -> \"" + info.getId().getName()
+								+ "\" [arrowhead=\"odot\"];\n");
+                });
+
+                // linked artifacts
+                info.getLinkedArtifacts().forEach(y -> {
+                    sb.append(
+                            "\t\"" + info.getId().getName() + "\" -> \"" + y.getName() + "\" [arrowhead=\"onormal\"];\n");
+                });
                     
             }
             sb.append("\t}\n");
@@ -248,15 +254,15 @@ public class RestImplEnv extends AbstractBinder {
                 sb.append("\t];\n");
 
                 // do not print agents_body observation
-                sb.append("\t\"" + y.getName() + "\" -> \"" + info.getId().getName()
-                      + "\" [arrowhead=\"none\"];\n");
+                sb.append("\t\"" + info.getId().getName() + "\" -> \"" + y.getName()
+                      + "\" [arrowhead=\"onormal\"];\n");
             });
 
             // observers
             info.getObservers().forEach(y -> {
                 // do not print agents_body observation
                 if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
-                    sb.append("\t\"" + y.getAgentId().getAgentName() + "\" -> \"" + info.getId().getName()
+                    sb.append("\t\"" + y.getAgentId().getAgentName() + "\" -> \"" + info.getId().getName() 
 							+ "\" [arrowhead=\"odot\"];\n");
             });
 
