@@ -49,7 +49,7 @@ See ClientTest.java for an example of Java client. It can be run with `gradle te
     `/agents/{agentname}/plans?label=planT`
 
 * POST FORM `/agents/{agentname}/plans`
-    upload some plans in the agent's plan library
+    upload some plans into the agent's plan library
 
 
 See RestImpl.java for more

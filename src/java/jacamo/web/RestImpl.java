@@ -49,7 +49,7 @@ public class RestImpl extends AbstractBinder {
                 "        http = new XMLHttpRequest();\n" + 
                 "        http.open(\"POST\", '/agents/'+document.getElementById('inputcmd').value, false); \n" +
                 "        http.send();\n"+
-                "        window.location.href = '/agents/'+document.getElementById('inputcmd').value+'/all';\n"+
+                "        window.location.href = '/agents/'+document.getElementById('inputcmd').value+'/mind';\n"+
                 "    }\n" + 
                 "</script>"+
                 "</form></html>";

@@ -63,14 +63,14 @@ public class RestImplAg extends AbstractBinder {
         //so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Agents</p></font>");
         if (JCMRest.getZKHost() == null) {
             for (String a: BaseCentralisedMAS.getRunner().getAgs().keySet()) {
-                so.append("<a href=\"/agents/"+a+"/all\" target='cf' style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
+                so.append("<a href=\"/agents/"+a+"/mind\" target='cf' style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
             }
         } else {
             // get agents from ZK
             try {
                 for (String a: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId+"/"+a));
-                    so.append("<a href=\""+url+"/all\" target='cf' style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
+                    so.append("<a href=\""+url+"/mind\" target='cf' style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
                     Agent ag = getAgent(a);
                     if (ag != null) createAgLog(a, ag);                    
                 }
@@ -121,7 +121,7 @@ public class RestImplAg extends AbstractBinder {
         if (rules != null) show.put("rules",false);
         if (intd != null) show.put("int-details",false);
         if (annots != null) show.put("annots",false);
-        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/all'\" /></head>ok";
+        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/mind'\" /></head>ok";
     }
 
     @Path("/{agentname}/show")
@@ -136,7 +136,7 @@ public class RestImplAg extends AbstractBinder {
         if (rules != null) show.put("rules",true);
         if (intd != null) show.put("int-details",true);
         if (annots != null) show.put("annots",true);
-        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/all'\" /></head>ok";
+        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/mind'\" /></head>ok";
     }
 
     static String helpMsg1 = "Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });";
@@ -156,14 +156,14 @@ public class RestImplAg extends AbstractBinder {
             ag.setASLSrc("no-inicial.asl");
             createAgLog(agName, ag);
             
-            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+name+"/all'\" /></head>ok for "+name;
+            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+name+"/mind'\" /></head>ok for "+name;
         } catch (Exception e) {
             e.printStackTrace();
             return "error "+e.getMessage();
         }
     }
 
-    @Path("/{agentname}/all")
+    @Path("/{agentname}/mind")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getAgentHtml(@PathParam("agentname") String agName) {
@@ -284,14 +284,14 @@ public class RestImplAg extends AbstractBinder {
                 ag.load(uploadedInputStream, "restAPI://"+fileDetail.getFileName());
                 r = "ok, code uploaded!";
             }
-            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"/all'\" /></head>"+r;
+            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"/mind'\" /></head>"+r;
         } catch (Exception e) {
             e.printStackTrace();
             return "error "+e.getMessage();
         }
     }
 
-    @Path("/{agentname}/all")
+    @Path("/{agentname}/mind")
     @GET
     @Produces(MediaType.APPLICATION_XML)
     public Document getAgentXml(@PathParam("agentname") String agName) {
