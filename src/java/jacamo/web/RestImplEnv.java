@@ -39,6 +39,8 @@ public class RestImplEnv extends AbstractBinder {
         bind(new RestImplEnv()).to(RestImplEnv.class);
     }
 
+    int MAX_LENGTH = 30; // max length of strings when printed in graphs
+    
     static Set<String> hidenArts = new HashSet<>( Arrays.asList(new String[] {
             "node",
             "console",
@@ -110,6 +112,7 @@ public class RestImplEnv extends AbstractBinder {
         return Response.noContent().build(); // TODO: set response properly
     }
     
+    @SuppressWarnings("finally")
     protected String getWksAsDot(String wksName) {
         String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
 
@@ -126,48 +129,60 @@ public class RestImplEnv extends AbstractBinder {
             for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
                 ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
 
-                if (info.getId().getArtifactType().equals("cartago.WorkspaceArtifact"))
+                if ((info.getId().getArtifactType().equals("cartago.WorkspaceArtifact")) ||
+                    (info.getId().getArtifactType().equals("cartago.tools.Console")) ||
+                    (info.getId().getArtifactType().equals("cartago.ManRepoArtifact")) ||
+                    (info.getId().getArtifactType().equals("cartago.tools.TupleSpace")) ||
+                    (info.getId().getArtifactType().equals("cartago.NodeArtifact")) ||
+                    (info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))) {
                     ; // do not print system artifacts
-                else if (info.getId().getArtifactType().equals("cartago.tools.Console"))
-                    ;
-                else if (info.getId().getArtifactType().equals("cartago.ManRepoArtifact"))
-                    ;
-                else if (info.getId().getArtifactType().equals("cartago.tools.TupleSpace"))
-                    ;
-                else if (info.getId().getArtifactType().equals("cartago.NodeArtifact"))
-                    ;
-                else if (info.getId().getArtifactType().equals("cartago.AgentBodyArtifact")) {
-                    ;
                 } else {
-                    sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel = <<b>"
-                            + info.getId().getName() + " :</b>");
-                    sb.append("<br/>" + info.getId().getArtifactType()+ ">\n");
-                    
-                    sb.append("\t\t\tshape = \"component\"\n");
+                    String s1;
+                    s1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
+                            : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
+                    sb.append("\t\"" + info.getId().getName() + "\" [ " + "\n\t\tlabel = \""
+                            + s1 + "|");
+                    s1 = (info.getId().getArtifactType().length() <= MAX_LENGTH) ? info.getId().getArtifactType()
+                            : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
+                    sb.append(s1 + "\"\n");
+                    sb.append("\t\tshape = \"record\"\n");
                     sb.append("\t\t\tURL = \"" + info.getId().getName() + "/img.svg\"\n");
                     sb.append("\t\t];\n");
                 }
                 info.getObservers().forEach(y -> {
                     // do not print agents_body observation
-                    if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
+                    if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact")) {
+                        // print node with defined shape
+                        String s2 = (y.getAgentId().getAgentName().length() <= MAX_LENGTH)
+                                ? y.getAgentId().getAgentName()
+                                : y.getAgentId().getAgentName().substring(0, MAX_LENGTH) + "...";
+                        sb.append("\t\"" + y.getAgentId().getAgentName() + "\" [ " + "\n\t\tlabel = \"" + s2 + "\"\n");
+                        sb.append("\t\tURL = \"../../agents/" + y.getAgentId().getAgentName() + "/mind\"\n");
+                        sb.append("\t];\n");
+
+                        // print arrow
                         sb.append("\t\t\"" + y.getAgentId().getAgentName() + "\" -> \"" + info.getId().getName()
 								+ "\" [arrowhead=\"odot\"];\n");
+                    }
                 });
 
                 // linked artifacts
                 info.getLinkedArtifacts().forEach(y -> {
-                    sb.append(
-                            "\t\"" + info.getId().getName() + "\" -> \"" + y.getName() + "\" [arrowhead=\"onormal\"];\n");
+                    // linked artifact node already exists if it belongs to this workspace
+                    sb.append("\t\"" + info.getId().getName() + "\" -> \"" + y.getName()
+							+ "\" [arrowhead=\"onormal\"];\n");
                 });
                     
             }
             sb.append("\t}\n");
             sb.append("}\n");
             graph = sb.toString();
+
         } catch (CartagoException e) {
             e.printStackTrace();
+        } finally {
+            return graph;
         }
-        return graph;
     }
 
     @Path("/{wrksname}/{artname}/img.svg")
@@ -188,46 +203,61 @@ public class RestImplEnv extends AbstractBinder {
         return Response.noContent().build(); // TODO: set response properly
     }
     
+    @SuppressWarnings("finally")
     protected String getArtAsDot(String wksName, String artName) {
         String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
         
-        
         ArtifactInfo info;
         try {
+            String s1;
             StringBuilder sb = new StringBuilder();
             sb.append("digraph G {\n");
             sb.append("\tgraph [\n");
             sb.append("\t\trankdir = \"LR\"\n");
             sb.append("\t]\n");
             info = CartagoService.getController(wksName).getArtifactInfo(artName);
-            sb.append("\t\"" + info.getId().getName() + "\" [ " + "\n\t\tlabel = <<b>"
-                    + info.getId().getName() + " :</b>");
-            sb.append("<br/>" + info.getId().getArtifactType()+ "<br/>\n");
+            s1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
+                    : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
+            sb.append("\t\"" + info.getId().getName() + "\" [ " + "\n\t\tlabel = \""
+                    + s1 + "|");
+            s1 = (info.getId().getArtifactType().length() <= MAX_LENGTH) ? info.getId().getArtifactType()
+                    : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
+            sb.append(s1 + "|");
             
             // observable properties
-            sb.append("\t\t\t<b>ObsProperties :</b><br/>");
-            info.getObsProperties().forEach(y -> sb.append(y + "<br/>"));
-            sb.append("\n");
+            info.getObsProperties().forEach(y -> {
+                String s2 = (y.toString().length() <= MAX_LENGTH) ? y.toString()
+                        : y.toString().substring(0, MAX_LENGTH) + " ...";
+                sb.append("\t\t\t" + s2 + "\n");
+            });
+            sb.append("\t\t\t|");
             
             // operations
-            sb.append("\t\t\t<b>Operations :</b><br/>");
-            info.getOperations().forEach(y -> sb.append(y.getOp().getName() + "<br/>"));
-            sb.append(">\n");
+            info.getOperations().forEach(y -> {
+                String s2 = (y.getOp().getName().length() <= MAX_LENGTH) ? y.getOp().getName()
+                        : y.getOp().getName().substring(0, MAX_LENGTH) + " ...";
+                sb.append("\t\t\t" + s2 + "\n");
+            });   
+            sb.append("\t\t\t\"\n");
 
-            sb.append("\t\tshape = \"component\"\n");
+            sb.append("\t\tshape = \"record\"\n");
             sb.append("\t];\n");
 
             // linked artifacts
             info.getLinkedArtifacts().forEach(y -> {
-                sb.append("\t\"" + y.getName() + "\" [ " + "\n\t\tlabel = <<b>"
-                        + y.getName() + " :</b>");
-                sb.append("<br/>" + y.getArtifactType()+ ">\n");
+                // print node with defined shape
+                String s2 = (y.getName().length() <= MAX_LENGTH) ? y.getName()
+                        : y.getName().substring(0, MAX_LENGTH) + "...";
+                sb.append("\t\"" + y.getName() + "\" [ " + "\n\t\tlabel = \""
+                        + s2 + "|");
+                s2 = (y.getArtifactType().length() <= MAX_LENGTH) ? y.getArtifactType()
+                        : y.getArtifactType().substring(0, MAX_LENGTH) + "...";
+                sb.append(s2 + "\"\n");
                 sb.append("\t\tURL = \"../" + y.getName() + "/img.svg\"\n");
-
-                sb.append("\t\tshape = \"component\"\n");
+                sb.append("\t\tshape = \"record\"\n");
                 sb.append("\t];\n");
 
-                // do not print agents_body observation
+                // print arrow
                 sb.append("\t\"" + info.getId().getName() + "\" -> \"" + y.getName()
                       + "\" [arrowhead=\"onormal\"];\n");
             });
@@ -235,29 +265,38 @@ public class RestImplEnv extends AbstractBinder {
             // observers
             info.getObservers().forEach(y -> {
                 // do not print agents_body observation
-                if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
+                if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact")) {
+                    // print node with defined shape
+                    String s2 = (y.getAgentId().getAgentName().length() <= MAX_LENGTH) ? y.getAgentId().getAgentName()
+                            : y.getAgentId().getAgentName().substring(0, MAX_LENGTH) + "...";
+                    sb.append("\t\"" + y.getAgentId().getAgentName() + "\" [ " + "\n\t\tlabel = \""
+                            + s2 + "\"\n");
+                    sb.append("\t\tURL = \"../../../agents/" + y.getAgentId().getAgentName() + "/mind\"\n");
+                    sb.append("\t];\n");
+                    
+                    // print arrow
                     sb.append("\t\"" + y.getAgentId().getAgentName() + "\" -> \"" + info.getId().getName() 
-							+ "\" [arrowhead=\"odot\"];\n");
+                            + "\" [arrowhead=\"odot\"];\n");
+                }
             });
-
+            
             sb.append("}\n");
             graph = sb.toString();
+
+            // for debug
+            try (FileWriter fw = new FileWriter("graph.gv", false);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    PrintWriter out = new PrintWriter(bw)) {
+                 out.print(graph);
+                out.flush();
+                out.close();
+            } catch (Exception ex) {
+            }
+            
         } catch (CartagoException e) {
             e.printStackTrace();
+        } finally {
+            return graph;
         }
-
-        // for debug
-        try (FileWriter fw = new FileWriter("graph.gv", false);
-                BufferedWriter bw = new BufferedWriter(fw);
-                PrintWriter out = new PrintWriter(bw)) {
-             out.print(graph);
-            out.flush();
-            out.close();
-        } catch (Exception ex) {
-            System.out.println(ex.toString());
-        }   
-        
-        return graph;
     }
-    
 }
