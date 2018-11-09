@@ -53,7 +53,6 @@ public class RestImplAg extends AbstractBinder {
         bind(new RestImplAg()).to(RestImplAg.class);
     }
 
-    @Path("/")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getAgentsHtml() {

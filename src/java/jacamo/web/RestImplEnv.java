@@ -1,15 +1,13 @@
 package jacamo.web;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -30,7 +28,6 @@ import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
 import jacamo.platform.EnvironmentWebInspector;
-import ora4mas.nopl.WebInterface;
 
 
 @Singleton
@@ -51,7 +48,6 @@ public class RestImplEnv extends AbstractBinder {
         }));
 
 
-    @Path("/")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getWorkspacesHtml() {
@@ -101,31 +97,13 @@ public class RestImplEnv extends AbstractBinder {
     @Produces("image/svg+xml")
     public Response getWrksImg(@PathParam("wrksname") String wrksName) {
         try {
-            //String program = null;
-            //try {
-                //program = WebInterface.getDotPath();
-            //} catch (Exception e) {}
-            //if (program != null) 
-            {
-                String dot = getWksAsDot(wrksName);
-                if (dot != null && !dot.isEmpty()) {
-                    //File fin     = File.createTempFile("jacamo-e-", ".dot");
-                    File imgFile = File.createTempFile("jacamo-e-", ".svg");
-
-                    //FileWriter out = new FileWriter(fin);
-                    //out.append(dot);
-                    //out.close();
-                    //Process p = Runtime.getRuntime().exec(program+" -Tsvg "+fin.getAbsolutePath()+" -o "+imgFile.getAbsolutePath());
-                    //p.waitFor(2000,TimeUnit.MILLISECONDS);
-                    
-
-                    MutableGraph g = Parser.read(dot);
-                    Graphviz.fromGraph(g).render(Format.SVG).toFile(new File(imgFile.getAbsolutePath()));
-
-                    return Response.ok(new FileInputStream(imgFile)).build();
-                }
+            String dot = getWksAsDot(wrksName);
+            if (dot != null && !dot.isEmpty()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                MutableGraph g = Parser.read(dot);
+                Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                return Response.ok(out.toByteArray()).build();
             }
-            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -197,32 +175,13 @@ public class RestImplEnv extends AbstractBinder {
     @Produces("image/svg+xml")
     public Response getArtImg(@PathParam("wrksname") String wrksName, @PathParam("artname") String artName) {
         try {
-            //String program = null;
-            //try {
-                //program = WebInterface.getDotPath();
-            //} catch (Exception e) {}
-            //if (program != null) 
-            {
-                String dot = getArtAsDot(wrksName,artName);
-                if (dot != null && !dot.isEmpty()) {
-                    //File fin     = File.createTempFile("jacamo-e-", ".dot");
-                    File imgFile = File.createTempFile("jacamo-e-", ".svg");
-
-                    //FileWriter out = new FileWriter(fin);
-                    //out.append(dot);
-                    //out.close();
-                    //Process p = Runtime.getRuntime().exec(program+" -Tsvg "+fin.getAbsolutePath()+" -o "+imgFile.getAbsolutePath());
-                    //p.waitFor(2000,TimeUnit.MILLISECONDS);
-                    
-                    System.out.println("Path: " + imgFile.getAbsolutePath());
-                    
-                    MutableGraph g = Parser.read(dot);
-                    Graphviz.fromGraph(g).render(Format.SVG).toFile(new File(imgFile.getAbsolutePath()));
-
-                    return Response.ok(new FileInputStream(imgFile)).build();
-                }
+            String dot = getArtAsDot(wrksName,artName);
+            if (dot != null && !dot.isEmpty()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                MutableGraph g = Parser.read(dot);
+                Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                return Response.ok(out.toByteArray()).build();
             }
-            
         } catch (Exception e) {
             e.printStackTrace();
         }

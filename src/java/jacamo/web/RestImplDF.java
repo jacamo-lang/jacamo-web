@@ -27,7 +27,6 @@ public class RestImplDF extends AbstractBinder {
 
     /** DF **/
 
-    @Path("/")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getDFHtml() {
