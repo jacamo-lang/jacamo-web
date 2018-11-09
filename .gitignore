@@ -1,6 +1,7 @@
 .classpath
 .project
 .settings
+graph.gv
 
 # Compiled class file
 *.class

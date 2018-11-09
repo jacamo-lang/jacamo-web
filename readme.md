@@ -5,8 +5,9 @@ To run:
 
 With docker:
 * `docker build  -t jomifred/jacamo-runrest .` to build a docker image
-* `docker run -ti --rm -v "$(pwd)":/app jomifred/jacamo-runrest gradle marcos ` to run marcos.jcm
-* `docker run -ti --rm -v "$(pwd)":/app jomifred/jacamo-runrest gradle bob ` to run bob.jcm
+* `docker network create jcm_net`
+* `docker run -ti --rm --net jcm_net  --name host1 -v "$(pwd)":/app jomifred/jacamo-runrest gradle marcos` to run marcos.jcm
+* `docker run -ti --rm --net jcm_net  --name host2 -v "$(pwd)":/app jomifred/jacamo-runrest gradle bob_d` to run bob.jcm
 
 Notes:
 * Each agent has a REST API to receive message and be inspected

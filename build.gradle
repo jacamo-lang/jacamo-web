@@ -46,7 +46,7 @@ dependencies {
 	//compile 'org.glassfish.jersey.containers:jersey-container-jetty-http:2.27'
     compile 'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.27'
     //compile 'org.glassfish.jersey.containers:jersey-container-jdk-http:2.27'
-    
+
     compile 'org.apache.zookeeper:zookeeper:3.5.4-beta'
     compile 'org.apache.curator:curator-framework:4.0.1'
     compile 'org.apache.curator:curator-x-async:4.0.1'
@@ -73,7 +73,7 @@ task run (type: JavaExec, dependsOn: 'classes') {
         mkdir 'log'
     }
     main 'jacamo.infra.JaCaMoLauncher'
-    args 'main.jcm'
+    args 'src/jcm/main.jcm'
     classpath sourceSets.main.runtimeClasspath
 }
 
@@ -84,7 +84,19 @@ task bob (type: JavaExec, dependsOn: 'classes') {
         mkdir 'log'
     }
     main 'jacamo.infra.JaCaMoLauncher'
-    args 'bob.jcm'
+    args 'src/jcm/bob.jcm'
+    classpath sourceSets.main.runtimeClasspath
+}
+
+// Bob for docker
+task bob_d (type: JavaExec, dependsOn: 'classes') {
+    group      ' JaCaMo'
+    description 'runs the JaCaMo application'
+    doFirst {
+        mkdir 'log'
+    }
+    main 'jacamo.infra.JaCaMoLauncher'
+    args 'src/jcm/bob-d.jcm'
     classpath sourceSets.main.runtimeClasspath
 }
 
@@ -95,7 +107,7 @@ task marcos (type: JavaExec, dependsOn: 'classes') {
         mkdir 'log'
     }
     main 'jacamo.infra.JaCaMoLauncher'
-    args 'marcos.jcm'
+    args 'src/jcm/marcos.jcm'
     classpath sourceSets.main.runtimeClasspath
 }
 
