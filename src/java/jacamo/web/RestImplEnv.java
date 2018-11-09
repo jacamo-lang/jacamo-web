@@ -1,8 +1,10 @@
 package jacamo.web;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -20,6 +22,7 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
 import cartago.ArtifactId;
+import cartago.ArtifactInfo;
 import cartago.CartagoException;
 import cartago.CartagoService;
 import jacamo.platform.EnvironmentWebInspector;
@@ -120,33 +123,66 @@ public class RestImplEnv extends AbstractBinder {
     }
     
     protected String getWksAsDot(String wksName) {
-        String graph = "digraph G {\n" + 
-                "\n" + 
-                "	subgraph cluster_0 {\n" + 
-                "		style=filled;\n" + 
-                "		color=lightgrey;\n" + 
-                "		node [style=filled,color=white];\n" + 
-                "		a0 -> a1 -> a2 -> a3;\n" + 
-                "		label = \"process #1\";\n" + 
-                "	}\n" + 
-                "\n" + 
-                "	subgraph cluster_1 {\n" + 
-                "		node [style=filled];\n" + 
-                "		b0 -> b1 -> b2 -> b3;\n" + 
-                "		label = \"process #2\";\n" + 
-                "		color=blue\n" + 
-                "	}\n" + 
-                "	start -> a0;\n" + 
-                "	start -> b0;\n" + 
-                "	a1 -> b3;\n" + 
-                "	b2 -> a3;\n" + 
-                "	a3 -> a0;\n" + 
-                "	a3 -> end;\n" + 
-                "	b3 -> end;\n" + 
-                "\n" + 
-                "	start [shape=Mdiamond];\n" + 
-                "	end [shape=Msquare];\n" + 
-                "}";
+        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
+
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("digraph G {\n");
+            sb.append("graph [\n");
+            sb.append("rankdir = \"LR\"\n");
+            sb.append("]\n");
+            sb.append("\tsubgraph cluster_0 {\n");
+            sb.append("\t\tlabel=\"" + wksName + "\"\n");
+            sb.append("\t\tlabeljust=\"r\"");
+            sb.append("\t\tgraph[style=dashed]");           
+            for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
+                ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
+
+                if (info.getId().getArtifactType().equals("cartago.WorkspaceArtifact"))
+                    ; // do not print system artifacts
+                else if (info.getId().getArtifactType().equals("cartago.tools.Console"))
+                    ;
+                else if (info.getId().getArtifactType().equals("cartago.ManRepoArtifact"))
+                    ;
+                else if (info.getId().getArtifactType().equals("cartago.tools.TupleSpace"))
+                    ;
+                else if (info.getId().getArtifactType().equals("cartago.NodeArtifact"))
+                    ;
+                else if (info.getId().getArtifactType().equals("cartago.AgentBodyArtifact")) {
+                    ;
+                } else {
+                    sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel = <<b>"
+                            + info.getId().getName() + "</b>");
+                    sb.append(" :<br/>" + info.getId().getArtifactType()+ ">");
+                    //info.getObsProperties().forEach(y -> sb.append(y + "\\n"));
+                    //info.getOperations().forEach(y -> sb.append(y + "\\n"));
+                    sb.append("\t\t\tshape = \"component\"\n");
+                    sb.append("\t\t];\n");
+                }
+                info.getObservers().forEach(y -> {
+                    // do not print agents_body observation
+                    if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
+                        sb.append("\t\t\"" + y + "\" -> \"" + info.getId().getName() + "\" [arrowhead=\"odot\"];\n");
+                    });
+
+            }
+            sb.append("\t}\n");
+            sb.append("}\n");
+            graph = sb.toString();
+        } catch (CartagoException e) {
+            e.printStackTrace();
+        }
+
+        try (FileWriter fw = new FileWriter("graph.gv", false);
+                BufferedWriter bw = new BufferedWriter(fw);
+                PrintWriter out = new PrintWriter(bw)) {
+             out.print(graph);
+            out.flush();
+            out.close();
+        } catch (Exception ex) {
+            System.out.println(ex.toString());
+        }   
+        
         return graph;
     }
 
