@@ -25,6 +25,10 @@ import cartago.ArtifactId;
 import cartago.ArtifactInfo;
 import cartago.CartagoException;
 import cartago.CartagoService;
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.model.MutableGraph;
+import guru.nidi.graphviz.parse.Parser;
 import jacamo.platform.EnvironmentWebInspector;
 import ora4mas.nopl.WebInterface;
 
@@ -97,21 +101,26 @@ public class RestImplEnv extends AbstractBinder {
     @Produces("image/svg+xml")
     public Response getWrksImg(@PathParam("wrksname") String wrksName) {
         try {
-            String program = null;
-            try {
-                program = WebInterface.getDotPath();
-            } catch (Exception e) {}
-            if (program != null) {
+            //String program = null;
+            //try {
+                //program = WebInterface.getDotPath();
+            //} catch (Exception e) {}
+            //if (program != null) 
+            {
                 String dot = getWksAsDot(wrksName);
                 if (dot != null && !dot.isEmpty()) {
-                    File fin     = File.createTempFile("jacamo-e-", ".dot");
+                    //File fin     = File.createTempFile("jacamo-e-", ".dot");
                     File imgFile = File.createTempFile("jacamo-e-", ".svg");
 
-                    FileWriter out = new FileWriter(fin);
-                    out.append(dot);
-                    out.close();
-                    Process p = Runtime.getRuntime().exec(program+" -Tsvg "+fin.getAbsolutePath()+" -o "+imgFile.getAbsolutePath());
-                    p.waitFor(2000,TimeUnit.MILLISECONDS);
+                    //FileWriter out = new FileWriter(fin);
+                    //out.append(dot);
+                    //out.close();
+                    //Process p = Runtime.getRuntime().exec(program+" -Tsvg "+fin.getAbsolutePath()+" -o "+imgFile.getAbsolutePath());
+                    //p.waitFor(2000,TimeUnit.MILLISECONDS);
+                    
+
+                    MutableGraph g = Parser.read(dot);
+                    Graphviz.fromGraph(g).render(Format.SVG).toFile(new File(imgFile.getAbsolutePath()));
 
                     return Response.ok(new FileInputStream(imgFile)).build();
                 }
@@ -188,21 +197,27 @@ public class RestImplEnv extends AbstractBinder {
     @Produces("image/svg+xml")
     public Response getArtImg(@PathParam("wrksname") String wrksName, @PathParam("artname") String artName) {
         try {
-            String program = null;
-            try {
-                program = WebInterface.getDotPath();
-            } catch (Exception e) {}
-            if (program != null) {
+            //String program = null;
+            //try {
+                //program = WebInterface.getDotPath();
+            //} catch (Exception e) {}
+            //if (program != null) 
+            {
                 String dot = getArtAsDot(wrksName,artName);
                 if (dot != null && !dot.isEmpty()) {
-                    File fin     = File.createTempFile("jacamo-e-", ".dot");
+                    //File fin     = File.createTempFile("jacamo-e-", ".dot");
                     File imgFile = File.createTempFile("jacamo-e-", ".svg");
 
-                    FileWriter out = new FileWriter(fin);
-                    out.append(dot);
-                    out.close();
-                    Process p = Runtime.getRuntime().exec(program+" -Tsvg "+fin.getAbsolutePath()+" -o "+imgFile.getAbsolutePath());
-                    p.waitFor(2000,TimeUnit.MILLISECONDS);
+                    //FileWriter out = new FileWriter(fin);
+                    //out.append(dot);
+                    //out.close();
+                    //Process p = Runtime.getRuntime().exec(program+" -Tsvg "+fin.getAbsolutePath()+" -o "+imgFile.getAbsolutePath());
+                    //p.waitFor(2000,TimeUnit.MILLISECONDS);
+                    
+                    System.out.println("Path: " + imgFile.getAbsolutePath());
+                    
+                    MutableGraph g = Parser.read(dot);
+                    Graphviz.fromGraph(g).render(Format.SVG).toFile(new File(imgFile.getAbsolutePath()));
 
                     return Response.ok(new FileInputStream(imgFile)).build();
                 }

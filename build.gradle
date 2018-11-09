@@ -50,6 +50,9 @@ dependencies {
     compile 'org.apache.zookeeper:zookeeper:3.5.4-beta'
     compile 'org.apache.curator:curator-framework:4.0.1'
     compile 'org.apache.curator:curator-x-async:4.0.1'
+	
+	compile group: 'guru.nidi', name: 'graphviz-java', version: '0.7.0'
+	
 }
 
 sourceSets {
