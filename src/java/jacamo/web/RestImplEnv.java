@@ -128,13 +128,13 @@ public class RestImplEnv extends AbstractBinder {
         try {
             StringBuilder sb = new StringBuilder();
             sb.append("digraph G {\n");
-            sb.append("graph [\n");
-            sb.append("rankdir = \"LR\"\n");
-            sb.append("]\n");
+            sb.append("\tgraph [\n");
+            sb.append("\t\trankdir = \"LR\"\n");
+            sb.append("\t]\n");
             sb.append("\tsubgraph cluster_0 {\n");
             sb.append("\t\tlabel=\"" + wksName + "\"\n");
-            sb.append("\t\tlabeljust=\"r\"");
-            sb.append("\t\tgraph[style=dashed]");           
+            sb.append("\t\tlabeljust=\"r\"\n");
+            sb.append("\t\tgraph[style=dashed]\n");           
             for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
                 ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
 
@@ -152,19 +152,22 @@ public class RestImplEnv extends AbstractBinder {
                     ;
                 } else {
                     sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel = <<b>"
-                            + info.getId().getName() + "</b>");
-                    sb.append(" :<br/>" + info.getId().getArtifactType()+ ">");
+                            + info.getId().getName() + " :</b>");
+                    sb.append("<br/>" + info.getId().getArtifactType()+ ">\n");
+                    
                     //info.getObsProperties().forEach(y -> sb.append(y + "\\n"));
                     //info.getOperations().forEach(y -> sb.append(y + "\\n"));
                     sb.append("\t\t\tshape = \"component\"\n");
+                    sb.append("\t\t\tURL = \"" + info.getId().getName() + "/img.svg\"\n");
                     sb.append("\t\t];\n");
                 }
                 info.getObservers().forEach(y -> {
                     // do not print agents_body observation
                     if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
-                        sb.append("\t\t\"" + y + "\" -> \"" + info.getId().getName() + "\" [arrowhead=\"odot\"];\n");
+                        sb.append("\t\t\"" + y.getAgentId().getAgentName() + "\" -> \"" 
+                            + info.getId().getName() + "\" [arrowhead=\"odot\"];\n");
                     });
-
+                    
             }
             sb.append("\t}\n");
             sb.append("}\n");
@@ -172,7 +175,84 @@ public class RestImplEnv extends AbstractBinder {
         } catch (CartagoException e) {
             e.printStackTrace();
         }
+        return graph;
+    }
 
+    @Path("/{wrksname}/{artname}/img.svg")
+    @GET
+    @Produces("image/svg+xml")
+    public Response getArtImg(@PathParam("wrksname") String wrksName, @PathParam("artname") String artName) {
+        try {
+            String program = null;
+            try {
+                program = WebInterface.getDotPath();
+            } catch (Exception e) {}
+            if (program != null) {
+                String dot = getArtAsDot(wrksName,artName);
+                if (dot != null && !dot.isEmpty()) {
+                    File fin     = File.createTempFile("jacamo-e-", ".dot");
+                    File imgFile = File.createTempFile("jacamo-e-", ".svg");
+
+                    FileWriter out = new FileWriter(fin);
+                    out.append(dot);
+                    out.close();
+                    Process p = Runtime.getRuntime().exec(program+" -Tsvg "+fin.getAbsolutePath()+" -o "+imgFile.getAbsolutePath());
+                    p.waitFor(2000,TimeUnit.MILLISECONDS);
+
+                    return Response.ok(new FileInputStream(imgFile)).build();
+                }
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.noContent().build(); // TODO: set response properly
+    }
+    
+    protected String getArtAsDot(String wksName, String artName) {
+        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
+        
+        
+        ArtifactInfo info;
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("digraph G {\n");
+            sb.append("\tgraph [\n");
+            sb.append("\t\trankdir = \"LR\"\n");
+            sb.append("\t]\n");
+            info = CartagoService.getController(wksName).getArtifactInfo(artName);
+            sb.append("\t\"" + info.getId().getName() + "\" [ " + "\n\t\tlabel = <<b>"
+                    + info.getId().getName() + " :</b>");
+            sb.append("<br/>" + info.getId().getArtifactType()+ "<br/>\n");
+            
+            // observable properties
+            sb.append("\t\t\t<b>ObsProperties :</b><br/>");
+            info.getObsProperties().forEach(y -> sb.append(y + "<br/>"));
+            sb.append("\n");
+            
+            // operations
+            sb.append("\t\t\t<b>Operations :</b><br/>");
+            info.getOperations().forEach(y -> sb.append(y.getOp().getName() + "<br/>"));
+            sb.append(">\n");
+
+            sb.append("\t\tshape = \"component\"\n");
+            sb.append("\t];\n");
+
+            // observers
+            info.getObservers().forEach(y -> {
+                // do not print agents_body observation
+                if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
+                    sb.append("\t\t\"" + y.getAgentId().getAgentName() + "\" -> \"" 
+                        + info.getId().getName() + "\" [arrowhead=\"odot\"];\n");
+                });
+            
+            sb.append("}\n");
+            graph = sb.toString();
+        } catch (CartagoException e) {
+            e.printStackTrace();
+        }
+
+        /* for debug
         try (FileWriter fw = new FileWriter("graph.gv", false);
                 BufferedWriter bw = new BufferedWriter(fw);
                 PrintWriter out = new PrintWriter(bw)) {
@@ -182,8 +262,8 @@ public class RestImplEnv extends AbstractBinder {
         } catch (Exception ex) {
             System.out.println(ex.toString());
         }   
-        
+        */
         return graph;
     }
-
+    
 }
