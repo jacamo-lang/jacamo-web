@@ -30,7 +30,7 @@ public class RestImplDF extends AbstractBinder {
     @Path("/")
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public String getAgentHtml() {
+    public String getDFHtml() {
         StringWriter so = new StringWriter();
         so.append("<html><head><title>Directory Facilitator State</title></head><body>");
         so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Directory Facilitator State</p></font>");

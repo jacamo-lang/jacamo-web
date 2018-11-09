@@ -1,7 +1,12 @@
 To run:
 * `gradle marcos` runs agent marcos and the REST platform
 * `gradle bob` runs agents bob and alice. Bob sends a message to marcos using its rest API.
-* see http://yourIP:3280 for a web interface (see the console for the right IP)
+* see http://yourIP:8080 for a web interface (see the console for the right IP)
+
+With docker:
+* `docker build  -t jomifred/jacamo-runrest .` to build a docker image
+* `docker run -ti --rm -v "$(pwd)":/app jomifred/jacamo-runrest gradle marcos ` to run marcos.jcm
+* `docker run -ti --rm -v "$(pwd)":/app jomifred/jacamo-runrest gradle bob ` to run bob.jcm
 
 Notes:
 * Each agent has a REST API to receive message and be inspected
@@ -40,7 +45,7 @@ See ClientTest.java for an example of Java client. It can be run with `gradle te
 
 * GET TXT `/agents/{agentname}/plans`
     returns the agent's plans. A label can be used as argument:
-    /agents/{agentname}/plans?label=planT
+    `/agents/{agentname}/plans?label=planT`
 
 * POST FORM `/agents/{agentname}/plans`
     upload some plans in the agent's plan library
