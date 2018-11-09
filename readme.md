@@ -24,7 +24,7 @@ See ClientTest.java for an example of Java client. It can be run with `gradle te
 * GET HTML `/agents`:
     returns the list of running agents
 
-* GET HTML `/agents/{agentname}/all`
+* GET HTML `/agents/{agentname}/mind`
     returns the mind state of the agent
 
 * GET HTML `/services`
@@ -41,7 +41,7 @@ See ClientTest.java for an example of Java client. It can be run with `gradle te
 * POST XML `/agents/{agentname}/mb`
     Adds a message in the agent's mailbox. See class Message.java for details of the fields.
 
-* GET XML `/agents/{agentname}/all`
+* GET XML `/agents/{agentname}/mind`
     returns the mind state of the agent
 
 * GET TXT `/agents/{agentname}/plans`
