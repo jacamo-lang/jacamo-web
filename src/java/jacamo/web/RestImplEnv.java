@@ -155,8 +155,6 @@ public class RestImplEnv extends AbstractBinder {
                             + info.getId().getName() + " :</b>");
                     sb.append("<br/>" + info.getId().getArtifactType()+ ">\n");
                     
-                    //info.getObsProperties().forEach(y -> sb.append(y + "\\n"));
-                    //info.getOperations().forEach(y -> sb.append(y + "\\n"));
                     sb.append("\t\t\tshape = \"component\"\n");
                     sb.append("\t\t\tURL = \"" + info.getId().getName() + "/img.svg\"\n");
                     sb.append("\t\t];\n");
@@ -238,21 +236,36 @@ public class RestImplEnv extends AbstractBinder {
             sb.append("\t\tshape = \"component\"\n");
             sb.append("\t];\n");
 
+            // linked artifacts
+            info.getLinkedArtifacts().forEach(y -> {
+                sb.append("\t\"" + y.getName() + "\" [ " + "\n\t\tlabel = <<b>"
+                        + y.getName() + " :</b>");
+                sb.append("<br/>" + y.getArtifactType()+ ">\n");
+                sb.append("\t\tURL = \"../" + y.getName() + "/img.svg\"\n");
+
+                sb.append("\t\tshape = \"component\"\n");
+                sb.append("\t];\n");
+
+                // do not print agents_body observation
+                sb.append("\t\"" + y.getName() + "\" -> \"" + info.getId().getName()
+                      + "\" [arrowhead=\"none\"];\n");
+            });
+
             // observers
             info.getObservers().forEach(y -> {
                 // do not print agents_body observation
                 if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
-                    sb.append("\t\t\"" + y.getAgentId().getAgentName() + "\" -> \"" 
-                        + info.getId().getName() + "\" [arrowhead=\"odot\"];\n");
-                });
-            
+                    sb.append("\t\"" + y.getAgentId().getAgentName() + "\" -> \"" + info.getId().getName()
+							+ "\" [arrowhead=\"odot\"];\n");
+            });
+
             sb.append("}\n");
             graph = sb.toString();
         } catch (CartagoException e) {
             e.printStackTrace();
         }
 
-        /* for debug
+        // for debug
         try (FileWriter fw = new FileWriter("graph.gv", false);
                 BufferedWriter bw = new BufferedWriter(fw);
                 PrintWriter out = new PrintWriter(bw)) {
@@ -262,7 +275,7 @@ public class RestImplEnv extends AbstractBinder {
         } catch (Exception ex) {
             System.out.println(ex.toString());
         }   
-        */
+        
         return graph;
     }
     
