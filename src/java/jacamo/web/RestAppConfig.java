@@ -13,6 +13,7 @@ public class RestAppConfig extends ResourceConfig {
         registerInstances(new RestImplAg());
         registerInstances(new RestImplDF());
         registerInstances(new RestImplEnv());
+        registerInstances(new RestImplOrg());
         
         addProperties(new HashMap<String,Object>() {{ put("jersey.config.server.provider.classnames", "org.glassfish.jersey.media.multipart.MultiPartFeature"); }} );   
     }
