@@ -1,6 +1,9 @@
 package jacamo.web;
 
-import java.awt.List;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,19 +15,28 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
 import cartago.ArtifactId;
 import cartago.ArtifactInfo;
+import cartago.ArtifactObsProperty;
 import cartago.CartagoException;
 import cartago.CartagoService;
 import cartago.ICartagoController;
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.model.MutableGraph;
+import guru.nidi.graphviz.parse.Parser;
+import jacamo.platform.EnvironmentWebInspector;
 
 
 @Singleton
 @Path("/oe")
 public class RestImplOrg extends AbstractBinder {
+    
+    int MAX_LENGTH = 30; // max length of strings when printed in graphs
 
     @Override
     protected void configure() {
@@ -54,14 +66,18 @@ public class RestImplOrg extends AbstractBinder {
                         oePages.put(aid.getName(), pageMap);
 
                         info.getObsProperties().forEach(y -> {
+                            System.out.println("Prop: "+y.getName() + "- " + y.toString());
                             // get ora4mas.nopl.GroupBoard
                             if (y.toString().substring(0, 6).equals("group(")) {
                                 pageMap.put(y.toString().substring(6, y.toString().indexOf(",")), "oe/"+aid.getName()+"/group/"+y.toString().substring(6, y.toString().indexOf(",")));
                                 oePages.put(aid.getName(), pageMap);
                             }
                             // get ora4mas.nopl.SchemeBoard
-                            if (y.toString().substring(0, 7).equals("scheme(")) {
-                                pageMap.put(y.toString().substring(7, y.toString().indexOf(",")), "oe/"+aid.getName()+"/scheme/"+y.toString().substring(7, y.toString().indexOf(",")));
+                            if (y.toString().contains("[scheme_specification(")) {
+                                int id_ini = y.toString().indexOf("[scheme_specification(") + "[scheme_specification(".length();
+                                String name_scheme = y.toString().substring(id_ini, y.toString().indexOf(",", id_ini));
+                                pageMap.put(name_scheme, "oe/"+aid.getName()+"/scheme/"+name_scheme);
+                                System.out.println(y.toString());
                                 oePages.put(aid.getName(), pageMap);
                             }
                             //TODO norms
@@ -75,7 +91,7 @@ public class RestImplOrg extends AbstractBinder {
         });
         
         so.append("<html><head><title>Moise (list of organisational entities)</title><meta http-equiv=\"refresh\" content=\""
-						+ 3 + "\" ></head><body>");
+                        + 3 + "\" ></head><body>");
 
         for (String oeId : oePages.keySet()) {
             so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>organisation <b>" + oeId
@@ -96,14 +112,13 @@ public class RestImplOrg extends AbstractBinder {
                 String addr = pages.get(id);
                 String html = "<a href=\"" + addr + "\" target='cf' style=\"font-family: arial; text-decoration: none\">" + id + "</a><br/>";
                 
-                if (addr.endsWith("os"))
-                    os.append(html);
-                else if (addr.indexOf("/group") > 0)
+                if (addr.indexOf(oeId+"/group") > 0)
                     gr.append("- " + html);
-                else if (addr.indexOf("/scheme") > 0)
+                else if (addr.indexOf(oeId+"/scheme") > 0)
                     sch.append("- " + html);
-                else
+                else if (addr.indexOf(oeId+"/norm") > 0) //TODO must have something to know that it is a norm ????
                     nor.append("- " + html);
+                else {} // do nothing, it not belongs this organization
                 
             }
             so.append(os.toString());
@@ -113,7 +128,7 @@ public class RestImplOrg extends AbstractBinder {
         }
 
         so.append("<hr/>");
-        so.append("Under development, stable interface <a href='http://localhost:3271/oe' target='lf'> here </a><br/><br/>");
+        so.append("Under development, earlier interface <a href='http://localhost:3271/oe' target='lf'> here </a><br/><br/>");
         so.append(" by <a href=\"http://moise.sf.net\" target=\"_blank\">Moise</a>");
         so.append("</body></html>");
 
@@ -124,33 +139,53 @@ public class RestImplOrg extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getGrouptHtml(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
-        StringWriter so = new StringWriter();
-        ArrayList<String> list = new ArrayList<String>(CartagoService.getNode().getWorkspaces());
-        list.forEach(x -> {
-            try {
-                ICartagoController control = CartagoService.getController(x);
-                ArtifactId[] arts = control.getCurrentArtifacts();
-                for (ArtifactId aid: arts) {
-                    if ((aid.getArtifactType().equals("ora4mas.nopl.GroupBoard")) && (aid.getName().equals(groupName))){
-                        ArtifactInfo info = CartagoService.getController(x).getArtifactInfo(aid.getName());
-
-                        so.append("<html><head><title>"+groupName+"</title></head>Nbody>");
-                            
-                        so.append("<hr/> Properties" + info.getObsProperties() + "<br/><br/>");
-                        so.append("<hr/> Observers" + info.getObservers() + "<br/><br/>");
-                        so.append("<hr/> Operations" + info.getOperations() + "<br/><br/>");
-
-                        so.append("</body></html>");
-                        
-                    }
+        try {
+            String img = "<img src='" + groupName + "/img.svg' /><br/>";
+            
+            ArtifactInfo info = CartagoService.getController(oeName).getArtifactInfo(groupName);
+            
+            StringBuilder out = new StringBuilder("<html>");
+            out.append("<span style=\"color: red; font-family: arial\"><font size=\"+2\">");
+            out.append("Inspection of artifact <b>"+info.getId().getName()+"</b> in organziation "+oeName+"</font></span>");
+            out.append("<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
+            for (ArtifactObsProperty op: info.getObsProperties()) {
+                StringBuilder vls = new StringBuilder();
+                String v = "";
+                for (Object vl: op.getValues()) {
+                    vls.append(v+vl);
+                    v = ",";
                 }
-            } catch (CartagoException e) {
-                e.printStackTrace();
+                out.append("<tr><td>"+op.getName()+"</td><td>"+vls+"</td></tr>");
             }
-        });
-        return so.toString();
+            out.append("</table>");
+            out.append("</html>");
+            
+            return img+out.toString();
+        } catch (CartagoException e) {
+            e.printStackTrace();
+        }
+        return "error"; // TODO: set response properly
     }
-
+    
+    @Path("/{oename}/group/{groupname}/img.svg")
+    @GET
+    @Produces("image/svg+xml")
+    public Response getGroupImg(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
+        try {
+            String dot = getGroupAsDot(oeName,groupName);
+            if (dot != null && !dot.isEmpty()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                MutableGraph g = Parser.read(dot);
+                Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                return Response.ok(out.toByteArray()).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.noContent().build(); // TODO: set response properly
+    }
+    
+    
     @Path("/{oename}/scheme/{schemename}")
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -162,16 +197,23 @@ public class RestImplOrg extends AbstractBinder {
                 ICartagoController control = CartagoService.getController(x);
                 ArtifactId[] arts = control.getCurrentArtifacts();
                 for (ArtifactId aid: arts) {
+                    System.out.println("*** " + aid.getArtifactType() + ":" + aid.getName());
                     if ((aid.getArtifactType().equals("ora4mas.nopl.SchemeBoard")) && (aid.getName().equals(schemeName))){
                         ArtifactInfo info = CartagoService.getController(x).getArtifactInfo(aid.getName());
-                        System.out.println(aid.getArtifactType() + ":" + aid.getName());
+                        
+                        System.out.println("### " + aid.getArtifactType() + ":" + aid.getName());
 
-                        so.append("<html><head><title>"+schemeName+"</title></head>Nbody>");
+                        so.append("<html><head><title>"+schemeName+"</title></head><body>");
                             
-                        so.append("<hr/> Properties" + info.getObsProperties() + "<br/><br/>");
-                        so.append("<hr/> Observers" + info.getObservers() + "<br/><br/>");
-                        so.append("<hr/> Operations" + info.getOperations() + "<br/><br/>");
-
+                        so.append("<hr/> Properties:<br/>");
+                        info.getObsProperties().forEach(y -> so.append(">>> " + y + " <br/>"));
+                        so.append("<hr/> Observers: <br/>");
+                        info.getObservers().forEach(y -> so.append(">>> " + y.getAgentId().getAgentName() + " <br/>"));
+                        so.append("<hr/> Operations: <br/>");
+                        info.getOperations().forEach(y -> so.append(">>> " + y.getOp().getName() + " <br/>"));
+                        so.append("<hr/> OngoingOp: <br/>");
+                        info.getOngoingOp().forEach(y -> so.append(">>> " + y.getName() + " <br/>"));
+                        
                         so.append("</body></html>");
                         
                     }
@@ -182,4 +224,103 @@ public class RestImplOrg extends AbstractBinder {
         });
         return so.toString();
     }
+
+    //TODO: It is a copy and paste from artifacts, must be adapted to groups
+    @SuppressWarnings("finally")
+    protected String getGroupAsDot(String wksName, String artName) {
+        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
+        
+        ArtifactInfo info;
+        try {
+            String s1;
+            StringBuilder sb = new StringBuilder();
+            sb.append("digraph G {\n");
+            sb.append("\tgraph [\n");
+            sb.append("\t\trankdir = \"LR\"\n");
+            sb.append("\t]\n");
+            info = CartagoService.getController(wksName).getArtifactInfo(artName);
+            s1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
+                    : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
+            sb.append("\t\"" + info.getId().getName() + "\" [ " + "\n\t\tlabel = \""
+                    + s1 + "|");
+            s1 = (info.getId().getArtifactType().length() <= MAX_LENGTH) ? info.getId().getArtifactType()
+                    : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
+            sb.append(s1 + "|");
+            
+            // observable properties
+            info.getObsProperties().forEach(y -> {
+                String s2 = (y.toString().length() <= MAX_LENGTH) ? y.toString()
+                        : y.toString().substring(0, MAX_LENGTH) + " ...";
+                sb.append("\t\t\t" + s2 + "\n");
+            });
+            sb.append("\t\t\t|");
+            
+            // operations
+            info.getOperations().forEach(y -> {
+                String s2 = (y.getOp().getName().length() <= MAX_LENGTH) ? y.getOp().getName()
+                        : y.getOp().getName().substring(0, MAX_LENGTH) + " ...";
+                sb.append("\t\t\t" + s2 + "\n");
+            });   
+            sb.append("\t\t\t\"\n");
+
+            sb.append("\t\tshape = \"record\"\n");
+            sb.append("\t];\n");
+
+            // linked artifacts
+            info.getLinkedArtifacts().forEach(y -> {
+                // print node with defined shape
+                String s2 = (y.getName().length() <= MAX_LENGTH) ? y.getName()
+                        : y.getName().substring(0, MAX_LENGTH) + "...";
+                sb.append("\t\"" + y.getName() + "\" [ " + "\n\t\tlabel = \""
+                        + s2 + "|");
+                s2 = (y.getArtifactType().length() <= MAX_LENGTH) ? y.getArtifactType()
+                        : y.getArtifactType().substring(0, MAX_LENGTH) + "...";
+                sb.append(s2 + "\"\n");
+                sb.append("\t\tURL = \"../" + y.getName() + "/img.svg\"\n");
+                sb.append("\t\tshape = \"record\"\n");
+                sb.append("\t];\n");
+
+                // print arrow
+                sb.append("\t\"" + info.getId().getName() + "\" -> \"" + y.getName()
+                      + "\" [arrowhead=\"onormal\"];\n");
+            });
+
+            // observers
+            info.getObservers().forEach(y -> {
+                // do not print agents_body observation
+                if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact")) {
+                    // print node with defined shape
+                    String s2 = (y.getAgentId().getAgentName().length() <= MAX_LENGTH) ? y.getAgentId().getAgentName()
+                            : y.getAgentId().getAgentName().substring(0, MAX_LENGTH) + "...";
+                    sb.append("\t\"" + y.getAgentId().getAgentName() + "\" [ " + "\n\t\tlabel = \""
+                            + s2 + "\"\n");
+                    sb.append("\t\tURL = \"../../../agents/" + y.getAgentId().getAgentName() + "/mind\"\n");
+                    sb.append("\t];\n");
+                    
+                    // print arrow
+                    sb.append("\t\"" + y.getAgentId().getAgentName() + "\" -> \"" + info.getId().getName() 
+                            + "\" [arrowhead=\"odot\"];\n");
+                }
+            });
+            
+            sb.append("}\n");
+            graph = sb.toString();
+
+            // for debug
+            try (FileWriter fw = new FileWriter("graph.gv", false);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    PrintWriter out = new PrintWriter(bw)) {
+                 out.print(graph);
+                out.flush();
+                out.close();
+            } catch (Exception ex) {
+            }
+            
+        } catch (CartagoException e) {
+            e.printStackTrace();
+        } finally {
+            return graph;
+        }
+    }
+
 }
