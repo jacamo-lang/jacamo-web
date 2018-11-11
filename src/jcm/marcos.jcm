@@ -11,8 +11,13 @@ mas marcos {
     }
 
     organisation testOrg : org.xml {
-        group g: group1 {
+        group group1: group1 {
             players: marcos role1
+        }
+    }
+    organisation buildHouse : house_building.xml {
+        group house_group: house_group {
+            players: marcos window_fitter
         }
     }
 

@@ -9,29 +9,25 @@ import java.util.Map;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
-import cartago.ArtifactDescriptor;
 import cartago.ArtifactId;
 import cartago.ArtifactInfo;
 import cartago.CartagoException;
 import cartago.CartagoService;
 import cartago.ICartagoController;
-import cartago.WorkspaceId;
-import ora4mas.nopl.ORA4MASConstants;
-import ora4mas.nopl.OrgBoard;
 
 
 @Singleton
 @Path("/oe")
-public class RestImplOrg<WorkspaceId> extends AbstractBinder {
+public class RestImplOrg extends AbstractBinder {
 
     @Override
     protected void configure() {
-        System.out.println("#0.2");
         bind(new RestImplOrg()).to(RestImplOrg.class);
     }
 
@@ -46,36 +42,38 @@ public class RestImplOrg<WorkspaceId> extends AbstractBinder {
         Map<String,String> pageMap = new HashMap<>();
         ArrayList<String> list = new ArrayList<String>(CartagoService.getNode().getWorkspaces());
         list.forEach(x -> {
-            ICartagoController control;
             try {
-                control = CartagoService.getController(x);
+                ICartagoController control = CartagoService.getController(x);
                 ArtifactId[] arts = control.getCurrentArtifacts();
                 for (ArtifactId aid: arts) {
                     if (aid.getArtifactType().equals("ora4mas.nopl.OrgBoard")) {
                         ArtifactInfo info = CartagoService.getController(x).getArtifactInfo(aid.getName());
                         System.out.println(aid.getArtifactType() + ":" + aid.getName());
 
-                        pageMap.put(aid.getName(), aid.getName()+"/os");
+                        pageMap.put(aid.getName(), "oe/"+aid.getName()+"/os");
                         oePages.put(aid.getName(), pageMap);
 
-                        // get ora4mas.nopl.GroupBoard
                         info.getObsProperties().forEach(y -> {
-                            System.out.println("\n\n" + y);
+                            // get ora4mas.nopl.GroupBoard
                             if (y.toString().substring(0, 6).equals("group(")) {
-                                pageMap.put(y.toString().substring(6, y.toString().indexOf(",")), aid.getName()+"/group/"+y.toString().substring(6, y.toString().indexOf(",")));
+                                pageMap.put(y.toString().substring(6, y.toString().indexOf(",")), "oe/"+aid.getName()+"/group/"+y.toString().substring(6, y.toString().indexOf(",")));
                                 oePages.put(aid.getName(), pageMap);
                             }
+                            // get ora4mas.nopl.SchemeBoard
+                            if (y.toString().substring(0, 7).equals("scheme(")) {
+                                pageMap.put(y.toString().substring(7, y.toString().indexOf(",")), "oe/"+aid.getName()+"/scheme/"+y.toString().substring(7, y.toString().indexOf(",")));
+                                oePages.put(aid.getName(), pageMap);
+                            }
+                            //TODO norms
                         });
-                        // get ora4mas.nopl.SchemeBoard
-                        //TODO
-                    }
+                    } 
+
                 }
             } catch (CartagoException e) {
                 e.printStackTrace();
             }
         });
         
-        System.out.println("#0");
         so.append("<html><head><title>Moise (list of organisational entities)</title><meta http-equiv=\"refresh\" content=\""
 						+ 3 + "\" ></head><body>");
 
@@ -96,9 +94,8 @@ public class RestImplOrg<WorkspaceId> extends AbstractBinder {
             // show schemes
             for (String id : pages.keySet()) {
                 String addr = pages.get(id);
-                String html = "<a href=\"" + addr
-                        + "\" target=\"oe-frame\" style=\"font-family: arial; text-decoration: none\">" + id
-                        + "</a><br/>";
+                String html = "<a href=\"" + addr + "\" target='cf' style=\"font-family: arial; text-decoration: none\">" + id + "</a><br/>";
+                
                 if (addr.endsWith("os"))
                     os.append(html);
                 else if (addr.indexOf("/group") > 0)
@@ -107,6 +104,7 @@ public class RestImplOrg<WorkspaceId> extends AbstractBinder {
                     sch.append("- " + html);
                 else
                     nor.append("- " + html);
+                
             }
             so.append(os.toString());
             so.append(gr.toString());
@@ -122,4 +120,66 @@ public class RestImplOrg<WorkspaceId> extends AbstractBinder {
         return so.toString();
     }
     
+    @Path("/{oename}/group/{groupname}")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getGrouptHtml(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
+        StringWriter so = new StringWriter();
+        ArrayList<String> list = new ArrayList<String>(CartagoService.getNode().getWorkspaces());
+        list.forEach(x -> {
+            try {
+                ICartagoController control = CartagoService.getController(x);
+                ArtifactId[] arts = control.getCurrentArtifacts();
+                for (ArtifactId aid: arts) {
+                    if ((aid.getArtifactType().equals("ora4mas.nopl.GroupBoard")) && (aid.getName().equals(groupName))){
+                        ArtifactInfo info = CartagoService.getController(x).getArtifactInfo(aid.getName());
+
+                        so.append("<html><head><title>"+groupName+"</title></head>Nbody>");
+                            
+                        so.append("<hr/> Properties" + info.getObsProperties() + "<br/><br/>");
+                        so.append("<hr/> Observers" + info.getObservers() + "<br/><br/>");
+                        so.append("<hr/> Operations" + info.getOperations() + "<br/><br/>");
+
+                        so.append("</body></html>");
+                        
+                    }
+                }
+            } catch (CartagoException e) {
+                e.printStackTrace();
+            }
+        });
+        return so.toString();
+    }
+
+    @Path("/{oename}/scheme/{schemename}")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getSchemeHtml(@PathParam("oename") String oeName, @PathParam("schemename") String schemeName) {
+        StringWriter so = new StringWriter();
+        ArrayList<String> list = new ArrayList<String>(CartagoService.getNode().getWorkspaces());
+        list.forEach(x -> {
+            try {
+                ICartagoController control = CartagoService.getController(x);
+                ArtifactId[] arts = control.getCurrentArtifacts();
+                for (ArtifactId aid: arts) {
+                    if ((aid.getArtifactType().equals("ora4mas.nopl.SchemeBoard")) && (aid.getName().equals(schemeName))){
+                        ArtifactInfo info = CartagoService.getController(x).getArtifactInfo(aid.getName());
+                        System.out.println(aid.getArtifactType() + ":" + aid.getName());
+
+                        so.append("<html><head><title>"+schemeName+"</title></head>Nbody>");
+                            
+                        so.append("<hr/> Properties" + info.getObsProperties() + "<br/><br/>");
+                        so.append("<hr/> Observers" + info.getObservers() + "<br/><br/>");
+                        so.append("<hr/> Operations" + info.getOperations() + "<br/><br/>");
+
+                        so.append("</body></html>");
+                        
+                    }
+                }
+            } catch (CartagoException e) {
+                e.printStackTrace();
+            }
+        });
+        return so.toString();
+    }
 }
