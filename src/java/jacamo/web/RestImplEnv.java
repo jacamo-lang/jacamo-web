@@ -21,6 +21,7 @@ import org.glassfish.jersey.internal.inject.AbstractBinder;
 
 import cartago.ArtifactId;
 import cartago.ArtifactInfo;
+import cartago.ArtifactObsProperty;
 import cartago.CartagoException;
 import cartago.CartagoService;
 import guru.nidi.graphviz.engine.Format;
@@ -83,9 +84,26 @@ public class RestImplEnv extends AbstractBinder {
     public String getArtifactHtml(@PathParam("wrksname") String wrksName, @PathParam("artname") String artName) {
         try {
             String img = "<img src='"+artName+"/img.svg' /><br/>";
-            return img+EnvironmentWebInspector.getArtHtml(wrksName, 
-                        CartagoService.getController(wrksName).getArtifactInfo(artName)
-                   );
+            
+            ArtifactInfo info = CartagoService.getController(wrksName).getArtifactInfo(artName);
+            
+            StringBuilder out = new StringBuilder("<html>");
+            out.append("<details><span style=\"color: red; font-family: arial\"><font size=\"+2\">");
+            out.append("Inspection of artifact <b>"+info.getId().getName()+"</b> in workspace "+wrksName+"</font></span>");
+            out.append("<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
+            for (ArtifactObsProperty op: info.getObsProperties()) {
+                StringBuilder vls = new StringBuilder();
+                String v = "";
+                for (Object vl: op.getValues()) {
+                    vls.append(v+vl);
+                    v = ",";
+                }
+                out.append("<tr><td>"+op.getName()+"</td><td>"+vls+"</td></tr>");
+            }
+            out.append("</details></table>");
+            out.append("</html>");
+            
+            return img+out.toString();
         } catch (CartagoException e) {
             e.printStackTrace();
         }

@@ -3,11 +3,14 @@ package jacamo.web;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -18,6 +21,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import cartago.ArtifactId;
 import cartago.ArtifactInfo;
@@ -30,6 +36,7 @@ import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
 import jacamo.platform.EnvironmentWebInspector;
+import jacamo.web.plugins.GoalNode;
 
 
 @Singleton
@@ -60,24 +67,26 @@ public class RestImplOrg extends AbstractBinder {
                 for (ArtifactId aid: arts) {
                     if (aid.getArtifactType().equals("ora4mas.nopl.OrgBoard")) {
                         ArtifactInfo info = CartagoService.getController(x).getArtifactInfo(aid.getName());
-                        System.out.println(aid.getArtifactType() + ":" + aid.getName());
+                        //System.out.println(aid.getArtifactType() + ":" + aid.getName());
 
                         pageMap.put(aid.getName(), "oe/"+aid.getName()+"/os");
                         oePages.put(aid.getName(), pageMap);
 
                         info.getObsProperties().forEach(y -> {
-                            System.out.println("Prop: "+y.getName() + "- " + y.toString());
-                            // get ora4mas.nopl.GroupBoard
+                            //System.out.println("Prop: "+y.getName() + "- " + y.toString());
+                            // add group, described on ora4mas.nopl.GroupBoard
                             if (y.toString().substring(0, 6).equals("group(")) {
-                                pageMap.put(y.toString().substring(6, y.toString().indexOf(",")), "oe/"+aid.getName()+"/group/"+y.toString().substring(6, y.toString().indexOf(",")));
+                                pageMap.put(y.toString().substring(6, y.toString().indexOf(",")), "oe/" + aid.getName()
+                                        + "/group/" + y.toString().substring(6, y.toString().indexOf(",")));
                                 oePages.put(aid.getName(), pageMap);
                             }
-                            // get ora4mas.nopl.SchemeBoard
+                            // add scheme which is described on ora4mas.nopl.OrgBoard
                             if (y.toString().contains("[scheme_specification(")) {
-                                int id_ini = y.toString().indexOf("[scheme_specification(") + "[scheme_specification(".length();
+                                int id_ini = y.toString().indexOf("[scheme_specification(")
+                                        + "[scheme_specification(".length();
                                 String name_scheme = y.toString().substring(id_ini, y.toString().indexOf(",", id_ini));
-                                pageMap.put(name_scheme, "oe/"+aid.getName()+"/scheme/"+name_scheme);
-                                System.out.println(y.toString());
+                                pageMap.put(name_scheme, "oe/" + aid.getName() + "/scheme/" + name_scheme);
+                                System.out.println("### " + y.toString());
                                 oePages.put(aid.getName(), pageMap);
                             }
                             //TODO norms
@@ -145,7 +154,7 @@ public class RestImplOrg extends AbstractBinder {
             ArtifactInfo info = CartagoService.getController(oeName).getArtifactInfo(groupName);
             
             StringBuilder out = new StringBuilder("<html>");
-            out.append("<span style=\"color: red; font-family: arial\"><font size=\"+2\">");
+            out.append("<details><span style=\"color: red; font-family: arial\"><font size=\"+2\">");
             out.append("Inspection of artifact <b>"+info.getId().getName()+"</b> in organziation "+oeName+"</font></span>");
             out.append("<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
             for (ArtifactObsProperty op: info.getObsProperties()) {
@@ -157,7 +166,7 @@ public class RestImplOrg extends AbstractBinder {
                 }
                 out.append("<tr><td>"+op.getName()+"</td><td>"+vls+"</td></tr>");
             }
-            out.append("</table>");
+            out.append("</details></table>");
             out.append("</html>");
             
             return img+out.toString();
@@ -185,11 +194,41 @@ public class RestImplOrg extends AbstractBinder {
         return Response.noContent().build(); // TODO: set response properly
     }
     
-    
     @Path("/{oename}/scheme/{schemename}")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getSchemeHtml(@PathParam("oename") String oeName, @PathParam("schemename") String schemeName) {
+
+        try {
+            String img = "<img src='" + schemeName + "/img.svg' /><br/>";
+            
+            // scheme is described on ora4mas.nopl.GroupBoard
+            ArtifactInfo info = CartagoService.getController(oeName).getArtifactInfo(oeName);
+            
+            System.out.println("*** "+info.toString());
+            
+            StringBuilder out = new StringBuilder("<html>");
+            out.append("<details><span style=\"color: red; font-family: arial\"><font size=\"+2\">");
+            out.append("Inspection of artifact <b>"+info.getId().getName()+"</b> in organziation "+oeName+"</font></span>");
+            out.append("<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
+            for (ArtifactObsProperty op: info.getObsProperties()) {
+                StringBuilder vls = new StringBuilder();
+                String v = "";
+                for (Object vl: op.getValues()) {
+                    vls.append(v+vl);
+                    v = ",";
+                }
+                out.append("<tr><td>"+op.getName()+"</td><td>"+vls+"</td></tr>");
+            }
+            out.append("</details></table>");
+            out.append("</html>");
+            
+            return img+out.toString();
+        } catch (CartagoException e) {
+            e.printStackTrace();
+        }
+        return "error"; // TODO: set response properly
+/*      
         StringWriter so = new StringWriter();
         ArrayList<String> list = new ArrayList<String>(CartagoService.getNode().getWorkspaces());
         list.forEach(x -> {
@@ -223,8 +262,27 @@ public class RestImplOrg extends AbstractBinder {
             }
         });
         return so.toString();
+        */
     }
 
+    @Path("/{oename}/scheme/{schemename}/img.svg")
+    @GET
+    @Produces("image/svg+xml")
+    public Response getSchemeImg(@PathParam("oename") String oeName, @PathParam("schemename") String schemeName) {
+        try {
+            String dot = getOrgSpecificationAsDot(oeName);
+            if (dot != null && !dot.isEmpty()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                MutableGraph g = Parser.read(dot);
+                Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                return Response.ok(out.toByteArray()).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.noContent().build(); // TODO: set response properly
+    }
+    
     //TODO: It is a copy and paste from artifacts, must be adapted to groups
     @SuppressWarnings("finally")
     protected String getGroupAsDot(String wksName, String artName) {
@@ -323,4 +381,87 @@ public class RestImplOrg extends AbstractBinder {
         }
     }
 
+	private static String getOrgSpecificationAsDot(String oeName) {
+		
+        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
+        StringBuilder sb = new StringBuilder();
+		ArtifactInfo info;
+		try {
+			info = CartagoService.getController(oeName).getArtifactInfo(oeName);
+			String spec = "";
+	        for (ArtifactObsProperty op: info.getObsProperties())
+	            if (op.getName().equals("specification")) spec = op.getValue().toString(); 
+
+			List<GoalNode> tree = new ArrayList<GoalNode>();
+			Stack<GoalNode> stackParent = new Stack<GoalNode>();
+			stackParent.push(null);
+
+			List<String> reservedWords = new ArrayList();
+			reservedWords.add("os");
+			reservedWords.add("authority");
+			reservedWords.add("role");
+			reservedWords.add("communication");
+			reservedWords.add("soc");
+			reservedWords.add("link");
+			reservedWords.add("mission");
+			reservedWords.add("scheme_specification");
+			reservedWords.add("norm");
+			reservedWords.add("goal");
+			
+			int lastIndex = 0; 
+			for (int i = 0; i < spec.length(); i++)
+		    {
+		        char current = spec.charAt(i);
+		        if (current == '(' || current == '[')
+		        {
+		        	String name = spec.substring(lastIndex, i);
+		        	if (name.indexOf(",") > 0) name = name.substring(0,name.indexOf(","));
+		        	name = name.replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\\(", "").replaceAll("\\)", "");
+		        	System.out.println("nd: '"+name+"'");
+		        	//if (name.length() > 0) 
+		        	{
+			        	if (stackParent.peek() != null) System.out.println("New node: '"+name+"' - parent: '"+stackParent.peek().getGoalName()+"'");
+			        	GoalNode newNode = stackParent.peek();
+			        	if (name.length() > 0 && !reservedWords.contains(name)) {
+			        		newNode = new GoalNode(stackParent.peek(),name);
+				        	tree.add(newNode);
+			        	}
+			        	lastIndex = i;
+			        	stackParent.push(newNode);
+		        	}
+		        }
+		        if (current == ')' || current == ']')
+		        {
+		        	stackParent.pop();
+		        }
+		    }
+			
+			sb.append("digraph G {");
+			for (GoalNode or : tree) {
+				if (or.getOperator().equals("parallel")) {
+					sb.append("\t\"" + or.getGoalName() + "\" [ style = \"filled\" fillcolor = \"white\" fontname = \"Courier New\" "
+							+ "shape = \"diamond\" label = <<table border=\"0\" cellborder=\"0\">"
+							+ "<tr><td align=\"center\"><font color=\"black\"><b>" 
+							+ or.getGoalName() + "</b></font></td></tr>");
+				} else {
+					sb.append("\t\"" + or.getGoalName() + "\" [ style = \"filled\" fillcolor = \"white\" fontname = \"Courier New\" "
+							+ "shape = \"ellipse\" label = <<table border=\"0\" cellborder=\"0\">"
+							+ "<tr><td align=\"center\"><b>" 
+							+ or.getGoalName() + "</b></td></tr>");
+				}
+				for (String s : or.getSkills())
+					sb.append("<tr><td align=\"left\"><sub><i>" + s + "</i></sub></td></tr>");
+				sb.append("</table>> ];");
+				if (or.getParent() != null)
+					sb.append("\t\"" + or.getParent().getGoalName() + "\"->\"" + or.getGoalName() + "\";");
+			}
+	    		
+			sb.append("}");
+			graph = sb.toString();
+		} catch (CartagoException e) {
+			e.printStackTrace();
+		}
+		
+		return graph;
+	}
 }
