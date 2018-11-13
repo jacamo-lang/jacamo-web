@@ -109,13 +109,13 @@ public class RestImplAg extends AbstractBinder {
     protected int MAX_LENGTH = 30;
     Map<String,Boolean> show = new HashMap<>();
     {
-        show.put("bels", true);
+        //show.put("bels", true);
         show.put("annots", Config.get().getBoolean(Config.SHOW_ANNOTS));
-        show.put("rules", false);
-        show.put("evt", true);
-        show.put("mb", true);
-        show.put("int", true);
-        show.put("int-details", false);
+        //show.put("rules", false);
+        //show.put("evt", true);
+        //show.put("mb", true);
+        //show.put("int", true);
+        //show.put("int-details", false);
     }
 
     @Path("/{agentname}/hide")
@@ -245,7 +245,12 @@ public class RestImplAg extends AbstractBinder {
             
             so.append("</details><hr/><a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;");
             so.append("<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;");
-            so.append("<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>");
+            so.append("<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>, &nbsp;");
+            if (show.get("annots")) {
+                so.append("<a href='hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>");              
+            } else {
+                so.append("<a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>");                              
+            }
         } catch (Exception e) {
             e.printStackTrace();
             so.append("Agent "+agName+" does not exist or cannot be observed.");
