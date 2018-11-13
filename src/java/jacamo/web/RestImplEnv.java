@@ -83,11 +83,12 @@ public class RestImplEnv extends AbstractBinder {
     @Produces(MediaType.TEXT_HTML)
     public String getArtifactHtml(@PathParam("wrksname") String wrksName, @PathParam("artname") String artName) {
         try {
-            String img = "<img src='"+artName+"/img.svg' /><br/>";
+            //String img = "<img src='"+artName+"/img.svg' /><br/>";
             
             ArtifactInfo info = CartagoService.getController(wrksName).getArtifactInfo(artName);
             
             StringBuilder out = new StringBuilder("<html>");
+            out.append("<center><img src='"+artName+"/img.svg' /><br/></center>");
             out.append("<details><span style=\"color: red; font-family: arial\"><font size=\"+2\">");
             out.append("Inspection of artifact <b>"+info.getId().getName()+"</b> in workspace "+wrksName+"</font></span>");
             out.append("<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
@@ -103,7 +104,7 @@ public class RestImplEnv extends AbstractBinder {
             out.append("</details></table>");
             out.append("</html>");
             
-            return img+out.toString();
+            return out.toString();
         } catch (CartagoException e) {
             e.printStackTrace();
         }
@@ -300,16 +301,6 @@ public class RestImplEnv extends AbstractBinder {
             
             sb.append("}\n");
             graph = sb.toString();
-
-            // for debug
-            try (FileWriter fw = new FileWriter("graph.gv", false);
-                    BufferedWriter bw = new BufferedWriter(fw);
-                    PrintWriter out = new PrintWriter(bw)) {
-                 out.print(graph);
-                out.flush();
-                out.close();
-            } catch (Exception ex) {
-            }
             
         } catch (CartagoException e) {
             e.printStackTrace();
