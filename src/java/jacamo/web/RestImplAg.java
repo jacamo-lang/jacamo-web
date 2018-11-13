@@ -1,6 +1,10 @@
 package jacamo.web;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -20,12 +24,17 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.w3c.dom.Document;
 
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.model.MutableGraph;
+import guru.nidi.graphviz.parse.Parser;
 import jason.ReceiverNotFoundException;
 import jason.asSemantics.Agent;
 import jason.asSemantics.IntendedMeans;
@@ -97,6 +106,7 @@ public class RestImplAg extends AbstractBinder {
     /** AGENT **/
 
     protected asl2html  mindInspectorTransformerHTML = null;
+    protected int MAX_LENGTH = 30;
     Map<String,Boolean> show = new HashMap<>();
     {
         show.put("bels", true);
@@ -167,6 +177,7 @@ public class RestImplAg extends AbstractBinder {
     @Produces(MediaType.TEXT_HTML)
     public String getAgentHtml(@PathParam("agentname") String agName) {
         StringWriter so = new StringWriter();
+        
         so.append("<html><head><title>"+agName+"</title></head>");
 
         // REPL part
@@ -219,7 +230,8 @@ public class RestImplAg extends AbstractBinder {
                 "    }\n" + 
                 "    showLog(); \n" +
                 "</script>");
-        
+        so.append("<center><img src='mind/img.svg'/></center><br/><details>");
+
         try {
             if (mindInspectorTransformerHTML == null) {
                 mindInspectorTransformerHTML = new asl2html("/xml/agInspection.xsl");
@@ -231,7 +243,7 @@ public class RestImplAg extends AbstractBinder {
                 so.append( mindInspectorTransformerHTML.transform( ag.getAgState() )); // transform to HTML
             }
             
-            so.append("<hr/><a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;");
+            so.append("</details><hr/><a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;");
             so.append("<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;");
             so.append("<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>");
         } catch (Exception e) {
@@ -412,7 +424,6 @@ public class RestImplAg extends AbstractBinder {
     
     
     // XML interface
-    
     @Path("/{agentname}/mb")
     @POST
     @Consumes(MediaType.APPLICATION_XML)
@@ -427,5 +438,85 @@ public class RestImplAg extends AbstractBinder {
         }
     }
     
+    @Path("/{agentname}/mind/img.svg")
+    @GET
+    @Produces("image/svg+xml")
+    public Response getAgentImg(@PathParam("agentname") String agName) {
+        try {
+            String dot = getAgAsDot(agName);
+            if (dot != null && !dot.isEmpty()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                MutableGraph g = Parser.read(dot);
+                Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                return Response.ok(out.toByteArray()).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.noContent().build(); // TODO: set response properly
+    }
+    
+    protected String getAgAsDot(String agName) {
+        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
+        
+        try {
+            String s1;
+            StringBuilder sb = new StringBuilder();
+            sb.append("digraph G {\n");
+            sb.append("\tgraph [\n");
+            sb.append("\t\trankdir = \"LR\"\n");
+            sb.append("\t]\n");
+
+            s1 = (agName.length() <= MAX_LENGTH) ? agName
+                    : agName.substring(0, MAX_LENGTH) + " ...";
+            sb.append("\t\"" + agName + "\" [ " + "\n\t\tlabel = \""
+                    + s1 + "\"");
+
+            sb.append("\t\tshape = \"ellipse\"\n");
+            sb.append("\t];\n");
+
+            sb.append("\t\"Workspace\" [ " + "\n\t\tlabel = \"Workspace:\\nUnder development\"");
+            sb.append("\n\t\tshape=folder style=rounded\n");
+            sb.append("\t];\n");
+
+            sb.append("\t\"Default_BB\" [ " + "\n\t\tlabel = \"Default::BB:\\nItem1\\nItem2\\n...\"");
+            sb.append("\n\t\tshape=cylinder style=filled pencolor=black fillcolor=cornsilk\n");
+            sb.append("\t];\n");
+
+            sb.append("\t\"NameSpace1_BB\" [ " + "\n\t\tlabel = \"NameSpace1::BB:\\nItem1\\nItem2\\n...\"");
+            sb.append("\n\t\tshape=cylinder style=filled pencolor=black fillcolor=cornsilk\n");
+            sb.append("\t];\n");
+
+            sb.append("\t\"Group1\" [ " + "\n\t\tlabel = \"Group1:\\nOrganization X\\nScheme Y\"");
+            sb.append("\n\t\tshape=tab style=filled pencolor=black fillcolor=gray\n");
+            sb.append("\t];\n");
+            
+            sb.append("\t\"Role1\" [ " + "\n\t\tlabel = \"Role1::\\nOrganization X\\nScheme Y\"");
+            sb.append("\n\t\tshape=box\n");
+            sb.append("\t];\n");
+       
+            sb.append("\t\""+agName+"\"->"+"\"Workspace\""+"\n");
+            sb.append("\t\""+agName+"\"->"+"\"Default_BB\""+"\n");
+            sb.append("\t\""+agName+"\"->"+"\"NameSpace1_BB\""+"\n");
+            sb.append("\t\""+agName+"\"->"+"\"Group1\""+"\n");
+            sb.append("\t\""+agName+"\"->"+"\"Role1\""+"\n");
+            
+            sb.append("}\n");
+            graph = sb.toString();
+            
+            // for debug
+            try (FileWriter fw = new FileWriter("graph.gv", false);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    PrintWriter out = new PrintWriter(bw)) {
+                 out.print(graph);
+                out.flush();
+                out.close();
+            } catch (Exception ex) {
+            }
+
+        } finally {
+            return graph;
+        }
+    }
 
 }
