@@ -73,7 +73,8 @@
     </properties-->
 
     <!-- the norms of the application -->
-    <norm id="norm1" type="obligation" role="role2" mission="mission1"/>
+    <norm id="norm1" type="obligation" role="role2" mission="mission2"/>
+    <norm id="norm2" type="obligation" role="role1" mission="mission1"/>
 </normative-specification>
 
 </organisational-specification>

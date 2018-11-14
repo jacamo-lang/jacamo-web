@@ -16,4 +16,4 @@ price(banana,X) :- X = math.random * 100 + 20.
 { include("$jacamoJar/templates/common-moise.asl") }
 
 // uncomment the include below to have an agent compliant with its organisation
-//{ include("$moiseJar/asl/org-obedient.asl") }
+{ include("$moiseJar/asl/org-obedient.asl") }

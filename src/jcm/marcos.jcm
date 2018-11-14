@@ -4,6 +4,7 @@ mas marcos {
         focus: testwks.a
                testwks.b
     }
+    
 
     workspace testwks {
         artifact a: tools.Counter(10)
@@ -13,6 +14,8 @@ mas marcos {
     organisation testOrg : org.xml {
         group group1: group1 {
             players: marcos role1
+                     marcos role2
+            responsible-for: scheme1
         }
         scheme scheme1 : scheme1
     }
