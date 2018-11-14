@@ -230,7 +230,7 @@ public class RestImplAg extends AbstractBinder {
                 "    }\n" + 
                 "    showLog(); \n" +
                 "</script>");
-        so.append("<center><img src='mind/img.svg'/></center><br/><details>");
+        so.append("<img src='mind/img.svg'/><br/><details>");
 
         try {
             if (mindInspectorTransformerHTML == null) {

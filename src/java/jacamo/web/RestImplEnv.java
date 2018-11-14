@@ -88,7 +88,7 @@ public class RestImplEnv extends AbstractBinder {
             ArtifactInfo info = CartagoService.getController(wrksName).getArtifactInfo(artName);
             
             StringBuilder out = new StringBuilder("<html>");
-            out.append("<center><img src='"+artName+"/img.svg' /><br/></center>");
+            out.append("<img src='"+artName+"/img.svg' /><br/>");
             out.append("<details><span style=\"color: red; font-family: arial\"><font size=\"+2\">");
             out.append("Inspection of artifact <b>"+info.getId().getName()+"</b> in workspace "+wrksName+"</font></span>");
             out.append("<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");

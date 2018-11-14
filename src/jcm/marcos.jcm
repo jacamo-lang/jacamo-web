@@ -14,11 +14,13 @@ mas marcos {
         group group1: group1 {
             players: marcos role1
         }
+        scheme scheme1 : scheme1
     }
     organisation buildHouse : house_building.xml {
         group house_group: house_group {
             players: marcos window_fitter
         }
+        scheme build_house_sch : build_house_sch
     }
 
     //platform: jacamo.web.JCMRest("--connect localhost:2181") // connects to platform at 2181
