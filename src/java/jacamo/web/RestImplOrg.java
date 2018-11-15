@@ -200,7 +200,9 @@ public class RestImplOrg extends AbstractBinder {
                     // TODO: develop npl function
                     StringBuilder out = new StringBuilder();
                     out.append("<html><head><title>debug: " + groupName + "</title></head><body>");
-                    out.append("Under construction!");
+                    out.append("<pre>");
+                    out.append(((OrgArt)gb).getNPLSrc());
+                    out.append("</pre>");
                     out.append("</body></html>");
                     return out.toString();
                 }
@@ -221,7 +223,9 @@ public class RestImplOrg extends AbstractBinder {
                     // TODO: develop debug function
                     StringBuilder out = new StringBuilder();
                     out.append("<html><head><title>debug: " + groupName + "</title></head><body>");
-                    out.append("Under construction!");
+                    out.append("<pre>");
+                    out.append(((OrgArt)gb).getDebugText());
+                    out.append("</pre>");
                     out.append("</body></html>");
                     return out.toString();
                 }
@@ -295,12 +299,18 @@ public class RestImplOrg extends AbstractBinder {
     @Produces(MediaType.TEXT_HTML)
     public String getNormHtml(@PathParam("oename") String oeName, @PathParam("groupname") String groupName,
             @PathParam("schemename") String schemeName) {
-
         try {
             StringBuilder out = new StringBuilder();
-            out.append("<html><head><title>Norm: " + groupName + "." + schemeName + "</title></head><body>");
-            // TODO: show norm details
-            out.append("Under construction!");
+            out.append("<html><head><title>Scheme: " + schemeName + "</title></head><body>");
+            for (NormativeBoard nb : NormativeBoard.getNormativeBoards()) {
+                if (nb.getOEId().equals(oeName) && nb.getArtId().equals(groupName+"."+schemeName)) {
+                    StringWriter so = new StringWriter();
+                    ((OrgArt) nb).getNSTransformer().transform(
+                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) nb).getNormativeEngine())),
+                            new StreamResult(so));
+                    out.append(so.toString());
+                }
+            }
             out.append("</body></html>");
 
             return out.toString();
