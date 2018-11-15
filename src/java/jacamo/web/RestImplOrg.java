@@ -1,16 +1,8 @@
 package jacamo.web;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -25,23 +17,17 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import cartago.ArtifactId;
-import cartago.ArtifactInfo;
-import cartago.ArtifactObsProperty;
 import cartago.CartagoException;
-import cartago.CartagoService;
-import cartago.ICartagoController;
+import cartago.OperationException;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
-import jacamo.platform.EnvironmentWebInspector;
-import jacamo.web.plugins.GoalNode;
+import moise.common.MoiseException;
+import moise.os.OS;
 import moise.xml.DOMUtils;
+import npl.parser.ParseException;
 import ora4mas.nopl.GroupBoard;
 import ora4mas.nopl.OrgArt;
 import ora4mas.nopl.OrgBoard;
@@ -73,6 +59,7 @@ public class RestImplOrg extends AbstractBinder {
             so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>organisation <b>" + ob.getOEId()
                     + "</b></p></font>");
 
+            so.append("- <a href='/oe/"+ob.getOEId()+"/os' target='cf' style=\"font-family: arial; text-decoration: none\">specification</a><br/>");
             StringWriter os = new StringWriter();
             StringWriter gr = new StringWriter();
             gr.append("<br/><scan style='color: red; font-family: arial;'>groups</scan> <br/>");
@@ -111,13 +98,37 @@ public class RestImplOrg extends AbstractBinder {
         return so.toString();
     }
     
+    @Path("/{oename}/os")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getSpecificationHtml(@PathParam("oename") String oeName) {
+        try {
+            StringBuilder out = new StringBuilder();
+            out.append("<html><head><title>" + oeName + "</title></head><body>");
+            for (OrgBoard ob : OrgBoard.getOrbBoards()) {
+                if (ob.getOEId().equals(oeName)) {
+                    OS os = OS.loadOSFromURI(ob.getOSFile());
+                    String osSpec = ob.specToStr(os,
+                            DOMUtils.getTransformerFactory().newTransformer(DOMUtils.getXSL("os")));
+                    out.append(osSpec);
+                }
+            }
+
+            return out.toString();
+        } catch (Exception | TransformerFactoryConfigurationError e) {
+            e.printStackTrace();
+        }
+        return "error"; // TODO: set response properly
+    }
+
+    
     @Path("/{oename}/group/{groupname}")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getGrouptHtml(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
         try {
             StringBuilder out = new StringBuilder();
-            out.append("<html><head><title>"+groupName+"</title></head><body>");
+            out.append("<html><head><title>Group: "+groupName+"</title></head><body>");
             String img = "<img src='" + groupName + "/img.svg' /><br/>";
             out.append("<details>");
             for (GroupBoard gb: GroupBoard.getGroupBoards()) {
@@ -125,6 +136,7 @@ public class RestImplOrg extends AbstractBinder {
                     if (((OrgArt) gb).getStyleSheet() != null) {
                         StringWriter so = new StringWriter();
                         ((OrgArt) gb).getStyleSheet().setParameter("show-oe-img", "true");
+                        //TODO: links that comes from xsl specification are wrong!!!
                         ((OrgArt) gb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb))),new StreamResult(so));
                         out.append(so.toString());
                     }
@@ -172,33 +184,27 @@ public class RestImplOrg extends AbstractBinder {
     public String getSchemeHtml(@PathParam("oename") String oeName, @PathParam("schemename") String schemeName) {
 
         try {
-            String img = "<img src='" + schemeName + "/img.svg'/><br/>";
-            
-            // scheme is described on ora4mas.nopl.GroupBoard
-            ArtifactInfo info = CartagoService.getController(oeName).getArtifactInfo(oeName);
-            
-            //TODO: read more info from scheme as desktop interface 
-            
-            StringBuilder out = new StringBuilder("<html>");
+            StringBuilder out = new StringBuilder();
+            out.append("<html><head><title>Scheme: "+schemeName+"</title></head><body>");
+            String img = "<img src='" + schemeName + "/img.svg' /><br/>";
             out.append("<details>");
-            out.append("<span style=\"color: red; font-family: arial\"><font size=\"+2\">");
-            out.append("Inspection of artifact <b>"+info.getId().getName()+"</b> in organziation "+oeName+"</font></span>");
-            out.append("<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
-            for (ArtifactObsProperty op: info.getObsProperties()) {
-                StringBuilder vls = new StringBuilder();
-                String v = "";
-                for (Object vl: op.getValues()) {
-                    vls.append(v+vl);
-                    v = ",";
+            for (SchemeBoard sb: SchemeBoard.getSchemeBoards()) {
+                if (sb.getOEId().equals(oeName) && sb.getArtId().equals(schemeName)) {
+                    if (((OrgArt) sb).getStyleSheet() != null) {
+                        StringWriter so = new StringWriter();
+                        ((OrgArt) sb).getStyleSheet().setParameter("show-oe-img", "true");
+                        ((OrgArt) sb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb))),new StreamResult(so));
+                        out.append(so.toString());
+                    }
+                    StringWriter so = new StringWriter();
+                    ((OrgArt) sb).getNSTransformer().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb).getNormativeEngine())), new StreamResult(so));
+                    out.append(so.toString());
                 }
-                out.append("<tr><td>"+op.getName()+"</td><td>"+vls+"</td></tr>");
             }
-            out.append("</table>");
             out.append("</details>");
-            out.append("</html>");
             
             return img+out.toString();
-        } catch (CartagoException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return "error"; // TODO: set response properly
