@@ -160,7 +160,7 @@ public class RestImplEnv extends AbstractBinder {
                     s1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
                             : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
                     sb.append("\t\"" + info.getId().getName() + "\" [ " + "\n\t\tlabel = \""
-                            + s1 + "|");
+                            + s1 + ":\n");
                     s1 = (info.getId().getArtifactType().length() <= MAX_LENGTH) ? info.getId().getArtifactType()
                             : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
                     sb.append(s1 + "\"\n");
@@ -238,7 +238,7 @@ public class RestImplEnv extends AbstractBinder {
             s1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
                     : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
             sb.append("\t\"" + info.getId().getName() + "\" [ " + "\n\t\tlabel = \""
-                    + s1 + "|");
+                    + s1 + ":\n");
             s1 = (info.getId().getArtifactType().length() <= MAX_LENGTH) ? info.getId().getArtifactType()
                     : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
             sb.append(s1 + "|");
