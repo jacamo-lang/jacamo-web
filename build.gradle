@@ -52,7 +52,6 @@ dependencies {
     compile 'org.apache.curator:curator-x-async:4.0.1'
 	
 	compile group: 'guru.nidi', name: 'graphviz-java', version: '0.7.0'
-	compile files ('lib/moise-0.12-SNAPSHOT.jar')	
 }
 
 sourceSets {
