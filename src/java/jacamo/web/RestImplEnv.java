@@ -1,9 +1,6 @@
 package jacamo.web;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -29,7 +26,6 @@ import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
 import jacamo.platform.EnvironmentWebInspector;
-
 
 @Singleton
 @Path("/workspaces")

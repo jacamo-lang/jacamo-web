@@ -1,6 +1,5 @@
 package jacamo.web;
 
-import java.awt.List;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
@@ -8,7 +7,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,7 +50,6 @@ import jason.asSemantics.Option;
 import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
 import jason.asSyntax.ASSyntax;
-import jason.asSyntax.Literal;
 import jason.asSyntax.Plan;
 import jason.asSyntax.PlanBody;
 import jason.asSyntax.PlanLibrary;
@@ -62,7 +59,6 @@ import jason.infra.centralised.CentralisedAgArch;
 import jason.util.Config;
 import jason.util.asl2html;
 import ora4mas.nopl.GroupBoard;
-import ora4mas.nopl.OrgArt;
 
 
 @Singleton
@@ -500,110 +496,111 @@ public class RestImplAg extends AbstractBinder {
 
             {// beliefs will be placed on the left
                 sb.append("\tsubgraph cluster_mind {\n");
-                sb.append("\t\tlabel=\"" + agName + "'s mind\"\n");
-				sb.append("\t\tlabeljust=\"r\"\n");
-				ag.getBB().getNameSpaces().forEach(x -> {
-					sb.append("\t\t\"" + x + "\" [ " + "\n\t\t\tlabel = \"" + x + "\"");
-					sb.append("\n\t\t\tshape=\"cylinder\" style=filled pencolor=black fillcolor=cornsilk\n");
-					sb.append("\t\t];\n");
-				});
-				sb.append("\t};\n");
-				// just to avoid put agent node into the cluster
-				ag.getBB().getNameSpaces().forEach(x -> {
-					sb.append("\t\"" + agName + "\"->\"" + x + "\" [arrowhead=none constraint=false]\n");
-				});
-			}
+                sb.append("\t\tlabel=\"mind\"\n");
+                sb.append("\t\tlabeljust=\"r\"\n");
+                sb.append("\t\tstyle=rounded\n");
+                ag.getBB().getNameSpaces().forEach(x -> {
+                    sb.append("\t\t\"" + x + "\" [ " + "\n\t\t\tlabel = \"" + x + "\"");
+                    sb.append("\n\t\t\tshape=\"cylinder\" style=filled pencolor=black fillcolor=cornsilk\n");
+                    sb.append("\t\t];\n");
+                });
+                sb.append("\t};\n");
+                // just to avoid put agent node into the cluster
+                ag.getBB().getNameSpaces().forEach(x -> {
+                    sb.append("\t\"" + agName + "\"->\"" + x + "\" [arrowhead=none constraint=false style=dotted]\n");
+                });
+            }
 
-			{ // groups and roles are also placed on the left
-	            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-	                if (workspacesIn.contains(gb.getOEId())) {
-						sb.append("\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
-						sb.append("\n\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
-						sb.append("\t];\n");
-						sb.append("\t\"" + gb.getArtId() + "\"->\"" + agName + "\" [arrowtail=none dir=back]\n");
-						gb.getGrpState().getPlayers().forEach(p -> {
-							if (p.getAg().equals(agName)) {
-								sb.append("\t\"" + p.getTarget() + "\" [ " + "\n\t\tlabel = \"" + p.getTarget() + "\"");
-								sb.append("\n\t\tshape=box style=rounded\n");
-								sb.append("\t];\n");
-								sb.append("\t\"" + p.getTarget() + "\"->\"" + gb.getArtId() + "\" [arrowtail=none dir=back label=\"plays\"]\n");
-							}
-						});
-	                }
-	            }
-			}
+            { // groups and roles are also placed on the left
+                for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+                    if (workspacesIn.contains(gb.getOEId())) {
+                        sb.append("\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
+                        sb.append("\n\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
+                        sb.append("\t];\n");
+                        sb.append("\t\"" + gb.getArtId() + "\"->\"" + agName + "\" [arrowtail=none dir=back]\n");
+                        gb.getGrpState().getPlayers().forEach(p -> {
+                            if (p.getAg().equals(agName)) {
+                                sb.append("\t\"" + p.getTarget() + "\" [ " + "\n\t\tlabel = \"" + p.getTarget() + "\"");
+                                sb.append("\n\t\tshape=box style=rounded\n");
+                                sb.append("\t];\n");
+                                sb.append("\t\"" + p.getTarget() + "\"->\"" + gb.getArtId() + "\" [arrowtail=none dir=back label=\"plays\"]\n");
+                            }
+                        });
+                    }
+                }
+            }
 
-			{// agent will be placed on center
-				String s1 = (agName.length() <= MAX_LENGTH) ? agName : agName.substring(0, MAX_LENGTH) + " ...";
-				sb.append("\t\"" + agName + "\" [ " + "\n\t\tlabel = \"" + s1 + "\"");
-				sb.append("\t\tshape = \"ellipse\"\n");
-				sb.append("\t];\n");
-			}
+            {// agent will be placed on center
+                String s1 = (agName.length() <= MAX_LENGTH) ? agName : agName.substring(0, MAX_LENGTH) + " ...";
+                sb.append("\t\"" + agName + "\" [ " + "\n\t\tlabel = \"" + s1 + "\"");
+                sb.append("\t\tshape = \"ellipse\"\n");
+                sb.append("\t];\n");
+            }
 
-			{ // workspances and artifacts the agents is focused on
-				workspacesIn.forEach(w -> {
-					String wksName = w.toString();
-					try {
-						for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
-							ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
-							info.getObservers().forEach(y -> {
-								if ((info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
-										|| (info.getId().getArtifactType().equals("ora4mas.nopl.GroupBoard"))
-										|| (info.getId().getArtifactType().equals("ora4mas.nopl.OrgBoard"))
-										|| (info.getId().getArtifactType().equals("ora4mas.nopl.SchemeBoard"))
-										|| (info.getId().getArtifactType().equals("ora4mas.nopl.NormativeBoard"))) {
-									; // do not print system artifacts
-								} else {
-									if (y.getAgentId().getAgentName().equals(agName)) {
-										// create a cluster for each artifact even at same wks of other artifacts?
-										sb.append("\tsubgraph cluster_" + wksName + " {\n");
-										sb.append("\t\tlabel=\"" + wksName + "\"\n");
-										sb.append("\t\tlabeljust=\"r\"\n");
-										sb.append("\t\tgraph[style=dashed]\n");
-										String str1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
-												: info.getId().getName().substring(0, MAX_LENGTH) + " ...";
-										sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel = \"" + str1
-												+ " :\\n");
-										str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
-												? info.getId().getArtifactType()
-												: info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
-										sb.append(str1 + "\"\n");
+            { // workspances and artifacts the agents is focused on
+                workspacesIn.forEach(w -> {
+                    String wksName = w.toString();
+                    try {
+                        for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
+                            ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
+                            info.getObservers().forEach(y -> {
+                                if ((info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
+                                        || (info.getId().getArtifactType().equals("ora4mas.nopl.GroupBoard"))
+                                        || (info.getId().getArtifactType().equals("ora4mas.nopl.OrgBoard"))
+                                        || (info.getId().getArtifactType().equals("ora4mas.nopl.SchemeBoard"))
+                                        || (info.getId().getArtifactType().equals("ora4mas.nopl.NormativeBoard"))) {
+                                    ; // do not print system artifacts
+                                } else {
+                                    if (y.getAgentId().getAgentName().equals(agName)) {
+                                        // create a cluster for each artifact even at same wks of other artifacts?
+                                        sb.append("\tsubgraph cluster_" + wksName + " {\n");
+                                        sb.append("\t\tlabel=\"" + wksName + "\"\n");
+                                        sb.append("\t\tlabeljust=\"r\"\n");
+                                        sb.append("\t\tgraph[style=dashed]\n");
+                                        String str1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
+                                                : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
+                                        sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
+                                                + " :\\n");
+                                        str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
+                                                ? info.getId().getArtifactType()
+                                                : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
+                                        sb.append(str1 + "\"\n");
 
-										sb.append("\t\t\tshape = \"record\"\n");
-										sb.append("\t\t\tURL = \"../../workspaces/" + wksName + "/" + info.getId().getName() + "/img.svg\"\n");
-										sb.append("\t\t];\n");
+                                        sb.append("\t\t\tshape=record style=filled fillcolor=white\n");
+                                        sb.append("\t\t\tURL=\"[../../workspaces/" + wksName + "/" + info.getId().getName() + "/img.svg]\"\n");
+                                        sb.append("\t\t];\n");
 
-										sb.append("\t};\n");
+                                        sb.append("\t};\n");
 
-										sb.append("\t\"" + agName + "\"->\"" + info.getId().getName()
-												+ "\" [arrowhead=odot]\n");
-									}
-								}
-							});
-						}
-					} catch (CartagoException e) {
-						e.printStackTrace();
-					}
-				});
-			}
-			/*
-			 * // Reference the toggle link var xa = document.getElementById('expAll');
-			 * 
-			 * // Register link on click event xa.addEventListener('click', function(e) {
-			 * 
-			 * // Toggle the two classes that represent "state" determined when link is
-			 * clicked e.target.classList.toggle('exp'); e.target.classList.toggle('col');
-			 * 
-			 * // Collect all <details> into a NodeList var details =
-			 * document.querySelectorAll('details');
-			 * 
-			 * // Convert NodeList into an array then iterate throught it... var D =
-			 * Array.from(details);
-			 * 
-			 * // Start a for loop at 6 instead of 0 Now 0 - 5 details are excluded for (let
-			 * i = 6; i < D.length; i++) {
-			 * 
-			 * // If the link has the class .exp... make each <detail>'s open attribute true
+                                        sb.append("\t\"" + agName + "\"->\"" + info.getId().getName()
+                                                + "\" [arrowhead=odot]\n");
+                                    }
+                                }
+                            });
+                        }
+                    } catch (CartagoException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+            /*
+             * // Reference the toggle link var xa = document.getElementById('expAll');
+             * 
+             * // Register link on click event xa.addEventListener('click', function(e) {
+             * 
+             * // Toggle the two classes that represent "state" determined when link is
+             * clicked e.target.classList.toggle('exp'); e.target.classList.toggle('col');
+             * 
+             * // Collect all <details> into a NodeList var details =
+             * document.querySelectorAll('details');
+             * 
+             * // Convert NodeList into an array then iterate throught it... var D =
+             * Array.from(details);
+             * 
+             * // Start a for loop at 6 instead of 0 Now 0 - 5 details are excluded for (let
+             * i = 6; i < D.length; i++) {
+             * 
+             * // If the link has the class .exp... make each <detail>'s open attribute true
              * if (e.target.classList.contains('exp')) { D[i].open = true; // Otherwise make
              * it false } else { D[i].open = false; }
              * 
