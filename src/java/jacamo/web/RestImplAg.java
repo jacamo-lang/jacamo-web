@@ -2,7 +2,9 @@ package jacamo.web;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
@@ -74,35 +77,84 @@ public class RestImplAg extends AbstractBinder {
     @Produces(MediaType.TEXT_HTML)
     public String getAgentsHtml() {
         StringWriter so = new StringWriter();
+        so.append("<!DOCTYPE html>\n" + 
+                "<html lang=\"en\" target=\"mainframe\">\n" + 
+                "<head><title>JaCamo-Rest - Agents</title>");
+        //so.append("<meta http-equiv=\"refresh\" content=\"3\"/>");
+        so.append("<style>"+getStyleCSS()+"</style>");
+        so.append("</head><body>\n" + 
+                "	<div id=\"root\">"); 
+        so.append(getAgentsMenu());                
+        so.append("<main class=\"col-sm-12 col-md-8 col-lg-9\" id=\"doc-content\">\n" + 
+                  "	<div id=\"getting-started\" class=\"card fluid\">\n" + 
+                  " 	<h2 class=\"section double-padded\">Getting started</h2>\n" + 
+                  " 		<div class=\"section\">\n" + 
+                  "				<p>If you have any agent running you can click on its name and watch its mind, check relation and more.<br/>" +
+                  "				Using command text box you can send order to the agents, change plans, add and remove beliefs, just using Jason's AgentSpeak sentences.<br/></p>" + 
+                  "				<br/>\n" + 
+                  "			</div>\n" + 
+                  "		</div>\n" + 
+                  "		</main>\n" + 
+                  "	</div>\n" + 
+                  "</body></html>\n");
+        return so.toString();
+    }
 
-        so.append("<html><head><title>Jason (list of agents)</title> <meta http-equiv=\"refresh\" content=\"3\"/> </head><body>");
-        //so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Agents</p></font>");
+    public String getAgentsMenu() {
+        StringWriter so = new StringWriter();
+
+        so.append("<div class=\"row\" id=\"doc-wrapper\">\n" + 
+                  "	<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\"\n" + 
+                  "		type=\"checkbox\">\n" + 
+                  "			<nav class=\"col-md-4 col-lg-3\" id=\"nav-drawer\">\n" + 
+                  "				<h3>Agents</h3>\n"); 
+
         if (JCMRest.getZKHost() == null) {
-            for (String a: BaseCentralisedMAS.getRunner().getAgs().keySet()) {
-                so.append("<a href=\"/agents/"+a+"/mind\" target='cf' style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
+            for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
+                so.append("<a href=\"agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>");
             }
         } else {
             // get agents from ZK
             try {
-                for (String a: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
-                    String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId+"/"+a));
-                    so.append("<a href=\""+url+"/mind\" target='cf' style=\"font-family: arial; text-decoration: none\">"+a+"</a><br/>");
+                for (String a : JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
+                    String url = new String(
+                            JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
+                    so.append("<a href=\"" + url + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>");
                     Agent ag = getAgent(a);
-                    if (ag != null) createAgLog(a, ag);                    
+                    if (ag != null)
+                        createAgLog(a, ag);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+        }                
+                
+        so.append("<br>\n");
+        so.append("<a href=\"/forms/new_agent\" target='mainframe'>new agent</a>");                            
+        so.append("<a href=\"/services\" target='mainframe'>directory facilitator</a>");                            
+        so.append("<br><br><a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>");
         
-        so.append("<br/><a href=\"/forms/new_agent\" target='cf' style=\"font-family: arial; text-decoration: none\">new agent</a>");                            
-        so.append("<br/><a href=\"/services\" target='cf' style=\"font-family: arial; text-decoration: none\">directory facilitator</a><br/>");                            
-
-        so.append("<hr/>by <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>");
-        so.append("</body></html>");        
+        so.append("</nav>\n");
         return so.toString();
     }
     
+    //TODO: @Path("css/style.css")???
+    //@GET
+    //@Produces(MediaType.TEXT_PLAIN)
+    public String getStyleCSS() {
+        StringBuilder so = new StringBuilder();
+        try (Scanner scanner = new Scanner(new File("src/resources/css/style.css"))) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                so.append(line).append("\n");
+            }
+            scanner.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return  so.toString();
+    }
+
     private Agent getAgent(String agName) {
         CentralisedAgArch cag = BaseCentralisedMAS.getRunner().getAg(agName);
         if (cag != null)
@@ -186,17 +238,68 @@ public class RestImplAg extends AbstractBinder {
     public String getAgentHtml(@PathParam("agentname") String agName) {
         StringWriter so = new StringWriter();
         
-        so.append("<html><head><title>"+agName+"</title></head>");
+        so.append("<!DOCTYPE html>\n" + 
+                "<html lang=\"en\" target=\"mainframe\">\n" + 
+                "<head><title>JaCamo-Rest - Agents</title>");
+        //so.append("<meta http-equiv=\"refresh\" content=\"3\"/>");
+        so.append("<style>"+getStyleCSS()+"</style>");
+        so.append("</head><body>\n" + 
+                "	<div id=\"root\">"); 
 
-        // REPL part
-        so.append(
-                "<input type=\"text\" name=\"c\"  size=\"70\" id=\"inputcmd\" placeholder=\""+helpMsg1+"\" onkeydown=\"if (event.keyCode == 13) runCMD()\" />" + 
-                //"</form>"+
-                //"<input type=\"submit\" onclick=\"runCMD();\" value=\"Submit\" />"+
-                "<code><span id='display'></span></code>  <span id='plog'></span>"+
-                "<pre><span id='log'></span></pre>"+
-                
-                "<script language=\"JavaScript\">\n" + 
+        so.append(getAgentsMenu());  
+        
+        // command box
+        so.append("<main class=\"col-sm-12 col-md-8 col-lg-9\" id=\"doc-content\">");
+        so.append("<div id=\"command\" class=\"card fluid\">\n" + 
+                  "  <div>\n" + 
+                  "    <input style=\"width: 100%; margin: 0px;\" placeholder=\"Command...\"\n" + 
+                  "    type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n" + 
+                  "  </div>\n" + 
+                  "</div>\n");
+        // overview
+        so.append("<div id=\"overview\" class=\"card fluid\">\n" + 
+                  "  <h2 class=\"section double-padded\">Overview</h2>\n" + 
+                  "    <div class=\"section\">\n");
+        so.append("      <img src='mind/img.svg'/><br/>");
+        so.append("    </div>");
+        so.append("</div>");
+        // details
+        so.append("<div id=\"details\" class=\"card fluid\">\n" + 
+                  "  <h2 class=\"section double-padded\">Agent's mind</h2>\n" + 
+                  "	   <div class=\"section\">\n"); 
+        try {
+            if (mindInspectorTransformerHTML == null) {
+                mindInspectorTransformerHTML = new asl2html("/xml/agInspection.xsl");
+            }
+            for (String p : show.keySet())
+                mindInspectorTransformerHTML.setParameter("show-" + p, show.get(p) + "");
+            Agent ag = getAgent(agName);
+            if (ag != null) {
+                so.append(mindInspectorTransformerHTML.transform(ag.getAgState()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } // transform to HTML
+        so.append("</div>\n" + 
+                  "</div>\n"); 
+        
+        so.append("<div id=\"Extra functions\" class=\"card fluid\">\n" + 
+                "  <h2 class=\"section double-padded\">Extra functions</h2>\n" + 
+                "	   <div class=\"section\">\n"); 
+        so.append("<a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;");
+        so.append("<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;");
+        so.append("<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>, &nbsp;");
+        if (show.get("annots")) {
+            so.append("<a href='hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>");              
+        } else {
+            so.append("<a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>");                              
+        }
+        so.append("</div>\n" + 
+                "</div>\n"); 
+        
+        so.append("</main>\n" + 
+                "</div>\n");
+        so.append("<script language=\"JavaScript\">\n" + 
                 "    function runCMD() {\n" +
                 "        http = new XMLHttpRequest();\n" + 
                 "        http.onreadystatechange = function() { \n" + 
@@ -238,33 +341,7 @@ public class RestImplAg extends AbstractBinder {
                 "    }\n" + 
                 "    showLog(); \n" +
                 "</script>");
-        so.append("<img src='mind/img.svg'/><br/><details>");
-
-        try {
-            if (mindInspectorTransformerHTML == null) {
-                mindInspectorTransformerHTML = new asl2html("/xml/agInspection.xsl");
-            }
-            for (String p: show.keySet())
-                mindInspectorTransformerHTML.setParameter("show-"+p, show.get(p)+"");
-            Agent ag = getAgent(agName);
-            if (ag != null) {
-                so.append( mindInspectorTransformerHTML.transform( ag.getAgState() )); // transform to HTML
-            }
-            
-            so.append("</details><hr/><a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;");
-            so.append("<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;");
-            so.append("<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>, &nbsp;");
-            if (show.get("annots")) {
-                so.append("<a href='hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>");              
-            } else {
-                so.append("<a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>");                              
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            so.append("Agent "+agName+" does not exist or cannot be observed.");
-        }
-
-        so.append("</body></html>");
+        so.append("</html>\n");
         return so.toString();
     }
 
