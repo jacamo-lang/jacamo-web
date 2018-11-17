@@ -83,43 +83,56 @@ public class RestImplAg extends AbstractBinder {
         //so.append("<meta http-equiv=\"refresh\" content=\"3\"/>");
         so.append("<style>"+getStyleCSS()+"</style>");
         so.append("</head><body>\n" + 
-                "	<div id=\"root\">"); 
-        so.append(getAgentsMenu());                
-        so.append("<main class=\"col-sm-12 col-md-8 col-lg-9\" id=\"doc-content\">\n" + 
-                  "	<div id=\"getting-started\" class=\"card fluid\">\n" + 
-                  " 	<h2 class=\"section double-padded\">Getting started</h2>\n" + 
-                  " 		<div class=\"section\">\n" + 
-                  "				<p>If you have any agent running you can click on its name and watch its mind, check relation and more.<br/>" +
-                  "				Using command text box you can send order to the agents, change plans, add and remove beliefs, just using Jason's AgentSpeak sentences.<br/></p>" + 
-                  "				<br/>\n" + 
+                  "	<div id=\"root\">"+ 
+                  "		<div class=\"row\" id=\"doc-wrapper\">\n"); 
+        so.append(getAgentsMenu(""));                
+        so.append("			<main class=\"col-sm-12 col-md-9 col-lg-10\" id=\"doc-content\">\n" + 
+                  "			<div id=\"getting-started\" class=\"card fluid\">\n" + 
+                  " 			<h2 class=\"section double-padded\">Getting started</h2>\n" + 
+                  " 			<div class=\"section\">\n" + 
+                  "					<p>If you have any agent running you can click on its name and watch its mind, check relation and more.<br/>" +
+                  "					Using command text box you can send order to the agents, change plans, add and "
+                  +                 "remove beliefs, just using <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>'s AgentSpeak sentences.</p>" + 
+                  "					<br/>\n" +
+                  "					<p>To create a new agent click <a href=\"/forms/new_agent\" target='mainframe'>here</a>"
+                  + "				and to access the directory facilitator click <a href=\"/services\" target='mainframe'>here</a></p>" + 
+                  "					<br/>\n" +
+                  "				</div>\n" + 
                   "			</div>\n" + 
+                  "			</main>\n" + 
                   "		</div>\n" + 
-                  "		</main>\n" + 
                   "	</div>\n" + 
                   "</body></html>\n");
         return so.toString();
     }
 
-    public String getAgentsMenu() {
+    public String getAgentsMenu(String selectedAgent) {
         StringWriter so = new StringWriter();
 
-        so.append("<div class=\"row\" id=\"doc-wrapper\">\n" + 
-                  "	<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\"\n" + 
+        so.append("	<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\"\n" + 
                   "		type=\"checkbox\">\n" + 
-                  "			<nav class=\"col-md-4 col-lg-3\" id=\"nav-drawer\">\n" + 
+                  "			<nav class=\"col-md-3 col-lg-2\" id=\"nav-drawer\">\n" + 
                   "				<h3>Agents</h3>\n"); 
 
         if (JCMRest.getZKHost() == null) {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
-                so.append("<a href=\"agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>");
+                so.append("<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>");
+                if (a.equals(selectedAgent)) {
+                    so.append("<a href=\"#overview\" id=\"link-to-overview\">. Overview</a>");
+                    so.append("<a href=\"#details\" id=\"link-to-details\">. Details</a>");
+                    so.append("<a href=\"#extrafunctions\" id=\"link-to-extrafunctions\">. Extra Functions</a>");
+                }
             }
         } else {
             // get agents from ZK
             try {
                 for (String a : JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
-                    String url = new String(
-                            JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
-                    so.append("<a href=\"" + url + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>");
+                    so.append("<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>");
+                    if (a.equals(selectedAgent)) {
+                        so.append("<a href=\"#overview\" id=\"link-to-overview\">. Overview</a>");
+                        so.append("<a href=\"#details\" id=\"link-to-details\">. Details</a>");
+                        so.append("<a href=\"#extrafunctions\" id=\"link-to-extrafunctions\">. Extra Functions</a>");
+                    }
                     Agent ag = getAgent(a);
                     if (ag != null)
                         createAgLog(a, ag);
@@ -128,11 +141,6 @@ public class RestImplAg extends AbstractBinder {
                 e.printStackTrace();
             }
         }                
-                
-        so.append("<br>\n");
-        so.append("<a href=\"/forms/new_agent\" target='mainframe'>new agent</a>");                            
-        so.append("<a href=\"/services\" target='mainframe'>directory facilitator</a>");                            
-        so.append("<br><br><a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>");
         
         so.append("</nav>\n");
         return so.toString();
@@ -244,12 +252,13 @@ public class RestImplAg extends AbstractBinder {
         //so.append("<meta http-equiv=\"refresh\" content=\"3\"/>");
         so.append("<style>"+getStyleCSS()+"</style>");
         so.append("</head><body>\n" + 
-                "	<div id=\"root\">"); 
+                "	<div id=\"root\">"+
+                "		<div class=\"row\" id=\"doc-wrapper\">\n"); 
 
-        so.append(getAgentsMenu());  
+        so.append(getAgentsMenu(agName));  
         
         // command box
-        so.append("<main class=\"col-sm-12 col-md-8 col-lg-9\" id=\"doc-content\">");
+        so.append("<main class=\"col-sm-12 col-md-9 col-lg-10\" id=\"doc-content\">");
         so.append("<div id=\"command\" class=\"card fluid\">\n" + 
                   "  <div>\n" + 
                   "    <input style=\"width: 100%; margin: 0px;\" placeholder=\"Command...\"\n" + 
@@ -260,7 +269,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("<div id=\"overview\" class=\"card fluid\">\n" + 
                   "  <h2 class=\"section double-padded\">Overview</h2>\n" + 
                   "    <div class=\"section\">\n");
-        so.append("      <img src='mind/img.svg'/><br/>");
+        so.append("      <center><img src='mind/img.svg'/></center><br/>");
         so.append("    </div>");
         so.append("</div>");
         // details
@@ -283,7 +292,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("</div>\n" + 
                   "</div>\n"); 
         
-        so.append("<div id=\"Extra functions\" class=\"card fluid\">\n" + 
+        so.append("<div id=\"extrafunctions\" class=\"card fluid\">\n" + 
                 "  <h2 class=\"section double-padded\">Extra functions</h2>\n" + 
                 "	   <div class=\"section\">\n"); 
         so.append("<a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;");
@@ -341,7 +350,7 @@ public class RestImplAg extends AbstractBinder {
                 "    }\n" + 
                 "    showLog(); \n" +
                 "</script>");
-        so.append("</html>\n");
+        so.append("</body></html>\n");
         return so.toString();
     }
 
@@ -568,7 +577,8 @@ public class RestImplAg extends AbstractBinder {
 
             sb.append("digraph G {\n");
             sb.append("\tgraph [\n");
-            sb.append("\t\trankdir = \"LR\"\n");
+            sb.append("\t\trankdir=\"LR\"\n");
+            sb.append("\t\tbgcolor=\"transparent\"\n");
             sb.append("\t]\n");
 
             {// beliefs will be placed on the left
@@ -598,7 +608,7 @@ public class RestImplAg extends AbstractBinder {
                         gb.getGrpState().getPlayers().forEach(p -> {
                             if (p.getAg().equals(agName)) {
                                 sb.append("\t\"" + p.getTarget() + "\" [ " + "\n\t\tlabel = \"" + p.getTarget() + "\"");
-                                sb.append("\n\t\tshape=box style=rounded\n");
+                                sb.append("\n\t\tshape=box style=\"filled,rounded\" fillcolor=white\n");
                                 sb.append("\t];\n");
                                 sb.append("\t\"" + p.getTarget() + "\"->\"" + gb.getArtId() + "\" [arrowtail=none dir=back label=\"plays\"]\n");
                             }
@@ -610,7 +620,7 @@ public class RestImplAg extends AbstractBinder {
             {// agent will be placed on center
                 String s1 = (agName.length() <= MAX_LENGTH) ? agName : agName.substring(0, MAX_LENGTH) + " ...";
                 sb.append("\t\"" + agName + "\" [ " + "\n\t\tlabel = \"" + s1 + "\"");
-                sb.append("\t\tshape = \"ellipse\"\n");
+                sb.append("\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
                 sb.append("\t];\n");
             }
 
