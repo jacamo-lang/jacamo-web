@@ -3,8 +3,7 @@
 <html lang="en" target="mainframe">
 	<head>
 		<title>JaCamo-Rest - Agents</title>
-		<style>
-@charset "UTF-8";
+		<style>@charset "UTF-8";
 /*
   Flavor name: Default (mini-default)
   Author: Angelos Chalaris (chalarangelo@gmail.com)
@@ -2182,41 +2181,56 @@ span.icon-user {
   }
 }
 
-
-		</style>
+</style>
 	</head>
 	<body>
 		<div id="root">
 			<div class="row" id="doc-wrapper">
 				<input id="doc-drawer-checkbox" class="drawer" value="on" type="checkbox">
-				<nav class="col-md-3 col-lg-2" id="nav-drawer">
-					<h3>Agents</h3>
-					<a href="marcos/mind/index.html" id="link-to-marcos-mind" target='mainframe'>marcos</a>
-				</nav>
+				<div class="row" id="doc-menu">
+					<nav class="col-md-3 col-lg-2" id="nav-drawer">
+						<h3>Agents</h3>
+						<a href="marcos/mind" id="link-to-marcos-mind" target='mainframe'>marcos</a>
+						<a href="#overview" id="link-to-overview">. Overview</a>
+						<a href="#details" id="link-to-details">. Details</a>
+						<a href="#extrafunctions" id="link-to-extrafunctions">. Extra Functions</a>
+					</nav>
+				</div>
+				<script>
+					var pageContent = document.getElementById("doc-menu").innerHTML;
+					sessionStorage.setItem("menucontent", pageContent);
+				</script>
 				<main class="col-sm-12 col-md-9 col-lg-10" id="doc-content">
-					<div id="getting-started" class="card fluid">
-						<h2 class="section double-padded">Getting started</h2>
+					<div id="command" class="card fluid">
+						<div>
+							<input style="width: 100%; margin: 0px;" placeholder="Command..."
+							type="text" id="inputcmd" onkeydown="if (event.keyCode == 13) runCMD()">
+						</div>
+					</div>
+					<div id="overview" class="card fluid">
+						<h2 class="section double-padded">Overview</h2>
 						<div class="section">
-							<p>
-								If you have any agent running you can click on its name and watch its mind, check relation and more.<br/>
-								Using command text box you can send order to the agents, change plans, add and 
-								remove beliefs, just using <a href="http://jason.sf.net" target="_blank">Jason</a>'s AgentSpeak sentences.</p>
-							</p>
-							<br/>
-							<p>
-								To create a new agent click <a href="/forms/new_agent" target='mainframe'>here</a>
-								and to access the directory facilitator click <a href="/services" target='mainframe'>here</a>
-							</p>
-							<br/>
+							<center><img src='mind/img.svg'/></center><br/>
+						</div>
+					</div>
+					<div id="details" class="card fluid">
+						<h2 class="section double-padded">Agent's mind</h2>
+						<div class="section">
+						</div>
+					</div>
+					<div id="extrafunctions" class="card fluid">
+						<h2 class="section double-padded">Extra functions</h2>
+						<div class="section">
+							<a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;
+							<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;
+							<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>, &nbsp;
+							<a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>
+							
 						</div>
 					</div>
 				</main>
 			</div>
 		</div>
 	</body>
-	<script>
-		var pageContent = document.getElementById("doc-wrapper").innerHTML;
-		sessionStorage.setItem("menucontent", pageContent);
-	</script>
 </html>
 

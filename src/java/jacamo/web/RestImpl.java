@@ -1,6 +1,5 @@
 package jacamo.web;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -14,6 +13,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
+
+import jason.asSemantics.Agent;
+import jason.infra.centralised.BaseCentralisedMAS;
 
 
 @Singleton
@@ -31,50 +33,62 @@ public class RestImpl extends AbstractBinder {
     @Produces(MediaType.TEXT_HTML)
     public String getRootHtml() {
         StringWriter so = new StringWriter();
-        so.append("<!DOCTYPE html>\n" + 
-                "<html lang=\"en\">\n" + 
-                "<head><title>JaCaMo-Rest</title>");
-        so.append("<style>"+getStyleCSS()+"</style>");
-        so.append("</head><body>\n" + 
-                "	<div id=\"root\">\n" + 
-                "		<header class=\"row\">\n" + 
-                "			<span class=\"logo col-sm-3 col-md\">JaCaMo</span> <a\n" + 
-                "				class=\"button col-sm col-md\" href=\"agents/\"\n" + 
-                "				target=\"mainframe\"> <svg xmlns=\"http://www.w3.org/2000/svg\"\n" + 
-                "					width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\"\n" + 
-                "					stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"\n" + 
-                "					stroke-linejoin=\"round\"\n" + 
-                "					style=\"height: 20px; vertical-align: text-top;\">\n" + 
-                "				<circle cx=\"12\" cy=\"12\" r=\"11\"/></svg><span>&nbsp;Agents</span>\n" + 
-                "\n" + 
-                "			</a><a class=\"button col-sm col-md\" href=\"workspaces/\"\n" + 
-                "				target=\"mainframe\"> <svg xmlns=\"http://www.w3.org/2000/svg\"\n" + 
-                "					width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\"\n" + 
-                "					stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"\n" + 
-                "					stroke-linejoin=\"round\"\n" + 
-                "					style=\"height: 20px; vertical-align: text-top;\">\n" + 
-                "					<polygon points=\"0 1, 24 1, 24 8, 0 8, 0 16, 24 16, 24 23, 0 23, 0 1, 24 1, 24 23, 0 23\"></polygon></svg><span>&nbsp;Environment</span></a>\n" + 
-                "\n" + 
-                "			</a><a class=\"button col-sm col-md\" href=\"oe/\"\n" + 
-                "				target=\"mainframe\"> <svg xmlns=\"http://www.w3.org/2000/svg\"\n" + 
-                "					width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\"\n" + 
-                "					stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"\n" + 
-                "					stroke-linejoin=\"round\"\n" + 
-                "					style=\"height: 20px; vertical-align: text-top;\">\n" + 
-                "					<polygon points=\"0 1, 10 1, 10 6, 24 6, 24 23, 0 23, 0 6, 10 6, 0 6, 0 1\"></polygon></svg><span>&nbsp;Organisation</span></a>\n" + 
-                "\n" + 
-                "			<label for=\"doc-drawer-checkbox\" class=\"button drawer-toggle col-sm\"></label>\n" + 
-                "\n" + 
-                "		</header>\n" + 
-                "		<div class=\"second-row\" id=\"full-content\">\n" + 
-                "			<iframe id=\"mainframe\" name=\"mainframe\" width=\"100%\" height=\"100%\"\n" + 
-                "				frameborder=0></iframe>\n" + 
-                "			<br />\n" + 
-                "		</div>\n" + 
-                "	</div>\n" + 
-                "	</div>\n" + 
-                "</body>\n" + 
-                "</html>");
+        so.append("<!DOCTYPE html>\n"); 
+        so.append("<html lang=\"en\">\n"); 
+        so.append("	<head>\n");
+        so.append("		<title>JaCamo-Rest</title>\n");
+        so.append("		<style>\n");
+        so.append(getStyleCSS() + "\n");
+        so.append("		</style>\n");
+        so.append("	<body>\n"); 
+        so.append("		<div id=\"root\">\n"); 
+        so.append("			<header class=\"row\">\n");
+        // logo JaCaMo
+        so.append("				<span class=\"logo col-sm-3 col-md\">JaCaMo</span>\n"); 
+        // top menu - button agents
+        so.append("				<a class=\"button col-sm col-md\" href=\"agents/\" target=\"mainframe\">\n" +
+                  "					<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"\n" + 
+                  "						fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"\n" + 
+                  "						stroke-linejoin=\"round\" style=\"height: 20px; vertical-align: text-top;\">\n" + 
+                  "						<circle cx=\"12\" cy=\"12\" r=\"11\"/>\n" + 
+                  "					</svg><span>&nbsp;Agents</span>\n" + 
+                  "				</a>\n");
+        so.append("				<a class=\"button col-sm col-md\" href=\"workspaces/\" target=\"mainframe\">\n" + 
+                  "					<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"\n" +  
+                  "						fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"\n" + 
+                  "						stroke-linejoin=\"round\" style=\"height: 20px; vertical-align: text-top;\">\n" + 
+                  "						<polygon points=\"0 1, 24 1, 24 8, 0 8, 0 16, 24 16, 24 23, 0 23, 0 1, 24 1, 24 23, 0 23\"></polygon>\n" +
+                  "					</svg><span>&nbsp;Environment</span></a>\n" +
+                  "				</a>\n");
+        so.append("				<a class=\"button col-sm col-md\" href=\"oe/\" target=\"mainframe\">\n" + 
+                  "					<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"\n" + 
+                  "						fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"\n" + 
+                  "						stroke-linejoin=\"round\" style=\"height: 20px; vertical-align: text-top;\">\n" + 
+                  "						<polygon points=\"0 1, 10 1, 10 6, 24 6, 24 23, 0 23, 0 6, 10 6, 0 6, 0 1\"></polygon>\n" + 
+                  "					</svg><span>&nbsp;Organisation</span>\n" + 
+                  "				</a>\n");
+        so.append("				<label for=\"doc-drawer-checkbox\" class=\"button drawer-toggle col-sm\"></label>\n");
+        // later this section will be 
+        so.append("				<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n"); 
+        so.append("				<div class=\"row\" id=\"doc-menu\">\n");
+        so.append("					<nav class=\"col-md-3 col-lg-2\" id=\"nav-drawer\">\n"); 
+        so.append("						<h3>Menu</h3>\n");
+        so.append("					</nav>\n");
+        so.append("				</div>\n");
+        
+        so.append("			</header>\n"); 
+        so.append("			<div class=\"second-row\" id=\"full-content\">\n" + 
+                  "				<iframe id=\"mainframe\" name=\"mainframe\" width=\"100%\" height=\"100%\"\n" + 
+                  "					frameborder=0></iframe>\n" + 
+                  "			</div>\n");
+        so.append("		</div>\n"); 
+        so.append("	</body>\n"); 
+        so.append("	<script>\n");
+        so.append("		document.getElementById(\"doc-menu\").innerHTML=sessionStorage.getItem(\"menucontent\");\n");
+        so.append("	</script>\n");
+
+        so.append("</html>\n"); 
+
         return so.toString();
     }
 
