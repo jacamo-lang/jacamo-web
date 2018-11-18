@@ -72,7 +72,9 @@ public class RestImpl extends AbstractBinder {
         so.append("				<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n"); 
         so.append("				<div class=\"row\" id=\"doc-menu\">\n");
         so.append("					<nav class=\"col-md-3 col-lg-2\" id=\"nav-drawer\">\n"); 
-        so.append("						<h3>Menu</h3>\n");
+        so.append("						<a hef=\"agents/\">Agents</a>\n");
+        so.append("						<a hef=\"workspaces/\">Environment</a>\n");
+        so.append("						<a hef=\"oe/\">Organisation</a>\n");
         so.append("					</nav>\n");
         so.append("				</div>\n");
         
