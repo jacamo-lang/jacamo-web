@@ -3,6 +3,7 @@ package jacamo.web;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +13,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -130,7 +132,7 @@ public class RestImplAg extends AbstractBinder {
 
         if (JCMRest.getZKHost() == null) {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
-                so.append("					<a href=\"" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
+                so.append("					<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                 if (a.equals(selectedAgent)) {
                     so.append("					<a href=\"#overview\" id=\"link-to-overview\">. Overview</a>\n");
                     so.append("					<a href=\"#mind\" id=\"link-to-mind\">. Mind</a>\n");
@@ -142,7 +144,7 @@ public class RestImplAg extends AbstractBinder {
             // get agents from ZK
             try {
                 for (String a : JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
-                    so.append("					<a href=\"" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
+                    so.append("					<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                     if (a.equals(selectedAgent)) {
                         so.append("					<a href=\"#overview\" id=\"link-to-overview\">. Overview</a>\n");
                         so.append("					<a href=\"#mind\" id=\"link-to-mind\">. Mind</a>\n");
@@ -167,7 +169,9 @@ public class RestImplAg extends AbstractBinder {
     //@Produces(MediaType.TEXT_PLAIN)
     public String getStyleCSS() {
         StringBuilder so = new StringBuilder();
-        try (Scanner scanner = new Scanner(new File("src/resources/css/style.css"))) {
+        Locale loc = new Locale("en", "US");
+        try (Scanner scanner = new Scanner(new FileInputStream("src/resources/css/style.css"), "UTF-8")) {
+            scanner.useLocale(loc);
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 so.append(line).append("\n");
@@ -176,7 +180,7 @@ public class RestImplAg extends AbstractBinder {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return  so.toString();
+        return so.toString();
     }
 
     private Agent getAgent(String agName) {
