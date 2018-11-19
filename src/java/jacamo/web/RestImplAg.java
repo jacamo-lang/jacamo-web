@@ -90,7 +90,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("		<div id=\"root\">\n"); 
         so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
         so.append(getAgentsMenu(""));                
-        so.append("				<main class=\"col-sm-12 col-md-9 col-lg-10\" id=\"doc-content\">\n"); 
+        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-9 col-lg-9\" id=\"doc-content\">\n"); 
         so.append("					<div id=\"getting-started\" class=\"card fluid\">\n"); 
         so.append("						<h2 class=\"section double-padded\">Getting started</h2>\n"); 
         so.append("						<div class=\"section\">\n"); 
@@ -112,10 +112,10 @@ public class RestImplAg extends AbstractBinder {
         so.append("		</div>\n"); 
         so.append("	</body>\n");
         // copy to 'menucontent' the menu to show on drop down main page menu
-        so.append("	<script>\n");
-        so.append("		var pageContent = document.getElementById(\"doc-wrapper\").innerHTML;\n");
-        so.append("		sessionStorage.setItem(\"menucontent\", pageContent);\n");
-        so.append("	</script>\n");
+//        so.append("   <script>\n");
+//        so.append("       var pageContent = document.getElementById(\"nav-drawer\").innerHTML;\n");
+//        so.append("       sessionStorage.setItem(\"menucontent\", pageContent);\n");
+//        so.append("   </script>\n");
         so.append("</html>\n");
         return so.toString();
     }
@@ -124,7 +124,8 @@ public class RestImplAg extends AbstractBinder {
         StringWriter so = new StringWriter();
 
         so.append("				<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n"); 
-        so.append("				<nav class=\"col-md-3 col-lg-2\" id=\"nav-drawer\">\n"); 
+        so.append("				<nav class=\"col-xs-12 col-sm-12 col-md-3 col-lg-3\" id=\"nav-drawer\">\n");
+        so.append("					<label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n"); 
         so.append("					<h3>Agents</h3>\n"); 
 
         if (JCMRest.getZKHost() == null) {
@@ -132,7 +133,8 @@ public class RestImplAg extends AbstractBinder {
                 so.append("					<a href=\"" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                 if (a.equals(selectedAgent)) {
                     so.append("					<a href=\"#overview\" id=\"link-to-overview\">. Overview</a>\n");
-                    so.append("					<a href=\"#details\" id=\"link-to-details\">. Details</a>\n");
+                    so.append("					<a href=\"#mind\" id=\"link-to-mind\">. Mind</a>\n");
+                    so.append("					<a href=\"#plans\" id=\"link-to-plans\">. Plans</a>\n");
                     so.append("					<a href=\"#extrafunctions\" id=\"link-to-extrafunctions\">. Extra Functions</a>\n");
                 }
             }
@@ -143,7 +145,8 @@ public class RestImplAg extends AbstractBinder {
                     so.append("					<a href=\"" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                     if (a.equals(selectedAgent)) {
                         so.append("					<a href=\"#overview\" id=\"link-to-overview\">. Overview</a>\n");
-                        so.append("					<a href=\"#details\" id=\"link-to-details\">. Details</a>\n");
+                        so.append("					<a href=\"#mind\" id=\"link-to-mind\">. Mind</a>\n");
+                        so.append("					<a href=\"#plans\" id=\"link-to-plans\">. Plans</a>\n");
                         so.append("					<a href=\"#extrafunctions\" id=\"link-to-extrafunctions\">. Extra Functions</a>\n");
                     }
                     Agent ag = getAgent(a);
@@ -273,7 +276,7 @@ public class RestImplAg extends AbstractBinder {
         so.append(getAgentsMenu(agName));  
         
         // agent's content
-        so.append("				<main class=\"col-sm-12 col-md-9 col-lg-10\" id=\"doc-content\">\n");
+        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-9 col-lg-9\" id=\"doc-content\">\n"); 
 
         // command box
         so.append("					<div id=\"command\" class=\"card fluid\">\n" + 
@@ -292,8 +295,8 @@ public class RestImplAg extends AbstractBinder {
         so.append("					</div>\n");
         
         // details
-        so.append("					<div id=\"details\" class=\"card fluid\">\n" + 
-                  "						<h2 class=\"section double-padded\">Agent's mind</h2>\n" + 
+        so.append("					<div id=\"mind\" class=\"card fluid\">\n" + 
+                  "						<h2 class=\"section double-padded\">Mind</h2>\n" + 
                   "						<div class=\"section\">\n"); 
         try {
             if (mindInspectorTransformerHTML == null) {
@@ -310,11 +313,17 @@ public class RestImplAg extends AbstractBinder {
         } // transform to HTML
         so.append("						</div>\n" + 
                   "					</div>\n"); 
+
+        so.append("					<div id=\"plans\" class=\"card fluid\">\n" + 
+                  "						<h2 class=\"section double-padded\">Plans</h2>\n" + 
+                  "						<div class=\"section\">\n"); 
+        so.append("							<a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>\n");
+        so.append("						</div>\n"); 
+        so.append("					</div>\n"); 
         
         so.append("					<div id=\"extrafunctions\" class=\"card fluid\">\n" + 
                   "						<h2 class=\"section double-padded\">Extra functions</h2>\n" + 
                   "						<div class=\"section\">\n"); 
-        so.append("							<a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>, &nbsp;\n");
         so.append("							<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;\n");
         so.append("							<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>, &nbsp;\n");
         if (show.get("annots")) {
@@ -370,8 +379,8 @@ public class RestImplAg extends AbstractBinder {
                 "    }\n" + 
                 "    showLog(); \n");
         // copy to 'menucontent' the menu to show on drop down main page menu
-        so.append("			var pageContent = document.getElementById(\"doc-wrapper\").innerHTML;\n"); 
-        so.append("			sessionStorage.setItem(\"menucontent\", pageContent);\n");
+//        so.append("           var pageContent = document.getElementById(\"nav-drawer\").innerHTML;\n"); 
+//        so.append("           sessionStorage.setItem(\"menucontent\", pageContent);\n");
         so.append("		</script>\n");
         so.append("	</body>\n");
         so.append("</html>\n");

@@ -40,6 +40,7 @@ public class RestImpl extends AbstractBinder {
         so.append("		<style>\n");
         so.append(getStyleCSS() + "\n");
         so.append("		</style>\n");
+        so.append("	</head>\n");
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
         so.append("			<header class=\"row\">\n");
@@ -58,7 +59,7 @@ public class RestImpl extends AbstractBinder {
                   "						fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"\n" + 
                   "						stroke-linejoin=\"round\" style=\"height: 20px; vertical-align: text-top;\">\n" + 
                   "						<polygon points=\"0 1, 24 1, 24 8, 0 8, 0 16, 24 16, 24 23, 0 23, 0 1, 24 1, 24 23, 0 23\"></polygon>\n" +
-                  "					</svg><span>&nbsp;Environment</span></a>\n" +
+                  "					</svg><span>&nbsp;Environment</span>\n" +
                   "				</a>\n");
         so.append("				<a class=\"button col-sm col-md\" href=\"oe/\" target=\"mainframe\">\n" + 
                   "					<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"\n" + 
@@ -67,27 +68,25 @@ public class RestImpl extends AbstractBinder {
                   "						<polygon points=\"0 1, 10 1, 10 6, 24 6, 24 23, 0 23, 0 6, 10 6, 0 6, 0 1\"></polygon>\n" + 
                   "					</svg><span>&nbsp;Organisation</span>\n" + 
                   "				</a>\n");
-        so.append("				<label for=\"doc-drawer-checkbox\" class=\"button drawer-toggle col-sm\"></label>\n");
-        // later this section will be 
-        so.append("				<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n"); 
-        so.append("				<div class=\"row\" id=\"doc-menu\">\n");
-        so.append("					<nav class=\"col-md-3 col-lg-2\" id=\"nav-drawer\">\n"); 
-        so.append("						<a hef=\"agents/\">Agents</a>\n");
-        so.append("						<a hef=\"workspaces/\">Environment</a>\n");
-        so.append("						<a hef=\"oe/\">Organisation</a>\n");
-        so.append("					</nav>\n");
-        so.append("				</div>\n");
-        
+//        so.append("               <label for=\"doc-drawer-checkbox\" class=\"button drawer-toggle col-sm\"></label>\n");
+//        so.append("               <input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n" + 
+//                  "               <nav class=\"col-md-3 col-lg-2\" id=\"nav-drawer\">\n" + 
+//                  "                   <label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n" + 
+//                  "                   <h3>Menu</h3>\n" + 
+//                  "                   <a hef=\"agents/\">Agents</a>\n" + 
+//                  "                   <a hef=\"workspaces/\">Environment</a>\n" + 
+//                  "                   <a hef=\"oe/\">Organisation</a>\n" + 
+//                "               </nav>\n");
         so.append("			</header>\n"); 
-        so.append("			<div class=\"second-row\" id=\"full-content\">\n" + 
-                  "				<iframe id=\"mainframe\" name=\"mainframe\" width=\"100%\" height=\"100%\"\n" + 
-                  "					frameborder=0></iframe>\n" + 
-                  "			</div>\n");
+        so.append("			<div class=\"second-row\" id=\"full-content\">\n");
+        so.append("				<iframe id=\"mainframe\" name=\"mainframe\" width=\"100%\" height=\"100%\"\n" + 
+                  "					frameborder=0></iframe>\n"); 
+        so.append("			</div>\n");
         so.append("		</div>\n"); 
         so.append("	</body>\n"); 
-        so.append("	<script>\n");
-        so.append("		document.getElementById(\"doc-menu\").innerHTML=sessionStorage.getItem(\"menucontent\");\n");
-        so.append("	</script>\n");
+//        so.append("   <script>\n");
+//        so.append("       document.getElementById(\"nav-drawer\").innerHTML=sessionStorage.getItem(\"menucontent\");\n");
+//        so.append("   </script>\n");
 
         so.append("</html>\n"); 
 
