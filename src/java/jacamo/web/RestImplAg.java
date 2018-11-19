@@ -311,13 +311,20 @@ public class RestImplAg extends AbstractBinder {
         } catch (Exception e) {
             e.printStackTrace();
         } // transform to HTML
-        so.append("						</div>\n" + 
-                  "					</div>\n"); 
+        so.append("						</div>\n"); 
+        so.append("						<div class=\"section\">\n"); 
+        if (show.get("annots")) {
+            so.append("							<a href='hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
+        } else {
+            so.append("							<a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
+        }
+        so.append("						</div>\n"); 
+        so.append("					</div>\n"); 
 
         so.append("					<div id=\"plans\" class=\"card fluid\">\n" + 
                   "						<h2 class=\"section double-padded\">Plans</h2>\n" + 
                   "						<div class=\"section\">\n"); 
-        so.append("							<a href='plans'      style='font-family: arial; text-decoration: none'>list plans</a>\n");
+        so.append("							<embed src='plans/' width=\"100%\"/>\n");
         so.append("						</div>\n"); 
         so.append("					</div>\n"); 
         
@@ -326,11 +333,6 @@ public class RestImplAg extends AbstractBinder {
                   "						<div class=\"section\">\n"); 
         so.append("							<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;\n");
         so.append("							<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>, &nbsp;\n");
-        if (show.get("annots")) {
-            so.append("							<a href='hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
-        } else {
-            so.append("							<a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
-        }
         so.append("						</div>\n"); 
         so.append("					</div>\n"); 
         so.append("				</main>\n"); 
