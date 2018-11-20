@@ -1,7 +1,8 @@
+src/jcm/bin
 .classpath
 .project
 .settings
-graph.gv
+graph.*
 
 # Compiled class file
 *.class
