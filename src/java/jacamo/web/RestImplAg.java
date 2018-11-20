@@ -11,7 +11,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
@@ -57,7 +56,6 @@ import jason.asSemantics.Option;
 import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
 import jason.asSyntax.ASSyntax;
-import jason.asSyntax.Literal;
 import jason.asSyntax.Plan;
 import jason.asSyntax.PlanBody;
 import jason.asSyntax.PlanLibrary;
@@ -106,8 +104,8 @@ public class RestImplAg extends AbstractBinder {
                   "							</p>\n" + 
                   "							<br/>\n");
         so.append("							<p>\n" +
-                  "								To create a new agent click <a href=\"/forms/new_agent\" target='mainframe'>here</a>\n" +
-                  "								and to access the directory facilitator click <a href=\"/services\" target='mainframe'>here</a>\n" + 
+                  "								You can <a href=\"/forms/new_agent\" target='mainframe'>create</a> a new agent and access the"
+                  + "<a href=\"/services\" target='mainframe'>directory facilitator</a>.\n" + 
                   "							</p>\n" +
                   "							<br/>\n");
         so.append("						</div>\n");
@@ -131,28 +129,29 @@ public class RestImplAg extends AbstractBinder {
         so.append("				<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n"); 
         so.append("				<nav class=\"col-xs-12 col-sm-12 col-md-3 col-lg-3\" id=\"nav-drawer\">\n");
         so.append("					<label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n"); 
-        so.append("					<h3>Agents</h3>\n"); 
+        //so.append("                   <h3>Agents</h3>\n"); 
 
         if (JCMRest.getZKHost() == null) {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
                 so.append("					<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                 if (a.equals(selectedAgent)) {
-                    so.append("					<a href=\"#overview\" id=\"link-to-overview\">. Overview</a>\n");
-                    so.append("					<a href=\"#mind\" id=\"link-to-mind\">. Mind</a>\n");
-                    so.append("					<a href=\"#plans\" id=\"link-to-plans\">. Plans</a>\n");
-                    so.append("					<a href=\"#extrafunctions\" id=\"link-to-extrafunctions\">. Extra Functions</a>\n");
+                    so.append("					<a href=\"#overview\" id=\"link-to-overview\">.  Overview</a>\n");
+                    so.append("					<a href=\"#mind\" id=\"link-to-mind\">.  Mind</a>\n");
+                    so.append("					<a href=\"#uploadplans\" id=\"link-to-uploadplans\">.  Upload plans</a>\n");
+                    so.append("					<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
                 }
             }
         } else {
             // get agents from ZK
             try {
                 for (String a : JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
-                    so.append("					<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
+                    String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
+                    so.append("					<a href=\"" + url + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                     if (a.equals(selectedAgent)) {
-                        so.append("					<a href=\"#overview\" id=\"link-to-overview\">. Overview</a>\n");
-                        so.append("					<a href=\"#mind\" id=\"link-to-mind\">. Mind</a>\n");
-                        so.append("					<a href=\"#plans\" id=\"link-to-plans\">. Plans</a>\n");
-                        so.append("					<a href=\"#extrafunctions\" id=\"link-to-extrafunctions\">. Extra Functions</a>\n");
+                        so.append("					<a href=\"#overview\" id=\"link-to-overview\">.  Overview</a>\n");
+                        so.append("					<a href=\"#mind\" id=\"link-to-mind\">.  Mind</a>\n");
+                        so.append("					<a href=\"#uploadplans\" id=\"link-to-uploadplans\">.  Upload plans</a>\n");
+                        so.append("					<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
                     }
                     Agent ag = getAgent(a);
                     if (ag != null)
@@ -162,7 +161,6 @@ public class RestImplAg extends AbstractBinder {
                 e.printStackTrace();
             }
         }                
-        
         so.append("				</nav>\n");
         return so.toString();
     }
@@ -286,24 +284,27 @@ public class RestImplAg extends AbstractBinder {
         so.append("				<main class=\"col-xs-12 col-sm-12 col-md-9 col-lg-9\" id=\"doc-content\">\n"); 
 
         // command box
-        so.append("					<div id=\"command\" class=\"card fluid\">\n" + 
-                  "						<div>\n" + 
-                  "							<input style=\"width: 100%; margin: 0px;\" placeholder=\"Command...\"\n" + 
-                  "							type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n" + 
-                  "						</div>\n" + 
-                  "					</div>\n");
+        so.append("					<div id=\"command\" class=\"card fluid\">\n"); 
+        so.append("						<div class=\"section\">\n");
+        so.append("							<input style=\"width: 100%; margin: 0px;\" placeholder=\"Command... (e.g. +price(10.00), -+bestSupplier(bob), !goHome)\"\n"); 
+        so.append("							type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n");
+        so.append("						</div>\n"); 
+        so.append("						<div class=\"section\">\n");
+        //so.append("                           <code><span id='display'></span></code>");
+        so.append("							<pre><span id='log'></span></pre>");
+        so.append("							<span id='plog'></span>");
+        so.append("						</div>\n"); 
+        so.append("					</div>\n");
         
         // overview
-        so.append("					<div id=\"overview\" class=\"card fluid\">\n" + 
-                  "						<h2 class=\"section double-padded\">Overview</h2>\n" + 
-                  "						<div class=\"section\">\n");
+        so.append("					<div id=\"overview\" class=\"card fluid\">\n"); 
+        so.append("						<div class=\"section\">\n");
         so.append("							<center><img src='mind/img.svg'/></center><br/>\n");
         so.append("						</div>\n");
         so.append("					</div>\n");
         
         // details
         so.append("					<div id=\"mind\" class=\"card fluid\">\n" + 
-                  "						<h2 class=\"section double-padded\">Mind</h2>\n" + 
                   "						<div class=\"section\">\n"); 
         try {
             if (mindInspectorTransformerHTML == null) {
@@ -318,6 +319,13 @@ public class RestImplAg extends AbstractBinder {
         } catch (Exception e) {
             e.printStackTrace();
         } // transform to HTML
+        
+        // put plans on agent's mind section
+        so.append("							<details>\n");
+        so.append("								<summary style=\"text-align: left; color: blue; font-family: arial\">Agent's plans</summary>\n");
+        so.append("								<embed src='plans/' width=\"100%\"/>\n");
+        so.append("							</details>\n");
+
         so.append("						</div>\n"); 
         so.append("						<div class=\"section\">\n"); 
         if (show.get("annots")) {
@@ -327,22 +335,10 @@ public class RestImplAg extends AbstractBinder {
         }
         so.append("						</div>\n"); 
         so.append("					</div>\n"); 
-
-        so.append("					<div id=\"plans\" class=\"card fluid\">\n" + 
-                  "						<h2 class=\"section double-padded\">Plans</h2>\n" + 
-                  "						<div class=\"section\">\n"); 
-        so.append("							<details>\n");
-        so.append("								<summary style=\"text-align: left; color: blue; font-family: arial\">Agent's plans</summary>\n");
-        so.append("								<embed src='plans/' width=\"100%\"/>\n");
-        so.append("							</details>\n");
-        so.append("						</div>\n"); 
-        so.append("					</div>\n"); 
         
-        so.append("					<div id=\"extrafunctions\" class=\"card fluid\">\n" + 
-                  "						<h2 class=\"section double-padded\">Extra functions</h2>\n" + 
-                  "						<div class=\"section\">\n"); 
-        so.append("							<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;\n");
-        so.append("							<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>\n");
+        so.append("					<div id=\"uploadplans\" class=\"card fluid\">\n");
+        so.append("						<div class=\"section\">\n"); 
+        so.append("							<embed src='load_plans_form/' width=\"100%\"/>\n");
         so.append("						</div>\n"); 
         so.append("					</div>\n"); 
         so.append("				</main>\n"); 
@@ -416,9 +412,8 @@ public class RestImplAg extends AbstractBinder {
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
         return  "<html><head><title>load plans for "+agName+"</title></head>"+
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
-                "Enter Jason code below:<br/><textarea name=\"plans\" form=\"usrform\" placeholder=\"optinally, write plans here\" rows=\"13\" cols=\"62\" ></textarea>" +
-                "<br/>or upload a file: <input type=\"file\" name=\"file\">"+
-                "<br/><input type=\"submit\" value=\"Upload it\">"+
+                "Enter Jason code below:<br/><textarea name=\"plans\" form=\"usrform\" placeholder=\"Write plans here...\" rows=\"5\" cols=\"62\"></textarea>" +
+                "<br/>or upload a file: <input type=\"file\" name=\"file\"><br/><input type=\"submit\" value=\"Upload it\">"+
                 "</form></html>";
     }
 
@@ -623,7 +618,7 @@ public class RestImplAg extends AbstractBinder {
 
             CAgentArch cartagoAgArch = getCartagoArch(ag);
             for (WorkspaceId wid: cartagoAgArch.getSession().getJoinedWorkspaces()) {
-            	// TODO: revise whether the Set is necessary
+                // TODO: revise whether the Set is necessary
                 workspacesIn.add(wid.getName());
             }
             
