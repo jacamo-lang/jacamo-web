@@ -68,6 +68,7 @@ public class RestImpl extends AbstractBinder {
                   "						<polygon points=\"0 1, 10 1, 10 6, 24 6, 24 23, 0 23, 0 6, 10 6, 0 6, 0 1\"></polygon>\n" + 
                   "					</svg><span>&nbsp;Organisation</span>\n" + 
                   "				</a>\n");
+// drawer menu is not working properly (needs correct link addresses, need to refresh after changed)        
 //        so.append("               <label for=\"doc-drawer-checkbox\" class=\"button drawer-toggle col-sm\"></label>\n");
 //        so.append("               <input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n" + 
 //                  "               <nav class=\"col-md-3 col-lg-2\" id=\"nav-drawer\">\n" + 

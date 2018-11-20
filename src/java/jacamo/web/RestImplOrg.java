@@ -19,15 +19,12 @@ import javax.xml.transform.stream.StreamResult;
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
 import cartago.CartagoException;
-import cartago.OperationException;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
-import moise.common.MoiseException;
 import moise.os.OS;
 import moise.xml.DOMUtils;
-import npl.parser.ParseException;
 import ora4mas.nopl.GroupBoard;
 import ora4mas.nopl.OrgArt;
 import ora4mas.nopl.OrgBoard;

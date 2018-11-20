@@ -1,12 +1,9 @@
 package jacamo.web;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -128,6 +125,7 @@ public class RestImplAg extends AbstractBinder {
 
         so.append("				<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n"); 
         so.append("				<nav class=\"col-xs-12 col-sm-12 col-md-3 col-lg-3\" id=\"nav-drawer\">\n");
+        so.append("					</br>\n"); 
         so.append("					<label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n"); 
         //so.append("                   <h3>Agents</h3>\n"); 
 
@@ -413,7 +411,7 @@ public class RestImplAg extends AbstractBinder {
         return  "<html><head><title>load plans for "+agName+"</title></head>"+
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
                 "Enter Jason code below:<br/><textarea name=\"plans\" form=\"usrform\" placeholder=\"Write plans here...\" rows=\"5\" cols=\"62\"></textarea>" +
-                "<br/>or upload a file: <input type=\"file\" name=\"file\"><br/><input type=\"submit\" value=\"Upload it\">"+
+                "<br/>or upload a file: <input type=\"file\" name=\"file\"><br/><input type=\"submit\" value=\"Upload\">"+
                 "</form></html>";
     }
 
@@ -605,17 +603,6 @@ public class RestImplAg extends AbstractBinder {
             // get workspaces the agent are in (including organizations)
             Set<String> workspacesIn = new HashSet<>();
             Agent ag = getAgent(agName);
-            /*if (ag != null) {
-                Iterator<Literal> i = ag.getBB().getPercepts();
-                while (i.hasNext()) {
-                    Literal belief = i.next();
-                    if (belief.getFunctor().equals("joined")) {
-                        workspacesIn.add(belief.getTerm(0).toString()); //belief.substring("joined(".length(), belief.indexOf(",")));
-                    }
-                }
-            }*/
-
-
             CAgentArch cartagoAgArch = getCartagoArch(ag);
             for (WorkspaceId wid: cartagoAgArch.getSession().getJoinedWorkspaces()) {
                 // TODO: revise whether the Set is necessary
@@ -648,16 +635,18 @@ public class RestImplAg extends AbstractBinder {
             { // groups and roles are also placed on the left
                 for (GroupBoard gb : GroupBoard.getGroupBoards()) {
                     if (workspacesIn.contains(gb.getOEId())) {
-                        sb.append("\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
-                        sb.append("\n\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
-                        sb.append("\t];\n");
-                        sb.append("\t\"" + gb.getArtId() + "\"->\"" + agName + "\" [arrowtail=none dir=back]\n");
                         gb.getGrpState().getPlayers().forEach(p -> {
                             if (p.getAg().equals(agName)) {
+                                // role
                                 sb.append("\t\"" + p.getTarget() + "\" [ " + "\n\t\tlabel = \"" + p.getTarget() + "\"");
                                 sb.append("\n\t\tshape=box style=\"filled,rounded\" fillcolor=white\n");
                                 sb.append("\t];\n");
-                                sb.append("\t\"" + p.getTarget() + "\"->\"" + gb.getArtId() + "\" [arrowtail=none dir=back label=\"plays\"]\n");
+                                sb.append("\t\"" + p.getTarget() + "\"->\"" + agName + "\" [arrowtail=normal dir=back]\n");
+                                // group
+                                sb.append("\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
+                                sb.append("\n\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
+                                sb.append("\t];\n");
+                                sb.append("\t\"" + gb.getArtId() + "\"->\"" + p.getTarget() + "\" [arrowtail=odiamond dir=back]\n");
                             }
                         });
                     }
@@ -721,20 +710,11 @@ public class RestImplAg extends AbstractBinder {
             sb.append("}\n");
             graph = sb.toString();
 
-            // for debug
-            try (FileWriter fw = new FileWriter("graph.gv", false);
-                    BufferedWriter bw = new BufferedWriter(fw);
-                    PrintWriter out = new PrintWriter(bw)) {
-                out.print(graph);
-                out.flush();
-                out.close();
-            } catch (Exception ex) {
-            }
-        } finally {
-            return graph;
+        } catch (Exception ex) {
         }
+        
+        return graph;
     }
-    
 
     protected CAgentArch getCartagoArch(Agent ag) {
         AgArch arch = ag.getTS().getUserAgArch().getFirstAgArch();
