@@ -2,7 +2,6 @@ package jacamo.web;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -43,11 +42,14 @@ import cartago.ArtifactId;
 import cartago.ArtifactInfo;
 import cartago.CartagoException;
 import cartago.CartagoService;
+import cartago.WorkspaceId;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
+import jaca.CAgentArch;
 import jason.ReceiverNotFoundException;
+import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
 import jason.asSemantics.IntendedMeans;
 import jason.asSemantics.Intention;
@@ -55,6 +57,7 @@ import jason.asSemantics.Option;
 import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
 import jason.asSyntax.ASSyntax;
+import jason.asSyntax.Literal;
 import jason.asSyntax.Plan;
 import jason.asSyntax.PlanBody;
 import jason.asSyntax.PlanLibrary;
@@ -328,7 +331,10 @@ public class RestImplAg extends AbstractBinder {
         so.append("					<div id=\"plans\" class=\"card fluid\">\n" + 
                   "						<h2 class=\"section double-padded\">Plans</h2>\n" + 
                   "						<div class=\"section\">\n"); 
-        so.append("							<embed src='plans/' width=\"100%\"/>\n");
+        so.append("							<details>\n");
+        so.append("								<summary style=\"text-align: left; color: blue; font-family: arial\">Agent's plans</summary>\n");
+        so.append("								<embed src='plans/' width=\"100%\"/>\n");
+        so.append("							</details>\n");
         so.append("						</div>\n"); 
         so.append("					</div>\n"); 
         
@@ -336,7 +342,7 @@ public class RestImplAg extends AbstractBinder {
                   "						<h2 class=\"section double-padded\">Extra functions</h2>\n" + 
                   "						<div class=\"section\">\n"); 
         so.append("							<a href='load_plans_form' style='font-family: arial; text-decoration: none'>upload plans</a>, &nbsp;\n");
-        so.append("							<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>, &nbsp;\n");
+        so.append("							<a href='kill' onclick='killAg()'     style='font-family: arial; text-decoration: none'>kill this agent</a>\n");
         so.append("						</div>\n"); 
         so.append("					</div>\n"); 
         so.append("				</main>\n"); 
@@ -602,18 +608,25 @@ public class RestImplAg extends AbstractBinder {
             StringBuilder sb = new StringBuilder();
 
             // get workspaces the agent are in (including organizations)
+            Set<String> workspacesIn = new HashSet<>();
             Agent ag = getAgent(agName);
-            Set<String> workspacesIn = new HashSet<String>();
-            if (ag != null) {
-                Iterator<?> i = ag.getBB().getPercepts();
+            /*if (ag != null) {
+                Iterator<Literal> i = ag.getBB().getPercepts();
                 while (i.hasNext()) {
-                    String belief = i.next().toString();
-                    if (belief.startsWith("joined")) {
-                        workspacesIn.add(belief.substring("joined(".length(), belief.indexOf(",")));
+                    Literal belief = i.next();
+                    if (belief.getFunctor().equals("joined")) {
+                        workspacesIn.add(belief.getTerm(0).toString()); //belief.substring("joined(".length(), belief.indexOf(",")));
                     }
                 }
-            }
+            }*/
 
+
+            CAgentArch cartagoAgArch = getCartagoArch(ag);
+            for (WorkspaceId wid: cartagoAgArch.getSession().getJoinedWorkspaces()) {
+            	// TODO: revise whether the Set is necessary
+                workspacesIn.add(wid.getName());
+            }
+            
             sb.append("digraph G {\n");
             sb.append("\tgraph [\n");
             sb.append("\t\trankdir=\"LR\"\n");
@@ -726,4 +739,17 @@ public class RestImplAg extends AbstractBinder {
             return graph;
         }
     }
+    
+
+    protected CAgentArch getCartagoArch(Agent ag) {
+        AgArch arch = ag.getTS().getUserAgArch().getFirstAgArch();
+        while (arch != null) {
+            if (arch instanceof CAgentArch) {
+                return (CAgentArch)arch;
+            }
+            arch = arch.getNextAgArch();
+        }
+        return null;
+    }
+
 }
