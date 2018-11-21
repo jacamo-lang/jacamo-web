@@ -1051,7 +1051,7 @@ header {
   color: var(--header-fore-color);
   border-bottom: 0.0625rem solid var(--header-border-color);
   padding: calc(var(--universal-padding) / 4) 0;
-  white-space: nowrap;
+  /*white-space: nowrap;*/
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -1067,6 +1067,7 @@ header .logo {
   text-decoration: none;
 }
 
+/* top bar menu buttons */
 header button, header [type="button"], header .button, header [role="button"] {
   box-sizing: border-box;
   position: relative;
@@ -1240,13 +1241,13 @@ footer.sticky {
 @media screen and (max-width: 320px) { 
   [type="checkbox"].drawer + * { width: 100%; }
 }
-/* TODO: remove an element that appears on top right (height: 0%; of .drawer is almost hiding)
+/* TODO: remove an element that appears on top right (height: 0%; of .drawer is almost hiding) 
 @media screen and (max-width: 768px) { 
-  [type="checkbox"].drawer:not(.persistent) + * { display: inline-block; }
+  .drawer-toggle:not(.persistent) {display: inline-block; z-index: 1500; }
 }*/
 
 @media screen and (min-width: 768px) {
-  .drawer-toggle:not(.persistent) { display: none; }
+  .drawer-toggle:not(.persistent) { display: none; z-index: 1500; }
   [type="checkbox"].drawer:not(.persistent) + * { position: static; height: 0%; border: none; z-index: 0; }
   [type="checkbox"].drawer:not(.persistent) + * .drawer-close { display: none; }
 }
