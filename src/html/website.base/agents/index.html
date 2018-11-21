@@ -3,18 +3,10 @@
 <html lang="en" target="mainframe">
 	<head>
 		<title>JaCamo-Rest - Agents</title>
-		<style>
-@charset "UTF-8";
-/*
-  Flavor name: Default (mini-default)
-  Author: Angelos Chalaris (chalarangelo@gmail.com)
-  Maintainers: Angelos Chalaris
-  mini.css version: v3.0.1
-*/
-/*
-  Browsers resets and base typography.
-*/
-/* Core module CSS variable definitions */
+		<style>@charset "UTF-8";
+/* mini-default by Angelos Chalaris v3.0.1 */
+
+/* Browsers resets and base typography. */
 :root {
   --fore-color: #111;
   --secondary-fore-color: #444;
@@ -242,9 +234,7 @@ a:hover, a:focus {
   text-decoration: underline;
 }
 
-/*
-  Definitions for the grid system, cards and containers.
-*/
+/* Definitions for the grid system, cards and containers. */
 .container {
   margin: 0 auto;
   padding: 0 calc(1.5 * var(--universal-padding));
@@ -739,10 +729,7 @@ a:hover, a:focus {
   padding: calc(1.5 * var(--universal-padding));
 }
 
-/*
-  Definitions for forms and input elements.
-*/
-/* Input_control module CSS variable definitions */
+/* Definitions for forms and input elements. */
 :root {
   --form-back-color: #f0f0f0;
   --form-fore-color: #111;
@@ -995,9 +982,7 @@ input:disabled, input[disabled], textarea:disabled, textarea[disabled], select:d
   }
 }
 
-/*
-  Custom elements for forms and input elements.
-*/
+/* Custom elements for forms and input elements. */
 button.primary, [type="button"].primary, [type="submit"].primary, [type="reset"].primary, .button.primary, [role="button"].primary {
   --button-back-color: #1976d2;
   --button-fore-color: #f8f8f8;
@@ -1044,10 +1029,7 @@ button.large, [type="button"].large, [type="submit"].large, [type="reset"].large
   margin: var(--universal-margin);
 }
 
-/*
-  Definitions for navigation elements.
-*/
-/* Navigation module CSS variable definitions */
+/* Definitions for navigation elements. */
 :root {
   --header-back-color: #f8f8f8;
   --header-hover-back-color: #f0f0f0;
@@ -1191,6 +1173,7 @@ footer.sticky {
   bottom: 0;
 }
 
+/* drawer button to open menu*/
 .drawer-toggle:before {
   display: inline-block;
   position: relative;
@@ -1198,12 +1181,6 @@ footer.sticky {
   content: '\00a0\2261\00a0';
   font-family: sans-serif;
   font-size: 1.5em;
-}
-
-@media screen and (min-width: 768px) {
-  .drawer-toggle:not(.persistent) {
-    display: none;
-  }
 }
 
 [type="checkbox"].drawer {
@@ -1234,6 +1211,7 @@ footer.sticky {
   transition: right 0.3s;
 }
 
+/* drawer button to close menu*/
 [type="checkbox"].drawer + * .drawer-close {
   position: absolute;
   top: var(--universal-margin);
@@ -1263,280 +1241,24 @@ footer.sticky {
   background: var(--drawer-hover-back-color);
 }
 
-@media screen and (max-width: 320px) {
-  [type="checkbox"].drawer + * {
-    width: 100%;
-  }
+/* show drawer menu on xp screens 320px - never happens */
+@media screen and (max-width: 320px) { 
+  [type="checkbox"].drawer + * { width: 100%; }
 }
-
-[type="checkbox"].drawer:checked + * {
-  right: 0;
-}
+/* TODO: remove an element that appears on top right (height: 0%; of .drawer is almost hiding)
+@media screen and (max-width: 768px) { 
+  [type="checkbox"].drawer:not(.persistent) + * { display: inline-block; }
+}*/
 
 @media screen and (min-width: 768px) {
-  [type="checkbox"].drawer:not(.persistent) + * {
-    position: static;
-    height: 100%;
-    z-index: 1100;
-  }
-  [type="checkbox"].drawer:not(.persistent) + * .drawer-close {
-    display: none;
-  }
+  .drawer-toggle:not(.persistent) { display: none; }
+  [type="checkbox"].drawer:not(.persistent) + * { position: static; height: 0%; z-index: 0; }
+  [type="checkbox"].drawer:not(.persistent) + * .drawer-close { display: none; }
 }
 
-/*
-  Definitions for the responsive table component.
-*/
-/* Table module CSS variable definitions. */
-:root {
-  --table-border-color: #aaa;
-  --table-border-separator-color: #666;
-  --table-head-back-color: #e6e6e6;
-  --table-head-fore-color: #111;
-  --table-body-back-color: #f8f8f8;
-  --table-body-fore-color: #111;
-  --table-body-alt-back-color: #eee;
-}
+[type="checkbox"].drawer:checked + * { right: 0; }
 
-table {
-  border-collapse: separate;
-  border-spacing: 0;
-  margin: 0;
-  display: flex;
-  flex: 0 1 auto;
-  flex-flow: row wrap;
-  padding: var(--universal-padding);
-  padding-top: 0;
-}
-
-table caption {
-  font-size: 1.5rem;
-  margin: calc(2 * var(--universal-margin)) 0;
-  max-width: 100%;
-  flex: 0 0 100%;
-}
-
-table thead, table tbody {
-  display: flex;
-  flex-flow: row wrap;
-  border: 0.0625rem solid var(--table-border-color);
-}
-
-table thead {
-  z-index: 999;
-  border-radius: var(--universal-border-radius) var(--universal-border-radius) 0 0;
-  border-bottom: 0.0625rem solid var(--table-border-separator-color);
-}
-
-table tbody {
-  border-top: 0;
-  margin-top: calc(0 - var(--universal-margin));
-  border-radius: 0 0 var(--universal-border-radius) var(--universal-border-radius);
-}
-
-table tr {
-  display: flex;
-  padding: 0;
-}
-
-table th, table td {
-  padding: calc(2 * var(--universal-padding));
-}
-
-table th {
-  text-align: left;
-  background: var(--table-head-back-color);
-  color: var(--table-head-fore-color);
-}
-
-table td {
-  background: var(--table-body-back-color);
-  color: var(--table-body-fore-color);
-  border-top: 0.0625rem solid var(--table-border-color);
-}
-
-table:not(.horizontal) {
-  overflow: auto;
-  max-height: 400px;
-}
-
-table:not(.horizontal) thead, table:not(.horizontal) tbody {
-  max-width: 100%;
-  flex: 0 0 100%;
-}
-
-table:not(.horizontal) tr {
-  flex-flow: row wrap;
-  flex: 0 0 100%;
-}
-
-table:not(.horizontal) th, table:not(.horizontal) td {
-  flex: 1 0 0%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-table:not(.horizontal) thead {
-  position: sticky;
-  top: 0;
-}
-
-table:not(.horizontal) tbody tr:first-child td {
-  border-top: 0;
-}
-
-table.horizontal {
-  border: 0;
-}
-
-table.horizontal thead, table.horizontal tbody {
-  border: 0;
-  flex: .2 0 0;
-  flex-flow: row nowrap;
-}
-
-table.horizontal tbody {
-  overflow: auto;
-  justify-content: space-between;
-  flex: .8 0 0;
-  margin-left: 0;
-  padding-bottom: calc(var(--universal-padding) / 4);
-}
-
-table.horizontal tr {
-  flex-direction: column;
-  flex: 1 0 auto;
-}
-
-table.horizontal th, table.horizontal td {
-  width: auto;
-  border: 0;
-  border-bottom: 0.0625rem solid var(--table-border-color);
-}
-
-table.horizontal th:not(:first-child), table.horizontal td:not(:first-child) {
-  border-top: 0;
-}
-
-table.horizontal th {
-  text-align: right;
-  border-left: 0.0625rem solid var(--table-border-color);
-  border-right: 0.0625rem solid var(--table-border-separator-color);
-}
-
-table.horizontal thead tr:first-child {
-  padding-left: 0;
-}
-
-table.horizontal th:first-child, table.horizontal td:first-child {
-  border-top: 0.0625rem solid var(--table-border-color);
-}
-
-table.horizontal tbody tr:last-child td {
-  border-right: 0.0625rem solid var(--table-border-color);
-}
-
-table.horizontal tbody tr:last-child td:first-child {
-  border-top-right-radius: 0.25rem;
-}
-
-table.horizontal tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 0.25rem;
-}
-
-table.horizontal thead tr:first-child th:first-child {
-  border-top-left-radius: 0.25rem;
-}
-
-table.horizontal thead tr:first-child th:last-child {
-  border-bottom-left-radius: 0.25rem;
-}
-
-@media screen and (max-width: 767px) {
-  table, table.horizontal {
-    border-collapse: collapse;
-    border: 0;
-    width: 100%;
-    display: table;
-  }
-  table thead, table th, table.horizontal thead, table.horizontal th {
-    border: 0;
-    height: 1px;
-    width: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    clip: rect(0 0 0 0);
-    -webkit-clip-path: inset(100%);
-    clip-path: inset(100%);
-  }
-  table tbody, table.horizontal tbody {
-    border: 0;
-    display: table-row-group;
-  }
-  table tr, table.horizontal tr {
-    display: block;
-    border: 0.0625rem solid var(--table-border-color);
-    border-radius: var(--universal-border-radius);
-    background: #fafafa;
-    padding: var(--universal-padding);
-    margin: var(--universal-margin);
-    margin-bottom: calc(2 * var(--universal-margin));
-  }
-  table th, table td, table.horizontal th, table.horizontal td {
-    width: auto;
-  }
-  table td, table.horizontal td {
-    display: block;
-    border: 0;
-    text-align: right;
-  }
-  table td:before, table.horizontal td:before {
-    content: attr(data-label);
-    float: left;
-    font-weight: 600;
-  }
-  table th:first-child, table td:first-child, table.horizontal th:first-child, table.horizontal td:first-child {
-    border-top: 0;
-  }
-  table tbody tr:last-child td, table.horizontal tbody tr:last-child td {
-    border-right: 0;
-  }
-}
-
-:root {
-  --table-body-alt-back-color: #eee;
-}
-
-table.striped tr:nth-of-type(2n) > td {
-  background: var(--table-body-alt-back-color);
-}
-
-@media screen and (max-width: 768px) {
-  table.striped tr:nth-of-type(2n) {
-    background: var(--table-body-alt-back-color);
-  }
-}
-
-:root {
-  --table-body-hover-back-color: #90caf9;
-}
-
-table.hoverable tr:hover, table.hoverable tr:hover > td, table.hoverable tr:focus, table.hoverable tr:focus > td {
-  background: var(--table-body-hover-back-color);
-}
-
-@media screen and (max-width: 768px) {
-  table.hoverable tr:hover, table.hoverable tr:hover > td, table.hoverable tr:focus, table.hoverable tr:focus > td {
-    background: var(--table-body-hover-back-color);
-  }
-}
-
-/*
-  Definitions for contextual background elements, toasts and tooltips.
-*/
-/* Contextual module CSS variable definitions */
+/* Definitions for contextual background elements, toasts and tooltips. */
 :root {
   --mark-back-color: #0277bd;
   --mark-fore-color: #fafafa;
@@ -1837,60 +1559,6 @@ mark.tag {
   border-radius: 1em;
 }
 
-/*
-  Definitions for progress elements and spinners.
-*/
-/* Progess module CSS variable definitions */
-:root {
-  --progress-back-color: #ddd;
-  --progress-fore-color: #555;
-}
-
-progress {
-  display: block;
-  vertical-align: baseline;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  height: 0.75rem;
-  width: calc(100% - 2 * var(--universal-margin));
-  margin: var(--universal-margin);
-  border: 0;
-  border-radius: calc(2 * var(--universal-border-radius));
-  background: var(--progress-back-color);
-  color: var(--progress-fore-color);
-}
-
-progress::-webkit-progress-value {
-  background: var(--progress-fore-color);
-  border-top-left-radius: calc(2 * var(--universal-border-radius));
-  border-bottom-left-radius: calc(2 * var(--universal-border-radius));
-}
-
-progress::-webkit-progress-bar {
-  background: var(--progress-back-color);
-}
-
-progress::-moz-progress-bar {
-  background: var(--progress-fore-color);
-  border-top-left-radius: calc(2 * var(--universal-border-radius));
-  border-bottom-left-radius: calc(2 * var(--universal-border-radius));
-}
-
-progress[value="1000"]::-webkit-progress-value {
-  border-radius: calc(2 * var(--universal-border-radius));
-}
-
-progress[value="1000"]::-moz-progress-bar {
-  border-radius: calc(2 * var(--universal-border-radius));
-}
-
-progress.inline {
-  display: inline-block;
-  vertical-align: middle;
-  width: 60%;
-}
-
 :root {
   --spinner-back-color: #ddd;
   --spinner-fore-color: #555;
@@ -1916,139 +1584,7 @@ progress.inline {
   animation: spinner-donut-anim 1.2s linear infinite;
 }
 
-/*
-  Custom elements for progress bars and spinners.
-*/
-progress.primary {
-  --progress-fore-color: #1976d2;
-}
-
-progress.secondary {
-  --progress-fore-color: #d32f2f;
-}
-
-progress.tertiary {
-  --progress-fore-color: #308732;
-}
-
-.spinner.primary {
-  --spinner-fore-color: #1976d2;
-}
-
-.spinner.secondary {
-  --spinner-fore-color: #d32f2f;
-}
-
-.spinner.tertiary {
-  --spinner-fore-color: #308732;
-}
-
-/*
-  Definitions for icons - powered by Feather (https://feathericons.com/).
-*/
-span[class^='icon-'] {
-  display: inline-block;
-  height: 1em;
-  width: 1em;
-  vertical-align: -0.125em;
-  background-size: contain;
-  margin: 0 calc(var(--universal-margin) / 4);
-}
-
-span[class^='icon-'].secondary {
-  -webkit-filter: invert(25%);
-  filter: invert(25%);
-}
-
-span[class^='icon-'].inverse {
-  -webkit-filter: invert(100%);
-  filter: invert(100%);
-}
-
-span.icon-alert {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='8' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='16' x2='12' y2='16'%3E%3C/line%3E%3C/svg%3E");
-}
-
-span.icon-bookmark {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");
-}
-
-span.icon-calendar {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
-}
-
-span.icon-credit {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='1' y='4' width='22' height='16' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='1' y1='10' x2='23' y2='10'%3E%3C/line%3E%3C/svg%3E");
-}
-
-span.icon-edit {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34'%3E%3C/path%3E%3Cpolygon points='18 2 22 6 12 16 8 16 8 12 18 2'%3E%3C/polygon%3E%3C/svg%3E");
-}
-
-span.icon-link {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'%3E%3C/path%3E%3Cpolyline points='15 3 21 3 21 9'%3E%3C/polyline%3E%3Cline x1='10' y1='14' x2='21' y2='3'%3E%3C/line%3E%3C/svg%3E");
-}
-
-span.icon-help {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'%3E%3C/path%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='17' x2='12' y2='17'%3E%3C/line%3E%3C/svg%3E");
-}
-
-span.icon-home {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'%3E%3C/path%3E%3Cpolyline points='9 22 9 12 15 12 15 22'%3E%3C/polyline%3E%3C/svg%3E");
-}
-
-span.icon-info {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='16' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='8' x2='12' y2='8'%3E%3C/line%3E%3C/svg%3E");
-}
-
-span.icon-lock {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E");
-}
-
-span.icon-mail {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'%3E%3C/path%3E%3Cpolyline points='22,6 12,13 2,6'%3E%3C/polyline%3E%3C/svg%3E");
-}
-
-span.icon-location {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'%3E%3C/path%3E%3Ccircle cx='12' cy='10' r='3'%3E%3C/circle%3E%3C/svg%3E");
-}
-
-span.icon-phone {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z'%3E%3C/path%3E%3C/svg%3E");
-}
-
-span.icon-rss {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 11a9 9 0 0 1 9 9'%3E%3C/path%3E%3Cpath d='M4 4a16 16 0 0 1 16 16'%3E%3C/path%3E%3Ccircle cx='5' cy='19' r='1'%3E%3C/circle%3E%3C/svg%3E");
-}
-
-span.icon-search {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
-}
-
-span.icon-settings {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3'%3E%3C/circle%3E%3Cpath d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'%3E%3C/path%3E%3C/svg%3E");
-}
-
-span.icon-share {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='18' cy='5' r='3'%3E%3C/circle%3E%3Ccircle cx='6' cy='12' r='3'%3E%3C/circle%3E%3Ccircle cx='18' cy='19' r='3'%3E%3C/circle%3E%3Cline x1='8.59' y1='13.51' x2='15.42' y2='17.49'%3E%3C/line%3E%3Cline x1='15.41' y1='6.51' x2='8.59' y2='10.49'%3E%3C/line%3E%3C/svg%3E");
-}
-
-span.icon-cart {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='21' r='1'%3E%3C/circle%3E%3Ccircle cx='20' cy='21' r='1'%3E%3C/circle%3E%3Cpath d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'%3E%3C/path%3E%3C/svg%3E");
-}
-
-span.icon-upload {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'%3E%3C/path%3E%3Cpolyline points='17 8 12 3 7 8'%3E%3C/polyline%3E%3Cline x1='12' y1='3' x2='12' y2='15'%3E%3C/line%3E%3C/svg%3E");
-}
-
-span.icon-user {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E");
-}
-
-/*
-  Definitions for utilities and helper classes.
-*/
-/* Utility module CSS variable definitions */
+/* Definitions for utilities and helper classes. */
 :root {
   --generic-border-color: rgba(0, 0, 0, 0.3);
   --generic-box-shadow: 0 0.25rem 0.25rem 0 rgba(0, 0, 0, 0.125), 0 0.125rem 0.125rem -0.125rem rgba(0, 0, 0, 0.25);
@@ -2182,41 +1718,165 @@ span.icon-user {
   }
 }
 
-
-		</style>
+</style>
 	</head>
 	<body>
 		<div id="root">
 			<div class="row" id="doc-wrapper">
 				<input id="doc-drawer-checkbox" class="drawer" value="on" type="checkbox">
-				<nav class="col-md-3 col-lg-2" id="nav-drawer">
-					<h3>Agents</h3>
-					<a href="marcos/mind/index.html" id="link-to-marcos-mind" target='mainframe'>marcos</a>
+				<nav class="col-xs-12 col-sm-12 col-md-2 col-lg-2" id="nav-drawer">
+					</br>
+					<label for="doc-drawer-checkbox" class="button drawer-close"></label>
+					<a href="http://150.162.14.59:8080/agents/marcos/mind" id="link-to-marcos-mind" target='mainframe'>marcos</a>
+					<a href="/agents/marcos/mind#overview" id="link-to-overview" target='mainframe'>.  Overview</a>
+					<a href="/agents/marcos/mind#mind" id="link-to-mind" target='mainframe'>.  Mind</a>
+					<a href="/agents/marcos/mind#uploadplans" id="link-to-uploadplans" target='mainframe'>.  Upload plans</a>
+					<a href='kill' onclick='killAg()'>.  kill this agent</a>
 				</nav>
-				<main class="col-sm-12 col-md-9 col-lg-10" id="doc-content">
-					<div id="getting-started" class="card fluid">
-						<h2 class="section double-padded">Getting started</h2>
+				<main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
+					<div id="command" class="card fluid">
 						<div class="section">
-							<p>
-								If you have any agent running you can click on its name and watch its mind, check relation and more.<br/>
-								Using command text box you can send order to the agents, change plans, add and 
-								remove beliefs, just using <a href="http://jason.sf.net" target="_blank">Jason</a>'s AgentSpeak sentences.</p>
-							</p>
-							<br/>
-							<p>
-								To create a new agent click <a href="/forms/new_agent" target='mainframe'>here</a>
-								and to access the directory facilitator click <a href="/services" target='mainframe'>here</a>
-							</p>
-							<br/>
+							<input style="width: 100%; margin: 0px;" placeholder="Command... (e.g. +price(10.00), -+bestSupplier(bob), !goHome)"
+							type="text" id="inputcmd" onkeydown="if (event.keyCode == 13) runCMD()">
+						</div>
+						<div class="section">
+							<pre><span id='log'></span></pre>							<span id='plog'></span>						</div>
+					</div>
+					<div id="overview" class="card fluid">
+						<div class="section">
+							<center><img src='mind/img.svg'/></center><br/>
+						</div>
+					</div>
+					<div id="mind" class="card fluid">
+						<div class="section">
+<html>
+<span style="color: red; font-family: arial;"><font size="+2">
+                    Inspection of agent <b>marcos</b></font></span>
+<hr>
+<details open="true">
+<summary style="text-align: left; color: blue; font-family: arial">Beliefs</summary>
+<blockquote>
+<details open="false">
+<summary style="text-align: left; color: blue; font-family: arial">default</summary>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">count(<i>2</i>)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_9),percept_type(obs_prop),source(percept),artifact_name(cobj_9,b),workspace(cobj_9,testwks,cobj_6)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">count(<i>10</i>)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_8),percept_type(obs_prop),source(percept),artifact_name(cobj_8,a),workspace(cobj_8,testwks,cobj_6)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">formationStatus(nok)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_13),percept_type(obs_prop),source(percept),artifact_name(cobj_13,house_group),workspace(cobj_13,buildHouse,cobj_2)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">formationStatus(ok)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_10),percept_type(obs_prop),source(percept),artifact_name(cobj_10,group1),workspace(cobj_10,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">groups([group1])<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_12),percept_type(obs_prop),source(percept),artifact_name(cobj_12,scheme1),workspace(cobj_12,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">parentGroup(root)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_10),percept_type(obs_prop),source(percept),artifact_name(cobj_10,group1),workspace(cobj_10,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">parentGroup(root)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_13),percept_type(obs_prop),source(percept),artifact_name(cobj_13,house_group),workspace(cobj_13,buildHouse,cobj_2)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">schemes([])<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_13),percept_type(obs_prop),source(percept),artifact_name(cobj_13,house_group),workspace(cobj_13,buildHouse,cobj_2)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">schemes([scheme1])<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_10),percept_type(obs_prop),source(percept),artifact_name(cobj_10,group1),workspace(cobj_10,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">specification(group_specification(group1,[role(role1,[],[soc],<i>1</i>,<i>1</i>,[role2],[link(authority,role2,intra_group)]),role(role2,[],[soc],<i>1</i>,<i>1</i>,[],[link(communication,role1,intra_group)])],[],properties([])))<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_10),percept_type(obs_prop),source(percept),artifact_name(cobj_10,group1),workspace(cobj_10,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">specification(group_specification(house_group,[role(house_owner,[],[soc],<i>1</i>,<i>1</i>,[],[link(authority,building_company,intra_group)]),role(painter,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(bricklayer,[],[soc,building_company],<i>1</i>,<i>2</i>,[building_company],[link(communication,house_owner,intra_group)]),role(window_fitter,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(plumber,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(electrician,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(roofer,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(site_prep_contractor,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(door_fitter,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)])],[],properties([])))<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_13),percept_type(obs_prop),source(percept),artifact_name(cobj_13,house_group),workspace(cobj_13,buildHouse,cobj_2)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">specification(os(house_contruction,group_specification(house_group,[role(house_owner,[],[soc],<i>1</i>,<i>1</i>,[],[link(authority,building_company,intra_group)]),role(painter,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(bricklayer,[],[soc,building_company],<i>1</i>,<i>2</i>,[building_company],[link(communication,house_owner,intra_group)]),role(window_fitter,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(plumber,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(electrician,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(roofer,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(site_prep_contractor,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)]),role(door_fitter,[],[soc,building_company],<i>1</i>,<i>1</i>,[building_company],[link(communication,house_owner,intra_group)])],[],properties([])),[scheme_specification(build_house_sch,goal(house_built,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"infinity"</span>,[],plan(sequence,[goal(site_prepared,performance,<span style="color: rgb(0, 0, 250)">"prepare the site for the next tasks"</span>,all,<span style="color: rgb(0, 0, 250)">"20 minutes"</span>,[],noplan),goal(floors_laid,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"25 minutes"</span>,[],noplan),goal(walls_built,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"40 minutes"</span>,[],noplan),goal(rwd,performance,<span style="color: rgb(0, 0, 250)">""</span>,<i>0</i>,<span style="color: rgb(0, 0, 250)">"infinity"</span>,[],plan(parallel,[goal(roof_built,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"30 minutes"</span>,[],noplan),goal(windows_fitted,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"10 minutes"</span>,[],noplan),goal(doors_fitted,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"10 minutes"</span>,[],noplan)])),goal(pee,performance,<span style="color: rgb(0, 0, 250)">""</span>,<i>0</i>,<span style="color: rgb(0, 0, 250)">"infinity"</span>,[],plan(parallel,[goal(plumbing_installed,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"20 minutes"</span>,[],noplan),goal(electrical_system_installed,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"20 minutes"</span>,[],noplan),goal(exterior_painted,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"20 minutes"</span>,[],noplan)])),goal(interior_painted,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"30 minutes"</span>,[],noplan)])),[mission(build_walls,<i>1</i>,<i>1</i>,[walls_built],[]),mission(fit_doors,<i>1</i>,<i>1</i>,[doors_fitted],[]),mission(fit_windows,<i>1</i>,<i>1</i>,[windows_fitted],[]),mission(management_of_house_building,<i>1</i>,<i>1</i>,[house_built],[]),mission(build_roof,<i>1</i>,<i>1</i>,[roof_built],[]),mission(paint_house,<i>1</i>,<i>1</i>,[exterior_painted,interior_painted],[]),mission(install_electrical_system,<i>1</i>,<i>1</i>,[electrical_system_installed],[]),mission(prepare_site,<i>1</i>,<i>1</i>,[site_prepared],[]),mission(lay_floors,<i>1</i>,<i>1</i>,[floors_laid],[]),mission(install_plumbing,<i>1</i>,<i>1</i>,[plumbing_installed],[])],properties([]))],[norm(n1,house_owner,obligation,build_house_sch.management_of_house_building),norm(n2,site_prep_contractor,obligation,build_house_sch.prepare_site),norm(n3,bricklayer,obligation,build_house_sch.lay_floors),norm(n4,bricklayer,obligation,build_house_sch.build_walls),norm(n5,roofer,obligation,build_house_sch.build_roof),norm(n6,window_fitter,obligation,build_house_sch.fit_windows),norm(n7,door_fitter,obligation,build_house_sch.fit_doors),norm(n8,plumber,obligation,build_house_sch.install_plumbing),norm(n9,electrician,obligation,build_house_sch.install_electrical_system),norm(n10,painter,obligation,build_house_sch.paint_house)]))<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_14),percept_type(obs_prop),source(percept),artifact_name(cobj_14,buildHouse),workspace(cobj_14,buildHouse,cobj_2)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">specification(os(jcmrest,group_specification(group1,[role(role1,[],[soc],<i>1</i>,<i>1</i>,[role2],[link(authority,role2,intra_group)]),role(role2,[],[soc],<i>1</i>,<i>1</i>,[],[link(communication,role1,intra_group)])],[],properties([])),[scheme_specification(scheme1,goal(goal1,performance,<span style="color: rgb(0, 0, 250)">""</span>,<i>0</i>,<span style="color: rgb(0, 0, 250)">"infinity"</span>,[],plan(sequence,[goal(goal2,performance,<span style="color: rgb(0, 0, 250)">"description goal2"</span>,all,<span style="color: rgb(0, 0, 250)">"20 minutes"</span>,[],noplan),goal(goal3,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"infinity"</span>,[],noplan),goal(goal4,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"infinity"</span>,[],noplan)])),[mission(mission1,<i>1</i>,<i>1</i>,[goal2,goal4],[]),mission(mission2,<i>1</i>,<i>1</i>,[goal3],[])],properties([]))],[norm(norm2,role1,obligation,scheme1.mission1),norm(norm1,role2,obligation,scheme1.mission2)]))<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_11),percept_type(obs_prop),source(percept),artifact_name(cobj_11,testOrg),workspace(cobj_11,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">specification(scheme_specification(scheme1,goal(goal1,performance,<span style="color: rgb(0, 0, 250)">""</span>,<i>0</i>,<span style="color: rgb(0, 0, 250)">"infinity"</span>,[],plan(sequence,[goal(goal2,performance,<span style="color: rgb(0, 0, 250)">"description goal2"</span>,all,<span style="color: rgb(0, 0, 250)">"20 minutes"</span>,[],noplan),goal(goal3,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"infinity"</span>,[],noplan),goal(goal4,performance,<span style="color: rgb(0, 0, 250)">""</span>,all,<span style="color: rgb(0, 0, 250)">"infinity"</span>,[],noplan)])),[mission(mission1,<i>1</i>,<i>1</i>,[goal2,goal4],[]),mission(mission2,<i>1</i>,<i>1</i>,[goal3],[])],properties([])))<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_12),percept_type(obs_prop),source(percept),artifact_name(cobj_12,scheme1),workspace(cobj_12,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">subgroups([])<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_10),percept_type(obs_prop),source(percept),artifact_name(cobj_10,group1),workspace(cobj_10,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">subgroups([])<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_13),percept_type(obs_prop),source(percept),artifact_name(cobj_13,house_group),workspace(cobj_13,buildHouse,cobj_2)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">joined(buildHouse,cobj_2)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_3),percept_type(obs_prop),source(percept),artifact_name(cobj_3,marcos_body),workspace(cobj_3,buildHouse,cobj_2)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">joined(main,cobj_0)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_1),percept_type(obs_prop),source(percept),artifact_name(cobj_1,marcos_body),workspace(cobj_1,main,cobj_0)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">joined(testOrg,cobj_4)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_5),percept_type(obs_prop),source(percept),artifact_name(cobj_5,marcos_body),workspace(cobj_5,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">joined(testwks,cobj_6)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_7),percept_type(obs_prop),source(percept),artifact_name(cobj_7,marcos_body),workspace(cobj_7,testwks,cobj_6)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">normative_board(group1.scheme1,cobj_16)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_11),percept_type(obs_prop),source(percept),artifact_name(cobj_11,testOrg),workspace(cobj_11,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">commitment(marcos,mission1,scheme1)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_12),percept_type(obs_prop),source(percept),artifact_name(cobj_12,scheme1),workspace(cobj_12,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">commitment(marcos,mission2,scheme1)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_12),percept_type(obs_prop),source(percept),artifact_name(cobj_12,scheme1),workspace(cobj_12,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">focused(buildHouse,buildHouse<span style="color: rgb(0 ,190, 0)"><sub>[artifact_type(<span style="color: rgb(0, 0, 250)">"ora4mas.nopl.OrgBoard"</span>)]</sub></span>,cobj_14)<span style="color: rgb(0 ,190, 0)"><sub>[source(percept)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">focused(buildHouse,house_group<span style="color: rgb(0 ,190, 0)"><sub>[artifact_type(<span style="color: rgb(0, 0, 250)">"ora4mas.nopl.GroupBoard"</span>)]</sub></span>,cobj_13)<span style="color: rgb(0 ,190, 0)"><sub>[source(percept)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">focused(testOrg,group1<span style="color: rgb(0 ,190, 0)"><sub>[artifact_type(<span style="color: rgb(0, 0, 250)">"ora4mas.nopl.GroupBoard"</span>)]</sub></span>,cobj_10)<span style="color: rgb(0 ,190, 0)"><sub>[source(percept)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">focused(testOrg,group1.scheme1<span style="color: rgb(0 ,190, 0)"><sub>[artifact_type(<span style="color: rgb(0, 0, 250)">"ora4mas.nopl.NormativeBoard"</span>)]</sub></span>,cobj_16)<span style="color: rgb(0 ,190, 0)"><sub>[source(percept)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">focused(testOrg,scheme1<span style="color: rgb(0 ,190, 0)"><sub>[artifact_type(<span style="color: rgb(0, 0, 250)">"ora4mas.nopl.SchemeBoard"</span>)]</sub></span>,cobj_12)<span style="color: rgb(0 ,190, 0)"><sub>[source(percept)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">focused(testOrg,testOrg<span style="color: rgb(0 ,190, 0)"><sub>[artifact_type(<span style="color: rgb(0, 0, 250)">"ora4mas.nopl.OrgBoard"</span>)]</sub></span>,cobj_11)<span style="color: rgb(0 ,190, 0)"><sub>[source(percept)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">focused(testwks,a<span style="color: rgb(0 ,190, 0)"><sub>[artifact_type(<span style="color: rgb(0, 0, 250)">"tools.Counter"</span>)]</sub></span>,cobj_8)<span style="color: rgb(0 ,190, 0)"><sub>[source(percept)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">focused(testwks,b<span style="color: rgb(0 ,190, 0)"><sub>[artifact_type(<span style="color: rgb(0, 0, 250)">"tools.Counter"</span>)]</sub></span>,cobj_9)<span style="color: rgb(0 ,190, 0)"><sub>[source(percept)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">group(group1,group1,cobj_10)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_11),percept_type(obs_prop),source(percept),artifact_name(cobj_11,testOrg),workspace(cobj_11,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">group(house_group,house_group,cobj_13)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_14),percept_type(obs_prop),source(percept),artifact_name(cobj_14,buildHouse),workspace(cobj_14,buildHouse,cobj_2)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">play(marcos,role1,group1)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_10),percept_type(obs_prop),source(percept),artifact_name(cobj_10,group1),workspace(cobj_10,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">play(marcos,role2,group1)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_10),percept_type(obs_prop),source(percept),artifact_name(cobj_10,group1),workspace(cobj_10,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">play(marcos,window_fitter,house_group)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_13),percept_type(obs_prop),source(percept),artifact_name(cobj_13,house_group),workspace(cobj_13,buildHouse,cobj_2)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">scheme(build_house_sch,build_house_sch,cobj_15)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_14),percept_type(obs_prop),source(percept),artifact_name(cobj_14,buildHouse),workspace(cobj_14,buildHouse,cobj_2)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">scheme(scheme1,scheme1,cobj_12)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_11),percept_type(obs_prop),source(percept),artifact_name(cobj_11,testOrg),workspace(cobj_11,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">obligation(marcos,enabled(scheme1,goal2),done(scheme1,goal2,marcos),<i>1542808715208</i>)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_12),percept_type(obs_prop),source(percept),artifact_name(cobj_12,scheme1),norm(ngoal,[[<span style="color: rgb(0, 0, 250)">"A"</span>,marcos],[<span style="color: rgb(0, 0, 250)">"S"</span>,scheme1],[<span style="color: rgb(0, 0, 250)">"D"</span>,<span style="color: rgb(0, 0, 250)">"1969-11-3 21:20:0"</span>],[<span style="color: rgb(0, 0, 250)">"G"</span>,goal2],[<span style="color: rgb(0, 0, 250)">"M"</span>,mission1],[<span style="color: rgb(0, 0, 250)">"What"</span>,done(scheme1,goal2,marcos)]]),workspace(cobj_12,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">goalState(scheme1,goal1,[],[],waiting)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_12),percept_type(obs_prop),source(percept),artifact_name(cobj_12,scheme1),workspace(cobj_12,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">goalState(scheme1,goal2,[marcos],[],enabled)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_12),percept_type(obs_prop),source(percept),artifact_name(cobj_12,scheme1),workspace(cobj_12,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">goalState(scheme1,goal3,[marcos],[],waiting)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_12),percept_type(obs_prop),source(percept),artifact_name(cobj_12,scheme1),workspace(cobj_12,testOrg,cobj_4)]</sub></span></span>.<br>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0)">goalState(scheme1,goal4,[marcos],[],waiting)<span style="color: rgb(0 ,190, 0)"><sub>[artifact_id(cobj_12),percept_type(obs_prop),source(percept),artifact_name(cobj_12,scheme1),workspace(cobj_12,testOrg,cobj_4)]</sub></span></span>.<br>
+</details>
+</blockquote>
+<br>
+</details>
+<details>
+<summary style="text-align: left; color: blue; font-family: arial">Rules</summary>
+<blockquote>
+<span style="font-family: arial; vertical-align: top; color: rgb(0 ,170, 0);">price(banana,<span style="color: rgb(0, 0, 200)">X</span>)<span style="color: rgb(0 ,190, 0)"><sub>[source(self)]</sub></span><font color="black"><b> :- </b></font>
+<table>
+<tr>
+<td width="20"></td><td><span style="color: rgb(0 ,170, 0)"><span style="color: black">(</span><span style="color: rgb(0, 0, 200)">X</span><span style="color: black"> = </span><span style="color: black">(</span><span style="color: black">(</span><span style="color: black">(</span><span style="color: black"></span>math.random<span style="color: black">)</span><span style="color: black">*</span><i>100</i><span style="color: black">)</span><span style="color: black">+</span><i>20</i><span style="color: black">)</span><span style="color: black">)</span></span>.</td>
+</tr>
+</table>
+</span>
+<br>
+</blockquote>
+</details>
+</html>
+							<details>
+								<summary style="text-align: left; color: blue; font-family: arial">Agent's plans</summary>
+								<embed src='plans/' width="100%"/>
+							</details>
+						</div>
+						<div class="section">
+							<a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>
+						</div>
+					</div>
+					<div id="uploadplans" class="card fluid">
+						<div class="section">
+							<embed src='load_plans_form/' width="100%"/>
 						</div>
 					</div>
 				</main>
 			</div>
 		</div>
+		<script language="JavaScript">
+    function runCMD() {
+        http = new XMLHttpRequest();
+        http.onreadystatechange = function() { 
+          if (http.readyState == 4 && http.status == 200) {
+                location.reload();
+                document.getElementById('display').innerHTML = "  result: " + http.responseText;
+        } }
+        http.open("POST", "cmd", true); // true for asynchronous 
+        http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        data = 'c='+encodeURIComponent(document.getElementById("inputcmd").value); 
+        http.send(data);
+    }
+    function killAg() {
+        h2 = new XMLHttpRequest();
+        h2.open('DELETE', '/agents/marcos', false); 
+        h2.send(); 
+    }
+    function delLog() {
+        h2 = new XMLHttpRequest();
+        h2.open('DELETE', 'log', false); 
+        h2.send(); 
+    }
+    function showLog() {
+        http = new XMLHttpRequest();
+        http.onreadystatechange = function() { 
+          if (http.readyState == 4 && http.status == 200) {
+                document.getElementById('log').innerHTML = http.responseText;
+                if (http.responseText.length > 1) {
+                      var btn = document.createElement("BUTTON"); 
+                      var t = document.createTextNode("clear log");
+                      btn.appendChild(t); 
+                      btn.onclick = function() { delLog(); location.reload(); }; 
+                      document.getElementById('plog').appendChild(btn);                  }
+        } }
+        http.open('GET', 'log', true); 
+        http.send();
+    }
+    showLog(); 
+           var pageContent = document.getElementById("nav-drawer").innerHTML;
+           sessionStorage.setItem("menucontent", pageContent);
+		</script>
 	</body>
-	<script>
-		var pageContent = document.getElementById("doc-wrapper").innerHTML;
-		sessionStorage.setItem("menucontent", pageContent);
-	</script>
 </html>
-
