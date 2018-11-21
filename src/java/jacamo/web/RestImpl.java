@@ -38,6 +38,7 @@ public class RestImpl extends AbstractBinder {
         so.append("	<head>\n");
         so.append("		<title>JaCamo-Rest</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+        so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
         so.append("	</head>\n");
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 

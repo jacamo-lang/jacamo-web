@@ -82,6 +82,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("	<head>\n");
         so.append("		<title>JaCamo-Rest - Agents</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+        so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
@@ -134,7 +135,6 @@ public class RestImplAg extends AbstractBinder {
                     so.append("					<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
                     so.append("					<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
                     so.append("					<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
-                    so.append("					<a href=\"/css/style.css\">.  test</a>\n");
                 }
             }
         } else {
@@ -148,7 +148,6 @@ public class RestImplAg extends AbstractBinder {
                         so.append("					<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
                         so.append("					<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
                         so.append("					<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
-                        so.append("					<a href=\"/css/style.css\">.  test</a>\n");
                     }
                     Agent ag = getAgent(a);
                     if (ag != null)
@@ -250,6 +249,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("	<head>\n");
         so.append("		<title>JaCamo-Rest - Agents</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+        so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n");
@@ -263,7 +263,7 @@ public class RestImplAg extends AbstractBinder {
         // command box
         so.append("					<div id=\"command\" class=\"card fluid\">\n"); 
         so.append("						<div class=\"section\">\n");
-        so.append("							<input style=\"width: 100%; margin: 0px;\" placeholder=\"Command... (e.g. +price(10.00), -+bestSupplier(bob), !goHome)\"\n"); 
+        so.append("							<input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (e.g. +price(10.00), -+bestSupplier(bob), !goHome) ...\"\n"); 
         so.append("							type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n");
         so.append("						</div>\n"); 
         so.append("						<div class=\"section\">\n");
