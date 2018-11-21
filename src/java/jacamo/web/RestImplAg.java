@@ -81,10 +81,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("<html lang=\"en\" target=\"mainframe\">\n");
         so.append("	<head>\n");
         so.append("		<title>JaCamo-Rest - Agents</title>\n");
-        //so.append("<meta http-equiv=\"refresh\" content=\"3\"/>");
-        so.append("		<style>\n");
-        so.append(getStyleCSS() + "\n");
-        so.append("		</style>\n");
+        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
@@ -137,6 +134,7 @@ public class RestImplAg extends AbstractBinder {
                     so.append("					<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
                     so.append("					<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
                     so.append("					<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
+                    so.append("					<a href=\"/css/style.css\">.  test</a>\n");
                 }
             }
         } else {
@@ -150,6 +148,7 @@ public class RestImplAg extends AbstractBinder {
                         so.append("					<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
                         so.append("					<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
                         so.append("					<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
+                        so.append("					<a href=\"/css/style.css\">.  test</a>\n");
                     }
                     Agent ag = getAgent(a);
                     if (ag != null)
@@ -163,25 +162,6 @@ public class RestImplAg extends AbstractBinder {
         return so.toString();
     }
     
-    //TODO: @Path("css/style.css")???
-    //@GET
-    //@Produces(MediaType.TEXT_PLAIN)
-    public String getStyleCSS() {
-        StringBuilder so = new StringBuilder();
-        Locale loc = new Locale("en", "US");
-        try (Scanner scanner = new Scanner(new FileInputStream("src/resources/css/style.css"), "UTF-8")) {
-            scanner.useLocale(loc);
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                so.append(line).append("\n");
-            }
-            scanner.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return so.toString();
-    }
-
     private Agent getAgent(String agName) {
         CentralisedAgArch cag = BaseCentralisedMAS.getRunner().getAg(agName);
         if (cag != null)
@@ -269,8 +249,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("<html lang=\"en\" target=\"mainframe\">\n"); 
         so.append("	<head>\n");
         so.append("		<title>JaCamo-Rest - Agents</title>\n");
-        //so.append("<meta http-equiv=\"refresh\" content=\"3\"/>");
-        so.append("		<style>"+getStyleCSS()+"</style>\n");
+        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n");

@@ -37,9 +37,7 @@ public class RestImpl extends AbstractBinder {
         so.append("<html lang=\"en\">\n"); 
         so.append("	<head>\n");
         so.append("		<title>JaCamo-Rest</title>\n");
-        so.append("		<style>\n");
-        so.append(getStyleCSS() + "\n");
-        so.append("		</style>\n");
+        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
         so.append("	</head>\n");
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
@@ -68,7 +66,6 @@ public class RestImpl extends AbstractBinder {
                   "						<polygon points=\"0 1, 10 1, 10 6, 24 6, 24 23, 0 23, 0 6, 10 6, 0 6, 0 1\"></polygon>\n" + 
                   "					</svg><span>&nbsp;Organisation</span>\n" + 
                   "				</a>\n");
-// drawer menu is not working properly (needs correct link addresses, need to refresh after changed)        
         so.append("               <label for=\"doc-drawer-checkbox\" class=\"button drawer-toggle\"></label>\n");
         so.append("               <input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n" + 
                   "               <nav class=\"col-md-2 col-lg-2\" id=\"nav-drawer\">\n" + 
@@ -111,9 +108,9 @@ public class RestImpl extends AbstractBinder {
                 "</form></html>";
     }
 
-    //TODO: @Path("css/style.css")???
-    //@GET
-    //@Produces(MediaType.TEXT_PLAIN)
+    @Path("/css/style.css")
+    @GET
+    @Produces("text/css")
     public String getStyleCSS() {
         StringBuilder so = new StringBuilder();
         Locale loc = new Locale("en", "US");
