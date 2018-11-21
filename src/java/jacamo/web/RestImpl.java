@@ -14,10 +14,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
-import jason.asSemantics.Agent;
-import jason.infra.centralised.BaseCentralisedMAS;
-
-
 @Singleton
 @Path("/")
 public class RestImpl extends AbstractBinder {
