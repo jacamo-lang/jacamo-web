@@ -86,7 +86,7 @@ public class RestImpl extends AbstractBinder {
         so.append("		</div>\n"); 
         so.append("	</body>\n"); 
         so.append("   <script>\n");
-        so.append("       document.getElementById(\"nav-drawer\").innerHTML=sessionStorage.getItem(\"menucontent\");\n");
+        so.append("       setInterval(function(){ document.getElementById(\"nav-drawer\").innerHTML=sessionStorage.getItem(\"menucontent\"); }, 500);\n");
         so.append("   </script>\n");
 
         so.append("</html>\n"); 

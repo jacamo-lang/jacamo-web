@@ -1247,7 +1247,7 @@ footer.sticky {
 
 @media screen and (min-width: 768px) {
   .drawer-toggle:not(.persistent) { display: none; }
-  [type="checkbox"].drawer:not(.persistent) + * { position: static; height: 0%; z-index: 0; }
+  [type="checkbox"].drawer:not(.persistent) + * { position: static; height: 0%; border: none; z-index: 0; }
   [type="checkbox"].drawer:not(.persistent) + * .drawer-close { display: none; }
 }
 
