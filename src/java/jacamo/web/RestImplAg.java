@@ -101,7 +101,7 @@ public class RestImplAg extends AbstractBinder {
                   "							</p>\n" + 
                   "							<br/>\n");
         so.append("							<p>\n" +
-                  "								You can <a href=\"/forms/new_agent\" target='mainframe'>create</a> a new agent and access the"
+                  "								You can <a href=\"/forms/new_agent\" target='mainframe'>create</a> a new agent and access the "
                   + "<a href=\"/services\" target='mainframe'>directory facilitator</a>.\n" + 
                   "							</p>\n" +
                   "							<br/>\n");
