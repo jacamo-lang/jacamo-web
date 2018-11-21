@@ -1185,6 +1185,7 @@ footer.sticky {
   bottom: 0;
 }
 
+/* drawer button to open menu*/
 .drawer-toggle:before {
   display: inline-block;
   position: relative;
@@ -1192,12 +1193,6 @@ footer.sticky {
   content: '\00a0\2261\00a0';
   font-family: sans-serif;
   font-size: 1.5em;
-}
-
-@media screen and (min-width: 768px) {
-  .drawer-toggle:not(.persistent) {
-    display: none;
-  }
 }
 
 [type="checkbox"].drawer {
@@ -1228,6 +1223,7 @@ footer.sticky {
   transition: right 0.3s;
 }
 
+/* drawer button to close menu*/
 [type="checkbox"].drawer + * .drawer-close {
   position: absolute;
   top: var(--universal-margin);
@@ -1257,26 +1253,22 @@ footer.sticky {
   background: var(--drawer-hover-back-color);
 }
 
-@media screen and (max-width: 320px) {
-  [type="checkbox"].drawer + * {
-    width: 100%;
-  }
+/* show drawer menu on xp screens 320px - never happens */
+@media screen and (max-width: 320px) { 
+  [type="checkbox"].drawer + * { width: 100%; }
 }
 
-[type="checkbox"].drawer:checked + * {
-  right: 0;
+@media screen and (max-width: 768px) { 
+  [type="checkbox"].drawer:not(.persistent) + * { display: inline-block; }
 }
 
 @media screen and (min-width: 768px) {
-  [type="checkbox"].drawer:not(.persistent) + * {
-    position: static;
-    height: 100%;
-    z-index: 1100;
-  }
-  [type="checkbox"].drawer:not(.persistent) + * .drawer-close {
-    display: none;
-  }
+  .drawer-toggle:not(.persistent) { display: none; }
+  [type="checkbox"].drawer:not(.persistent) + * { position: static; height: 100%; z-index: 1100; }
+  [type="checkbox"].drawer:not(.persistent) + * .drawer-close { display: none; }
 }
+
+[type="checkbox"].drawer:checked + * { right: 0; }
 
 /*
   Definitions for the responsive table component.

@@ -90,7 +90,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("		<div id=\"root\">\n"); 
         so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
         so.append(getAgentsMenu(""));                
-        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-9 col-lg-9\" id=\"doc-content\">\n"); 
+        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
         so.append("					<div id=\"getting-started\" class=\"card fluid\">\n"); 
         so.append("						<h2 class=\"section double-padded\">Getting started</h2>\n"); 
         so.append("						<div class=\"section\">\n"); 
@@ -112,10 +112,10 @@ public class RestImplAg extends AbstractBinder {
         so.append("		</div>\n"); 
         so.append("	</body>\n");
         // copy to 'menucontent' the menu to show on drop down main page menu
-//        so.append("   <script>\n");
-//        so.append("       var pageContent = document.getElementById(\"nav-drawer\").innerHTML;\n");
-//        so.append("       sessionStorage.setItem(\"menucontent\", pageContent);\n");
-//        so.append("   </script>\n");
+        so.append("   <script>\n");
+        so.append("       var pageContent = document.getElementById(\"nav-drawer\").innerHTML;\n");
+        so.append("       sessionStorage.setItem(\"menucontent\", pageContent);\n");
+        so.append("   </script>\n");
         so.append("</html>\n");
         return so.toString();
     }
@@ -124,7 +124,7 @@ public class RestImplAg extends AbstractBinder {
         StringWriter so = new StringWriter();
 
         so.append("				<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n"); 
-        so.append("				<nav class=\"col-xs-12 col-sm-12 col-md-3 col-lg-3\" id=\"nav-drawer\">\n");
+        so.append("				<nav class=\"col-xs-12 col-sm-12 col-md-2 col-lg-2\" id=\"nav-drawer\">\n");
         so.append("					</br>\n"); 
         so.append("					<label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n"); 
         //so.append("                   <h3>Agents</h3>\n"); 
@@ -133,9 +133,9 @@ public class RestImplAg extends AbstractBinder {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
                 so.append("					<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                 if (a.equals(selectedAgent)) {
-                    so.append("					<a href=\"#overview\" id=\"link-to-overview\">.  Overview</a>\n");
-                    so.append("					<a href=\"#mind\" id=\"link-to-mind\">.  Mind</a>\n");
-                    so.append("					<a href=\"#uploadplans\" id=\"link-to-uploadplans\">.  Upload plans</a>\n");
+                    so.append("					<a href=\"/agents/" + a + "/mind#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
+                    so.append("					<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
+                    so.append("					<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
                     so.append("					<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
                 }
             }
@@ -146,9 +146,9 @@ public class RestImplAg extends AbstractBinder {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
                     so.append("					<a href=\"" + url + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                     if (a.equals(selectedAgent)) {
-                        so.append("					<a href=\"#overview\" id=\"link-to-overview\">.  Overview</a>\n");
-                        so.append("					<a href=\"#mind\" id=\"link-to-mind\">.  Mind</a>\n");
-                        so.append("					<a href=\"#uploadplans\" id=\"link-to-uploadplans\">.  Upload plans</a>\n");
+                        so.append("					<a href=\"/agents/" + a + "/mind#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
+                        so.append("					<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
+                        so.append("					<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
                         so.append("					<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
                     }
                     Agent ag = getAgent(a);
@@ -279,7 +279,7 @@ public class RestImplAg extends AbstractBinder {
         so.append(getAgentsMenu(agName));  
         
         // agent's content
-        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-9 col-lg-9\" id=\"doc-content\">\n"); 
+        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
 
         // command box
         so.append("					<div id=\"command\" class=\"card fluid\">\n"); 
@@ -385,8 +385,8 @@ public class RestImplAg extends AbstractBinder {
                 "    }\n" + 
                 "    showLog(); \n");
         // copy to 'menucontent' the menu to show on drop down main page menu
-//        so.append("           var pageContent = document.getElementById(\"nav-drawer\").innerHTML;\n"); 
-//        so.append("           sessionStorage.setItem(\"menucontent\", pageContent);\n");
+        so.append("           var pageContent = document.getElementById(\"nav-drawer\").innerHTML;\n"); 
+        so.append("           sessionStorage.setItem(\"menucontent\", pageContent);\n");
         so.append("		</script>\n");
         so.append("	</body>\n");
         so.append("</html>\n");

@@ -45,7 +45,7 @@ public class RestImpl extends AbstractBinder {
         so.append("		<div id=\"root\">\n"); 
         so.append("			<header class=\"row\">\n");
         // logo JaCaMo
-        so.append("				<span class=\"logo col-sm-3 col-md\">JaCaMo</span>\n"); 
+        so.append("				<span class=\"logo col-sm-2 col-md\">JaCaMo</span>\n"); 
         // top menu - button agents
         so.append("				<a class=\"button col-sm col-md\" href=\"agents/\" target=\"mainframe\">\n" +
                   "					<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"\n" + 
@@ -69,15 +69,15 @@ public class RestImpl extends AbstractBinder {
                   "					</svg><span>&nbsp;Organisation</span>\n" + 
                   "				</a>\n");
 // drawer menu is not working properly (needs correct link addresses, need to refresh after changed)        
-//        so.append("               <label for=\"doc-drawer-checkbox\" class=\"button drawer-toggle col-sm\"></label>\n");
-//        so.append("               <input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n" + 
-//                  "               <nav class=\"col-md-3 col-lg-2\" id=\"nav-drawer\">\n" + 
-//                  "                   <label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n" + 
-//                  "                   <h3>Menu</h3>\n" + 
-//                  "                   <a hef=\"agents/\">Agents</a>\n" + 
-//                  "                   <a hef=\"workspaces/\">Environment</a>\n" + 
-//                  "                   <a hef=\"oe/\">Organisation</a>\n" + 
-//                "               </nav>\n");
+        so.append("               <label for=\"doc-drawer-checkbox\" class=\"button drawer-toggle\"></label>\n");
+        so.append("               <input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n" + 
+                  "               <nav class=\"col-md-2 col-lg-2\" id=\"nav-drawer\">\n" + 
+                  "                   <label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n" + 
+                  "                   <h3>Menu</h3>\n" + 
+                  "                   <a hef=\"agents/\">Agents</a>\n" + 
+                  "                   <a hef=\"workspaces/\">Environment</a>\n" + 
+                  "                   <a hef=\"oe/\">Organisation</a>\n" + 
+                "               </nav>\n");
         so.append("			</header>\n"); 
         so.append("			<div class=\"second-row\" id=\"full-content\">\n");
         so.append("				<iframe id=\"mainframe\" name=\"mainframe\" width=\"100%\" height=\"100%\"\n" + 
@@ -85,9 +85,9 @@ public class RestImpl extends AbstractBinder {
         so.append("			</div>\n");
         so.append("		</div>\n"); 
         so.append("	</body>\n"); 
-//        so.append("   <script>\n");
-//        so.append("       document.getElementById(\"nav-drawer\").innerHTML=sessionStorage.getItem(\"menucontent\");\n");
-//        so.append("   </script>\n");
+        so.append("   <script>\n");
+        so.append("       document.getElementById(\"nav-drawer\").innerHTML=sessionStorage.getItem(\"menucontent\");\n");
+        so.append("   </script>\n");
 
         so.append("</html>\n"); 
 
