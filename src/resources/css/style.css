@@ -1167,22 +1167,8 @@ footer.sticky {
   bottom: 0;
 }
 
-/* drawer button to open menu*/
-.drawer-toggle:before {
-  display: inline-block;
-  position: relative;
-  vertical-align: bottom;
-  content: '\00a0\2261\00a0';
-  font-family: sans-serif;
-  font-size: 2.0em;
-}
-
-.drawer-toggle {
-  right: 0px;
-  position: fixed;
-}
-
-[type="checkbox"].drawer {
+/* left menu bar for frames */
+[type="checkbox"].leftmenu {
   height: 1px;
   width: 1px;
   margin: -1px;
@@ -1193,7 +1179,49 @@ footer.sticky {
   clip-path: inset(100%);
 }
 
-/* drawer dropdown area */
+/* leftmenu dropdown area */
+[type="checkbox"].leftmenu + * {
+  display: block;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  width: 200px;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--drawer-back-color);
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  z-index: 1110;
+  right: -320px;
+  transition: right 0.3s;
+}
+ 
+/* drawer button to open menu*/
+.drawer-toggle:before {
+  display: inline-block;
+  position: fixed;
+  vertical-align: bottom;
+  content: '\00a0\2261\00a0';
+  font-family: sans-serif;
+  font-size: 2.0em;
+  right: 15px;
+  text-align: center;
+  color: red;
+}
+
+[type="checkbox"].drawer {
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  -webkit-clip-path: inset(100%);
+  clip-path: inset(100%);
+  position: absolute;
+}
+
+/* drawer drop down area */
 [type="checkbox"].drawer + * {
   display: block;
   box-sizing: border-box;
@@ -1207,7 +1235,7 @@ footer.sticky {
   border-radius: 0;
   margin: 0;
   z-index: 1110;
-  right: -320px;
+  right: -200px;
   transition: right 0.3s;
 }
 
@@ -1222,7 +1250,6 @@ footer.sticky {
   border-radius: var(--universal-border-radius);
   padding: var(--universal-padding);
   margin: 0;
-  cursor: pointer;
   transition: background 0.3s;
 }
 
@@ -1232,7 +1259,7 @@ footer.sticky {
   color: var(--drawer-close-color);
   position: relative;
   font-family: sans-serif;
-  font-size: 2rem;
+  font-size: 1.2rem;
   line-height: 1;
   text-align: center;
 }
@@ -1241,14 +1268,13 @@ footer.sticky {
   background: var(--drawer-hover-back-color);
 }
 
-/* show drawer menu on xp screens 320px - never happens */
-@media screen and (max-width: 320px) { 
-  [type="checkbox"].drawer + * { width: 100%; }
+[type="checkbox"].leftmenu + * .leftmenu-close:hover, [type="checkbox"].leftmenu + * .leftmenu-close:focus {
+  background: var(--drawer-hover-back-color);
 }
 
 @media screen and (min-width: 768px) {
   .drawer-toggle:not(.persistent) { display: none; z-index: 1100; }
-  [type="checkbox"].drawer:not(.persistent) + * { position: static; height: 1%; border: none; z-index: 0; }
+  [type="checkbox"].leftmenu:not(.persistent) + * { position: static; height: 100%; z-index: 0; }
   [type="checkbox"].drawer:not(.persistent) + * .drawer-close { display: none; }
 }
 

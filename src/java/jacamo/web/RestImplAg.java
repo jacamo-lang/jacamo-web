@@ -113,10 +113,12 @@ public class RestImplAg extends AbstractBinder {
         so.append("		</div>\n"); 
         so.append("	</body>\n");
         // copy to 'menucontent' the menu to show on drop down main page menu
-        so.append("   <script>\n");
-        so.append("       var pageContent = document.getElementById(\"nav-drawer\").innerHTML;\n");
-        so.append("       sessionStorage.setItem(\"menucontent\", pageContent);\n");
-        so.append("   </script>\n");
+        so.append("	<script>\n");
+        so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
+        so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n"); 
+        so.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
+        so.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
+        so.append("	</script>\n");
         so.append("</html>\n");
         return so.toString();
     }
@@ -124,10 +126,10 @@ public class RestImplAg extends AbstractBinder {
     public String getAgentsMenu(String selectedAgent) {
         StringWriter so = new StringWriter();
 
-        so.append("				<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n"); 
-        so.append("				<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer\">\n");
+        so.append("				<input id=\"doc-drawer-checkbox-frame\" class=\"leftmenu\" value=\"on\" type=\"checkbox\">\n"); 
+        so.append("				<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer-frame\">\n");
         so.append("					</br>\n"); 
-        so.append("					<label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n"); 
+        //so.append("                   <label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n"); 
         //so.append("                   <h3>Agents</h3>\n"); 
 
         if (JCMRest.getZKHost() == null) {
@@ -240,7 +242,7 @@ public class RestImplAg extends AbstractBinder {
             return "error "+e.getMessage();
         }
     }
-
+    
     @Path("/{agentname}/mind")
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -266,7 +268,7 @@ public class RestImplAg extends AbstractBinder {
         // command box
         so.append("					<div id=\"command\" class=\"card fluid\">\n"); 
         so.append("						<div class=\"section\">\n");
-        so.append("							<input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (e.g. +price(10.00), -+bestSupplier(bob), !goHome) ...\"\n"); 
+        so.append("							<input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (" + helpMsg1 + ") ...\"\n"); 
         so.append("							type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n");
         so.append("						</div>\n"); 
         so.append("						<div class=\"section\">\n");
@@ -303,7 +305,7 @@ public class RestImplAg extends AbstractBinder {
         // put plans on agent's mind section
         so.append("							<details>\n");
         so.append("								<summary style=\"text-align: left; color: blue; font-family: arial\">Agent's plans</summary>\n");
-        so.append("								<embed src='plans/' width=\"100%\"/>\n");
+        so.append("								<embed src='plans' width=\"100%\"/>\n");
         so.append("							</details>\n");
 
         so.append("						</div>\n"); 
@@ -324,9 +326,10 @@ public class RestImplAg extends AbstractBinder {
         so.append("				</main>\n"); 
         so.append("			</div>\n");
         so.append("		</div>\n");
-        so.append("		<script language=\"JavaScript\">\n");
+        so.append("	</body>\n");
+        so.append("	<script language=\"JavaScript\">\n");
         // function to run Jason commands
-        so.append("    function runCMD() {\n" +
+        so.append("		function runCMD() {\n" +
                 "        http = new XMLHttpRequest();\n" + 
                 "        http.onreadystatechange = function() { \n" + 
                 "          if (http.readyState == 4 && http.status == 200) {\n" +
@@ -367,10 +370,11 @@ public class RestImplAg extends AbstractBinder {
                 "    }\n" + 
                 "    showLog(); \n");
         // copy to 'menucontent' the menu to show on drop down main page menu
-        so.append("           var pageContent = document.getElementById(\"nav-drawer\").innerHTML;\n"); 
-        so.append("           sessionStorage.setItem(\"menucontent\", pageContent);\n");
-        so.append("		</script>\n");
-        so.append("	</body>\n");
+        so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
+        so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n"); 
+        so.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
+        so.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
+        so.append("	</script>\n");
         so.append("</html>\n");
         return so.toString();
     }
@@ -390,7 +394,7 @@ public class RestImplAg extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
-        return  "<html><head><title>load plans for "+agName+"</title></head>"+
+        return  "<html><head><title>load plans for "+agName+"</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
                 "Enter Jason code below:<br/><textarea name=\"plans\" form=\"usrform\" placeholder=\"Write plans here...\" rows=\"5\" cols=\"62\"></textarea>" +
                 "<br/>or upload a file: <input type=\"file\" name=\"file\"><br/><input type=\"submit\" value=\"Upload\">"+

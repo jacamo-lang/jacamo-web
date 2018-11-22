@@ -40,7 +40,7 @@ public class RestImpl extends AbstractBinder {
         so.append("		<div id=\"root\">\n"); 
         so.append("			<header class=\"row\">\n");
         // logo JaCaMo
-        so.append("				<span class=\"logo col-xp-1 col-sm-2 col-md\">JaCaMo</span>\n"); 
+        so.append("				<span class=\"logo col-xp-2 col-sm-2 col-md\">JaCaMo</span>\n"); 
         // top menu - button agents
         so.append("				<a class=\"button col-xp-1 col-sm-2 col-md\" href=\"agents/\" target=\"mainframe\">\n" +
                   "					<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"\n" + 
@@ -63,7 +63,7 @@ public class RestImpl extends AbstractBinder {
                   "						<polygon points=\"0 1, 10 1, 10 6, 24 6, 24 23, 0 23, 0 6, 10 6, 0 6, 0 1\"></polygon>\n" + 
                   "					</svg><span>&nbsp;Organisation</span>\n" + 
                   "				</a>\n");
-        so.append("				<label for=\"doc-drawer-checkbox\" class=\"button drawer-toggle\"></label>\n");
+        so.append("             <label for=\"doc-drawer-checkbox\" class=\"button drawer-toggle\" style=\"right: 10px; width: 50px; position: fixed;\"></label>\n");
         so.append("				<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n" + 
                   "				<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer\">\n" + 
                   "					<label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n" + 
@@ -82,7 +82,6 @@ public class RestImpl extends AbstractBinder {
         so.append("   <script>\n");
         so.append("       setInterval(function(){ document.getElementById(\"nav-drawer\").innerHTML=sessionStorage.getItem(\"menucontent\"); }, 500);\n");
         so.append("   </script>\n");
-
         so.append("</html>\n"); 
 
         return so.toString();
