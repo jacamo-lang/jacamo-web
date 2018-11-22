@@ -252,7 +252,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("<!DOCTYPE html>\n"); 
         so.append("<html lang=\"en\" target=\"mainframe\">\n"); 
         so.append("	<head>\n");
-        so.append("		<title>JaCamo-Rest - Agents</title>\n");
+        so.append("		<title>JaCamo-Rest - Agents: " + agName + "</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
         so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
         so.append("	</head>\n"); 

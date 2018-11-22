@@ -19,6 +19,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
 import cartago.CartagoException;
+import cartago.CartagoService;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
@@ -46,61 +47,90 @@ public class RestImplOrg extends AbstractBinder {
     @Produces(MediaType.TEXT_HTML)
     public String getOrgHtml() throws CartagoException {
 
-        StringBuilder out = new StringBuilder();
+         StringWriter so = new StringWriter();
+         so.append("<!DOCTYPE html>\n");
+         so.append("<html lang=\"en\" target=\"mainframe\">\n");
+         so.append("	<head>\n");
+         so.append("		<title>JaCamo-Rest - Organisation</title>\n");
+         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+         so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+         so.append("	</head>\n"); 
+         so.append("	<body>\n"); 
+         so.append("		<div id=\"root\">\n"); 
+         so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
+         so.append(getOrganisationMenu(""));                
+         so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
+         so.append("					<div id=\"getting-started\" class=\"card fluid\">\n"); 
+         so.append("						<h2 class=\"section double-padded\">Getting started</h2>\n"); 
+         so.append("						<div class=\"section\">\n"); 
+         so.append("							<p>\n" +
+                 "									<a href=\"http://moise.sf.net\" target=\"_blank\">Moise</a> interface is under development, <a href='http://localhost:3271/oe' target='mainframe'> earlier interface </a> is also available.<br/>\n" + 
+                 "								</p> " +        
+                 "							<br/>\n");
+         so.append("						</div>\n");
+         so.append("					</div>\n");
+         so.append("				</main>\n"); 
+         so.append("			</div>\n"); 
+         so.append("		</div>\n"); 
+         so.append("	</body>\n");
+         // copy to 'menucontent' the menu to show on drop down main page menu
+         so.append("	<script>\n");
+         so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
+         so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n"); 
+         so.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
+         so.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
+         so.append("	</script>\n");
+         so.append("</html>\n");
 
-        out.append(
-                "<html><head><title>Moise (list of organisational entities)</title><meta http-equiv=\"refresh\" content=\""
-						+ 3 + "\" ></head><body>");
+        return so.toString();
+    }
+
+    private String getOrganisationMenu(String string) {
+
+        StringWriter so = new StringWriter();
+
+        so.append("				<input id=\"doc-drawer-checkbox-frame\" class=\"leftmenu\" value=\"on\" type=\"checkbox\">\n"); 
+        so.append("				<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer-frame\">\n");
+        so.append("					</br>\n"); 
 
         for (OrgBoard ob : OrgBoard.getOrbBoards()) {
-            out.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>organisation <b>" + ob.getOEId()
-                    + "</b></p></font>");
+            so.append("					" + ob.getOEId() + "\n");
 
-            out.append("- <a href='/oe/" + ob.getOEId()
-                    + "/os' target='cf' style=\"font-family: arial; text-decoration: none\">specification</a><br/>");
+            so.append("					<a href=\"/oe/" + ob.getOEId() + "/os\">. specification</a>\n");
+
             StringWriter os = new StringWriter();
             StringWriter gr = new StringWriter();
-            gr.append("<br/><scan style='color: red; font-family: arial;'>groups</scan> <br/>");
+            gr.append(". groups<br/>");
             StringWriter sch = new StringWriter();
-            sch.append("<br/><scan style='color: red; font-family: arial;'>schemes</scan> <br/>");
+            sch.append(". schemes<br/>");
             StringWriter nor = new StringWriter();
-            nor.append("<br/><scan style='color: red; font-family: arial;'>norms</scan> <br/>");
+            nor.append(". norms<br/>");
 
             for (GroupBoard gb : GroupBoard.getGroupBoards()) {
                 if (gb.getOEId().equals(ob.getOEId())) {
-                    gr.append("- <a href='/oe/" + gb.getOEId() + "/group/" + gb.getArtId()
-                            + "' target='cf' style=\"font-family: arial; text-decoration: none\">" + gb.getArtId()
-                            + "</a><br/>");
+                    gr.append("<a href='/oe/" + gb.getOEId() + "/group/" + gb.getArtId() + "' target='mainframe'>" + gb.getArtId() + "</a><br/>");
                 }
             }
             // TODO: why the schemes are not appearing????
             for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
                 if (sb.getOEId().equals(ob.getOEId())) {
-                    sch.append("- <a href='/oe/" + sb.getOEId() + "/scheme/" + sb.getArtId()
-                            + "' target='cf' style=\"font-family: arial; text-decoration: none\">" + sb.getArtId()
-                            + "</a><br/>");
+                    sch.append("<a href='/oe/" + sb.getOEId() + "/scheme/" + sb.getArtId() + "' target='mainframe'>" + sb.getArtId() + "</a><br/>");
                 }
             }
             for (NormativeBoard nb : NormativeBoard.getNormativeBoards()) {
                 if (nb.getOEId().equals(ob.getOEId())) {
-                    nor.append("- <a href='/oe/" + nb.getOEId() + "/norm/" + nb.getArtId()
-                            + "' target='cf' style=\"font-family: arial; text-decoration: none\">" + nb.getArtId()
-                            + "</a><br/>");
+                    nor.append("<a href='/oe/" + nb.getOEId() + "/norm/" + nb.getArtId() + "' target='mainframe'>" + nb.getArtId() + "</a><br/>");
                 }
             }
-            out.append(os.toString());
-            out.append(gr.toString());
-            out.append(sch.toString());
-            out.append(nor.toString());
+            so.append(os.toString());
+            so.append(gr.toString());
+            so.append(sch.toString());
+            so.append(nor.toString());
         }
 
-        out.append("<hr/>");
-        out.append(
-                "Under development, earlier interface <a href='http://localhost:3271/oe' target='lf'> here </a><br/><br/>");
-        out.append(" by <a href=\"http://moise.sf.net\" target=\"_blank\">Moise</a>");
-        out.append("</body></html>");
+        so.append("				</nav>\n");
 
-        return out.toString();
+        return so.toString();
     }
 
     @Path("/{oename}/os")
@@ -109,7 +139,21 @@ public class RestImplOrg extends AbstractBinder {
     public String getSpecificationHtml(@PathParam("oename") String oeName) {
         try {
             StringBuilder out = new StringBuilder();
-            out.append("<html><head><title>" + oeName + "</title></head><body>");
+            out.append("<!DOCTYPE html>\n");
+            out.append("<html lang=\"en\" target=\"mainframe\">\n");
+            out.append("	<head>\n");
+            out.append("		<title>JaCamo-Rest - Organisation: " + oeName + "</title>\n");
+            out.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+            out.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+            out.append("	</head>\n"); 
+            out.append("	<body>\n"); 
+            out.append("		<div id=\"root\">\n"); 
+            out.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
+            out.append(getOrganisationMenu(""));                
+            out.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
+            out.append("					<div id=\"getting-started\" class=\"card fluid\">\n"); 
+            out.append("						<h2 class=\"section double-padded\">Getting started</h2>\n"); 
+            out.append("						<div class=\"section\">\n"); 
             for (OrgBoard ob : OrgBoard.getOrbBoards()) {
                 if (ob.getOEId().equals(oeName)) {
                     OS os = OS.loadOSFromURI(ob.getOSFile());
@@ -118,7 +162,20 @@ public class RestImplOrg extends AbstractBinder {
                     out.append(osSpec);
                 }
             }
-            out.append("</body></html>");
+            out.append("						</div>\n");
+            out.append("					</div>\n");
+            out.append("				</main>\n"); 
+            out.append("			</div>\n"); 
+            out.append("		</div>\n"); 
+            out.append("	</body>\n");
+            // copy to 'menucontent' the menu to show on drop down main page menu
+            out.append("	<script>\n");
+            out.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
+            out.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n"); 
+            out.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
+            out.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
+            out.append("	</script>\n");
+            out.append("</html>\n");
 
             return out.toString();
         } catch (Exception | TransformerFactoryConfigurationError e) {

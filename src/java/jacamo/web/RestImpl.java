@@ -74,7 +74,7 @@ public class RestImpl extends AbstractBinder {
                   "				</nav>\n");
         so.append("			</header>\n"); 
         so.append("			<div class=\"second-row\" id=\"full-content\">\n");
-        so.append("				<iframe id=\"mainframe\" name=\"mainframe\" width=\"100%\" height=\"100%\"\n" + 
+        so.append("				<iframe id=\"mainframe\" name=\"mainframe\" src=\"agents/\" width=\"100%\" height=\"100%\"\n" + 
                   "					frameborder=0></iframe>\n"); 
         so.append("			</div>\n");
         so.append("		</div>\n"); 
