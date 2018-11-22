@@ -125,7 +125,7 @@ public class RestImplAg extends AbstractBinder {
         StringWriter so = new StringWriter();
 
         so.append("				<input id=\"doc-drawer-checkbox\" class=\"drawer\" value=\"on\" type=\"checkbox\">\n"); 
-        so.append("				<nav class=\"col-xs-12 col-sm-12 col-md-2 col-lg-2\" id=\"nav-drawer\">\n");
+        so.append("				<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer\">\n");
         so.append("					</br>\n"); 
         so.append("					<label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n"); 
         //so.append("                   <h3>Agents</h3>\n"); 
