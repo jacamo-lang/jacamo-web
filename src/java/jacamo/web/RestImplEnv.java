@@ -67,7 +67,7 @@ public class RestImplEnv extends AbstractBinder {
         so.append("						<h2 class=\"section double-padded\">Getting started</h2>\n"); 
         so.append("						<div class=\"section\">\n"); 
         so.append("							<p>\n" +
-                "								Artifacts are <a href=\"http://cartago.sourceforge.net\" target=\"_blank\">CArtAgO</a> entities situated in a workaspace. Agents may use them in their tasks." +
+                "								Artifacts are <a href=\"http://cartago.sourceforge.net\" target=\"_blank\">CArtAgO</a> entities situated in a workspace. Agents may use them in their tasks." +
                 "							</p> " +        
                 "							<br/>\n");
         so.append("						</div>\n");
@@ -97,7 +97,7 @@ public class RestImplEnv extends AbstractBinder {
 
         for (String wname: CartagoService.getNode().getWorkspaces()) {
             try {
-                so.append("					" + wname + "</br>\n");
+                so.append("					<h5 style=\"margin:0;\">" + wname + "</h5>\n");
                 for (ArtifactId aid: CartagoService.getController(wname).getCurrentArtifacts()) {
                     if (hidenArts.contains(aid.getName()))
                         continue;

@@ -152,8 +152,7 @@ public class RestImplOrg extends AbstractBinder {
                         // TODO: links that comes from xsl specification are wrong!!!
                         ((OrgArt) gb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb))),
                                 new StreamResult(so));
-                        out.append("<center><img src='/oe/" + oeName + "/group/"+ gb.getArtId() + "/img.svg' /></center><br/>");
-                        out.append("						</div>\n");
+                        out.append("							<center><img src='/oe/" + oeName + "/group/"+ gb.getArtId() + "/img.svg' /></center><br/>");
                         out.append(so.toString());
                     }
                     StringWriter so = new StringWriter();
@@ -163,6 +162,45 @@ public class RestImplOrg extends AbstractBinder {
                     out.append(so.toString());
                 }
             }
+
+            out.append("						</div>\n");
+
+            out.append("					<div id=\"schemes\" class=\"card fluid\">\n");
+            out.append("						<h2 class=\"section double-padded\">Schemes</h2>\n");
+
+            for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
+                if (sb.getOEId().equals(oeName)) {
+                    if (((OrgArt) sb).getStyleSheet() != null) {
+                        StringWriter so = new StringWriter();
+                        ((OrgArt) sb).getStyleSheet().setParameter("show-oe-img", "true");
+                        ((OrgArt) sb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb))),
+                                new StreamResult(so));
+                        out.append("							<center><img src='/oe/" + oeName + "/scheme/"
+                                + sb.getArtId() + "/img.svg' /></center><br/>");
+                        out.append(so.toString());
+                    }
+                    StringWriter so = new StringWriter();
+                    ((OrgArt) sb).getNSTransformer().transform(
+                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb).getNormativeEngine())),
+                            new StreamResult(so));
+                    out.append(so.toString());
+                }
+            }
+            out.append("						</div>\n");
+
+            out.append("					<div id=\"norms\" class=\"card fluid\">\n");
+            out.append("						<h2 class=\"section double-padded\">Norms</h2>\n");
+
+            for (NormativeBoard nb : NormativeBoard.getNormativeBoards()) {
+                if (nb.getOEId().equals(oeName)) {
+                    StringWriter so = new StringWriter();
+                    ((OrgArt) nb).getNSTransformer().transform(
+                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) nb).getNormativeEngine())),
+                            new StreamResult(so));
+                    out.append(so.toString());
+                }
+            }
+            out.append("						</div>\n");
             
             out.append("					</div>\n");
             out.append("				</main>\n"); 
@@ -185,6 +223,7 @@ public class RestImplOrg extends AbstractBinder {
         return "error"; // TODO: set response properly
     }
 
+    // this method is not being used anymore, should be kept for other rest requests?
     @Path("/{oename}/group/{groupname}")
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -290,6 +329,7 @@ public class RestImplOrg extends AbstractBinder {
         return "error"; // TODO: set response properly
     }
 
+    // this method is not being used anymore, should be kept for other rest requests?
     @Path("/{oename}/scheme/{schemename}")
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -348,6 +388,7 @@ public class RestImplOrg extends AbstractBinder {
         return Response.noContent().build(); // TODO: set response properly
     }
 
+    // this method is not being used anymore, should be kept for other rest requests?
     @Path("/{oename}/norm/{groupname}.{schemename}")
     @GET
     @Produces(MediaType.TEXT_HTML)
