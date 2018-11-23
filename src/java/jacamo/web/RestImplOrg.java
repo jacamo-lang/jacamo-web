@@ -85,7 +85,7 @@ public class RestImplOrg extends AbstractBinder {
         return so.toString();
     }
 
-    private String getOrganisationMenu(String string) {
+    private String getOrganisationMenu(String selectedOrganisation) {
 
         StringWriter so = new StringWriter();
 
@@ -94,38 +94,12 @@ public class RestImplOrg extends AbstractBinder {
         so.append("					</br>\n"); 
 
         for (OrgBoard ob : OrgBoard.getOrbBoards()) {
-            so.append("					" + ob.getOEId() + "\n");
-
-            so.append("					<a href=\"/oe/" + ob.getOEId() + "/os\">. specification</a>\n");
-
-            StringWriter os = new StringWriter();
-            StringWriter gr = new StringWriter();
-            gr.append(". groups<br/>");
-            StringWriter sch = new StringWriter();
-            sch.append(". schemes<br/>");
-            StringWriter nor = new StringWriter();
-            nor.append(". norms<br/>");
-
-            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-                if (gb.getOEId().equals(ob.getOEId())) {
-                    gr.append("<a href='/oe/" + gb.getOEId() + "/group/" + gb.getArtId() + "' target='mainframe'>" + gb.getArtId() + "</a><br/>");
-                }
+            so.append("					<a href=\"/oe/" + ob.getOEId() + "/os#specification\">" + ob.getOEId() + "</a>\n");
+            if (ob.getOEId().equals(selectedOrganisation)) {
+                so.append("<a href='/oe/" + ob.getOEId() + "/os#groups' target='mainframe'>. Groups</a>\n");
+                so.append("<a href='/oe/" + ob.getOEId() + "/os#schemes' target='mainframe'>. Schemes</a>\n");
+                so.append("<a href='/oe/" + ob.getOEId() + "/os#norms' target='mainframe'>. Norms</a>\n");
             }
-            // TODO: why the schemes are not appearing????
-            for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
-                if (sb.getOEId().equals(ob.getOEId())) {
-                    sch.append("<a href='/oe/" + sb.getOEId() + "/scheme/" + sb.getArtId() + "' target='mainframe'>" + sb.getArtId() + "</a><br/>");
-                }
-            }
-            for (NormativeBoard nb : NormativeBoard.getNormativeBoards()) {
-                if (nb.getOEId().equals(ob.getOEId())) {
-                    nor.append("<a href='/oe/" + nb.getOEId() + "/norm/" + nb.getArtId() + "' target='mainframe'>" + nb.getArtId() + "</a><br/>");
-                }
-            }
-            so.append(os.toString());
-            so.append(gr.toString());
-            so.append(sch.toString());
-            so.append(nor.toString());
         }
 
         so.append("				</nav>\n");
@@ -149,10 +123,10 @@ public class RestImplOrg extends AbstractBinder {
             out.append("	<body>\n"); 
             out.append("		<div id=\"root\">\n"); 
             out.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
-            out.append(getOrganisationMenu(""));                
+            out.append(getOrganisationMenu(oeName));                
             out.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
-            out.append("					<div id=\"getting-started\" class=\"card fluid\">\n"); 
-            out.append("						<h2 class=\"section double-padded\">Getting started</h2>\n"); 
+            out.append("					<div id=\"specification\" class=\"card fluid\">\n"); 
+            out.append("						<h2 class=\"section double-padded\">Specification</h2>\n"); 
             out.append("						<div class=\"section\">\n"); 
             for (OrgBoard ob : OrgBoard.getOrbBoards()) {
                 if (ob.getOEId().equals(oeName)) {
@@ -163,6 +137,33 @@ public class RestImplOrg extends AbstractBinder {
                 }
             }
             out.append("						</div>\n");
+            out.append("					</div>\n");
+
+            out.append("					<div id=\"groups\" class=\"card fluid\">\n"); 
+            out.append("						<h2 class=\"section double-padded\">Groups</h2>\n");
+            
+            // add groups sub section
+            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+                if (gb.getOEId().equals(oeName)) {
+                    if (((OrgArt) gb).getStyleSheet() != null) {
+                        out.append("						<div class=\"section\">\n"); 
+                        StringWriter so = new StringWriter();
+                        ((OrgArt) gb).getStyleSheet().setParameter("show-oe-img", "true");
+                        // TODO: links that comes from xsl specification are wrong!!!
+                        ((OrgArt) gb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb))),
+                                new StreamResult(so));
+                        out.append("<center><img src='/oe/" + oeName + "/group/"+ gb.getArtId() + "/img.svg' /></center><br/>");
+                        out.append("						</div>\n");
+                        out.append(so.toString());
+                    }
+                    StringWriter so = new StringWriter();
+                    ((OrgArt) gb).getNSTransformer().transform(
+                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb).getNormativeEngine())),
+                            new StreamResult(so));
+                    out.append(so.toString());
+                }
+            }
+            
             out.append("					</div>\n");
             out.append("				</main>\n"); 
             out.append("			</div>\n"); 
@@ -190,7 +191,7 @@ public class RestImplOrg extends AbstractBinder {
     public String getGrouptHtml(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
         try {
             StringBuilder out = new StringBuilder();
-            out.append("<html><head><title>Group: " + groupName + "</title></head><body>");
+            out.append("<html target=\"mainframe\"><head><title>Group: " + groupName + "</title></head><body>");
             String img = "<img src='" + groupName + "/img.svg' /><br/>";
             out.append("<details>");
             for (GroupBoard gb : GroupBoard.getGroupBoards()) {
@@ -251,9 +252,8 @@ public class RestImplOrg extends AbstractBinder {
         try {
             for (GroupBoard gb : GroupBoard.getGroupBoards()) {
                 if (gb.getOEId().equals(oeName) && gb.getArtId().equals(groupName)) {
-                    // TODO: develop npl function
                     StringBuilder out = new StringBuilder();
-                    out.append("<html><head><title>debug: " + groupName + "</title></head><body>");
+                    out.append("<html target=\"mainframe\"><head><title>debug: " + groupName + "</title></head><body>");
                     out.append("<pre>");
                     out.append(((OrgArt)gb).getNPLSrc());
                     out.append("</pre>");
@@ -276,7 +276,7 @@ public class RestImplOrg extends AbstractBinder {
                 if (gb.getOEId().equals(oeName) && gb.getArtId().equals(groupName)) {
                     // TODO: develop debug function
                     StringBuilder out = new StringBuilder();
-                    out.append("<html><head><title>debug: " + groupName + "</title></head><body>");
+                    out.append("<html target=\"mainframe\"><head><title>debug: " + groupName + "</title></head><body>");
                     out.append("<pre>");
                     out.append(((OrgArt)gb).getDebugText());
                     out.append("</pre>");
@@ -297,7 +297,7 @@ public class RestImplOrg extends AbstractBinder {
 
         try {
             StringBuilder out = new StringBuilder();
-            out.append("<html><head><title>Scheme: " + schemeName + "</title></head><body>");
+            out.append("<html target=\"mainframe\"><head><title>Scheme: " + schemeName + "</title></head><body>");
             String img = "<img src='" + schemeName + "/img.svg' /><br/>";
             out.append("<details>");
             for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
@@ -355,7 +355,7 @@ public class RestImplOrg extends AbstractBinder {
             @PathParam("schemename") String schemeName) {
         try {
             StringBuilder out = new StringBuilder();
-            out.append("<html><head><title>Scheme: " + schemeName + "</title></head><body>");
+            out.append("<html target=\"mainframe\"><head><title>Scheme: " + schemeName + "</title></head><body>");
             for (NormativeBoard nb : NormativeBoard.getNormativeBoards()) {
                 if (nb.getOEId().equals(oeName) && nb.getArtId().equals(groupName+"."+schemeName)) {
                     StringWriter so = new StringWriter();

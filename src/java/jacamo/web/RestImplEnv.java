@@ -87,7 +87,7 @@ public class RestImplEnv extends AbstractBinder {
         return so.toString();
     }
 
-    private String getEnvironmentMenu(String string) {
+    private String getEnvironmentMenu(String selectedArtifact) {
         
         StringWriter so = new StringWriter();
 
@@ -105,6 +105,11 @@ public class RestImplEnv extends AbstractBinder {
                         continue;
                     String addr = "/workspaces/"+wname+"/"+aid.getName();
                     so.append("					<a href=\"" + addr + "\" id=\"link-to-" + wname + "\" target='mainframe'>" + aid.getName() + "</a>\n");
+                    if (aid.getName().equals(selectedArtifact)) {
+                        so.append("					<a href=\"" + addr + "#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
+                        so.append("					<a href=\"" + addr + "#inspection\" id=\"link-to-inspection\" target='mainframe'>.  Inspection</a>\n");
+                    }
+
                 }
 
             } catch (CartagoException e) {
@@ -137,7 +142,7 @@ public class RestImplEnv extends AbstractBinder {
             so.append("		<div id=\"root\">\n");
             so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
 
-            so.append(getEnvironmentMenu(wrksName));  
+            so.append(getEnvironmentMenu(artName));  
             
             // agent's content
             so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
@@ -148,9 +153,9 @@ public class RestImplEnv extends AbstractBinder {
             so.append("							<center><img src='" + artName + "/img.svg'/></center><br/>\n");
             so.append("						</div>\n");
             so.append("					</div>\n");
-            so.append("					<div id=\"artifactinspection\" class=\"card fluid\">\n");
+            so.append("					<div id=\"inspection\" class=\"card fluid\">\n");
             so.append("						<div class=\"section\">\n"); 
-            so.append("							Inspection of artifact <b>" + info.getId().getName() + "</b> in workspace \"" + wrksName + "\n");
+            so.append("							Artifact <b>" + info.getId().getName() + "</b> in workspace <b>" + wrksName + "</b>\n");
             so.append("<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
             for (ArtifactObsProperty op: info.getObsProperties()) {
                 StringBuilder vls = new StringBuilder();
