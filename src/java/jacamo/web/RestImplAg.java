@@ -189,6 +189,14 @@ public class RestImplAg extends AbstractBinder {
         //show.put("int-details", false);
     }
 
+    @Path("/{agentname}/collapse")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String setHide(@PathParam("agentname") String agName) {
+
+        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/mind'\" /></head>ok";
+    }
+
     @Path("/{agentname}/hide")
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -288,6 +296,8 @@ public class RestImplAg extends AbstractBinder {
         // details
         so.append("					<div id=\"mind\" class=\"card fluid\">\n" + 
                   "						<div class=\"section\">\n"); 
+        so.append("							<a href='#/' id='expAll' class='exp'>Expand/Collapse </a>\n"); 
+        
         try {
             if (mindInspectorTransformerHTML == null) {
                 mindInspectorTransformerHTML = new asl2html("/xml/agInspection.xsl");
@@ -369,6 +379,22 @@ public class RestImplAg extends AbstractBinder {
                 "        http.send();\n"+
                 "    }\n" + 
                 "    showLog(); \n");
+        
+        so.append("// Expand/collapse function\n" + 
+                "var xa = document.getElementById('expAll');\n" + 
+                "xa.addEventListener('click', function(e) {\n" + 
+                "  e.target.classList.toggle('exp');\n" + 
+                "  e.target.classList.toggle('col');\n" + 
+                "  var details = document.querySelectorAll('details');\n" + 
+                "  Array.from(details).forEach(function(obj, idx) {\n" + 
+                "    if (e.target.classList.contains('exp')) {\n" + 
+                "      obj.open = true;\n" + 
+                "    } else {\n" + 
+                "      obj.open = false;\n" + 
+                "    }\n" + 
+                "  });\n" + 
+                "}, false);");
+        
         // copy to 'menucontent' the menu to show on drop down main page menu
         so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
         so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n"); 
@@ -603,8 +629,6 @@ public class RestImplAg extends AbstractBinder {
 
             {// beliefs will be placed on the left
                 sb.append("\tsubgraph cluster_mind {\n");
-                sb.append("\t\tlabel=\"mind\"\n");
-                sb.append("\t\tlabeljust=\"r\"\n");
                 sb.append("\t\tstyle=rounded\n");
                 ag.getBB().getNameSpaces().forEach(x -> {
                     sb.append("\t\t\"" + x + "\" [ " + "\n\t\t\tlabel = \"" + x + "\"");
