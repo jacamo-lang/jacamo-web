@@ -330,7 +330,7 @@ public class RestImplAg extends AbstractBinder {
         
         so.append("					<div id=\"uploadplans\" class=\"card fluid\">\n");
         so.append("						<div class=\"section\">\n"); 
-        so.append("							<embed src='load_plans_form/' width=\"100%\"/>\n");
+        so.append("							<embed src='load_plans_form/' width=\"100%\" height=\"220px\"/>\n");
         so.append("						</div>\n"); 
         so.append("					</div>\n"); 
         so.append("				</main>\n"); 
@@ -422,9 +422,8 @@ public class RestImplAg extends AbstractBinder {
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
         return  "<html><head><title>load plans for "+agName+"</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
-                "Enter Jason code below:<br/><textarea name=\"plans\" form=\"usrform\" placeholder=\"Write plans here...\" rows=\"5\" cols=\"62\"></textarea>" +
-                "<br/>or upload a file: <input type=\"file\" name=\"file\"><br/><input type=\"submit\" value=\"Upload\">"+
-                "</form></html>";
+                "Enter Jason code:<br/><textarea name=\"plans\" form=\"usrform\" placeholder=\"Write plans here...\" rows=\"3\" cols=\"62\"></textarea>" +
+                "<br/>or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload\"></form></html>";
     }
 
     @Path("/{agentname}/plans")
