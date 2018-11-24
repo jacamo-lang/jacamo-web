@@ -43,6 +43,35 @@ public class RestImplOrg extends AbstractBinder {
         bind(new RestImplOrg()).to(RestImplOrg.class);
     }
 
+    public String designPage(String title, String selectedItem, String mainContent) {
+        StringWriter so = new StringWriter();
+        so.append("<!DOCTYPE html><html lang=\"en\" target=\"mainframe\">\n");
+        so.append("	<head>\n");
+        so.append("		<title>" + title + "</title>\n");
+        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+        so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+        so.append("	</head>\n");
+        so.append("	<body>\n");
+        so.append("		<div id=\"root\">\n");
+        so.append("			<div class=\"row\" id=\"doc-wrapper\">\n");
+        so.append(              getOrganisationMenu(selectedItem));
+        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n");
+        so.append(                  mainContent);
+        so.append("				</main>\n");
+        so.append("			</div>\n");
+        so.append("		</div>\n");
+        so.append("	</body>\n");
+        // copy to 'menucontent' the menu to show on drop down main page menu
+        so.append("	<script>\n");
+        so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n");
+        so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n");
+        so.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
+        so.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
+        so.append("	</script>\n");
+        so.append("</html>\n");
+        return so.toString();
+    }
+
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getOrgHtml() throws CartagoException {
@@ -366,34 +395,4 @@ public class RestImplOrg extends AbstractBinder {
         }
         return "error"; // TODO: set response properly
     }
-
-    public String designPage(String title, String selectedItem, String mainContent) {
-        StringWriter so = new StringWriter();
-        so.append("<!DOCTYPE html><html lang=\"en\" target=\"mainframe\">\n");
-        so.append("	<head>\n");
-        so.append("		<title>" + title + "</title>\n");
-        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
-        so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-        so.append("	</head>\n");
-        so.append("	<body>\n");
-        so.append("		<div id=\"root\">\n");
-        so.append("			<div class=\"row\" id=\"doc-wrapper\">\n");
-        so.append(              getOrganisationMenu(selectedItem));
-        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n");
-        so.append(                  mainContent);
-        so.append("				</main>\n");
-        so.append("			</div>\n");
-        so.append("		</div>\n");
-        so.append("	</body>\n");
-        // copy to 'menucontent' the menu to show on drop down main page menu
-        so.append("	<script>\n");
-        so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n");
-        so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n");
-        so.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
-        so.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
-        so.append("	</script>\n");
-        so.append("</html>\n");
-        return so.toString();
-    }
-
 }

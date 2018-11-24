@@ -46,32 +46,21 @@ public class RestImplEnv extends AbstractBinder {
             "manrepo",
         }));
 
-
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getWorkspacesHtml() {
+    public String designPage(String title, String selectedItem, String mainContent) {
         StringWriter so = new StringWriter();
         so.append("<!DOCTYPE html>\n");
         so.append("<html lang=\"en\" target=\"mainframe\">\n");
         so.append("	<head>\n");
-        so.append("		<title>JaCamo-Rest - Environment</title>\n");
+        so.append("		<title>" + title + "</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
         so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
         so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
-        so.append(getEnvironmentMenu(""));                
+        so.append(              getEnvironmentMenu(selectedItem));                
         so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
-        so.append("					<div id=\"getting-started\" class=\"card fluid\">\n"); 
-        so.append("						<h2 class=\"section double-padded\">Getting started</h2>\n"); 
-        so.append("						<div class=\"section\">\n"); 
-        so.append("							<p>\n" +
-                "								<a href=\"http://cartago.sourceforge.net\" target=\"_blank\">CArtAgO</a> is an <a href=\"https://github.com/cartago-lang/cartago\" target=\"_blank\">open-source</a> Java-based Framework for Programming Environments in Agent-oriented Applications." +       
-                "							</p> " +        
-                "							<br/>\n");
-        so.append("						</div>\n");
-        so.append("					</div>\n");
+        so.append(                  mainContent);
         so.append("				</main>\n"); 
         so.append("			</div>\n"); 
         so.append("		</div>\n"); 
@@ -86,28 +75,45 @@ public class RestImplEnv extends AbstractBinder {
         so.append("</html>\n");
         return so.toString();
     }
+        
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getWorkspacesHtml() {
+        StringWriter mainContent = new StringWriter();
+        mainContent.append("<div id=\"getting-started\" class=\"card fluid\">\n"); 
+        mainContent.append("	<h2 class=\"section double-padded\">Getting started</h2>\n"); 
+        mainContent.append("	<div class=\"section\">\n"); 
+        mainContent.append("		<p>\n");
+        mainContent.append("			<a href=\"http://cartago.sourceforge.net\" target=\"_blank\">CArtAgO</a> is an <a href=\"https://github.com/cartago-lang/cartago\" target=\"_blank\">open-source</a> Java-based Framework for Programming Environments in Agent-oriented Applications.");       
+        mainContent.append("		</p> ");        
+        mainContent.append("		<br/>\n");
+        mainContent.append("	</div>\n");
+        mainContent.append("</div>\n");
+        
+        return designPage("JaCamo-Rest - Environment","",mainContent.toString());
+    }
 
     private String getEnvironmentMenu(String selectedArtifact) {
         
         StringWriter so = new StringWriter();
 
-        so.append("				<input id=\"doc-drawer-checkbox-frame\" class=\"leftmenu\" value=\"on\" type=\"checkbox\">\n"); 
-        so.append("				<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer-frame\">\n");
-        so.append("					</br>\n"); 
+        so.append("<input id=\"doc-drawer-checkbox-frame\" class=\"leftmenu\" value=\"on\" type=\"checkbox\">\n"); 
+        so.append("<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer-frame\">\n");
+        so.append("	</br>\n"); 
 
         for (String wname: CartagoService.getNode().getWorkspaces()) {
             try {
-                so.append("					<h5 style=\"margin:0;\">" + wname + "</h5>\n");
+                so.append("	<h5 style=\"margin:0;\">" + wname + "</h5>\n");
                 for (ArtifactId aid: CartagoService.getController(wname).getCurrentArtifacts()) {
                     if (hidenArts.contains(aid.getName()))
                         continue;
                     if (aid.getName().endsWith("-body"))
                         continue;
                     String addr = "/workspaces/"+wname+"/"+aid.getName();
-                    so.append("					<a href=\"" + addr + "\" id=\"link-to-" + wname + "\" target='mainframe'>" + aid.getName() + "</a>\n");
+                    so.append("	<a href=\"" + addr + "\" id=\"link-to-" + wname + "\" target='mainframe'>" + aid.getName() + "</a>\n");
                     if (aid.getName().equals(selectedArtifact)) {
-                        so.append("					<a href=\"" + addr + "#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
-                        so.append("					<a href=\"" + addr + "#inspection\" id=\"link-to-inspection\" target='mainframe'>.  Inspection</a>\n");
+                        so.append("	<a href=\"" + addr + "#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
+                        so.append("	<a href=\"" + addr + "#inspection\" id=\"link-to-inspection\" target='mainframe'>.  Inspection</a>\n");
                     }
 
                 }
@@ -116,7 +122,7 @@ public class RestImplEnv extends AbstractBinder {
                 e.printStackTrace();
             }
         }
-        so.append("				</nav>\n");
+        so.append("</nav>\n");
         
         return so.toString();
     }
@@ -126,37 +132,19 @@ public class RestImplEnv extends AbstractBinder {
     @Produces(MediaType.TEXT_HTML)
     public String getArtifactHtml(@PathParam("wrksname") String wrksName, @PathParam("artname") String artName) {
         try {
-            //String img = "<img src='"+artName+"/img.svg' /><br/>";
-            
             ArtifactInfo info = CartagoService.getController(wrksName).getArtifactInfo(artName);
-            StringWriter so = new StringWriter();
+            StringWriter mainContent = new StringWriter();
             
-            so.append("<!DOCTYPE html>\n"); 
-            so.append("<html lang=\"en\" target=\"mainframe\">\n"); 
-            so.append("	<head>\n");
-            so.append("		<title>JaCamo-Rest - Environment: " + wrksName + "</title>\n");
-            so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
-            so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-            so.append("	</head>\n"); 
-            so.append("	<body>\n"); 
-            so.append("		<div id=\"root\">\n");
-            so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
-
-            so.append(getEnvironmentMenu(artName));  
-            
-            // agent's content
-            so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
-
             // overview
-            so.append("					<div id=\"overview\" class=\"card fluid\">\n"); 
-            so.append("						<div class=\"section\">\n");
-            so.append("							<center><img src='" + artName + "/img.svg'/></center><br/>\n");
-            so.append("						</div>\n");
-            so.append("					</div>\n");
-            so.append("					<div id=\"inspection\" class=\"card fluid\">\n");
-            so.append("						<div class=\"section\">\n"); 
-            so.append("							Artifact <b>" + info.getId().getName() + "</b> in workspace <b>" + wrksName + "</b>\n");
-            so.append("<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
+            mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
+            mainContent.append("	<div class=\"section\">\n");
+            mainContent.append("		<center><img src='" + artName + "/img.svg'/></center><br/>\n");
+            mainContent.append("	</div>\n");
+            mainContent.append("</div>\n");
+            mainContent.append("<div id=\"inspection\" class=\"card fluid\">\n");
+            mainContent.append("	<div class=\"section\">\n"); 
+            mainContent.append("		Artifact <b>" + info.getId().getName() + "</b> in workspace <b>" + wrksName + "</b>\n");
+            mainContent.append("		<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
             for (ArtifactObsProperty op: info.getObsProperties()) {
                 StringBuilder vls = new StringBuilder();
                 String v = "";
@@ -164,21 +152,13 @@ public class RestImplEnv extends AbstractBinder {
                     vls.append(v+vl);
                     v = ",";
                 }
-                so.append("<tr><td>"+op.getName()+"</td><td>"+vls+"</td></tr>");
+                mainContent.append("		<tr><td>"+op.getName()+"</td><td>"+vls+"</td></tr>");
             }
-            so.append("</details></table>");
-            so.append("                     </div>\n"); 
-            so.append("                 </div>\n"); 
-            so.append("             </main>\n"); 
-            so.append("         </div>\n");
-            so.append("     </div>\n");
-            so.append(" </body>\n");
-            so.append(" <script language=\"JavaScript\">\n");
-            // function to run Jason commands
-            so.append(" </script>\n");
-            so.append("</html>\n");
+            mainContent.append("		</table>");
+            mainContent.append("	</div>\n"); 
+            mainContent.append("</div>\n"); 
             
-            return so.toString();
+            return designPage("JaCamo-Rest - Environment: " + wrksName,artName,mainContent.toString());
         } catch (CartagoException e) {
             e.printStackTrace();
         }

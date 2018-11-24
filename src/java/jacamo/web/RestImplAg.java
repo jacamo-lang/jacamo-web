@@ -68,77 +68,141 @@ public class RestImplAg extends AbstractBinder {
     protected void configure() {
         bind(new RestImplAg()).to(RestImplAg.class);
     }
-
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getAgentsHtml() {
+    
+    public String designPage(String title, String selectedItem, String mainContent) {
         StringWriter so = new StringWriter();
         so.append("<!DOCTYPE html>\n");
         so.append("<html lang=\"en\" target=\"mainframe\">\n");
         so.append("	<head>\n");
-        so.append("		<title>JaCamo-Rest - Agents</title>\n");
+        so.append("		<title>" + title + "</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
         so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
         so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
-        so.append(getAgentsMenu(""));                
+        so.append(              getAgentsMenu(selectedItem));
         so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
-        so.append("					<div id=\"getting-started\" class=\"card fluid\">\n"); 
-        so.append("						<h2 class=\"section double-padded\">Getting started</h2>\n"); 
-        so.append("						<div class=\"section\">\n"); 
-        so.append("							<p>\n" +
-                  "								<a href=\"http://jason.sourceforge.net/\" target=\"_blank\">Jason</a> is an interpreter for an extended version of AgentSpeak. It implements the operational semantics of that language, " +
-                  "								and provides a platform for the development of multi-agent systems, with many user-customisable features. Jason is " + 
-                  "								available as <a href=\"https://github.com/jason-lang/jason\" target=\"_blank\">open-source</a>, and is distributed under GNU LGPL.\n" +
-                  "							</p>\n" + 
-                  "							<br/>\n");
-        so.append("							<p>\n" +
-                "								Using command text box you can send orders to the agents, change plans, add and \n" +
-                "								remove beliefs and so on, just using <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>'s AgentSpeak sentences.</p>\n" + 
-                "							</p>\n" + 
-                "							<br/>\n");
-        so.append("							<p>\n" +
-                  "								You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered services the agents are providing." +
-                  "								You can also <a href=\"/forms/new_agent\" target='mainframe'>create</a> a new agent and kill some existing one.\n" + 
-                  "								<mark class=\"do\">Attention:</mark> killing agents may cause data loss. Make sure you don't need the data or the agent is using persistent belief base.\n" + 
-                  "							</p>\n" +
-                  "							<br/>\n");
-        so.append("						</div>\n");
-        so.append("					</div>\n");
+        so.append(                  mainContent);
         so.append("				</main>\n"); 
         so.append("			</div>\n"); 
         so.append("		</div>\n"); 
         so.append("	</body>\n");
         // copy to 'menucontent' the menu to show on drop down main page menu
-        so.append("	<script>\n");
+        so.append("	<script language=\"JavaScript\">\n");
         so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
         so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n"); 
         so.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
         so.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
+        // function to run Jason commands
+        so.append("		function runCMD() {\n" +
+                "        http = new XMLHttpRequest();\n" + 
+                "        http.onreadystatechange = function() { \n" + 
+                "          if (http.readyState == 4 && http.status == 200) {\n" +
+                "                location.reload();\n" + 
+                "                document.getElementById('display').innerHTML = \"  result: \" + http.responseText;\n" + 
+                "        } }\n" + 
+                "        http.open(\"POST\", \"cmd\", true); // true for asynchronous \n" +
+                "        http.setRequestHeader(\"Content-type\", \"application/x-www-form-urlencoded\");\n" +
+                "        data = 'c='+encodeURIComponent(document.getElementById(\"inputcmd\").value); \n"+
+                //"        document.getElementById('debug').innerHTML = data\n" + 
+                "        http.send(data);\n"+
+                "    }\n" + 
+                "    function killAg() {\n" +
+                "        h2 = new XMLHttpRequest();\n" + 
+                "        h2.open('DELETE', '/agents/"+selectedItem+"', false); \n" +
+                "        h2.send(); \n" +
+                "    }\n" + 
+                "    function delLog() {\n" +
+                "        h2 = new XMLHttpRequest();\n" + 
+                "        h2.open('DELETE', 'log', false); \n" +
+                "        h2.send(); \n" +
+                "    }\n" + 
+                "    function showLog() {\n" +
+                "        http = new XMLHttpRequest();\n" + 
+                "        http.onreadystatechange = function() { \n" + 
+                "          if (http.readyState == 4 && http.status == 200) {\n" +
+                "                document.getElementById('log').innerHTML = http.responseText;\n" + 
+                "                if (http.responseText.length > 1) {\n" + 
+                "                      var btn = document.createElement(\"BUTTON\"); \n" + 
+                "                      var t = document.createTextNode(\"clear log\");\n" + 
+                "                      btn.appendChild(t); \n" +
+                "                      btn.onclick = function() { delLog(); location.reload(); }; \n" +
+                "                      document.getElementById('plog').appendChild(btn);  "+
+                "                }\n" + 
+                "        } }\n" + 
+                "        http.open('GET', 'log', true); \n" +
+                "        http.send();\n"+
+                "    }\n" + 
+                "    showLog(); \n");
+        so.append("// Expand/collapse function\n" + 
+                "var xa = document.getElementById('expAll');\n" + 
+                "xa.addEventListener('click', function(e) {\n" + 
+                "  e.target.classList.toggle('exp');\n" + 
+                "  e.target.classList.toggle('col');\n" + 
+                "  var details = document.querySelectorAll('details');\n" + 
+                "  Array.from(details).forEach(function(obj, idx) {\n" + 
+                "    if (e.target.classList.contains('exp')) {\n" + 
+                "      obj.open = true;\n" + 
+                "    } else {\n" + 
+                "      obj.open = false;\n" + 
+                "    }\n" + 
+                "  });\n" + 
+                "}, false);");
         so.append("	</script>\n");
         so.append("</html>\n");
+        
         return so.toString();
+    }
+
+
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getAgentsHtml() {
+        StringWriter mainContent = new StringWriter();
+        mainContent.append("<div id=\"getting-started\" class=\"card fluid\">\n"); 
+        mainContent.append("	<h2 class=\"section double-padded\">Getting started</h2>\n"); 
+        mainContent.append("	<div class=\"section\">\n"); 
+        mainContent.append("		<p>\n");
+        mainContent.append("			<a href=\"http://jason.sourceforge.net/\" target=\"_blank\">Jason</a> is an interpreter for an extended version of AgentSpeak. It implements the operational semantics of that language, ");
+        mainContent.append("			and provides a platform for the development of multi-agent systems, with many user-customisable features. Jason is ");
+        mainContent.append("			available as <a href=\"https://github.com/jason-lang/jason\" target=\"_blank\">open-source</a>, and is distributed under GNU LGPL.\n");
+        mainContent.append("		</p>\n"); 
+        mainContent.append("		<br/>\n");
+        mainContent.append("		<p>\n");
+        mainContent.append("			Using command text box you can send orders to the agents, change plans, add and \n");
+        mainContent.append("			remove beliefs and so on, just using <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>'s AgentSpeak sentences.</p>\n"); 
+        mainContent.append("		</p>\n"); 
+        mainContent.append("		<br/>\n");
+        mainContent.append("		<p>\n");
+        mainContent.append("			You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered services the agents are providing.");
+        mainContent.append("			You can also <a href=\"/forms/new_agent\" target='mainframe'>create</a> a new agent and kill some existing one.\n"); 
+        mainContent.append("			<mark class=\"do\">Attention:</mark> killing agents may cause data loss. Make sure you don't need the data or the agent is using persistent belief base.\n"); 
+        mainContent.append("		</p>\n");
+        mainContent.append("		<br/>\n");
+        mainContent.append("	</div>\n");
+        mainContent.append("</div>\n");
+
+        return designPage("JaCamo-Rest - Agents","",mainContent.toString());
     }
 
     public String getAgentsMenu(String selectedAgent) {
         StringWriter so = new StringWriter();
 
-        so.append("				<input id=\"doc-drawer-checkbox-frame\" class=\"leftmenu\" value=\"on\" type=\"checkbox\">\n"); 
-        so.append("				<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer-frame\">\n");
-        so.append("					</br>\n"); 
+        so.append("<input id=\"doc-drawer-checkbox-frame\" class=\"leftmenu\" value=\"on\" type=\"checkbox\">\n"); 
+        so.append("<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer-frame\">\n");
+        so.append("	</br>\n"); 
         //so.append("                   <label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n"); 
         //so.append("                   <h3>Agents</h3>\n"); 
 
         if (JCMRest.getZKHost() == null) {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
-                so.append("					<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
+                so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                 if (a.equals(selectedAgent)) {
-                    so.append("					<a href=\"/agents/" + a + "/mind#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
-                    so.append("					<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
-                    so.append("					<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
-                    so.append("					<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
+                    so.append("	<a href=\"/agents/" + a + "/mind#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
+                    so.append("	<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
+                    so.append("	<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
+                    so.append("	<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
                 }
             }
         } else {
@@ -146,12 +210,12 @@ public class RestImplAg extends AbstractBinder {
             try {
                 for (String a : JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
-                    so.append("					<a href=\"" + url + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
+                    so.append("	<a href=\"" + url + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                     if (a.equals(selectedAgent)) {
-                        so.append("					<a href=\"/agents/" + a + "/mind#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
-                        so.append("					<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
-                        so.append("					<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
-                        so.append("					<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
+                        so.append("	<a href=\"/agents/" + a + "/mind#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
+                        so.append("	<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
+                        so.append("	<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
+                        so.append("	<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
                     }
                     Agent ag = getAgent(a);
                     if (ag != null)
@@ -161,7 +225,7 @@ public class RestImplAg extends AbstractBinder {
                 e.printStackTrace();
             }
         }                
-        so.append("				</nav>\n");
+        so.append("</nav>\n");
         return so.toString();
     }
     
@@ -254,48 +318,31 @@ public class RestImplAg extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getAgentHtml(@PathParam("agentname") String agName) {
-        StringWriter so = new StringWriter();
-        
-        so.append("<!DOCTYPE html>\n"); 
-        so.append("<html lang=\"en\" target=\"mainframe\">\n"); 
-        so.append("	<head>\n");
-        so.append("		<title>JaCamo-Rest - Agents: " + agName + "</title>\n");
-        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
-        so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-        so.append("	</head>\n"); 
-        so.append("	<body>\n"); 
-        so.append("		<div id=\"root\">\n");
-        so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
-
-        so.append(getAgentsMenu(agName));  
-        
-        // agent's content
-        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
+        StringWriter mainContent = new StringWriter();
 
         // command box
-        so.append("					<div id=\"command\" class=\"card fluid\">\n"); 
-        so.append("						<div class=\"section\">\n");
-        so.append("							<input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (" + helpMsg1 + ") ...\"\n"); 
-        so.append("							type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n");
-        so.append("						</div>\n"); 
-        so.append("						<div class=\"section\">\n");
-        //so.append("                           <code><span id='display'></span></code>");
-        so.append("							<pre><span id='log'></span></pre>");
-        so.append("							<span id='plog'></span>");
-        so.append("						</div>\n"); 
-        so.append("					</div>\n");
+        mainContent.append("<div id=\"command\" class=\"card fluid\">\n"); 
+        mainContent.append("	<div class=\"section\">\n");
+        mainContent.append("		<input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (" + helpMsg1 + ") ...\"\n"); 
+        mainContent.append("		type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n");
+        mainContent.append("	</div>\n"); 
+        mainContent.append("	<div class=\"section\">\n");
+        mainContent.append("		<pre><span id='log'></span></pre>");
+        mainContent.append("		<span id='plog'></span>");
+        mainContent.append("	</div>\n"); 
+        mainContent.append("</div>\n");
         
         // overview
-        so.append("					<div id=\"overview\" class=\"card fluid\">\n"); 
-        so.append("						<div class=\"section\">\n");
-        so.append("							<center><img src='mind/img.svg'/></center><br/>\n");
-        so.append("						</div>\n");
-        so.append("					</div>\n");
+        mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
+        mainContent.append("	<div class=\"section\">\n");
+        mainContent.append("		<center><img src='mind/img.svg'/></center><br/>\n");
+        mainContent.append("	</div>\n");
+        mainContent.append("</div>\n");
         
         // details
-        so.append("					<div id=\"mind\" class=\"card fluid\">\n" + 
-                  "						<div class=\"section\">\n"); 
-        so.append("							<a href='#/' id='expAll' class='exp'>Expand/Collapse </a>\n"); 
+        mainContent.append("<div id=\"mind\" class=\"card fluid\">\n");
+        mainContent.append("	<div class=\"section\">\n"); 
+        mainContent.append("		<a href='#/' id='expAll' class='exp'>Expand/Collapse </a>\n"); 
         
         try {
             if (mindInspectorTransformerHTML == null) {
@@ -305,103 +352,36 @@ public class RestImplAg extends AbstractBinder {
                 mindInspectorTransformerHTML.setParameter("show-" + p, show.get(p) + "");
             Agent ag = getAgent(agName);
             if (ag != null) {
-                so.append(mindInspectorTransformerHTML.transform(ag.getAgState()));
+                mainContent.append(mindInspectorTransformerHTML.transform(ag.getAgState()));
             }
         } catch (Exception e) {
             e.printStackTrace();
         } // transform to HTML
         
         // put plans on agent's mind section
-        so.append("							<details>\n");
-        so.append("								<summary style=\"text-align: left; color: blue; font-family: arial\">Agent's plans</summary>\n");
-        so.append("								<embed src='plans' width=\"100%\"/>\n");
-        so.append("							</details>\n");
+        mainContent.append("		<details>\n");
+        mainContent.append("			<summary style=\"text-align: left; color: blue; font-family: arial\">Agent's plans</summary>\n");
+        mainContent.append("			<embed src='plans' width=\"100%\"/>\n");
+        mainContent.append("		</details>\n");
 
-        so.append("						</div>\n"); 
-        so.append("						<div class=\"section\">\n"); 
+        mainContent.append("	</div>\n"); 
+        mainContent.append("	<div class=\"section\">\n"); 
         if (show.get("annots")) {
-            so.append("							<a href='hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
+            mainContent.append("		<a href='hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
         } else {
-            so.append("							<a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
+            mainContent.append("		<a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
         }
-        so.append("						</div>\n"); 
-        so.append("					</div>\n"); 
+        mainContent.append("	</div>\n"); 
+        mainContent.append("</div>\n"); 
         
-        so.append("					<div id=\"uploadplans\" class=\"card fluid\">\n");
-        so.append("						<div class=\"section\">\n"); 
-        so.append("							<embed src='load_plans_form/' width=\"100%\" height=\"220px\"/>\n");
-        so.append("						</div>\n"); 
-        so.append("					</div>\n"); 
-        so.append("				</main>\n"); 
-        so.append("			</div>\n");
-        so.append("		</div>\n");
-        so.append("	</body>\n");
-        so.append("	<script language=\"JavaScript\">\n");
-        // function to run Jason commands
-        so.append("		function runCMD() {\n" +
-                "        http = new XMLHttpRequest();\n" + 
-                "        http.onreadystatechange = function() { \n" + 
-                "          if (http.readyState == 4 && http.status == 200) {\n" +
-                "                location.reload();\n" + 
-                "                document.getElementById('display').innerHTML = \"  result: \" + http.responseText;\n" + 
-                "        } }\n" + 
-                "        http.open(\"POST\", \"cmd\", true); // true for asynchronous \n" +
-                "        http.setRequestHeader(\"Content-type\", \"application/x-www-form-urlencoded\");\n" +
-                "        data = 'c='+encodeURIComponent(document.getElementById(\"inputcmd\").value); \n"+
-                //"        document.getElementById('debug').innerHTML = data\n" + 
-                "        http.send(data);\n"+
-                "    }\n" + 
-                "    function killAg() {\n" +
-                "        h2 = new XMLHttpRequest();\n" + 
-                "        h2.open('DELETE', '/agents/"+agName+"', false); \n" +
-                "        h2.send(); \n" +
-                "    }\n" + 
-                "    function delLog() {\n" +
-                "        h2 = new XMLHttpRequest();\n" + 
-                "        h2.open('DELETE', 'log', false); \n" +
-                "        h2.send(); \n" +
-                "    }\n" + 
-                "    function showLog() {\n" +
-                "        http = new XMLHttpRequest();\n" + 
-                "        http.onreadystatechange = function() { \n" + 
-                "          if (http.readyState == 4 && http.status == 200) {\n" +
-                "                document.getElementById('log').innerHTML = http.responseText;\n" + 
-                "                if (http.responseText.length > 1) {\n" + 
-                "                      var btn = document.createElement(\"BUTTON\"); \n" + 
-                "                      var t = document.createTextNode(\"clear log\");\n" + 
-                "                      btn.appendChild(t); \n" +
-                "                      btn.onclick = function() { delLog(); location.reload(); }; \n" +
-                "                      document.getElementById('plog').appendChild(btn);  "+
-                "                }\n" + 
-                "        } }\n" + 
-                "        http.open('GET', 'log', true); \n" +
-                "        http.send();\n"+
-                "    }\n" + 
-                "    showLog(); \n");
+        // upload plans
+        mainContent.append("<div id=\"uploadplans\" class=\"card fluid\">\n");
+        mainContent.append("	<div class=\"section\">\n"); 
+        mainContent.append("		<embed src='load_plans_form/' width=\"100%\" height=\"220px\"/>\n");
+        mainContent.append("	</div>\n"); 
+        mainContent.append("</div>\n"); 
         
-        so.append("// Expand/collapse function\n" + 
-                "var xa = document.getElementById('expAll');\n" + 
-                "xa.addEventListener('click', function(e) {\n" + 
-                "  e.target.classList.toggle('exp');\n" + 
-                "  e.target.classList.toggle('col');\n" + 
-                "  var details = document.querySelectorAll('details');\n" + 
-                "  Array.from(details).forEach(function(obj, idx) {\n" + 
-                "    if (e.target.classList.contains('exp')) {\n" + 
-                "      obj.open = true;\n" + 
-                "    } else {\n" + 
-                "      obj.open = false;\n" + 
-                "    }\n" + 
-                "  });\n" + 
-                "}, false);");
-        
-        // copy to 'menucontent' the menu to show on drop down main page menu
-        so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
-        so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n"); 
-        so.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
-        so.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
-        so.append("	</script>\n");
-        so.append("</html>\n");
-        return so.toString();
+        return designPage("JaCamo-Rest - Agents: " + agName,agName,mainContent.toString());
     }
 
     @Path("/{agentname}")
@@ -734,5 +714,4 @@ public class RestImplAg extends AbstractBinder {
         }
         return null;
     }
-
 }
