@@ -89,23 +89,22 @@ public class RestImplAg extends AbstractBinder {
         so.append("						<h2 class=\"section double-padded\">Getting started</h2>\n"); 
         so.append("						<div class=\"section\">\n"); 
         so.append("							<p>\n" +
-                "								Using command text box you can send order to the agents, change plans, add and \n" +
-                "								remove beliefs, just using <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>'s AgentSpeak sentences.</p>\n" + 
-                "							</p>\n" + 
-                "							<br/>\n");
-        so.append("							<p>\n" +
-                  "								If you have any agent running you can click on its name and watch its mind, check relation and more.<br/>\n" +
+                  "								<a href=\"http://jason.sourceforge.net/\" target=\"_blank\">Jason</a> is an interpreter for an extended version of AgentSpeak. It implements the operational semantics of that language, " +
+                  "								and provides a platform for the development of multi-agent systems, with many user-customisable features. Jason is " + 
+                  "								available as <a href=\"https://github.com/jason-lang/jason\" target=\"_blank\">open-source</a>, and is distributed under GNU LGPL.\n" +
                   "							</p>\n" + 
                   "							<br/>\n");
         so.append("							<p>\n" +
-                  "								You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered agents the system has." +
+                "								Using command text box you can send orders to the agents, change plans, add and \n" +
+                "								remove beliefs and so on, just using <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>'s AgentSpeak sentences.</p>\n" + 
+                "							</p>\n" + 
+                "							<br/>\n");
+        so.append("							<p>\n" +
+                  "								You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered services the agents are providing." +
                   "								You can also <a href=\"/forms/new_agent\" target='mainframe'>create</a> a new agent and kill some existing one.\n" + 
+                  "								<mark class=\"do\">Attention:</mark> killing agents may cause data loss. Make sure you don't need the data or the agent is using persistent belief base.\n" + 
                   "							</p>\n" +
                   "							<br/>\n");
-        so.append("							<p>\n" +
-                "								<mark class=\"do\">Attention:</mark> killing agents may cause data loss. Make sure you don't need the data or the agent is using persistent belief base.\n" + 
-                "							</p>\n" +
-                "							<br/>\n");
         so.append("						</div>\n");
         so.append("					</div>\n");
         so.append("				</main>\n"); 

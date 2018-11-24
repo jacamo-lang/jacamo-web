@@ -67,7 +67,7 @@ public class RestImplEnv extends AbstractBinder {
         so.append("						<h2 class=\"section double-padded\">Getting started</h2>\n"); 
         so.append("						<div class=\"section\">\n"); 
         so.append("							<p>\n" +
-                "								Artifacts are <a href=\"http://cartago.sourceforge.net\" target=\"_blank\">CArtAgO</a> entities situated in a workspace. Agents may use them in their tasks." +
+                "								<a href=\"http://cartago.sourceforge.net\" target=\"_blank\">CArtAgO</a> is an <a href=\"https://github.com/cartago-lang/cartago\" target=\"_blank\">open-source</a> Java-based Framework for Programming Environments in Agent-oriented Applications." +       
                 "							</p> " +        
                 "							<br/>\n");
         so.append("						</div>\n");
