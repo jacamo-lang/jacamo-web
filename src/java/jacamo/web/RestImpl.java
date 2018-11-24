@@ -87,23 +87,6 @@ public class RestImpl extends AbstractBinder {
         return so.toString();
     }
 
-    @Path("/forms/new_agent")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getNewAgentForm() {
-        return  "<html><head><title>new agent form</title></head>"+
-                "<input type=\"text\" name=\"name\"  size=\"43\" id=\"inputcmd\" placeholder='enter the name of the agent' onkeydown=\"if (event.keyCode == 13) runCMD()\" />\n" + 
-                "<script language=\"JavaScript\">\n" + 
-                "    function runCMD() {\n" +
-                "        http = new XMLHttpRequest();\n" + 
-                "        http.open(\"POST\", '/agents/'+document.getElementById('inputcmd').value, false); \n" +
-                "        http.send();\n"+
-                "        window.location.href = '/agents/'+document.getElementById('inputcmd').value+'/mind';\n"+
-                "    }\n" + 
-                "</script>"+
-                "</form></html>";
-    }
-
     @Path("/css/style.css")
     @GET
     @Produces("text/css")

@@ -135,6 +135,12 @@ public class RestImplAg extends AbstractBinder {
                 "        http.send();\n"+
                 "    }\n" + 
                 "    showLog(); \n");
+        so.append("    function newAg() {\n" +
+                "        http = new XMLHttpRequest();\n" + 
+                "        http.open(\"POST\", '/agents/'+document.getElementById('createAgent').value, false); \n" +
+                "        http.send();\n"+
+                "        window.location.href = '/agents/'+document.getElementById('createAgent').value+'/mind';\n"+
+                "	}\n"); 
         so.append("// Expand/collapse function\n" + 
                 "var xa = document.getElementById('expAll');\n" + 
                 "xa.addEventListener('click', function(e) {\n" + 
@@ -148,7 +154,7 @@ public class RestImplAg extends AbstractBinder {
                 "      obj.open = false;\n" + 
                 "    }\n" + 
                 "  });\n" + 
-                "}, false);");
+                "}, false);\n");
         so.append("	</script>\n");
         so.append("</html>\n");
         
@@ -176,7 +182,7 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("		<br/>\n");
         mainContent.append("		<p>\n");
         mainContent.append("			You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered services the agents are providing.");
-        mainContent.append("			You can also <a href=\"/forms/new_agent\" target='mainframe'>create</a> a new agent and kill some existing one.\n"); 
+        mainContent.append("			You can also <a href=\"/agents/forms/new_agent\" target='mainframe'>create</a> a new agent and kill some existing one.\n"); 
         mainContent.append("			<mark class=\"do\">Attention:</mark> killing agents may cause data loss. Make sure you don't need the data or the agent is using persistent belief base.\n"); 
         mainContent.append("		</p>\n");
         mainContent.append("		<br/>\n");
@@ -325,11 +331,14 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("	<div class=\"section\">\n");
         mainContent.append("		<input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (" + helpMsg1 + ") ...\"\n"); 
         mainContent.append("		type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n");
-        mainContent.append("	</div>\n"); 
-        mainContent.append("	<div class=\"section\">\n");
-        mainContent.append("		<pre><span id='log'></span></pre>");
-        mainContent.append("		<span id='plog'></span>");
-        mainContent.append("	</div>\n"); 
+        mainContent.append("	</div>\n");
+        // if log is not empty
+        if (!agLog.get(agName).toString().equals("")) {
+            mainContent.append("	<div class=\"section\">\n");
+            mainContent.append("      <pre><span id='log'></span></pre>");
+            mainContent.append("      <span id='plog'></span>");
+            mainContent.append("	</div>\n"); 
+        }
         mainContent.append("</div>\n");
         
         // overview
@@ -582,7 +591,26 @@ public class RestImplAg extends AbstractBinder {
         }
         return Response.noContent().build(); // TODO: set response properly
     }
-    
+
+    @Path("/forms/new_agent")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getNewAgentForm() {
+        StringWriter mainContent = new StringWriter();
+        mainContent.append("<div id=\"create-agent\" class=\"card fluid\">\n"); 
+        mainContent.append("	<h2 class=\"section double-padded\">Create agent</h2>\n"); 
+        mainContent.append("	<div class=\"section\">\n"); 
+        mainContent.append("		<p>\n");
+        mainContent.append("			<input style=\"width: 100%; margin: 0px;\" placeholder=\"enter agent's name ...\"\n"); 
+        mainContent.append("			type=\"text\" id=\"createAgent\" onkeydown=\"if (event.keyCode == 13) newAg()\">\n");
+        mainContent.append("		</p>\n");
+        mainContent.append("		<br/>\n");
+        mainContent.append("	</div>\n");
+        mainContent.append("</div>\n");
+
+        return designPage("JaCamo-Rest - Agents: new agent","",mainContent.toString());
+    }
+
     protected String getAgAsDot(String agName) {
         String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
         
