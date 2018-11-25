@@ -64,6 +64,8 @@ import ora4mas.nopl.GroupBoard;
 @Path("/agents")
 public class RestImplAg extends AbstractBinder {
 
+    Map<String, StringBuilder> agLog = new HashMap<>();
+    
     @Override
     protected void configure() {
         bind(new RestImplAg()).to(RestImplAg.class);
@@ -88,6 +90,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("			</div>\n"); 
         so.append("		</div>\n"); 
         so.append("	</body>\n");
+        
         // copy to 'menucontent' the menu to show on drop down main page menu
         so.append("	<script language=\"JavaScript\">\n");
         so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
@@ -198,8 +201,6 @@ public class RestImplAg extends AbstractBinder {
         so.append("<input id=\"doc-drawer-checkbox-frame\" class=\"leftmenu\" value=\"on\" type=\"checkbox\">\n"); 
         so.append("<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer-frame\">\n");
         so.append("	</br>\n"); 
-        //so.append("                   <label for=\"doc-drawer-checkbox\" class=\"button drawer-close\"></label>\n"); 
-        //so.append("                   <h3>Agents</h3>\n"); 
 
         if (JCMRest.getZKHost() == null) {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
@@ -328,31 +329,32 @@ public class RestImplAg extends AbstractBinder {
 
         // command box
         mainContent.append("<div id=\"command\" class=\"card fluid\">\n"); 
-        mainContent.append("	<div class=\"section\">\n");
-        mainContent.append("		<input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (" + helpMsg1 + ") ...\"\n"); 
-        mainContent.append("		type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n");
-        mainContent.append("	</div>\n");
+        mainContent.append("    <div class=\"section\">\n");
+        mainContent.append("        <input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (" + helpMsg1 + ") ...\"\n"); 
+        mainContent.append("        type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n");
+        mainContent.append("    </div>\n");
         // if log is not empty
-        if (!agLog.get(agName).toString().equals("")) {
-            mainContent.append("	<div class=\"section\">\n");
+        if (!getLogOutput(agName).equals("")) {
+            mainContent.append("    <div class=\"section\">\n");
             mainContent.append("      <pre><span id='log'></span></pre>");
             mainContent.append("      <span id='plog'></span>");
-            mainContent.append("	</div>\n"); 
+            mainContent.append("    </div>\n"); 
         }
         mainContent.append("</div>\n");
         
         // overview
         mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
-        mainContent.append("	<div class=\"section\">\n");
-        mainContent.append("		<center><img src='mind/img.svg'/></center><br/>\n");
-        mainContent.append("	</div>\n");
+        mainContent.append("    <div class=\"section\">\n");
+        mainContent.append("        <center><img src='mind/img.svg'/></center><br/>\n");
+        mainContent.append("    </div>\n");
         mainContent.append("</div>\n");
+        
         
         // details
         mainContent.append("<div id=\"mind\" class=\"card fluid\">\n");
-        mainContent.append("	<div class=\"section\">\n"); 
-        mainContent.append("		<a href='#/' id='expAll' class='exp'>Expand/Collapse </a>\n"); 
-        
+        mainContent.append("    <div class=\"section\">\n"); 
+        mainContent.append("        <a href='#/' id='expAll' class='exp'>Expand/Collapse </a>\n"); 
+
         try {
             if (mindInspectorTransformerHTML == null) {
                 mindInspectorTransformerHTML = new asl2html("/xml/agInspection.xsl");
@@ -368,26 +370,26 @@ public class RestImplAg extends AbstractBinder {
         } // transform to HTML
         
         // put plans on agent's mind section
-        mainContent.append("		<details>\n");
-        mainContent.append("			<summary style=\"text-align: left; color: blue; font-family: arial\">Agent's plans</summary>\n");
-        mainContent.append("			<embed src='plans' width=\"100%\"/>\n");
-        mainContent.append("		</details>\n");
+        mainContent.append("        <details>\n");
+        mainContent.append("            <summary style=\"text-align: left; color: blue; font-family: arial\">Agent's plans</summary>\n");
+        mainContent.append("            <embed src='plans' width=\"100%\"/>\n");
+        mainContent.append("        </details>\n");
 
-        mainContent.append("	</div>\n"); 
-        mainContent.append("	<div class=\"section\">\n"); 
+        mainContent.append("    </div>\n"); 
+        mainContent.append("    <div class=\"section\">\n"); 
         if (show.get("annots")) {
-            mainContent.append("		<a href='hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
+            mainContent.append("        <a href='hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
         } else {
-            mainContent.append("		<a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
+            mainContent.append("        <a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
         }
-        mainContent.append("	</div>\n"); 
+        mainContent.append("    </div>\n"); 
         mainContent.append("</div>\n"); 
         
         // upload plans
         mainContent.append("<div id=\"uploadplans\" class=\"card fluid\">\n");
-        mainContent.append("	<div class=\"section\">\n"); 
-        mainContent.append("		<embed src='load_plans_form/' width=\"100%\" height=\"220px\"/>\n");
-        mainContent.append("	</div>\n"); 
+        mainContent.append("    <div class=\"section\">\n"); 
+        mainContent.append("        <embed src='load_plans_form/' width=\"100%\" height=\"180px\"/>\n");
+        mainContent.append("    </div>\n"); 
         mainContent.append("</div>\n"); 
         
         return designPage("JaCamo-Rest - Agents: " + agName,agName,mainContent.toString());
@@ -410,7 +412,7 @@ public class RestImplAg extends AbstractBinder {
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
         return  "<html><head><title>load plans for "+agName+"</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
-                "Enter Jason code:<br/><textarea name=\"plans\" form=\"usrform\" placeholder=\"Write plans here...\" rows=\"3\" cols=\"62\"></textarea>" +
+                "<textarea name=\"plans\" form=\"usrform\" placeholder=\"Write Jason plans here...\" style=\"width:99%; overflow: auto;\"></textarea>" +
                 "<br/>or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload\"></form></html>";
     }
 
@@ -477,8 +479,6 @@ public class RestImplAg extends AbstractBinder {
         return so.toString();
     }
 
-    Map<String, StringBuilder> agLog = new HashMap<>();
-    
     @Path("/{agentname}/cmd")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
