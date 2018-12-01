@@ -1,6 +1,9 @@
 package jacamo.web;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -220,7 +223,8 @@ public class RestImplEnv extends AbstractBinder {
                             : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
                     sb.append(s1 + "\"\n");
                     sb.append("\t\tshape = \"record\"\n");
-                    sb.append("\t\t\tURL = \"" + info.getId().getName() + "/img.svg\"\n");
+                    sb.append("\t\tURL = \"" + info.getId().getWorkspaceId().getName() + "/" +  
+                    		info.getId().getName() + "/img.svg\"\n");
                     sb.append("\t\t];\n");
                 }
                 info.getObservers().forEach(y -> {
@@ -231,7 +235,7 @@ public class RestImplEnv extends AbstractBinder {
                                 ? y.getAgentId().getAgentName()
                                 : y.getAgentId().getAgentName().substring(0, MAX_LENGTH) + "...";
                         sb.append("\t\"" + y.getAgentId().getAgentName() + "\" [ " + "\n\t\tlabel = \"" + s2 + "\"\n");
-                        sb.append("\t\tURL = \"../../agents/" + y.getAgentId().getAgentName() + "/mind\"\n");
+                        sb.append("\t\tURL = \"/agents/" + y.getAgentId().getAgentName() + "/mind\"\n");
                         sb.append("\t];\n");
 
                         // print arrow
@@ -328,7 +332,8 @@ public class RestImplEnv extends AbstractBinder {
                 s2 = (y.getArtifactType().length() <= MAX_LENGTH) ? y.getArtifactType()
                         : y.getArtifactType().substring(0, MAX_LENGTH) + "...";
                 sb.append(s2 + "\"\n");
-                sb.append("\t\tURL = \"../" + y.getName() + "/img.svg\"\n");
+                sb.append("\t\tURL = \"" + y.getWorkspaceId().getName() + "/" +  
+                			y.getName() + "/img.svg\"\n");
                 sb.append("\t\tshape = \"record\"\n");
                 sb.append("\t];\n");
 
@@ -346,7 +351,7 @@ public class RestImplEnv extends AbstractBinder {
                             : y.getAgentId().getAgentName().substring(0, MAX_LENGTH) + "...";
                     sb.append("\t\"" + y.getAgentId().getAgentName() + "\" [ " + "\n\t\tlabel = \""
                             + s2 + "\"\n");
-                    sb.append("\t\tURL = \"../../../agents/" + y.getAgentId().getAgentName() + "/mind\"\n");
+                    sb.append("\t\tURL = \"/agents/" + y.getAgentId().getAgentName() + "/mind\"\n");
                     sb.append("\t];\n");
                     
                     // print arrow
@@ -357,6 +362,16 @@ public class RestImplEnv extends AbstractBinder {
             
             sb.append("}\n");
             graph = sb.toString();
+            
+            // for debug            
+            try (FileWriter fw = new FileWriter("graph.gv", false); 
+                    BufferedWriter bw = new BufferedWriter(fw); 
+                    PrintWriter out = new PrintWriter(bw)) {    
+                out.print(graph);   
+                out.flush();    
+                out.close();    
+            } catch (Exception ex) {    
+            }
             
         } catch (CartagoException e) {
             e.printStackTrace();

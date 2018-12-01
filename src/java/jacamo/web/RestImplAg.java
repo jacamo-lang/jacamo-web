@@ -706,7 +706,7 @@ public class RestImplAg extends AbstractBinder {
                                         sb.append(str1 + "\"\n");
 
                                         sb.append("\t\t\tshape=record style=filled fillcolor=white\n");
-                                        sb.append("\t\t\tURL=\"[../../workspaces/" + wksName + "/" + info.getId().getName() + "/img.svg]\"\n");
+                                        sb.append("\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName() + "/img.svg\"\n");
                                         sb.append("\t\t];\n");
 
                                         sb.append("\t};\n");
