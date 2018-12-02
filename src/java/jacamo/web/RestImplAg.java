@@ -345,7 +345,7 @@ public class RestImplAg extends AbstractBinder {
         // overview
         mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
         mainContent.append("    <div class=\"section\">\n");
-        mainContent.append("        <center><img src='mind/img.svg'/></center><br/>\n");
+        mainContent.append("        <center><object data=\"mind/img.svg\" type=\"image/svg+xml\"></object></center><br/>\n");
         mainContent.append("    </div>\n");
         mainContent.append("</div>\n");
         
@@ -706,7 +706,8 @@ public class RestImplAg extends AbstractBinder {
                                         sb.append(str1 + "\"\n");
 
                                         sb.append("\t\t\tshape=record style=filled fillcolor=white\n");
-                                        sb.append("\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName() + "/img.svg\"\n");
+                                        sb.append("\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName() + "\"\n");
+                                        sb.append("\t\t\ttarget=\"mainframe\"\n");
                                         sb.append("\t\t];\n");
 
                                         sb.append("\t};\n");

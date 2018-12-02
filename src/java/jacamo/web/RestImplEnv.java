@@ -1,9 +1,6 @@
 package jacamo.web;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -141,7 +138,8 @@ public class RestImplEnv extends AbstractBinder {
             // overview
             mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
             mainContent.append("	<div class=\"section\">\n");
-            mainContent.append("		<center><img src='" + artName + "/img.svg'/></center><br/>\n");
+            mainContent.append("        <center><object data=\"" + artName + "/img.svg\" type=\"image/svg+xml\"></object></center><br/>\n");
+            
             mainContent.append("	</div>\n");
             mainContent.append("</div>\n");
             mainContent.append("<div id=\"inspection\" class=\"card fluid\">\n");
@@ -222,7 +220,7 @@ public class RestImplEnv extends AbstractBinder {
                     s1 = (info.getId().getArtifactType().length() <= MAX_LENGTH) ? info.getId().getArtifactType()
                             : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
                     sb.append(s1 + "\"\n");
-                    sb.append("\t\tshape = \"record\"\n");
+                    sb.append("\t\tshape=record style=filled fillcolor=white\n");
                     sb.append("\t\tURL = \"" + info.getId().getWorkspaceId().getName() + "/" +  
                     		info.getId().getName() + "/img.svg\"\n");
                     sb.append("\t\t];\n");
@@ -236,6 +234,8 @@ public class RestImplEnv extends AbstractBinder {
                                 : y.getAgentId().getAgentName().substring(0, MAX_LENGTH) + "...";
                         sb.append("\t\"" + y.getAgentId().getAgentName() + "\" [ " + "\n\t\tlabel = \"" + s2 + "\"\n");
                         sb.append("\t\tURL = \"/agents/" + y.getAgentId().getAgentName() + "/mind\"\n");
+                        sb.append("\t\t\ttarget=\"mainframe\"\n");
+                        sb.append("\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
                         sb.append("\t];\n");
 
                         // print arrow
@@ -319,7 +319,7 @@ public class RestImplEnv extends AbstractBinder {
             });   
             sb.append("\t\t\t\"\n");
 
-            sb.append("\t\tshape = \"record\"\n");
+            sb.append("\t\tshape=record style=filled fillcolor=white\n");
             sb.append("\t];\n");
 
             // linked artifacts
@@ -332,9 +332,10 @@ public class RestImplEnv extends AbstractBinder {
                 s2 = (y.getArtifactType().length() <= MAX_LENGTH) ? y.getArtifactType()
                         : y.getArtifactType().substring(0, MAX_LENGTH) + "...";
                 sb.append(s2 + "\"\n");
-                sb.append("\t\tURL = \"" + y.getWorkspaceId().getName() + "/" +  
-                			y.getName() + "/img.svg\"\n");
-                sb.append("\t\tshape = \"record\"\n");
+                sb.append("\t\tURL = \"/workspaces/" + y.getWorkspaceId().getName() + "/" +  
+                			y.getName() + "\"\n");
+                sb.append("\t\ttarget=\"mainframe\"\n");
+                sb.append("\t\tshape=record style=filled fillcolor=white\n");
                 sb.append("\t];\n");
 
                 // print arrow
@@ -352,6 +353,8 @@ public class RestImplEnv extends AbstractBinder {
                     sb.append("\t\"" + y.getAgentId().getAgentName() + "\" [ " + "\n\t\tlabel = \""
                             + s2 + "\"\n");
                     sb.append("\t\tURL = \"/agents/" + y.getAgentId().getAgentName() + "/mind\"\n");
+                    sb.append("\t\t\ttarget=\"mainframe\"\n");
+                    sb.append("\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
                     sb.append("\t];\n");
                     
                     // print arrow
@@ -362,16 +365,6 @@ public class RestImplEnv extends AbstractBinder {
             
             sb.append("}\n");
             graph = sb.toString();
-            
-            // for debug            
-            try (FileWriter fw = new FileWriter("graph.gv", false); 
-                    BufferedWriter bw = new BufferedWriter(fw); 
-                    PrintWriter out = new PrintWriter(bw)) {    
-                out.print(graph);   
-                out.flush();    
-                out.close();    
-            } catch (Exception ex) {    
-            }
             
         } catch (CartagoException e) {
             e.printStackTrace();
