@@ -345,7 +345,7 @@ public class RestImplAg extends AbstractBinder {
         // overview
         mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
         mainContent.append("    <div class=\"section\">\n");
-        mainContent.append("        <center><object data=\"mind/img.svg\" type=\"image/svg+xml\"></object></center><br/>\n");
+        mainContent.append("        <center><object data=\"mind/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
         mainContent.append("    </div>\n");
         mainContent.append("</div>\n");
         

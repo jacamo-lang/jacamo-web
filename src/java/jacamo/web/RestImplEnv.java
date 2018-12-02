@@ -138,7 +138,7 @@ public class RestImplEnv extends AbstractBinder {
             // overview
             mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
             mainContent.append("	<div class=\"section\">\n");
-            mainContent.append("        <center><object data=\"" + artName + "/img.svg\" type=\"image/svg+xml\"></object></center><br/>\n");
+            mainContent.append("        <center><object data=\"/workspaces/" + wrksName + "/" + artName + "/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
             
             mainContent.append("	</div>\n");
             mainContent.append("</div>\n");
@@ -222,7 +222,7 @@ public class RestImplEnv extends AbstractBinder {
                     sb.append(s1 + "\"\n");
                     sb.append("\t\tshape=record style=filled fillcolor=white\n");
                     sb.append("\t\tURL = \"" + info.getId().getWorkspaceId().getName() + "/" +  
-                    		info.getId().getName() + "/img.svg\"\n");
+                    		info.getId().getName() + "\"\n");
                     sb.append("\t\t];\n");
                 }
                 info.getObservers().forEach(y -> {
