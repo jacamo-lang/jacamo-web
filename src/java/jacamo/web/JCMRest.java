@@ -24,13 +24,10 @@ import org.apache.zookeeper.server.ZooKeeperServer;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 
-import jacamo.infra.JaCaMoRuntimeServices;
 import jacamo.platform.DefaultPlatformImpl;
-import jason.asSemantics.Agent;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.mas2j.AgentParameters;
 import jason.mas2j.ClassParameters;
-import jason.runtime.Settings;
 
 
 public class JCMRest extends DefaultPlatformImpl {
@@ -112,10 +109,12 @@ public class JCMRest extends DefaultPlatformImpl {
             }
         }
         
+        BaseCentralisedMAS.getRunner().getRuntimeServices().registerDefaultAgArch(RestAgArch.class.getName());
+        /*
         // replace createAgent service (to add RestAgArch)
         BaseCentralisedMAS.getRunner().setRuntimeServives(new JaCaMoRuntimeServices(BaseCentralisedMAS.getRunner()) {
             @Override
-            public String createAgent(String agName, String agSource, String agClass, List<String> archClasses, ClassParameters bbPars, Settings stts, Agent father) throws Exception {
+            public String createAgent(String agName, String agSource, String agClass, Collection<String> archClasses, ClassParameters bbPars, Settings stts, Agent father) throws Exception {
                 if (archClasses == null)
                     archClasses = new ArrayList<>();
                 if (!archClasses.contains(RestAgArch.class.getName()))
@@ -123,6 +122,7 @@ public class JCMRest extends DefaultPlatformImpl {
                 return super.createAgent(agName, agSource, agClass, archClasses, bbPars, stts, father);
             }
         });
+        */
         
         //this.runner = (JaCaMoLauncher)JaCaMoLauncher.getRunner();
     }

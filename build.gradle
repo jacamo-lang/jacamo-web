@@ -149,18 +149,6 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
-            artifact sourceJar
-            artifact javadocJar
-
-            artifactId 'jacamo-rest'
-        }
-    }
-}
-
 task javadocJar (type: Jar, dependsOn: javadoc) {
     baseName 'jacamo-rest'
     classifier = 'javadoc'
@@ -171,6 +159,19 @@ task sourceJar (type : Jar) {
     baseName 'jacamo-rest'
     classifier = 'sources'
     from sourceSets.main.allSource
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+
+            artifactId 'jacamo-rest'
+        }
+    }
 }
 
 // transfer local maven artifact to our maven2 repository at sourceforge

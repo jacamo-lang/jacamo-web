@@ -2,7 +2,6 @@ package jacamo.web;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.client.Client;
@@ -19,7 +18,6 @@ import org.apache.zookeeper.CreateMode;
 
 import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
-import jason.asSemantics.Agent;
 import jason.asSemantics.Message;
 import jason.asSemantics.Unifier;
 import jason.asSyntax.ASSyntax;
@@ -28,11 +26,8 @@ import jason.asSyntax.Literal;
 import jason.asSyntax.StringTermImpl;
 import jason.asSyntax.Term;
 import jason.asSyntax.UnnamedVar;
-import jason.infra.centralised.BaseCentralisedMAS;
-import jason.infra.centralised.CentralisedRuntimeServices;
-import jason.mas2j.ClassParameters;
-import jason.runtime.RuntimeServices;
-import jason.runtime.Settings;
+import jason.infra.centralised.*;
+import jason.runtime.*;
 
 public class RestAgArch extends AgArch {
     
@@ -77,14 +72,14 @@ public class RestAgArch extends AgArch {
     public RuntimeServices getRuntimeServices() {
         if (singRTS == null) {
             if (JCMRest.getZKHost() != null) {
-                singRTS = new CentralisedRuntimeServices(BaseCentralisedMAS.getRunner()) {
+                singRTS = new DelegatedRuntimeServices(super.getRuntimeServices()) {
                     @Override
                     public void dfRegister(String agName, String service, String type) {
-                        RestAgArch.this.dfRegister(agName, service, type);
+                        RestAgArch.this.dfRegister(service, type);
                     }               
                     @Override
                     public void dfDeRegister(String agName, String service, String type) {
-                        RestAgArch.this.dfDeRegister(agName, service, type);
+                        RestAgArch.this.dfDeRegister(service, type);
                     }               
                     @Override
                     public Collection<String> dfSearch(String service, String type) {
@@ -92,12 +87,7 @@ public class RestAgArch extends AgArch {
                     }                               
                     @Override
                     public void dfSubscribe(String agName, String service, String type) {
-                        RestAgArch.this.dfSubscribe(agName, service, type);
-                    }
-                    @Override
-                    public String createAgent(String agName, String agSource, String agClass, List<String> archClasses, ClassParameters bbPars, Settings stts, Agent father) throws Exception {
-                        // delegate agent creation to RTS defined in JaCaMo Launcher
-                        return masRunner.getRuntimeServices().createAgent(agName, agSource, agClass, archClasses, bbPars, stts, father);
+                        RestAgArch.this.dfSubscribe(service, type);
                     }
                 };
             } else {
@@ -145,7 +135,7 @@ public class RestAgArch extends AgArch {
         }        
     }
     
-    public void dfRegister(String agName, String service, String type) {
+    public void dfRegister(String service, String type) {
         if (type == null) type = "no-type";
         try {
             String node = JCMRest.JaCaMoZKDFNodeId+"/"+service+"/"+getAgName();
@@ -159,7 +149,7 @@ public class RestAgArch extends AgArch {
         }
     }
     
-    public void dfDeRegister(String agName, String service, String type) {
+    public void dfDeRegister(String service, String type) {
         try {
             zkClient.delete().forPath(JCMRest.JaCaMoZKDFNodeId+"/"+service+"/"+getAgName());
         } catch (Exception e) {
@@ -181,13 +171,13 @@ public class RestAgArch extends AgArch {
         return ags;
     }
     
-    public void dfSubscribe(String agName, String service, String type) {
+    public void dfSubscribe(String service, String type) {
         try {
             zkAsync.with(WatchMode.successOnly).watched().getChildren().forPath(JCMRest.JaCaMoZKDFNodeId+"/"+service).event().thenAccept(event -> {
                 try {
                     //System.out.println("something changed...."+event.getType()+"/"+event.getState());                 
                     // stupid implementation: send them all again and
-                    dfSubscribe(agName, service, type); // keep watching
+                    dfSubscribe(service, type); // keep watching
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
