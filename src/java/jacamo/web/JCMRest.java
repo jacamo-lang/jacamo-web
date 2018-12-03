@@ -59,13 +59,16 @@ public class JCMRest extends DefaultPlatformImpl {
     public void init(String[] args) throws Exception {
         
         // adds RestAgArch in the configuration of all agents in the project
-        List<AgentParameters> lags = new ArrayList<>();
+        /*List<AgentParameters> lags = new ArrayList<>();
         for (AgentParameters ap: project.getAgents()) {
             if (ap.getNbInstances() > 0) {
                 lags.add(ap);
                 ap.insertArchClass(new ClassParameters(RestAgArch.class.getName()));
             }
-        }
+        }*/
+        
+        // adds RestAgArch as default ag arch when using this platform
+        BaseCentralisedMAS.getRunner().getRuntimeServices().registerDefaultAgArch(RestAgArch.class.getName());
         
         int restPort = 3280;
         int zkPort   = 2181;
@@ -109,22 +112,6 @@ public class JCMRest extends DefaultPlatformImpl {
             }
         }
         
-        BaseCentralisedMAS.getRunner().getRuntimeServices().registerDefaultAgArch(RestAgArch.class.getName());
-        /*
-        // replace createAgent service (to add RestAgArch)
-        BaseCentralisedMAS.getRunner().setRuntimeServives(new JaCaMoRuntimeServices(BaseCentralisedMAS.getRunner()) {
-            @Override
-            public String createAgent(String agName, String agSource, String agClass, Collection<String> archClasses, ClassParameters bbPars, Settings stts, Agent father) throws Exception {
-                if (archClasses == null)
-                    archClasses = new ArrayList<>();
-                if (!archClasses.contains(RestAgArch.class.getName()))
-                    archClasses.add(RestAgArch.class.getName());
-                return super.createAgent(agName, agSource, agClass, archClasses, bbPars, stts, father);
-            }
-        });
-        */
-        
-        //this.runner = (JaCaMoLauncher)JaCaMoLauncher.getRunner();
     }
     
     @Override
