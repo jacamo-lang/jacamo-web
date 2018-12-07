@@ -24,6 +24,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -56,7 +61,6 @@ import jason.asSyntax.Trigger;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
 import jason.util.Config;
-import jason.util.asl2html;
 import ora4mas.nopl.GroupBoard;
 
 
@@ -246,7 +250,7 @@ public class RestImplAg extends AbstractBinder {
 
     /** AGENT **/
 
-    protected asl2html  mindInspectorTransformerHTML = null;
+    protected Transformer  mindInspectorTransformerHTML = null;
     protected int MAX_LENGTH = 35;
     Map<String,Boolean> show = new HashMap<>();
     {
@@ -357,13 +361,16 @@ public class RestImplAg extends AbstractBinder {
 
         try {
             if (mindInspectorTransformerHTML == null) {
-                mindInspectorTransformerHTML = new asl2html("/xml/agInspection.xsl");
+                mindInspectorTransformerHTML = TransformerFactory.newInstance().newTransformer(
+                        new StreamSource(this.getClass().getResource("/xml/agInspection.xsl").openStream()));//new asl2html("/xml/agInspection.xsl");
             }
             for (String p : show.keySet())
                 mindInspectorTransformerHTML.setParameter("show-" + p, show.get(p) + "");
             Agent ag = getAgent(agName);
             if (ag != null) {
-                mainContent.append(mindInspectorTransformerHTML.transform(ag.getAgState()));
+                StringWriter so = new StringWriter();
+                mindInspectorTransformerHTML.transform(new DOMSource(ag.getAgState()), new StreamResult(so) );
+                mainContent.append(so.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -371,7 +378,7 @@ public class RestImplAg extends AbstractBinder {
         
         // put plans on agent's mind section
         mainContent.append("        <details>\n");
-        mainContent.append("            <summary style=\"text-align: left; color: blue; font-family: arial\">Agent's plans</summary>\n");
+        mainContent.append("            <summary>Agent's plans</summary>\n");
         mainContent.append("            <embed src='plans' width=\"100%\"/>\n");
         mainContent.append("        </details>\n");
 

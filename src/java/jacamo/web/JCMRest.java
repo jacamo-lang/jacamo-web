@@ -5,8 +5,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -26,8 +24,6 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 
 import jacamo.platform.DefaultPlatformImpl;
 import jason.infra.centralised.BaseCentralisedMAS;
-import jason.mas2j.AgentParameters;
-import jason.mas2j.ClassParameters;
 
 
 public class JCMRest extends DefaultPlatformImpl {

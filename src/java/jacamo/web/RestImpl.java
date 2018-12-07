@@ -1,10 +1,11 @@
 package jacamo.web;
 
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.util.Locale;
-import java.util.Scanner;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -92,14 +93,27 @@ public class RestImpl extends AbstractBinder {
     @Produces("text/css")
     public String getStyleCSS() {
         StringBuilder so = new StringBuilder();
-        Locale loc = new Locale("en", "US");
-        try (Scanner scanner = new Scanner(new FileInputStream("src/resources/css/style.css"), "UTF-8")) {
-            scanner.useLocale(loc);
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                so.append(line).append("\n");
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/css/style.css");
+            if (f.exists()) {
+                /*Locale loc = new Locale("en", "US");
+                try (Scanner scanner = new Scanner(new FileInputStream("src/resources/css/style.css"), "UTF-8")) {
+                    scanner.useLocale(loc);
+                    while (scanner.hasNextLine()) {
+                        String line = scanner.nextLine();
+                        so.append(line).append("\n");
+                    }
+                    scanner.close();*/
+                in = new BufferedReader(new FileReader(f)); 
+            } else {
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/css/style.css").openStream()));
             }
-            scanner.close();
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
