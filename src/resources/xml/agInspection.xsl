@@ -92,9 +92,9 @@
                         </span>
                         <xsl:text>.</xsl:text>
                         <br/>
-                    </div>
                     </xsl:for-each>
                     </details>
+                    </div>
             </xsl:for-each>
             <br/>
             </details>

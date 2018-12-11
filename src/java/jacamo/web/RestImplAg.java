@@ -148,20 +148,6 @@ public class RestImplAg extends AbstractBinder {
                 "        http.send();\n"+
                 "        window.location.href = '/agents/'+document.getElementById('createAgent').value+'/mind';\n"+
                 "	}\n"); 
-        so.append("// Expand/collapse function\n" + 
-                "var xa = document.getElementById('expAll');\n" + 
-                "xa.addEventListener('click', function(e) {\n" + 
-                "  e.target.classList.toggle('exp');\n" + 
-                "  e.target.classList.toggle('col');\n" + 
-                "  var details = document.querySelectorAll('details');\n" + 
-                "  Array.from(details).forEach(function(obj, idx) {\n" + 
-                "    if (e.target.classList.contains('exp')) {\n" + 
-                "      obj.open = true;\n" + 
-                "    } else {\n" + 
-                "      obj.open = false;\n" + 
-                "    }\n" + 
-                "  });\n" + 
-                "}, false);\n");
         so.append("	</script>\n");
         so.append("</html>\n");
         
@@ -263,14 +249,6 @@ public class RestImplAg extends AbstractBinder {
         //show.put("int-details", false);
     }
 
-    @Path("/{agentname}/collapse")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String setHide(@PathParam("agentname") String agName) {
-
-        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/mind'\" /></head>ok";
-    }
-
     @Path("/{agentname}/hide")
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -357,7 +335,6 @@ public class RestImplAg extends AbstractBinder {
         // details
         mainContent.append("<div id=\"mind\" class=\"card fluid\">\n");
         mainContent.append("    <div class=\"section\">\n"); 
-        mainContent.append("        <a href='#/' id='expAll' class='exp'>Expand/Collapse </a>\n"); 
 
         try {
             if (mindInspectorTransformerHTML == null) {
