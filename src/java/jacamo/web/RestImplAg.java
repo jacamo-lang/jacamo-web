@@ -226,6 +226,11 @@ public class RestImplAg extends AbstractBinder {
                 e.printStackTrace();
             }
         }                
+        so.append("<br>");
+        so.append("<br>");
+        so.append("<a href=\"/services\" target='mainframe'>directory facilitator</a>\n");
+        so.append("<a href=\"/agents/forms/new_agent\" target='mainframe'>create agent</a>\n"); 
+
         so.append("</nav>\n");
         return so.toString();
     }
