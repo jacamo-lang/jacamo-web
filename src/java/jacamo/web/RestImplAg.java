@@ -327,7 +327,7 @@ public class RestImplAg extends AbstractBinder {
         // if log is not empty
         if (!getLogOutput(agName).equals("")) {
             mainContent.append("    <div class=\"section\">\n");
-            mainContent.append("      <pre><span id='log'></span></pre>");
+            mainContent.append("      <pre><span id='" + agName + "/log'></span></pre>");
             mainContent.append("      <span id='plog'></span>");
             mainContent.append("    </div>\n"); 
         }
@@ -336,7 +336,7 @@ public class RestImplAg extends AbstractBinder {
         // overview
         mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
         mainContent.append("    <div class=\"section\">\n");
-        mainContent.append("        <center><object data=\"/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
+        mainContent.append("        <center><object data=\"" + agName + "/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
         mainContent.append("    </div>\n");
         mainContent.append("</div>\n");
         
@@ -365,15 +365,15 @@ public class RestImplAg extends AbstractBinder {
         // put plans on agent's mind section
         mainContent.append("        <details>\n");
         mainContent.append("            <summary>Agent's plans</summary>\n");
-        mainContent.append("            <embed src='plans' width=\"100%\"/>\n");
+        mainContent.append("            <embed src='"+ agName + "/plans' width=\"100%\"/>\n");
         mainContent.append("        </details>\n");
 
         mainContent.append("    </div>\n"); 
         mainContent.append("    <div class=\"section\">\n"); 
         if (show.get("annots")) {
-            mainContent.append("        <a href='hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
+            mainContent.append("        <a href='"+ agName + "/hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
         } else {
-            mainContent.append("        <a href='show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
+            mainContent.append("        <a href='"+ agName + "/show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
         }
         mainContent.append("    </div>\n"); 
         mainContent.append("</div>\n"); 
@@ -381,7 +381,7 @@ public class RestImplAg extends AbstractBinder {
         // upload plans
         mainContent.append("<div id=\"uploadplans\" class=\"card fluid\">\n");
         mainContent.append("    <div class=\"section\">\n"); 
-        mainContent.append("        <embed src='load_plans_form/' width=\"100%\" height=\"180px\"/>\n");
+        mainContent.append("        <embed src='" + agName + "/load_plans_form/' width=\"100%\" height=\"180px\"/>\n");
         mainContent.append("    </div>\n"); 
         mainContent.append("</div>\n"); 
         
@@ -433,7 +433,7 @@ public class RestImplAg extends AbstractBinder {
         }
     }
 
-    @Path("/{agentname}/mind")
+    @Path("/{agentname}")
     @GET
     @Produces(MediaType.APPLICATION_XML)
     public Document getAgentXml(@PathParam("agentname") String agName) {
