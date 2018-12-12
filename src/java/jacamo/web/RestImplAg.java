@@ -146,7 +146,7 @@ public class RestImplAg extends AbstractBinder {
                 "        http = new XMLHttpRequest();\n" + 
                 "        http.open(\"POST\", '/agents/'+document.getElementById('createAgent').value, false); \n" +
                 "        http.send();\n"+
-                "        window.location.href = '/agents/'+document.getElementById('createAgent').value+'/mind';\n"+
+                "        window.location.href = '/agents/'+document.getElementById('createAgent').value;\n"+
                 "	}\n"); 
         so.append("	</script>\n");
         so.append("</html>\n");
@@ -194,12 +194,14 @@ public class RestImplAg extends AbstractBinder {
 
         if (JCMRest.getZKHost() == null) {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
-                so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                 if (a.equals(selectedAgent)) {
-                    so.append("	<a href=\"/agents/" + a + "/mind#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
-                    so.append("	<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
-                    so.append("	<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
+                    so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><b>" + a + "</b></a>\n");
+                    so.append("	<a href=\"/agents/" + a + "#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
+                    so.append("	<a href=\"/agents/" + a + "#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
+                    so.append("	<a href=\"/agents/" + a + "#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
                     so.append("	<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
+                } else {
+                    so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'>" + a + "</a>\n");
                 }
             }
         } else {
@@ -207,12 +209,14 @@ public class RestImplAg extends AbstractBinder {
             try {
                 for (String a : JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
-                    so.append("	<a href=\"" + url + "/mind\" id=\"link-to-" + a + "-mind\" target='mainframe'>" + a + "</a>\n");
                     if (a.equals(selectedAgent)) {
-                        so.append("	<a href=\"/agents/" + a + "/mind#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
-                        so.append("	<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
-                        so.append("	<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
+                        so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><b>" + a + "</b></a>\n");
+                        so.append("	<a href=\"/agents/" + a + "#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
+                        so.append("	<a href=\"/agents/" + a + "#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
+                        so.append("	<a href=\"/agents/" + a + "#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
                         so.append("	<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
+                    } else {
+                        so.append("	<a href=\"" + url + "\" id=\"link-to-" + a + "\" target='mainframe'>" + a + "</a>\n");
                     }
                     Agent ag = getAgent(a);
                     if (ag != null)
@@ -261,7 +265,7 @@ public class RestImplAg extends AbstractBinder {
         if (rules != null) show.put("rules",false);
         if (intd != null) show.put("int-details",false);
         if (annots != null) show.put("annots",false);
-        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/mind'\" /></head>ok";
+        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"'\" /></head>ok";
     }
 
     @Path("/{agentname}/show")
@@ -276,7 +280,7 @@ public class RestImplAg extends AbstractBinder {
         if (rules != null) show.put("rules",true);
         if (intd != null) show.put("int-details",true);
         if (annots != null) show.put("annots",true);
-        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/mind'\" /></head>ok";
+        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"'\" /></head>ok";
     }
 
     static String helpMsg1 = "Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });";
@@ -296,14 +300,14 @@ public class RestImplAg extends AbstractBinder {
             ag.setASLSrc("no-inicial.asl");
             createAgLog(agName, ag);
             
-            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+name+"/mind'\" /></head>ok for "+name;
+            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+name+"'\" /></head>ok for "+name;
         } catch (Exception e) {
             e.printStackTrace();
             return "error "+e.getMessage();
         }
     }
     
-    @Path("/{agentname}/mind")
+    @Path("/{agentname}")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getAgentHtml(@PathParam("agentname") String agName) {
@@ -327,13 +331,13 @@ public class RestImplAg extends AbstractBinder {
         // overview
         mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
         mainContent.append("    <div class=\"section\">\n");
-        mainContent.append("        <center><object data=\"mind/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
+        mainContent.append("        <center><object data=\"/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
         mainContent.append("    </div>\n");
         mainContent.append("</div>\n");
         
         
         // details
-        mainContent.append("<div id=\"mind\" class=\"card fluid\">\n");
+        mainContent.append("<div id=\"\" class=\"card fluid\">\n");
         mainContent.append("    <div class=\"section\">\n"); 
 
         try {
@@ -417,7 +421,7 @@ public class RestImplAg extends AbstractBinder {
                 ag.load(uploadedInputStream, "restAPI://"+fileDetail.getFileName());
                 r = "ok, code uploaded!";
             }
-            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"/mind'\" /></head>"+r;
+            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"'\" /></head>"+r;
         } catch (Exception e) {
             e.printStackTrace();
             return "error "+e.getMessage();
@@ -558,7 +562,7 @@ public class RestImplAg extends AbstractBinder {
         }
     }
     
-    @Path("/{agentname}/mind/img.svg")
+    @Path("/{agentname}/img.svg")
     @GET
     @Produces("image/svg+xml")
     public Response getAgentImg(@PathParam("agentname") String agName) {
