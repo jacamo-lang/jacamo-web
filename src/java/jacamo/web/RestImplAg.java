@@ -109,7 +109,7 @@ public class RestImplAg extends AbstractBinder {
                 "                location.reload();\n" + 
                 "                document.getElementById('display').innerHTML = \"  result: \" + http.responseText;\n" + 
                 "        } }\n" + 
-                "        http.open(\"POST\", \"cmd\", true); // true for asynchronous \n" +
+                "        http.open(\"POST\", \"" + selectedItem + "/cmd\", true); // true for asynchronous \n" +
                 "        http.setRequestHeader(\"Content-type\", \"application/x-www-form-urlencoded\");\n" +
                 "        data = 'c='+encodeURIComponent(document.getElementById(\"inputcmd\").value); \n"+
                 //"        document.getElementById('debug').innerHTML = data\n" + 
@@ -122,7 +122,7 @@ public class RestImplAg extends AbstractBinder {
                 "    }\n" + 
                 "    function delLog() {\n" +
                 "        h2 = new XMLHttpRequest();\n" + 
-                "        h2.open('DELETE', 'log', false); \n" +
+                "        h2.open('DELETE', '"+ selectedItem + "/log', false); \n" +
                 "        h2.send(); \n" +
                 "    }\n" + 
                 "    function showLog() {\n" +
@@ -138,7 +138,7 @@ public class RestImplAg extends AbstractBinder {
                 "                      document.getElementById('plog').appendChild(btn);  "+
                 "                }\n" + 
                 "        } }\n" + 
-                "        http.open('GET', 'log', true); \n" +
+                "        http.open('GET', '"+ selectedItem + "/log', true); \n" +
                 "        http.send();\n"+
                 "    }\n" + 
                 "    showLog(); \n");
@@ -195,13 +195,13 @@ public class RestImplAg extends AbstractBinder {
         if (JCMRest.getZKHost() == null) {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
                 if (a.equals(selectedAgent)) {
-                    so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><b>" + a + "</b></a>\n");
-                    so.append("	<a href=\"/agents/" + a + "#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
-                    so.append("	<a href=\"/agents/" + a + "#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
-                    so.append("	<a href=\"/agents/" + a + "#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
-                    so.append("	<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
+                    so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><h4>. " + a + "</h4></a>\n");
+                    so.append("	<a href=\"/agents/" + a + "#overview\" id=\"link-to-overview\" target='mainframe'><h6>.  Overview</h6></a>\n");
+                    so.append("	<a href=\"/agents/" + a + "#mind\" id=\"link-to-mind\" target='mainframe'><h6>.  Mind</h6></a>\n");
+                    so.append("	<a href=\"/agents/" + a + "#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'><h6>.  Upload plans</h6></a>\n");
+                    so.append("	<a href='kill' onclick='killAg()'><h6>.  kill this agent</h6></a>\n");
                 } else {
-                    so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'>" + a + "</a>\n");
+                    so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><h4>+ " + a + "</h4></a>\n");
                 }
             }
         } else {
@@ -210,13 +210,13 @@ public class RestImplAg extends AbstractBinder {
                 for (String a : JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
                     if (a.equals(selectedAgent)) {
-                        so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><b>" + a + "</b></a>\n");
-                        so.append("	<a href=\"/agents/" + a + "#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
-                        so.append("	<a href=\"/agents/" + a + "#mind\" id=\"link-to-mind\" target='mainframe'>.  Mind</a>\n");
-                        so.append("	<a href=\"/agents/" + a + "#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'>.  Upload plans</a>\n");
-                        so.append("	<a href='kill' onclick='killAg()'>.  kill this agent</a>\n");
+                        so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><h4>. " + a + "</h4></a>\n");
+                        so.append("	<a href=\"/agents/" + a + "#overview\" id=\"link-to-overview\" target='mainframe'><h6>.  Overview</h6></a>\n");
+                        so.append("	<a href=\"/agents/" + a + "#mind\" id=\"link-to-mind\" target='mainframe'><h6>.  Mind</h6></a>\n");
+                        so.append("	<a href=\"/agents/" + a + "#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'><h6>.  Upload plans</h6></a>\n");
+                        so.append("	<a href='kill' onclick='killAg()'><h6>.  kill this agent</h6></a>\n");
                     } else {
-                        so.append("	<a href=\"" + url + "\" id=\"link-to-" + a + "\" target='mainframe'>" + a + "</a>\n");
+                        so.append("	<a href=\"" + url + "\" id=\"link-to-" + a + "\" target='mainframe'><h4>+ " + a + "</h4></a>\n");
                     }
                     Agent ag = getAgent(a);
                     if (ag != null)
@@ -327,7 +327,7 @@ public class RestImplAg extends AbstractBinder {
         // if log is not empty
         if (!getLogOutput(agName).equals("")) {
             mainContent.append("    <div class=\"section\">\n");
-            mainContent.append("      <pre><span id='" + agName + "/log'></span></pre>");
+            mainContent.append("      <pre><span id='log'></span></pre>");
             mainContent.append("      <span id='plog'></span>");
             mainContent.append("    </div>\n"); 
         }
