@@ -195,13 +195,13 @@ public class RestImplAg extends AbstractBinder {
         if (JCMRest.getZKHost() == null) {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
                 if (a.equals(selectedAgent)) {
-                    so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><h4>. " + a + "</h4></a>\n");
+                    so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><h5>. " + a + "</h5></a>\n");
                     so.append("	<a href=\"/agents/" + a + "#overview\" id=\"link-to-overview\" target='mainframe'><h6>.  Overview</h6></a>\n");
                     so.append("	<a href=\"/agents/" + a + "#mind\" id=\"link-to-mind\" target='mainframe'><h6>.  Mind</h6></a>\n");
                     so.append("	<a href=\"/agents/" + a + "#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'><h6>.  Upload plans</h6></a>\n");
                     so.append("	<a href='kill' onclick='killAg()'><h6>.  kill this agent</h6></a>\n");
                 } else {
-                    so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><h4>+ " + a + "</h4></a>\n");
+                    so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><h5>+ " + a + "</h5></a>\n");
                 }
             }
         } else {
@@ -210,13 +210,13 @@ public class RestImplAg extends AbstractBinder {
                 for (String a : JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
                     if (a.equals(selectedAgent)) {
-                        so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><h4>. " + a + "</h4></a>\n");
+                        so.append("	<a href=\"/agents/" + a + "\" id=\"link-to-" + a + "\" target='mainframe'><h5>. " + a + "</h5></a>\n");
                         so.append("	<a href=\"/agents/" + a + "#overview\" id=\"link-to-overview\" target='mainframe'><h6>.  Overview</h6></a>\n");
                         so.append("	<a href=\"/agents/" + a + "#mind\" id=\"link-to-mind\" target='mainframe'><h6>.  Mind</h6></a>\n");
                         so.append("	<a href=\"/agents/" + a + "#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'><h6>.  Upload plans</h6></a>\n");
                         so.append("	<a href='kill' onclick='killAg()'><h6>.  kill this agent</h6></a>\n");
                     } else {
-                        so.append("	<a href=\"" + url + "\" id=\"link-to-" + a + "\" target='mainframe'><h4>+ " + a + "</h4></a>\n");
+                        so.append("	<a href=\"" + url + "\" id=\"link-to-" + a + "\" target='mainframe'><h5>+ " + a + "</h5></a>\n");
                     }
                     Agent ag = getAgent(a);
                     if (ag != null)

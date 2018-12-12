@@ -21,6 +21,9 @@ import org.apache.zookeeper.server.ServerCnxnFactory;
 import org.apache.zookeeper.server.ZooKeeperServer;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.message.DeflateEncoder;
+import org.glassfish.jersey.message.GZipEncoder;
+import org.glassfish.jersey.server.filter.EncodingFilter;
 
 import jacamo.platform.DefaultPlatformImpl;
 import jason.infra.centralised.BaseCentralisedMAS;
@@ -99,6 +102,7 @@ public class JCMRest extends DefaultPlatformImpl {
         }
         
         restHttpServer = startRestServer(restPort);
+        
         if (useZK) {
             if (zkHost == null) {
                 zkFactory  = startZookeeper(zkPort);
@@ -161,7 +165,14 @@ public class JCMRest extends DefaultPlatformImpl {
         //config.addProperties(new HashMap<String,Object>() {{ put("jersey.config.server.provider.classnames", "org.glassfish.jersey.media.multipart.MultiPartFeature"); }} );
         try {
             restServerURI = UriBuilder.fromUri("http://"+InetAddress.getLocalHost().getHostAddress()+"/").port(port).build();
-            HttpServer s = GrizzlyHttpServerFactory.createHttpServer(restServerURI, new RestAppConfig());
+            
+            // gzip compression configuration
+            RestAppConfig rc = new RestAppConfig();
+            rc.registerClasses(EncodingFilter.class, GZipEncoder.class, DeflateEncoder.class);
+            
+            // get a server from factory
+            HttpServer s = GrizzlyHttpServerFactory.createHttpServer(restServerURI, rc);
+            
             // other possiblecontainers:
             //JettyHttpContainerFactory.createServer(baseUri, config);
             //JdkHttpServerFactory.createHttpServer(baseUri, config);

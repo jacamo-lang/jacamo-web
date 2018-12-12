@@ -32,6 +32,8 @@
        <compatibility from="role1" to="role2" />
     </formation-constraints>
 </group-specification>
+
+
 </structural-specification>
 
 <functional-specification>
