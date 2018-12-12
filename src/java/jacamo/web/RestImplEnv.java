@@ -111,11 +111,6 @@ public class RestImplEnv extends AbstractBinder {
                         continue;
                     String addr = "/workspaces/"+wname+"/"+aid.getName();
                     so.append("	<a href=\"" + addr + "\" id=\"link-to-" + wname + "\" target='mainframe'>" + aid.getName() + "</a>\n");
-                    if (aid.getName().equals(selectedArtifact)) {
-                        so.append("	<a href=\"" + addr + "#overview\" id=\"link-to-overview\" target='mainframe'>.  Overview</a>\n");
-                        so.append("	<a href=\"" + addr + "#inspection\" id=\"link-to-inspection\" target='mainframe'>.  Inspection</a>\n");
-                    }
-
                 }
 
             } catch (CartagoException e) {
