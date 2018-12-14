@@ -160,7 +160,7 @@ public class RestImplAg extends AbstractBinder {
     public String getAgentsHtml() {
         StringWriter mainContent = new StringWriter();
         mainContent.append("<div id=\"getting-started\" class=\"card fluid\">\n"); 
-        mainContent.append("	<h2 class=\"section double-padded\">Getting started</h2>\n"); 
+        mainContent.append("	<h4 class=\"section double-padded\">Getting started</h4>\n"); 
         mainContent.append("	<div class=\"section\">\n"); 
         mainContent.append("		<p>\n");
         mainContent.append("			<a href=\"http://jason.sourceforge.net/\" target=\"_blank\">Jason</a> is an interpreter for an extended version of AgentSpeak. It implements the operational semantics of that language, ");

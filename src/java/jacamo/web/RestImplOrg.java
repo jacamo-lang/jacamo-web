@@ -78,7 +78,7 @@ public class RestImplOrg extends AbstractBinder {
 
          StringWriter mainContent = new StringWriter();
          mainContent.append("<div id=\"getting-started\" class=\"card fluid\">\n"); 
-         mainContent.append("	<h2 class=\"section double-padded\">Getting started</h2>\n"); 
+         mainContent.append("	<h4 class=\"section double-padded\">Getting started</h4>\n"); 
          mainContent.append("	<div class=\"section\">\n"); 
          mainContent.append("		<p>\n");
          mainContent.append("			<a href=\"http://moise.sf.net\" target=\"_blank\">Moise</a> is an <a href=\"https://github.com/moise-lang/moise\" target=\"_blank\">open-source</a> organisational platform for MultiAgent Systems");
@@ -100,11 +100,13 @@ public class RestImplOrg extends AbstractBinder {
         so.append("	</br>\n");
 
         for (OrgBoard ob : OrgBoard.getOrbBoards()) {
-            so.append("	<a href=\"/oe/" + ob.getOEId() + "/os#specification\">" + ob.getOEId() + "</a>\n");
             if (ob.getOEId().equals(selectedOrganisation)) {
-                so.append("	<a href='/oe/" + ob.getOEId() + "/os#groups' target='mainframe'>. Groups</a>\n");
-                so.append("	<a href='/oe/" + ob.getOEId() + "/os#schemes' target='mainframe'>. Schemes</a>\n");
-                so.append("	<a href='/oe/" + ob.getOEId() + "/os#norms' target='mainframe'>. Norms</a>\n");
+                so.append("	<a href=\"/oe/" + ob.getOEId() + "/os#specification\"><h5>. " + ob.getOEId() + "</h5></a>\n");
+                so.append("	<a href='/oe/" + ob.getOEId() + "/os#groups' target='mainframe'><h6>. Groups</h6></a>\n");
+                so.append("	<a href='/oe/" + ob.getOEId() + "/os#schemes' target='mainframe'><h6>. Schemes</h6></a>\n");
+                so.append("	<a href='/oe/" + ob.getOEId() + "/os#norms' target='mainframe'><h6>. Norms</h6></a>\n");
+            } else {
+                so.append("	<a href=\"/oe/" + ob.getOEId() + "/os#specification\"><h5>+ " + ob.getOEId() + "</h5></a>\n");
             }
         }
 
