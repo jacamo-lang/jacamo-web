@@ -46,7 +46,7 @@ public class RestImplEnv extends AbstractBinder {
             "manrepo",
         }));
 
-    public String designPage(String title, String selectedItem, String mainContent) {
+    public String designPage(String title, String selectedItem, String selectedSubItem, String mainContent) {
         StringWriter so = new StringWriter();
         so.append("<!DOCTYPE html>\n");
         so.append("<html lang=\"en\" target=\"mainframe\">\n");
@@ -58,7 +58,7 @@ public class RestImplEnv extends AbstractBinder {
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
         so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
-        so.append(              getEnvironmentMenu(selectedItem));                
+        so.append(              getEnvironmentMenu(selectedItem, selectedSubItem));                
         so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n"); 
         so.append(                  mainContent);
         so.append("				</main>\n"); 
@@ -81,19 +81,21 @@ public class RestImplEnv extends AbstractBinder {
     public String getWorkspacesHtml() {
         StringWriter mainContent = new StringWriter();
         mainContent.append("<div id=\"getting-started\" class=\"card fluid\">\n"); 
-        mainContent.append("	<h2 class=\"section double-padded\">Getting started</h2>\n"); 
+        mainContent.append("	<h4 class=\"section double-padded\">Getting started</h4>\n"); 
         mainContent.append("	<div class=\"section\">\n"); 
         mainContent.append("		<p>\n");
-        mainContent.append("			<a href=\"http://cartago.sourceforge.net\" target=\"_blank\">CArtAgO</a> is an <a href=\"https://github.com/cartago-lang/cartago\" target=\"_blank\">open-source</a> Java-based Framework for Programming Environments in Agent-oriented Applications.");       
+        mainContent.append("			<a href=\"http://cartago.sourceforge.net\" target=\"_blank\">CArtAgO</a> is an <a href=\"https://github.com/cartago-lang/cartago\"" +
+                           " 			target=\"_blank\">open-source</a> Java-based Framework for Programming Environments in Agent-oriented Applications." +
+                           " 			Notice that the menu does not show empty workspaces.");       
         mainContent.append("		</p> ");        
         mainContent.append("		<br/>\n");
         mainContent.append("	</div>\n");
         mainContent.append("</div>\n");
         
-        return designPage("JaCamo-Rest - Environment","",mainContent.toString());
+        return designPage("JaCamo-Rest - Environment", "", "", mainContent.toString());
     }
 
-    private String getEnvironmentMenu(String selectedArtifact) {
+    private String getEnvironmentMenu(String selectedWorkspace, String selectedArtifact) {
         
         StringWriter so = new StringWriter();
 
@@ -101,18 +103,37 @@ public class RestImplEnv extends AbstractBinder {
         so.append("<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer-frame\">\n");
         so.append("	</br>\n"); 
 
-        for (String wname: CartagoService.getNode().getWorkspaces()) {
+        for (String wname : CartagoService.getNode().getWorkspaces()) {
             try {
-                so.append("	<h5 style=\"margin:0;\">" + wname + "</h5>\n");
-                for (ArtifactId aid: CartagoService.getController(wname).getCurrentArtifacts()) {
+                StringWriter arts = new StringWriter();
+                for (ArtifactId aid : CartagoService.getController(wname).getCurrentArtifacts()) {
                     if (hidenArts.contains(aid.getName()))
                         continue;
-                    if (aid.getName().endsWith("-body"))
+                    if (aid.getName().endsWith("-body") || aid.getArtifactType().endsWith(".OrgBoard")
+                            || aid.getArtifactType().endsWith(".SchemeBoard")
+                            || aid.getArtifactType().endsWith(".GroupBoard"))
                         continue;
-                    String addr = "/workspaces/"+wname+"/"+aid.getName();
-                    so.append("	<a href=\"" + addr + "\" id=\"link-to-" + wname + "\" target='mainframe'>" + aid.getName() + "</a>\n");
+                    if (aid.getName().equals(selectedArtifact))
+                        arts.append("	<a href=\"/workspaces/" + wname + "/" + aid.getName() + "\" id=\"link-to-"
+								+ wname + "-" + aid.getName() + "\" target='mainframe'><h6>. " + aid.getName()
+                                + "</h6></a>\n");
+                    else
+                        arts.append("	<a href=\"/workspaces/" + wname + "/" + aid.getName() + "\" id=\"link-to-"
+								+ wname + "-" + aid.getName() + "\" target='mainframe'><h6>+ " + aid.getName()
+                                + "</h6></a>\n");
                 }
-
+                // Do not print empty workspaces, it includes workspaces that have only
+                // organisation's artifacts
+                if (!arts.toString().equals("")) {
+                    if (wname.equals(selectedWorkspace)) {
+                        so.append("	<a href=\"/workspaces/" + wname + "/\" id=\"link-to-" + wname
+								+ "\" target='mainframe'><h5>. " + wname + "</h5></a>\n");
+                        so.append(arts.toString());
+                    } else {
+                        so.append("	<a href=\"/workspaces/" + wname + "/\" id=\"link-to-" + wname
+								+ "\" target='mainframe'><h5>+ " + wname + "</h5></a>\n");
+                    }
+                }
             } catch (CartagoException e) {
                 e.printStackTrace();
             }
@@ -122,6 +143,35 @@ public class RestImplEnv extends AbstractBinder {
         return so.toString();
     }
 
+    @Path("/{wrksname}")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getWorkspaceHtml(@PathParam("wrksname") String wrksName) {
+        try {
+            StringWriter mainContent = new StringWriter();
+            
+            // overview
+            mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
+            mainContent.append("	<div class=\"section\">\n");
+            mainContent.append("        <center><object data=\"/workspaces/" + wrksName + "/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
+            
+            mainContent.append("	</div>\n");
+            mainContent.append("</div>\n");
+            mainContent.append("<div id=\"inspection\" class=\"card fluid\">\n");
+            mainContent.append("	<div class=\"section\">\n"); 
+            mainContent.append("		Artifact <b></b> in workspace <b>" + wrksName + "</b>\n");
+            mainContent.append("		<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
+            mainContent.append("		</table>");
+            mainContent.append("	</div>\n"); 
+            mainContent.append("</div>\n"); 
+            
+            return designPage("JaCamo-Rest - Environment: " + wrksName, wrksName, "", mainContent.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "error"; // TODO: set response properly
+    }
+    
     @Path("/{wrksname}/{artname}")
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -154,7 +204,7 @@ public class RestImplEnv extends AbstractBinder {
             mainContent.append("	</div>\n"); 
             mainContent.append("</div>\n"); 
             
-            return designPage("JaCamo-Rest - Environment: " + wrksName,artName,mainContent.toString());
+            return designPage("JaCamo-Rest - Environment: " + wrksName, wrksName, artName, mainContent.toString());
         } catch (CartagoException e) {
             e.printStackTrace();
         }
@@ -216,8 +266,9 @@ public class RestImplEnv extends AbstractBinder {
                             : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
                     sb.append(s1 + "\"\n");
                     sb.append("\t\tshape=record style=filled fillcolor=white\n");
-                    sb.append("\t\tURL = \"" + info.getId().getWorkspaceId().getName() + "/" +  
+                    sb.append("\t\tURL = \"/workspaces/" + info.getId().getWorkspaceId().getName() + "/" +  
                     		info.getId().getName() + "\"\n");
+                    sb.append("\t\ttarget=\"mainframe\"\n");
                     sb.append("\t\t];\n");
                 }
                 info.getObservers().forEach(y -> {
