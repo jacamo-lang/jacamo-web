@@ -1,11 +1,15 @@
 package jacamo.web;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.LogRecord;
@@ -83,6 +87,8 @@ public class RestImplAg extends AbstractBinder {
         so.append("		<title>" + title + "</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
         so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+        //so.append("     <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>");
+        so.append("     <script src=\"/js/jquery-3.3.1.min.js\"></script>");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
@@ -147,13 +153,128 @@ public class RestImplAg extends AbstractBinder {
                 "        http.open(\"POST\", '/agents/'+document.getElementById('createAgent').value, false); \n" +
                 "        http.send();\n"+
                 "        window.location.href = '/agents/'+document.getElementById('createAgent').value;\n"+
-                "	}\n"); 
+                "	}\n");
+       /* so.append("$(document).ready(function(){\n" + 
+                "    $(\"#inputcmd\").keypress(completeCode);\n" + 
+                "});\n" + 
+                "function completeCode() {\n" + 
+                "    var data = ['!create','!kill'];\n" + 
+                "    $(\"#inputcmd\").autocomplete({source: data});\n" + 
+                "};");*/
+        so.append("function autocomplete(inp, arr) {\n" + 
+                "  /*the autocomplete function takes two arguments,\n" + 
+                "  the text field element and an array of possible autocompleted values:*/\n" + 
+                "  var currentFocus;\n" + 
+                "  /*execute a function when someone writes in the text field:*/\n" + 
+                "  inp.addEventListener(\"input\", function(e) {\n" + 
+                "      var a, b, i, val = this.value;\n" + 
+                "      /*close any already open lists of autocompleted values*/\n" + 
+                "      closeAllLists();\n" + 
+                "      if (!val) { return false;}\n" + 
+                "      currentFocus = -1;\n" + 
+                "      /*create a DIV element that will contain the items (values):*/\n" + 
+                "      a = document.createElement(\"DIV\");\n" + 
+                "      a.setAttribute(\"id\", this.id + \"autocomplete-list\");\n" + 
+                "      a.setAttribute(\"class\", \"autocomplete-items\");\n" + 
+                "      /*append the DIV element as a child of the autocomplete container:*/\n" + 
+                "      this.parentNode.appendChild(a);\n" + 
+                "      /*for each item in the array...*/\n" + 
+                "      for (i = 0; i < arr.length; i++) {\n" + 
+                "        /*check if the item starts with the same letters as the text field value:*/\n" + 
+                "        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {\n" + 
+                "          /*create a DIV element for each matching element:*/\n" + 
+                "          b = document.createElement(\"DIV\");\n" + 
+                "          /*make the matching letters bold:*/\n" + 
+                "          b.innerHTML = \"<strong>\" + arr[i].substr(0, val.length) + \"</strong>\";\n" + 
+                "          b.innerHTML += arr[i].substr(val.length);\n" + 
+                "          /*insert a input field that will hold the current array item's value:*/\n" + 
+                "          b.innerHTML += \"<input type='hidden' value='\" + arr[i] + \"'>\";\n" + 
+                "          /*execute a function when someone clicks on the item value (DIV element):*/\n" + 
+                "          b.addEventListener(\"click\", function(e) {\n" + 
+                "              /*insert the value for the autocomplete text field:*/\n" + 
+                "              inp.value = this.getElementsByTagName(\"input\")[0].value;\n" + 
+                "              /*close the list of autocompleted values,\n" + 
+                "              (or any other open lists of autocompleted values:*/\n" + 
+                "              closeAllLists();\n" + 
+                "          });\n" + 
+                "          a.appendChild(b);\n" + 
+                "        }\n" + 
+                "      }\n" + 
+                "  });\n" + 
+                "  /*execute a function presses a key on the keyboard:*/\n" + 
+                "  inp.addEventListener(\"keydown\", function(e) {\n" + 
+                "      var x = document.getElementById(this.id + \"autocomplete-list\");\n" + 
+                "      if (x) x = x.getElementsByTagName(\"div\");\n" + 
+                "      if (e.keyCode == 40) {\n" + 
+                "        /*If the arrow DOWN key is pressed,\n" + 
+                "        increase the currentFocus variable:*/\n" + 
+                "        currentFocus++;\n" + 
+                "        /*and and make the current item more visible:*/\n" + 
+                "        addActive(x);\n" + 
+                "      } else if (e.keyCode == 38) { //up\n" + 
+                "        /*If the arrow UP key is pressed,\n" + 
+                "        decrease the currentFocus variable:*/\n" + 
+                "        currentFocus--;\n" + 
+                "        /*and and make the current item more visible:*/\n" + 
+                "        addActive(x);\n" + 
+                "      } else if (e.keyCode == 13) {\n" + 
+                "        /*If the ENTER key is pressed, prevent the form from being submitted,*/\n" + 
+                "        e.preventDefault();\n" + 
+                "        if (currentFocus > -1) {\n" + 
+                "          /*and simulate a click on the \"active\" item:*/\n" + 
+                "          if (x) x[currentFocus].click();\n" + 
+                "        }\n" + 
+                "      }\n" + 
+                "  });\n" + 
+                "  function addActive(x) {\n" + 
+                "    /*a function to classify an item as \"active\":*/\n" + 
+                "    if (!x) return false;\n" + 
+                "    /*start by removing the \"active\" class on all items:*/\n" + 
+                "    removeActive(x);\n" + 
+                "    if (currentFocus >= x.length) currentFocus = 0;\n" + 
+                "    if (currentFocus < 0) currentFocus = (x.length - 1);\n" + 
+                "    /*add class \"autocomplete-active\":*/\n" + 
+                "    x[currentFocus].classList.add(\"autocomplete-active\");\n" + 
+                "  }\n" + 
+                "  function removeActive(x) {\n" + 
+                "    /*a function to remove the \"active\" class from all autocomplete items:*/\n" + 
+                "    for (var i = 0; i < x.length; i++) {\n" + 
+                "      x[i].classList.remove(\"autocomplete-active\");\n" + 
+                "    }\n" + 
+                "  }\n" + 
+                "  function closeAllLists(elmnt) {\n" + 
+                "    /*close all autocomplete lists in the document,\n" + 
+                "    except the one passed as an argument:*/\n" + 
+                "    var x = document.getElementsByClassName(\"autocomplete-items\");\n" + 
+                "    for (var i = 0; i < x.length; i++) {\n" + 
+                "      if (elmnt != x[i] && elmnt != inp) {\n" + 
+                "        x[i].parentNode.removeChild(x[i]);\n" + 
+                "      }\n" + 
+                "    }\n" + 
+                "  }\n" + 
+                "  /*execute a function when someone clicks in the document:*/\n" + 
+                "  document.addEventListener(\"click\", function (e) {\n" + 
+                "      closeAllLists(e.target);\n" + 
+                "  });\n" + 
+                "}\n" + 
+                "var suggestions = [\".desire\",\".drop_desire\",\".drop_all_desires\",\".intend\",\".drop_intention\","
+                + "\".drop_all_intentions\",\".current_intention\",\".drop_event\",\".drop_all_events\",\".succeed_goal\"," 
+                + "\".fail_goal\",\".suspend\",\".suspended\",\".resume\",\".abolish\",\".findall\",\".setof\",\".count\","
+                + "\".namespace\",\".relevant_rules\",\".list_rules\",\".add_plan\",\".remove_plan\",\".plan_label\",\".relevant_plans\","
+                + "\".list_plans\",\".send\",\".list_rules\",\".broadcast\",\".my_name\",\".all_names\",\".all_names\","
+                + "\".df_register\",\".df_deregister\",\".df_search\",\".df_subscribe\",\".member\",\".length\",\".empty\","
+                + "\".concat\",\".delete\",\".reverse\",\".shuffle\",\".nth\",\".max\",\".min\",\".sort\",\".list\","
+                + "\".concat\",\".delete\",\".suffix\",\".prefix\",\".sublist\",\".difference\",\".intersection\","
+                + "\".union\",\".length\",\".concat\",\".delete\",\".reverse\",\".substring\","
+                + "\".string\",\".term2string\",\".lower_case\",\".upper_case\",\".at\",\".wait\","
+                + "\".save_agent\",\".create_agent\",\".kill_agent\",\".clone\",\".stopMAS\",\".wait\",\".date\","
+                + "\".time\",\".fail\",\".perceive\",\".range\",\".random\",\".include\",\".printftf\"];\n" +
+                "autocomplete(document.getElementById(\"inputcmd\"), suggestions);");
         so.append("	</script>\n");
         so.append("</html>\n");
         
         return so.toString();
     }
-
 
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -171,12 +292,12 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("		<p>\n");
         mainContent.append("			Using command text box you can send orders to the agents, change plans, add and \n");
         mainContent.append("			remove beliefs and so on, just using <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>'s AgentSpeak sentences.</p>\n"); 
-        mainContent.append("		</p>\n"); 
-        mainContent.append("		<br/>\n");
-        mainContent.append("		<p>\n");
-        mainContent.append("			You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered services the agents are providing.");
-        mainContent.append("			You can also <a href=\"/agents/forms/new_agent\" target='mainframe'>create</a> a new agent and kill some existing one.\n"); 
-        mainContent.append("			<mark class=\"do\">Attention:</mark> killing agents may cause data loss. Make sure you don't need the data or the agent is using persistent belief base.\n"); 
+        mainContent.append("        </p>\n"); 
+        mainContent.append("        <br/>\n");
+        mainContent.append("        <p>\n");
+        mainContent.append("            You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered services the agents are providing.");
+        mainContent.append("            You can also <a href=\"/agents/forms/new_agent\" target='mainframe'>create</a> a new agent and kill some existing one.\n"); 
+        mainContent.append("            <mark class=\"do\">Attention:</mark> killing agents may cause data loss. Make sure you don't need the data or the agent is using persistent belief base.\n"); 
         mainContent.append("		</p>\n");
         mainContent.append("		<br/>\n");
         mainContent.append("	</div>\n");
@@ -320,10 +441,14 @@ public class RestImplAg extends AbstractBinder {
 
         // command box
         mainContent.append("<div id=\"command\" class=\"card fluid\">\n"); 
-        mainContent.append("    <div class=\"section\">\n");
+        //mainContent.append("    <div class=\"section\">\n");
+        mainContent.append("<form autocomplete=\"off\" action=\"\">\n");
+        mainContent.append("    <div class=\"autocomplete\">\n");
         mainContent.append("        <input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (" + helpMsg1 + ") ...\"\n"); 
         mainContent.append("        type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n");
         mainContent.append("    </div>\n");
+        mainContent.append("</form>\n");
+        
         // if log is not empty
         if (!getLogOutput(agName).equals("")) {
             mainContent.append("    <div class=\"section\">\n");
@@ -427,6 +552,36 @@ public class RestImplAg extends AbstractBinder {
                 r = "ok, code uploaded!";
             }
             return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"/mind/'\" /></head>"+r;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error "+e.getMessage();
+        }
+    }
+
+    @Path("/{agentname}/plans")
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String loadListPlans(@PathParam("agentname") String agName,
+            @DefaultValue("") @FormDataParam("plans") String plans,
+            @FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileDetail
+            ) {
+        try {
+            Agent ag = getAgent(agName);
+            if (ag != null) {
+                ag.parseAS(new StringReader(plans), "RrestAPI");
+                ag.load(uploadedInputStream, "restAPI://"+fileDetail.getFileName());
+            }
+
+            List<String> output = new ArrayList<String>();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(uploadedInputStream));
+            String line;
+            while ((line = bufferedReader.readLine()) != null)
+            { 
+                output.add(line.substring(line.indexOf("+!"), line.length()-line.indexOf("+!")));
+            } 
+            return output.toString();
         } catch (Exception e) {
             e.printStackTrace();
             return "error "+e.getMessage();

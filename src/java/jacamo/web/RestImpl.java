@@ -97,14 +97,6 @@ public class RestImpl extends AbstractBinder {
             BufferedReader in = null;
             File f = new File("src/resources/css/style.css");
             if (f.exists()) {
-                /*Locale loc = new Locale("en", "US");
-                try (Scanner scanner = new Scanner(new FileInputStream("src/resources/css/style.css"), "UTF-8")) {
-                    scanner.useLocale(loc);
-                    while (scanner.hasNextLine()) {
-                        String line = scanner.nextLine();
-                        so.append(line).append("\n");
-                    }
-                    scanner.close();*/
                 in = new BufferedReader(new FileReader(f)); 
             } else {
                 in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/css/style.css").openStream()));
@@ -120,4 +112,28 @@ public class RestImpl extends AbstractBinder {
         return so.toString();
     }
     
+    @Path("/js/jquery-3.3.1.min.js")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getJQueryMinCSS() {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/js/jquery-3.3.1.min.js");
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f)); 
+            } else {
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/jquery-3.3.1.min.js").openStream()));
+            }
+            String line = "<script>" + in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
+            line = "</script>";
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return so.toString();
+    }
 }
