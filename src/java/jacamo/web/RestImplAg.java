@@ -551,8 +551,8 @@ public class RestImplAg extends AbstractBinder {
             @DefaultValue("all") @QueryParam("label") String label) {
         List<String> so = new ArrayList<String>();
         try {
-        	// get agent's plans
-        	Agent ag = getAgent(agName);
+            // get agent's plans
+            Agent ag = getAgent(agName);
             if (ag != null) {
                 PlanLibrary pl = ag.getPL();
                 for (Plan plan : pl.getPlans()) {
