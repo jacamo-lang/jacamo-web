@@ -11,7 +11,9 @@ import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
@@ -88,10 +90,12 @@ public class RestImpl extends AbstractBinder {
         return so.toString();
     }
 
+    private CacheControl cc = new CacheControl();  { cc.setMaxAge(20); } // in seconds
+
     @Path("/css/style.css")
     @GET
     @Produces("text/css")
-    public String getStyleCSS() {
+    public Response getStyleCSS() {
         StringBuilder so = new StringBuilder();
         try {
             BufferedReader in = null;
@@ -109,14 +113,14 @@ public class RestImpl extends AbstractBinder {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return so.toString();
+        return Response.ok(so.toString(), "text/css").cacheControl(cc).build();
     }
     
     // for debug
     @Path("/js/jquery-3.3.1.js")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String getJQueryJS() {
+    public Response getJQueryJS() {
         StringBuilder so = new StringBuilder();
         try {
             BufferedReader in = null;
@@ -134,13 +138,13 @@ public class RestImpl extends AbstractBinder {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return so.toString();
+        return Response.ok(so.toString(), MediaType.TEXT_PLAIN).cacheControl(cc).build();
     }
 
     @Path("/js/jquery-3.3.1.min.js")
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public String getJQueryMinJS() {
+    public Response getJQueryMinJS() {
         StringBuilder so = new StringBuilder();
         try {
             BufferedReader in = null;
@@ -158,6 +162,6 @@ public class RestImpl extends AbstractBinder {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return so.toString();
+        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
     }
 }
