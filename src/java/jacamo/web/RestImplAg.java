@@ -61,6 +61,7 @@ import jason.asSyntax.Plan;
 import jason.asSyntax.PlanBody;
 import jason.asSyntax.PlanLibrary;
 import jason.asSyntax.Trigger;
+import jason.asSyntax.Trigger.TEType;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
 import jason.util.Config;
@@ -88,7 +89,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
         so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
         //so.append("     <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>");
-        so.append("     <script src=\"/js/jquery-3.3.1.min.js\"></script>");
+        so.append("     <script src=\"/js/jquery-3.3.1.js\"></script>");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
@@ -103,147 +104,147 @@ public class RestImplAg extends AbstractBinder {
         
         // copy to 'menucontent' the menu to show on drop down main page menu
         so.append("	<script language=\"JavaScript\">\n");
-        so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
-        so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n"); 
+        so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n");
+        so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n");
         so.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
         so.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
-        // function to run Jason commands
-        so.append("		function runCMD() {\n" +
-                "        http = new XMLHttpRequest();\n" + 
-                "        http.onreadystatechange = function() { \n" + 
-                "          if (http.readyState == 4 && http.status == 200) {\n" +
-                "                location.reload();\n" + 
-                "                document.getElementById('display').innerHTML = \"  result: \" + http.responseText;\n" + 
-                "        } }\n" + 
-                "        http.open(\"POST\", \"/agents/" + selectedItem + "/cmd\", true); // true for asynchronous \n" +
-                "        http.setRequestHeader(\"Content-type\", \"application/x-www-form-urlencoded\");\n" +
-                "        data = 'c='+encodeURIComponent(document.getElementById(\"inputcmd\").value); \n"+
-                //"        document.getElementById('debug').innerHTML = data\n" + 
-                "        http.send(data);\n"+
-                "    }\n" + 
-                "    function killAg() {\n" +
-                "        h2 = new XMLHttpRequest();\n" + 
-                "        h2.open('DELETE', '/agents/" + selectedItem + "', false); \n" +
-                "        h2.send(); \n" +
-                "    }\n" + 
-                "    function delLog() {\n" +
-                "        h2 = new XMLHttpRequest();\n" + 
-                "        h2.open('DELETE', '/agents/"+ selectedItem + "/log', false); \n" +
-                "        h2.send(); \n" +
-                "    }\n" + 
-                "    function showLog() {\n" +
-                "        http = new XMLHttpRequest();\n" + 
-                "        http.onreadystatechange = function() { \n" + 
-                "          if (http.readyState == 4 && http.status == 200) {\n" +
-                "                document.getElementById('log').innerHTML = http.responseText;\n" + 
-                "                if (http.responseText.length > 1) {\n" + 
-                "                      var btn = document.createElement(\"BUTTON\"); \n" + 
-                "                      var t = document.createTextNode(\"clear log\");\n" + 
-                "                      btn.appendChild(t); \n" +
-                "                      btn.onclick = function() { delLog(); location.reload(); }; \n" +
-                "                      document.getElementById('plog').appendChild(btn);  "+
-                "                }\n" + 
-                "        } }\n" + 
-                "        http.open('GET', '/agents/"+ selectedItem + "/log', true); \n" +
-                "        http.send();\n"+
-                "    }\n" + 
-                "    showLog(); \n");
-        so.append("    function newAg() {\n" +
-                "        http = new XMLHttpRequest();\n" + 
-                "        http.open(\"POST\", '/agents/'+document.getElementById('createAgent').value, false); \n" +
-                "        http.send();\n"+
-                "        window.location.href = '/agents/'+document.getElementById('createAgent').value;\n"+
-                "	}\n");
-       /* so.append("$(document).ready(function(){\n" + 
-                "    $(\"#inputcmd\").keypress(completeCode);\n" + 
-                "});\n" + 
-                "function completeCode() {\n" + 
-                "    var data = ['!create','!kill'];\n" + 
-                "    $(\"#inputcmd\").autocomplete({source: data});\n" + 
-                "};");*/
-        so.append("function autocomplete(inp, arr) {\n" + 
-                "  var currentFocus;\n" + 
-                "  inp.addEventListener(\"input\", function(e) {\n" + 
-                "      var a, b, i, val = this.value;\n" + 
-                "      closeAllLists();\n" + 
-                "      if (!val) { return false;}\n" + 
-                "      currentFocus = -1;\n" + 
-                "      a = document.createElement(\"DIV\");\n" + 
-                "      a.setAttribute(\"id\", this.id + \"autocomplete-list\");\n" + 
-                "      a.setAttribute(\"class\", \"autocomplete-items\");\n" + 
-                "      this.parentNode.appendChild(a);\n" + 
-                "      for (i = 0; i < arr.length; i++) {\n" + 
-                "        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {\n" + 
-                "          b = document.createElement(\"DIV\");\n" + 
-                "          b.innerHTML = \"<strong>\" + arr[i].substr(0, val.length) + \"</strong>\";\n" + 
-                "          b.innerHTML += arr[i].substr(val.length);\n" + 
-                "          b.innerHTML += \"<input type='hidden' value='\" + arr[i] + \"'>\";\n" + 
-                "          b.addEventListener(\"click\", function(e) {\n" + 
-                "              inp.value = this.getElementsByTagName(\"input\")[0].value;\n" + 
-                "              closeAllLists();\n" + 
-                "          });\n" + 
-                "          a.appendChild(b);\n" + 
-                "        }\n" + 
-                "      }\n" + 
-                "  });\n" + 
-                "  inp.addEventListener(\"keydown\", function(e) {\n" + 
-                "      var x = document.getElementById(this.id + \"autocomplete-list\");\n" + 
-                "      if (x) x = x.getElementsByTagName(\"div\");\n" + 
-                "      if (e.keyCode == 40) {\n" + 
-                "        currentFocus++;\n" + 
-                "        addActive(x);\n" + 
-                "      } else if (e.keyCode == 38) { //up\n" + 
-                "        currentFocus--;\n" + 
-                "        addActive(x);\n" + 
-                "      } else if (e.keyCode == 13) {\n" + 
-                "        e.preventDefault();\n" + 
-                "        if (currentFocus > -1) {\n" + 
-                "          if (x) x[currentFocus].click();\n" + 
-                "        }\n" + 
-                "      }\n" + 
-                "  });\n" + 
-                "  function addActive(x) {\n" + 
-                "    if (!x) return false;\n" + 
-                "    if (currentFocus >= x.length) currentFocus = 0;\n" + 
-                "    if (currentFocus < 0) currentFocus = (x.length - 1);\n" + 
-                "    x[currentFocus].classList.add(\"autocomplete-active\");\n" + 
-                "  }\n" + 
-                "  function removeActive(x) {\n" + 
-                "    for (var i = 0; i < x.length; i++) {\n" + 
-                "      x[i].classList.remove(\"autocomplete-active\");\n" + 
-                "    }\n" + 
-                "  }\n" + 
-                "  function closeAllLists(elmnt) {\n" + 
-                "    var x = document.getElementsByClassName(\"autocomplete-items\");\n" + 
-                "    for (var i = 0; i < x.length; i++) {\n" + 
-                "      if (elmnt != x[i] && elmnt != inp) {\n" + 
-                "        x[i].parentNode.removeChild(x[i]);\n" + 
-                "      }\n" + 
-                "    }\n" + 
-                "  }\n" + 
-                "  document.addEventListener(\"click\", function (e) {\n" + 
-                "      closeAllLists(e.target);\n" + 
-                "  });\n" + 
-                "}\n");
-        so.append("    var suggestions = [];\n");
-        so.append("    function updateSuggestions() {\n" +
-                "        http = new XMLHttpRequest();\n" + 
-                "        http.onreadystatechange = function() { \n" + 
-                "          if (http.readyState == 4 && http.status == 200) {\n" +
-                "                var a = http.responseText;\n" +
-                "                a = a.replace(/'/g, '\"');\n" +
-                "                window.suggestions = JSON.parse(a);\n" +
-                "        } }\n" + 
-                "        http.open('GET', '/agents/"+ selectedItem + "/code', true); \n" +
-                "        http.send();\n"+
-                "    }\n"); 
-        so.append("updateSuggestions();\n");
-        so.append("    function updateCmdCodeCompletion() {\n" +
-        		  "      updateSuggestions();\n" +
-                  "      autocomplete(document.getElementById(\"inputcmd\"), suggestions);" +
-                  "    }\n"); 
-        so.append("updateCmdCodeCompletion()");
         so.append("	</script>\n");
+
+        // some scripts are only used when some agents is selected
+        if (!selectedItem.equals("")) {
+            // function to run Jason commands
+            so.append("	<script language=\"JavaScript\">\n");
+            so.append("		function runCMD() {\n" +
+                    "        http = new XMLHttpRequest();\n" + 
+                    "        http.onreadystatechange = function() { \n" + 
+                    "          if (http.readyState == 4 && http.status == 200) {\n" +
+                    "                location.reload();\n" + 
+                    //"                document.getElementById('display').innerHTML = \"  result: \" + http.responseText;\n" + 
+                    "        } }\n" + 
+                    "        http.open(\"POST\", \"/agents/" + selectedItem + "/cmd\", true); // true for asynchronous \n" +
+                    "        http.setRequestHeader(\"Content-type\", \"application/x-www-form-urlencoded\");\n" +
+                    "        data = 'c='+encodeURIComponent(document.getElementById(\"inputcmd\").value); \n"+
+                    //"        document.getElementById('debug').innerHTML = data\n" + 
+                    "        http.send(data);\n"+
+                    "    }\n"); 
+            so.append("    function killAg() {\n" +
+                    "        h2 = new XMLHttpRequest();\n" + 
+                    "        h2.open('DELETE', '/agents/" + selectedItem + "', false); \n" +
+                    "        h2.send(); \n" +
+                    "    }\n"); 
+            so.append("    function delLog() {\n" +
+                    "        h2 = new XMLHttpRequest();\n" + 
+                    "        h2.open('DELETE', '/agents/"+ selectedItem + "/log', false); \n" +
+                    "        h2.send(); \n" +
+                    "    }\n"); 
+            so.append("    function showLog() {\n" +
+                    "        http = new XMLHttpRequest();\n" + 
+                    "        http.onreadystatechange = function() { \n" + 
+                    "          if (http.readyState == 4 && http.status == 200) {\n" +
+                    "                document.getElementById('log').innerHTML = http.responseText;\n" + 
+                    "                if (http.responseText.length > 1) {\n" + 
+                    "                      var btn = document.createElement(\"BUTTON\"); \n" + 
+                    "                      var t = document.createTextNode(\"clear log\");\n" + 
+                    "                      btn.appendChild(t); \n" +
+                    "                      btn.onclick = function() { delLog(); location.reload(); }; \n" +
+                    "                      document.getElementById('plog').appendChild(btn);  "+
+                    "                }\n" + 
+                    "        } }\n" + 
+                    "        http.open('GET', '/agents/"+ selectedItem + "/log', true); \n" +
+                    "        http.send();\n"+
+                    "    }\n" + 
+                    "    showLog(); \n");
+            so.append("    function newAg() {\n" +
+                    "        http = new XMLHttpRequest();\n" + 
+                    "        http.open(\"POST\", '/agents/'+document.getElementById('createAgent').value, false); \n" +
+                    "        http.send();\n"+
+                    "        window.location.href = '/agents/'+document.getElementById('createAgent').value;\n"+
+                    "	}\n");
+            so.append("function autocomplete(inp, arr) {\n" + 
+                    "  var currentFocus;\n" + 
+                    "  inp.addEventListener(\"input\", function(e) {\n" + 
+                    "      var a, b, i, val = this.value;\n" + 
+                    "      closeAllLists();\n" + 
+                    "      if (!val) { return false;}\n" + 
+                    "      currentFocus = -1;\n" + 
+                    "      a = document.createElement(\"DIV\");\n" + 
+                    "      a.setAttribute(\"id\", this.id + \"autocomplete-list\");\n" + 
+                    "      a.setAttribute(\"class\", \"autocomplete-items\");\n" + 
+                    "      this.parentNode.appendChild(a);\n" + 
+                    "      for (i = 0; i < arr.length; i++) {\n" + 
+                    "        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {\n" + 
+                    "          b = document.createElement(\"DIV\");\n" + 
+                    "          b.innerHTML = \"<strong>\" + arr[i].substr(0, val.length) + \"</strong>\";\n" + 
+                    "          b.innerHTML += arr[i].substr(val.length);\n" + 
+                    "          b.innerHTML += \"<input type='hidden' value='\" + arr[i] + \"'>\";\n" + 
+                    "          b.addEventListener(\"click\", function(e) {\n" + 
+                    "              inp.value = this.getElementsByTagName(\"input\")[0].value;\n" + 
+                    "              closeAllLists();\n" + 
+                    "          });\n" + 
+                    "          a.appendChild(b);\n" + 
+                    "        }\n" + 
+                    "      }\n" + 
+                    "  });\n" + 
+                    "  inp.addEventListener(\"keydown\", function(e) {\n" + 
+                    "      var x = document.getElementById(this.id + \"autocomplete-list\");\n" + 
+                    "      if (x) x = x.getElementsByTagName(\"div\");\n" + 
+                    "      if (e.keyCode == 40) {\n" + 
+                    "        currentFocus++;\n" + 
+                    "        addActive(x);\n" + 
+                    "      } else if (e.keyCode == 38) { //left arrow 37, up arrow 38, right arrow 39, down arrow 40 \n" + 
+                    "        currentFocus--;\n" + 
+                    "        addActive(x);\n" + 
+                    "      } else if (e.keyCode == 13) {\n" + 
+                    "        e.preventDefault();\n" + 
+                    "        if (currentFocus > -1) {\n" + 
+                    "          if (x) x[currentFocus].click();\n" + 
+                    "        }\n" + 
+                    "      }\n" + 
+                    "  });\n" + 
+                    "  function addActive(x) {\n" + 
+                    "    if (!x) return false;\n" + 
+                    "    if (currentFocus >= x.length) currentFocus = 0;\n" + 
+                    "    if (currentFocus < 0) currentFocus = (x.length - 1);\n" + 
+                    "    x[currentFocus].classList.add(\"autocomplete-active\");\n" + 
+                    "  }\n" + 
+                    "  function removeActive(x) {\n" + 
+                    "    for (var i = 0; i < x.length; i++) {\n" + 
+                    "      x[i].classList.remove(\"autocomplete-active\");\n" + 
+                    "    }\n" + 
+                    "  }\n" + 
+                    "  function closeAllLists(elmnt) {\n" + 
+                    "    var x = document.getElementsByClassName(\"autocomplete-items\");\n" + 
+                    "    for (var i = 0; i < x.length; i++) {\n" + 
+                    "      if (elmnt != x[i] && elmnt != inp) {\n" + 
+                    "        x[i].parentNode.removeChild(x[i]);\n" + 
+                    "      }\n" + 
+                    "    }\n" + 
+                    "  }\n" + 
+                    "  document.addEventListener(\"click\", function (e) {\n" + 
+                    "      closeAllLists(e.target);\n" + 
+                    "  });\n" + 
+                    "}\n");
+            so.append("    var suggestions = [];\n");
+            so.append("    function updateSuggestions() {\n" +
+                    "        h4 = new XMLHttpRequest();\n" + 
+                    "        h4.onreadystatechange = function() { \n" + 
+                    "          if (h4.readyState == 4 && h4.status == 200) {\n" +
+                    "                var a = h4.responseText;\n" +
+                    "                a = a.replace(/'/g, '\"');\n" +
+                    "                window.suggestions = JSON.parse(a);\n" +
+                    "        } }\n" + 
+                    "        h4.open('GET', '/agents/"+ selectedItem + "/code', true); \n" +
+                    "        h4.send();\n"+
+                    "    }\n"); 
+            so.append("updateSuggestions();\n");
+            so.append("function updateCmdCodeCompletion() {\n" +
+                      "  updateSuggestions();\n" +
+                      "  autocomplete(document.getElementById(\"inputcmd\"), suggestions);" +
+                      "}\n"); 
+            so.append("updateCmdCodeCompletion()");
+            so.append("	</script>\n");
+        }
+
         so.append("</html>\n");
         
         return so.toString();
@@ -418,14 +419,19 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("<form autocomplete=\"off\" action=\"\">\n");
         mainContent.append("    <div class=\"autocomplete\">\n");
         mainContent.append("        <input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (" + helpMsg1 + ") ...\"\n"); 
-        mainContent.append("        type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD(); else updateCmdCodeCompletion();\">\n");
+        mainContent.append("        type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) {runCMD();} else {updateCmdCodeCompletion();}\">\n");
         mainContent.append("    </div>\n");
         mainContent.append("</form>\n");
         
-        // if log is not empty
+        // if log is not empty (the element must exists as hidden to avoid httpresponse error
         if (!getLogOutput(agName).equals("")) {
-            mainContent.append("    <div class=\"section\">\n");
-            mainContent.append("      <pre><span id='log'></span></pre>");
+            mainContent.append("    <div class=\"section\" style=\"display:block\">\n");
+            mainContent.append("      <pre><span id='log'>log</span></pre>");
+            mainContent.append("      <span id='plog'></span>");
+            mainContent.append("    </div>\n"); 
+        } else {
+            mainContent.append("    <div class=\"section\" style=\"display:none\">\n");
+            mainContent.append("      <pre><span id='log'>log</span></pre>");
             mainContent.append("      <span id='plog'></span>");
             mainContent.append("    </div>\n"); 
         }
@@ -465,13 +471,12 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("            <summary>Plans</summary>\n");
         mainContent.append("            <embed src='/agents/"+ agName + "/plans' width=\"100%\"/>\n");
         mainContent.append("        </details>\n");*/
-
         mainContent.append("    </div>\n"); 
         /*mainContent.append("    <div class=\"section\">\n"); 
         if (show.get("annots")) {
-            mainContent.append("        <a href='"+ agName + "/hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
+            mainContent.append("        <a href='/agents/"+ agName + "/hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
         } else {
-            mainContent.append("        <a href='"+ agName + "/show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
+            mainContent.append("        <a href='/agents/"+ agName + "/show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
         }
         mainContent.append("    </div>\n"); */
         mainContent.append("</div>\n"); 
@@ -479,7 +484,7 @@ public class RestImplAg extends AbstractBinder {
         // upload plans
         mainContent.append("<div id=\"uploadplans\" class=\"card fluid\">\n");
         mainContent.append("    <div class=\"section\">\n"); 
-        mainContent.append("        <embed src='" + agName + "/load_plans_form/' width=\"100%\" height=\"180px\"/>\n");
+        mainContent.append("        <embed src='/agents/" + agName + "/load_plans_form/' width=\"100%\" height=\"180px\"/>\n");
         mainContent.append("    </div>\n"); 
         mainContent.append("</div>\n"); 
         
@@ -556,6 +561,8 @@ public class RestImplAg extends AbstractBinder {
             if (ag != null) {
                 PlanLibrary pl = ag.getPL();
                 for (Plan plan : pl.getPlans()) {
+                    
+                    // do not add system's plans
                     if (plan.getTrigger().getLiteral().getFunctor().equals("focus_env_art") ||
                             plan.getTrigger().getLiteral().getFunctor().equals("schemes") ||
                             plan.getTrigger().getLiteral().getFunctor().equals("initial_roles") ||
@@ -567,16 +574,22 @@ public class RestImplAg extends AbstractBinder {
                             plan.getTrigger().getLiteral().getFunctor().equals("clear_source") ||
                             plan.getTrigger().getLiteral().getFunctor().equals("join_workspace"))
                         continue;
-                    if (plan.getNS().toString().equals("default"))
-                        so.add("'" + plan.getTrigger().getOperator().toString() +
-                                plan.getTrigger().getType().toString() +
-                                plan.getTrigger().getLiteral().getFunctor() +
-                                "'");
-                    else
-                        so.add("'" + plan.getNS().toString() + "::" + plan.getTrigger().getOperator().toString() + 
-                                plan.getTrigger().getType().toString() +
-                                plan.getTrigger().getLiteral().getFunctor() + 
-                                "'");
+                    
+                    // add namespace when it is not default
+                    String ns = "";
+                    if (!plan.getNS().toString().equals("default")) {
+                        ns = plan.getNS().toString() + "::";
+                    }
+
+                    // do not add operator when type is achieve
+                    if (plan.getTrigger().getType() == TEType.achieve)
+                        so.add("'" + ns + plan.getTrigger().getType().toString()
+                                + plan.getTrigger().getLiteral().getFunctor() + "'");
+                    // when it is belief, do not add type which is anyway empty
+                    else if (plan.getTrigger().getType() == TEType.belief)
+                        so.add("'" + ns + plan.getTrigger().getOperator().toString()
+                                + plan.getTrigger().getLiteral().getFunctor() + "'");
+                    // TODO: do nothing when type is TEType.test?
                 }
             }
             

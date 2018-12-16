@@ -116,10 +116,11 @@ public class RestImpl extends AbstractBinder {
         return Response.ok(so.toString(), "text/css").cacheControl(cc).build();
     }
     
-    @Path("/js/jquery-3.3.1.min.js")
+    // for debug
+    @Path("/js/jquery-3.3.1.js")
     @GET
-    @Produces(MediaType.TEXT_HTML)
-    public Response getJQueryMinCSS() {
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response getJQueryJS() {
         StringBuilder so = new StringBuilder();
         try {
             BufferedReader in = null;
@@ -129,12 +130,35 @@ public class RestImpl extends AbstractBinder {
             } else {
                 in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/jquery-3.3.1.min.js").openStream()));
             }
-            String line = "<script>" + in.readLine();
+            String line = in.readLine();
             while (line != null) {
                 so.append(line);
                 line = in.readLine();
             }
-            line = "</script>";
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.ok(so.toString(), MediaType.TEXT_PLAIN).cacheControl(cc).build();
+    }
+
+    @Path("/js/jquery-3.3.1.min.js")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getJQueryMinJS() {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/js/jquery-3.3.1.min.js");
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f)); 
+            } else {
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/jquery-3.3.1.min.js").openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
