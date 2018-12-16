@@ -1,12 +1,11 @@
 package jacamo.web;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -66,7 +65,8 @@ import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
 import jason.util.Config;
 import ora4mas.nopl.GroupBoard;
-
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
 
 @Singleton
 @Path("/agents")
@@ -162,89 +162,58 @@ public class RestImplAg extends AbstractBinder {
                 "    $(\"#inputcmd\").autocomplete({source: data});\n" + 
                 "};");*/
         so.append("function autocomplete(inp, arr) {\n" + 
-                "  /*the autocomplete function takes two arguments,\n" + 
-                "  the text field element and an array of possible autocompleted values:*/\n" + 
                 "  var currentFocus;\n" + 
-                "  /*execute a function when someone writes in the text field:*/\n" + 
                 "  inp.addEventListener(\"input\", function(e) {\n" + 
                 "      var a, b, i, val = this.value;\n" + 
-                "      /*close any already open lists of autocompleted values*/\n" + 
                 "      closeAllLists();\n" + 
                 "      if (!val) { return false;}\n" + 
                 "      currentFocus = -1;\n" + 
-                "      /*create a DIV element that will contain the items (values):*/\n" + 
                 "      a = document.createElement(\"DIV\");\n" + 
                 "      a.setAttribute(\"id\", this.id + \"autocomplete-list\");\n" + 
                 "      a.setAttribute(\"class\", \"autocomplete-items\");\n" + 
-                "      /*append the DIV element as a child of the autocomplete container:*/\n" + 
                 "      this.parentNode.appendChild(a);\n" + 
-                "      /*for each item in the array...*/\n" + 
                 "      for (i = 0; i < arr.length; i++) {\n" + 
-                "        /*check if the item starts with the same letters as the text field value:*/\n" + 
                 "        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {\n" + 
-                "          /*create a DIV element for each matching element:*/\n" + 
                 "          b = document.createElement(\"DIV\");\n" + 
-                "          /*make the matching letters bold:*/\n" + 
                 "          b.innerHTML = \"<strong>\" + arr[i].substr(0, val.length) + \"</strong>\";\n" + 
                 "          b.innerHTML += arr[i].substr(val.length);\n" + 
-                "          /*insert a input field that will hold the current array item's value:*/\n" + 
                 "          b.innerHTML += \"<input type='hidden' value='\" + arr[i] + \"'>\";\n" + 
-                "          /*execute a function when someone clicks on the item value (DIV element):*/\n" + 
                 "          b.addEventListener(\"click\", function(e) {\n" + 
-                "              /*insert the value for the autocomplete text field:*/\n" + 
                 "              inp.value = this.getElementsByTagName(\"input\")[0].value;\n" + 
-                "              /*close the list of autocompleted values,\n" + 
-                "              (or any other open lists of autocompleted values:*/\n" + 
                 "              closeAllLists();\n" + 
                 "          });\n" + 
                 "          a.appendChild(b);\n" + 
                 "        }\n" + 
                 "      }\n" + 
                 "  });\n" + 
-                "  /*execute a function presses a key on the keyboard:*/\n" + 
                 "  inp.addEventListener(\"keydown\", function(e) {\n" + 
                 "      var x = document.getElementById(this.id + \"autocomplete-list\");\n" + 
                 "      if (x) x = x.getElementsByTagName(\"div\");\n" + 
                 "      if (e.keyCode == 40) {\n" + 
-                "        /*If the arrow DOWN key is pressed,\n" + 
-                "        increase the currentFocus variable:*/\n" + 
                 "        currentFocus++;\n" + 
-                "        /*and and make the current item more visible:*/\n" + 
                 "        addActive(x);\n" + 
                 "      } else if (e.keyCode == 38) { //up\n" + 
-                "        /*If the arrow UP key is pressed,\n" + 
-                "        decrease the currentFocus variable:*/\n" + 
                 "        currentFocus--;\n" + 
-                "        /*and and make the current item more visible:*/\n" + 
                 "        addActive(x);\n" + 
                 "      } else if (e.keyCode == 13) {\n" + 
-                "        /*If the ENTER key is pressed, prevent the form from being submitted,*/\n" + 
                 "        e.preventDefault();\n" + 
                 "        if (currentFocus > -1) {\n" + 
-                "          /*and simulate a click on the \"active\" item:*/\n" + 
                 "          if (x) x[currentFocus].click();\n" + 
                 "        }\n" + 
                 "      }\n" + 
                 "  });\n" + 
                 "  function addActive(x) {\n" + 
-                "    /*a function to classify an item as \"active\":*/\n" + 
                 "    if (!x) return false;\n" + 
-                "    /*start by removing the \"active\" class on all items:*/\n" + 
-                "    removeActive(x);\n" + 
                 "    if (currentFocus >= x.length) currentFocus = 0;\n" + 
                 "    if (currentFocus < 0) currentFocus = (x.length - 1);\n" + 
-                "    /*add class \"autocomplete-active\":*/\n" + 
                 "    x[currentFocus].classList.add(\"autocomplete-active\");\n" + 
                 "  }\n" + 
                 "  function removeActive(x) {\n" + 
-                "    /*a function to remove the \"active\" class from all autocomplete items:*/\n" + 
                 "    for (var i = 0; i < x.length; i++) {\n" + 
                 "      x[i].classList.remove(\"autocomplete-active\");\n" + 
                 "    }\n" + 
                 "  }\n" + 
                 "  function closeAllLists(elmnt) {\n" + 
-                "    /*close all autocomplete lists in the document,\n" + 
-                "    except the one passed as an argument:*/\n" + 
                 "    var x = document.getElementsByClassName(\"autocomplete-items\");\n" + 
                 "    for (var i = 0; i < x.length; i++) {\n" + 
                 "      if (elmnt != x[i] && elmnt != inp) {\n" + 
@@ -252,24 +221,28 @@ public class RestImplAg extends AbstractBinder {
                 "      }\n" + 
                 "    }\n" + 
                 "  }\n" + 
-                "  /*execute a function when someone clicks in the document:*/\n" + 
                 "  document.addEventListener(\"click\", function (e) {\n" + 
                 "      closeAllLists(e.target);\n" + 
                 "  });\n" + 
-                "}\n" + 
-                "var suggestions = [\".desire\",\".drop_desire\",\".drop_all_desires\",\".intend\",\".drop_intention\","
-                + "\".drop_all_intentions\",\".current_intention\",\".drop_event\",\".drop_all_events\",\".succeed_goal\"," 
-                + "\".fail_goal\",\".suspend\",\".suspended\",\".resume\",\".abolish\",\".findall\",\".setof\",\".count\","
-                + "\".namespace\",\".relevant_rules\",\".list_rules\",\".add_plan\",\".remove_plan\",\".plan_label\",\".relevant_plans\","
-                + "\".list_plans\",\".send\",\".list_rules\",\".broadcast\",\".my_name\",\".all_names\",\".all_names\","
-                + "\".df_register\",\".df_deregister\",\".df_search\",\".df_subscribe\",\".member\",\".length\",\".empty\","
-                + "\".concat\",\".delete\",\".reverse\",\".shuffle\",\".nth\",\".max\",\".min\",\".sort\",\".list\","
-                + "\".concat\",\".delete\",\".suffix\",\".prefix\",\".sublist\",\".difference\",\".intersection\","
-                + "\".union\",\".length\",\".concat\",\".delete\",\".reverse\",\".substring\","
-                + "\".string\",\".term2string\",\".lower_case\",\".upper_case\",\".at\",\".wait\","
-                + "\".save_agent\",\".create_agent\",\".kill_agent\",\".clone\",\".stopMAS\",\".wait\",\".date\","
-                + "\".time\",\".fail\",\".perceive\",\".range\",\".random\",\".include\",\".printftf\"];\n" +
-                "autocomplete(document.getElementById(\"inputcmd\"), suggestions);");
+                "}\n");
+        so.append("    var suggestions = [];\n");
+        so.append("    function updateSuggestions() {\n" +
+                "        http = new XMLHttpRequest();\n" + 
+                "        http.onreadystatechange = function() { \n" + 
+                "          if (http.readyState == 4 && http.status == 200) {\n" +
+                "                var a = http.responseText;\n" +
+                "                a = a.replace(/'/g, '\"');\n" +
+                "                window.suggestions = JSON.parse(a);\n" +
+                "        } }\n" + 
+                "        http.open('GET', '/agents/"+ selectedItem + "/code', true); \n" +
+                "        http.send();\n"+
+                "    }\n"); 
+        so.append("updateSuggestions();\n");
+        so.append("    function updateCmdCodeCompletion() {\n" +
+        		  "      updateSuggestions();\n" +
+                  "      autocomplete(document.getElementById(\"inputcmd\"), suggestions);" +
+                  "    }\n"); 
+        so.append("updateCmdCodeCompletion()");
         so.append("	</script>\n");
         so.append("</html>\n");
         
@@ -445,7 +418,7 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("<form autocomplete=\"off\" action=\"\">\n");
         mainContent.append("    <div class=\"autocomplete\">\n");
         mainContent.append("        <input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (" + helpMsg1 + ") ...\"\n"); 
-        mainContent.append("        type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD()\">\n");
+        mainContent.append("        type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) runCMD(); else updateCmdCodeCompletion();\">\n");
         mainContent.append("    </div>\n");
         mainContent.append("</form>\n");
         
@@ -551,41 +524,76 @@ public class RestImplAg extends AbstractBinder {
                 ag.load(uploadedInputStream, "restAPI://"+fileDetail.getFileName());
                 r = "ok, code uploaded!";
             }
-            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"/mind/'\" /></head>"+r;
+            return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+agName+"/mind/'\"/></head>"+r;
         } catch (Exception e) {
             e.printStackTrace();
             return "error "+e.getMessage();
         }
     }
 
-    @Path("/{agentname}/plans")
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String loadListPlans(@PathParam("agentname") String agName,
-            @DefaultValue("") @FormDataParam("plans") String plans,
-            @FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetail
-            ) {
+    public List<String> getIAlist() {
+        List<String> l = new ArrayList<String>();
         try {
-            Agent ag = getAgent(agName);
-            if (ag != null) {
-                ag.parseAS(new StringReader(plans), "RrestAPI");
-                ag.load(uploadedInputStream, "restAPI://"+fileDetail.getFileName());
-            }
-
-            List<String> output = new ArrayList<String>();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(uploadedInputStream));
-            String line;
-            while ((line = bufferedReader.readLine()) != null)
-            { 
-                output.add(line.substring(line.indexOf("+!"), line.length()-line.indexOf("+!")));
-            } 
-            return output.toString();
+            ClassPath classPath = ClassPath.from(this.getClass().getClassLoader());
+            Set<ClassInfo> allClasses = classPath.getTopLevelClassesRecursive("jason.stdlib");
+            
+            allClasses.forEach(a -> {l.add(a.getSimpleName());});
         } catch (Exception e) {
             e.printStackTrace();
-            return "error "+e.getMessage();
         }
+        return l;
+    }
+
+    @Path("/{agentname}/code")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getCodeCompletionSuggestions(@PathParam("agentname") String agName,
+            @DefaultValue("all") @QueryParam("label") String label) {
+        List<String> so = new ArrayList<String>();
+        try {
+        	// get agent's plans
+        	Agent ag = getAgent(agName);
+            if (ag != null) {
+                PlanLibrary pl = ag.getPL();
+                for (Plan plan : pl.getPlans()) {
+                    if (plan.getTrigger().getLiteral().getFunctor().equals("focus_env_art") ||
+                            plan.getTrigger().getLiteral().getFunctor().equals("schemes") ||
+                            plan.getTrigger().getLiteral().getFunctor().equals("initial_roles") ||
+                            plan.getTrigger().getLiteral().getFunctor().equals("focus_orgBoard") ||
+                            plan.getTrigger().getLiteral().getFunctor().equals("obligation") ||
+                            plan.getTrigger().getLiteral().getFunctor().equals("kqml_received") ||
+                            plan.getTrigger().getLiteral().getFunctor().equals("add_all_kqml_achieve") ||
+                            plan.getTrigger().getLiteral().getFunctor().equals("add_all_kqml_received") ||
+                            plan.getTrigger().getLiteral().getFunctor().equals("clear_source") ||
+                            plan.getTrigger().getLiteral().getFunctor().equals("join_workspace"))
+                        continue;
+                    if (plan.getNS().toString().equals("default"))
+                        so.add("'" + plan.getTrigger().getOperator().toString() +
+                                plan.getTrigger().getType().toString() +
+                                plan.getTrigger().getLiteral().getFunctor() +
+                                "'");
+                    else
+                        so.add("'" + plan.getNS().toString() + "::" + plan.getTrigger().getOperator().toString() + 
+                                plan.getTrigger().getType().toString() +
+                                plan.getTrigger().getLiteral().getFunctor() + 
+                                "'");
+                }
+            }
+            
+            // get internal actions
+            getIAlist().forEach(a -> so.add("'." + a + "'"));
+            
+            //TODO: get external actions (from focused artifacts)
+            
+            //TODO: get beliefs add options to remove and to update
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            so.add("No code completion suggestions for " + agName);
+        }
+        Collections.sort(so);
+        return so.toString();
+        //return  "['.desire','.drop_desire','.drop_all_desires']";
     }
 
     @Path("/{agentname}")

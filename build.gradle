@@ -52,7 +52,11 @@ dependencies {
     compile 'org.apache.curator:curator-x-async:4.0.1'
 	
 	compile group: 'guru.nidi', name: 'graphviz-java', version: '0.7.0'
+	// https://mvnrepository.com/artifact/com.google.guava/guava
+	compile group: 'com.google.guava', name: 'guava', version: '11.0.2'
+
 	//compile files ('lib/moise-0.12-SNAPSHOT.jar')	
+	//compile files ('lib/jason-2.4-SNAPSHOT.jar')
 }
 
 sourceSets {

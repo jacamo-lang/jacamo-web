@@ -14,6 +14,10 @@ price(banana,X) :- X = math.random * 100 + 20.
 
 +oi[source(A)] <- .print("I received hello from ",A).
 
++tstWithOneTerm(X)[source(A)] <- .print("I received ", X, " from ",A).
+
++tstWithTwoTerms(X,Y)[source(A)] <- .print("I received ", X, " and ", Y, " from ",A).
+
 +!create_group <- 
      createWorkspace(wkstest);
      joinWorkspace(wkstest,Ofa);
