@@ -42,7 +42,7 @@
                 <xsl:apply-templates select="circumstance/intentions" />
                 <xsl:apply-templates select="circumstance/actions" />
 
-                <!-- xsl:apply-templates select="plans" /-->
+                <xsl:apply-templates select="plans" />
         </html>
     </xsl:template>
 
@@ -90,37 +90,70 @@
                         <span class="belief">
                             <xsl:apply-templates select="." />
                         </span>
-                        <xsl:text>.</xsl:text>
+                        <span class="punctuation">.</span>
                         <br/>
                     </xsl:for-each>
                     </details>
                     </div>
             </xsl:for-each>
             <br/>
+            <div align="right">
+            <xsl:if test="$show-annots='true'">
+            	<a href='hide?annots'>hide annotations</a>
+            </xsl:if>
+            <xsl:if test="$show-annots='false'">
+            	<a href='show?annots'>show annotations</a>
+            </xsl:if>
+            </div>
             </details>
         </xsl:if>
 
         <!-- Rules -->
         <xsl:if test="count(rule) > 0" >
             <details><summary>Rules</summary>
-                <blockquote>
+                <div class="rules">
                         <xsl:for-each select="rule">
                                     <span class="rule">
                                         <xsl:apply-templates select="." />
                                     </span>
                         </xsl:for-each>
                         <br/>
-                </blockquote>
+                </div>
            </details>
         </xsl:if>
     </xsl:template>
 
+    <xsl:template match="plans">
+        <xsl:if test="count(plan) > 0" >
+            <details><summary>Plans</summary>
+                    <xsl:for-each select="plan[not(@file=preceding-sibling::plan/@file)]/@file">
+		                <div class="plans">
+                    	<details><summary><xsl:value-of select="." /></summary>
+		                    <xsl:variable name="fId" select="." />
+		                    <xsl:for-each select="../../plan[@file=$fId]">
+                                    <div class="plan">
+                                        <xsl:apply-templates select="." />
+                                    </div>
+		                    </xsl:for-each>
+                    	</details>
+ 		                </div>
+                	</xsl:for-each>
+                    <xsl:for-each select="plan[not(@file)]">
+                                    <div class="plan">
+                                        <xsl:apply-templates select="." />
+                                    </div>
+                    </xsl:for-each>
+           </details>
+        </xsl:if>
+	</xsl:template>
+	
+	
     <xsl:template match="mailbox">
         <xsl:if test="count(message) > 0" >
-            <details><summary style="{$th-style2}">MailBox</summary>
+            <details><summary>MailBox</summary>
                 <blockquote>
                     <xsl:for-each select="message">
-                          <span style="{$trh-style}">
+                          <span class="message">
                               <xsl:apply-templates select="." />
                               <br/>
                           </span>
@@ -342,53 +375,43 @@
     </xsl:template>
 
     <xsl:template match="plan">
+    	<!-- xsl:if test="not(starts-with(label/literal/structure/@functor,'kqml'))" -->
+    	
         <xsl:if test="count(label) > 0 and not(starts-with(label/literal/structure/@functor,'l__'))">
             <span class="plan-label">
                 @<xsl:apply-templates select="label" />
             </span><br/>
         </xsl:if>
 
-        <span style="color: {$tec};">
-            <b><xsl:apply-templates select="trigger" /></b>
+        <span class	="trigger">
+            <xsl:apply-templates select="trigger" />
         </span>
 
         <xsl:if test="count(context) > 0">
-            <table>
-                <tr>
-                    <td width="20" />
-                    <td width="20" style="vertical-align: top"><b>:</b></td>
-                    <td><xsl:apply-templates select="context" /></td>
-                </tr>
-            </table>
+                    <span class="operator"> : </span>
+                    <xsl:apply-templates select="context" />
         </xsl:if>
 
         <xsl:if test="count(body/body-literal) > 0">
-            <table>
-                <tr>
-                    <td width="20" />
-                    <td width="20" style="vertical-align: top"><b>&lt;-</b></td>
-                    <td>
-                       <xsl:apply-templates select="body">
+                    <span class="operator"> &lt;- </span>
+                    <xsl:apply-templates select="body">
                          <xsl:with-param name="in-plan" select="'true'" />
-                       </xsl:apply-templates>
-                    </td>
-                </tr>
-            </table>
+                    </xsl:apply-templates>
         </xsl:if>
-        <span class="punctuation">.</span>
+        <!-- /xsl:if -->
     </xsl:template>
 
 
-    <xsl:template match="context">
+    <!-- xsl:template match="context">
         <span style="color: {$bc}">
             <xsl:apply-templates />
         </span>
-    </xsl:template>
+    </xsl:template -->
 
     <xsl:template match="expression">
         <span class="punctuation">(</span>
         <xsl:apply-templates select="left" />
-        <span style="color: black">
+        <span class="operator">
             <xsl:value-of select="@operator" />
         </span>
         <xsl:apply-templates select="right" />
@@ -397,29 +420,32 @@
 
     <xsl:template match="body">
         <xsl:param name="in-plan" select="'false'" />
+        <div class="body">
         <xsl:for-each select="body-literal">
             <xsl:choose>
                 <xsl:when test="literal/@ia = 'true'">
-                    <span style="color: {$iac}"><xsl:apply-templates />	</span>
+                    <span class="internal-action"><xsl:apply-templates />	</span>
                 </xsl:when>
                 <xsl:when test="string-length(@type) = 0">
-                    <span style="color: {$ac}"><xsl:apply-templates />	</span>
+                    <span class="action"><xsl:apply-templates />	</span>
                 </xsl:when>
                 <xsl:when test="@type = '?'">
-                    <span style="color: {$tgc}">?<xsl:apply-templates />	</span>
+                    <span class="test">?<xsl:apply-templates />	</span>
                 </xsl:when>
                 <xsl:when test="@type = '!' or @type = '!!'">
-                    <span style="color: {$agc}"><xsl:value-of select="@type"/><xsl:apply-templates />	</span>
+                    <span class="achieve"><xsl:value-of select="@type"/><xsl:apply-templates />	</span>
                 </xsl:when>
                 <xsl:when test="@type = '+' or @type = '-'">
-                    <span style="color: {$bc}"><xsl:value-of select="@type"/><xsl:apply-templates />	</span>
+                    <span class="belief"><xsl:value-of select="@type"/><xsl:apply-templates />	</span>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="@type"/><xsl:apply-templates />
                 </xsl:otherwise>
             </xsl:choose>
-            <xsl:if test="not(position()=last())"> <span class="punctuation">;</span> </xsl:if>
+            <xsl:if test="not(position()=last())"> <span class="punctuation">;</span> <br/> </xsl:if>
         </xsl:for-each>
+        <span class="punctuation">.</span>
+        </div>
     </xsl:template>
 
 
@@ -431,7 +457,7 @@
 
     <xsl:template match="rule">
         <xsl:apply-templates select="head"/>
-        <span class="punctuation"> :- </span>
+        <span class="operator"> :- </span>
         <xsl:apply-templates select="context" />
         <span class="punctuation">.</span>
     </xsl:template>
@@ -492,7 +518,7 @@
     </xsl:template>
 
     <xsl:template match="number-term">
-        <span classs="number-term"><xsl:value-of select="text()"/></span>
+        <span class="number-term"><xsl:value-of select="text()"/></span>
     </xsl:template>
     <xsl:template match="string-term">
         <span class="string-term"><xsl:value-of select="text()"/></span>
@@ -500,7 +526,7 @@
     <xsl:template match="list-term">
         <span class="punctuation">[</span>
         <xsl:for-each select="*">
-            <xsl:value-of select="@sep"/>
+            <span class="punctuation"><xsl:value-of select="@sep"/></span>
             <xsl:apply-templates select="." />
         </xsl:for-each>
         <span class="punctuation">]</span>

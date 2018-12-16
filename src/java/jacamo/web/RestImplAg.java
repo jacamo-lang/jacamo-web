@@ -461,19 +461,19 @@ public class RestImplAg extends AbstractBinder {
         } // transform to HTML
         
         // put plans on agent's mind section
-        mainContent.append("        <details>\n");
-        mainContent.append("            <summary>Agent's plans</summary>\n");
-        mainContent.append("            <embed src='"+ agName + "/plans' width=\"100%\"/>\n");
-        mainContent.append("        </details>\n");
+        /*mainContent.append("        <details>\n");
+        mainContent.append("            <summary>Plans</summary>\n");
+        mainContent.append("            <embed src='/agents/"+ agName + "/plans' width=\"100%\"/>\n");
+        mainContent.append("        </details>\n");*/
 
         mainContent.append("    </div>\n"); 
-        mainContent.append("    <div class=\"section\">\n"); 
+        /*mainContent.append("    <div class=\"section\">\n"); 
         if (show.get("annots")) {
             mainContent.append("        <a href='"+ agName + "/hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
         } else {
             mainContent.append("        <a href='"+ agName + "/show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
         }
-        mainContent.append("    </div>\n"); 
+        mainContent.append("    </div>\n"); */
         mainContent.append("</div>\n"); 
         
         // upload plans
@@ -634,6 +634,7 @@ public class RestImplAg extends AbstractBinder {
         }
         return so.toString();
     }
+ 
 
     @Path("/{agentname}/cmd")
     @POST
