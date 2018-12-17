@@ -388,12 +388,12 @@
         </span>
 
         <xsl:if test="count(context) > 0">
-                    <span class="operator"> : </span>
+                    <!--span class="operator"> : </span-->
                     <xsl:apply-templates select="context" />
         </xsl:if>
 
         <xsl:if test="count(body/body-literal) > 0">
-                    <span class="operator"> &lt;- </span>
+                    <!-- span class="operator"> &lt;- </span -->
                     <xsl:apply-templates select="body">
                          <xsl:with-param name="in-plan" select="'true'" />
                     </xsl:apply-templates>
@@ -402,11 +402,11 @@
     </xsl:template>
 
 
-    <!-- xsl:template match="context">
-        <span style="color: {$bc}">
+    <xsl:template match="context">
+        <div class="context">
             <xsl:apply-templates />
-        </span>
-    </xsl:template -->
+        </div>
+    </xsl:template>
 
     <xsl:template match="expression">
         <span class="punctuation">(</span>

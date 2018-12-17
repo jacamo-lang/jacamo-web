@@ -359,12 +359,30 @@ a:hover, a:focus {
 
 .trigger {
 }
-.contex {
+.plan-label {
+    color: rgb(192,192,192);
+}
+.context {
+  display: block;
+  position: relative;
+  margin-left: calc(6 * var(--universal-margin));
+}
+.context:before {
+  position: absolute;
+  margin-left: calc(-3 * var(--universal-margin));
+  content: ":";
+  color: black;
 }
 .body {
   display: block;
   position: relative;
-  margin-left: calc(3 * var(--universal-margin));
+  margin-left: calc(6 * var(--universal-margin));
+}
+.body:before {
+  position: absolute;
+  margin-left: calc(-3 * var(--universal-margin));
+  content: "<-";
+  color: black;
 }
 .internal-action {
 	color: rgb(100, 70, 30);
