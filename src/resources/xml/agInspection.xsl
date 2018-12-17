@@ -3,24 +3,6 @@
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-    <xsl:param name="h-style"  select="'color: red; font-family: arial;'" />
-    <xsl:param name="th-style" select="'text-align: left; vertical-align: top;  color: #330099;'" />
-    <xsl:param name="th-style2" select="'text-align: left; color: blue; font-family: arial'" />
-    <xsl:param name="td-style" select="'text-align: left; vertical-align: top;'" />
-    <xsl:param name="td-style2" select="'text-align: center; vertical-align: top;'" />
-    <xsl:param name="trh-style" select="'font-family: arial; vertical-align: top;'" />
-    <xsl:param name="tr-style" select="'background-color: #ece7e6; font-family: arial;'" />
-    <!-- border-top: 2px solid black;  -->
-
-    <xsl:param name="bc"     select="'rgb(0 ,170, 0)'" />
-    <xsl:param name="tec"    select="'rgb(200, 0, 0)'" />
-    <xsl:param name="ac"     select="'rgb(80, 40, 20)'" />
-    <xsl:param name="tgc"    select="'rgb(0, 0, 170)'" />
-    <xsl:param name="agc"    select="'rgb(0, 0, 120)'" />
-    <xsl:param name="iac"    select="'rgb(100, 70, 30)'" />
-    <xsl:param name="var"    select="'rgb(0, 0, 200)'" />
-    <xsl:param name="string" select="'rgb(0, 0, 250)'" />
-
     <xsl:param name="show-annots"  select="'true'" />
 
     <xsl:output method="html" />
@@ -28,50 +10,14 @@
 
     <xsl:template match="agent">
         <html>
-            <!-- span style="{$h-style}"><font size="+2">
-                    Inspection of agent <b><xsl:value-of select="@name"/></b>
-                    <xsl:if test="@cycle != 0">
-                        (cycle #<xsl:value-of select="@cycle"/>)
-                    </xsl:if>
-            </font></span -->
-
                 <xsl:apply-templates select="beliefs" />
                 <xsl:apply-templates select="circumstance/mailbox" />
                 <xsl:apply-templates select="circumstance/events" />
                 <xsl:apply-templates select="circumstance/options" />
                 <xsl:apply-templates select="circumstance/intentions" />
                 <xsl:apply-templates select="circumstance/actions" />
-
                 <xsl:apply-templates select="plans" />
         </html>
-    </xsl:template>
-
-    <!-- create de +/- buttom -->
-    <xsl:template name="hideshow">
-        <xsl:param name="show" select="'false'" />
-        <xsl:param name="item" select="'none'" />
-        <xsl:param name="ds"   select="'none'" />
-        <xsl:if test="$show='true'">
-            <th valign="top" style="{$th-style}">
-                <hr/>
-                <a href="hide?{$item}" style="text-decoration: none">
-                    <font size="+1">-</font>
-                    <xsl:text> </xsl:text>
-                </a>
-                <xsl:value-of select="$ds" />
-            </th>
-        </xsl:if>
-        <xsl:if test="$show='false'">
-            <th valign="top" style="{$th-style}">
-                <hr/>
-                <a href="show?{$item}" style="text-decoration: none">
-                    <font size="+1">+</font>
-                    <xsl:text> </xsl:text>
-                </a>
-                <xsl:value-of select="$ds" />
-            </th>
-            <td style="{$td-style}"></td>
-        </xsl:if>
     </xsl:template>
 
     <xsl:template match="beliefs">
@@ -192,9 +138,7 @@
             </td>
 
             <td>
-                <span style="color: {$tec}">
-                    <xsl:apply-templates />
-                </span>
+                <xsl:apply-templates />
             </td>
             <td>
                 <xsl:value-of select="@intention" />
@@ -257,10 +201,8 @@
             <pre>     &lt;- ... <xsl:apply-templates select="body"/> </pre>
 
             <font size="-2">
-            <span style="{$td-style}">
                 <br/>
                 <xsl:apply-templates select="unifier"/>
-            </span>
             </font>
     </xsl:template>
 
@@ -325,7 +267,6 @@
 
                     <table cellspacing="0" cellpadding="3">
                         <tr>
-                            <!--th valign="top" style="{$th-style2}">Rel</th-->
                             <th>App</th>
                             <th>Sel</th>
                             <th>Plan</th>
@@ -458,9 +399,9 @@
 
     <xsl:template match="rule">
         <xsl:apply-templates select="head"/>
-        <span class="operator"> :- </span>
+        <!--  span class="operator"> :- </span -->
         <xsl:apply-templates select="context" />
-        <span class="punctuation">.</span>
+        <!-- span class="punctuation">.</span -->
     </xsl:template>
 
     <xsl:template match="literal">

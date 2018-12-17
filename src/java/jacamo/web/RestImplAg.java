@@ -38,6 +38,9 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.w3c.dom.Document;
 
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
+
 import cartago.ArtifactId;
 import cartago.ArtifactInfo;
 import cartago.CartagoException;
@@ -64,10 +67,9 @@ import jason.asSyntax.Trigger;
 import jason.asSyntax.Trigger.TEType;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
+import jason.stdlib.print;
 import jason.util.Config;
 import ora4mas.nopl.GroupBoard;
-import com.google.common.reflect.ClassPath;
-import com.google.common.reflect.ClassPath.ClassInfo;
 
 @Singleton
 @Path("/agents")
@@ -542,9 +544,9 @@ public class RestImplAg extends AbstractBinder {
     }
 
     public List<String> getIAlist() {
-        List<String> l = new ArrayList<String>();
+        List<String> l = new ArrayList<>();
         try {
-            ClassPath classPath = ClassPath.from(this.getClass().getClassLoader());
+            ClassPath classPath = ClassPath.from(print.class.getClassLoader());
             Set<ClassInfo> allClasses = classPath.getTopLevelClassesRecursive("jason.stdlib");
             
             allClasses.forEach(a -> {l.add(a.getSimpleName());});
@@ -559,13 +561,15 @@ public class RestImplAg extends AbstractBinder {
     @Produces(MediaType.TEXT_PLAIN)
     public String getCodeCompletionSuggestions(@PathParam("agentname") String agName,
             @DefaultValue("all") @QueryParam("label") String label) {
-        List<String> so = new ArrayList<String>();
+        List<String> so = new ArrayList<>();
         try {
             // get agent's plans
             Agent ag = getAgent(agName);
             if (ag != null) {
                 PlanLibrary pl = ag.getPL();
                 for (Plan plan : pl.getPlans()) {
+                    
+                    //plan.getFile().startsWith("jar:file")
                     
                     // do not add system's plans
                     if (plan.getTrigger().getLiteral().getFunctor().equals("focus_env_art") ||
