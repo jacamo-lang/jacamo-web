@@ -569,20 +569,8 @@ public class RestImplAg extends AbstractBinder {
                 PlanLibrary pl = ag.getPL();
                 for (Plan plan : pl.getPlans()) {
                     
-                    //plan.getFile().startsWith("jar:file")
-                    
-                    // do not add system's plans
-                    if (plan.getTrigger().getLiteral().getFunctor().equals("focus_env_art") ||
-                            plan.getTrigger().getLiteral().getFunctor().equals("schemes") ||
-                            plan.getTrigger().getLiteral().getFunctor().equals("initial_roles") ||
-                            plan.getTrigger().getLiteral().getFunctor().equals("focus_orgBoard") ||
-                            plan.getTrigger().getLiteral().getFunctor().equals("obligation") ||
-                            plan.getTrigger().getLiteral().getFunctor().equals("kqml_received") ||
-                            plan.getTrigger().getLiteral().getFunctor().equals("add_all_kqml_achieve") ||
-                            plan.getTrigger().getLiteral().getFunctor().equals("add_all_kqml_received") ||
-                            plan.getTrigger().getLiteral().getFunctor().equals("clear_source") ||
-                            plan.getTrigger().getLiteral().getFunctor().equals("join_workspace"))
-                        continue;
+                    // do not add plans that comes from jar files (usually system's plans)
+                    if (plan.getFile().startsWith("jar:file")) continue;
                     
                     // add namespace when it is not default
                     String ns = "";
@@ -590,14 +578,29 @@ public class RestImplAg extends AbstractBinder {
                         ns = plan.getNS().toString() + "::";
                     }
 
+                    // prepare terms to show between parenthesis plan_functor(Term1, Term2,...) 
+                    String terms = "";
+                    if (plan.getTrigger().getLiteral().getArity() > 0) {
+                        for (int i = 0; i < plan.getTrigger().getLiteral().getArity(); i++) {
+                            if (i == 0) terms = "(";
+                            terms += plan.getTrigger().getLiteral().getTerm(i).toString();
+                            if (i < plan.getTrigger().getLiteral().getArity() - 1) 
+                                terms += ", "; 
+                            else
+                                terms += ")";
+                        }
+                    }
+
                     // do not add operator when type is achieve
                     if (plan.getTrigger().getType() == TEType.achieve)
                         so.add("'" + ns + plan.getTrigger().getType().toString()
-                                + plan.getTrigger().getLiteral().getFunctor() + "'");
+                                + plan.getTrigger().getLiteral().getFunctor() + terms + "'");
                     // when it is belief, do not add type which is anyway empty
                     else if (plan.getTrigger().getType() == TEType.belief)
                         so.add("'" + ns + plan.getTrigger().getOperator().toString()
-                                + plan.getTrigger().getLiteral().getFunctor() + "'");
+                                + plan.getTrigger().getLiteral().getFunctor() + terms + "'");
+                    
+
                     // TODO: do nothing when type is TEType.test?
                 }
             }
