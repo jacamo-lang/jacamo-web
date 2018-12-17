@@ -334,27 +334,30 @@ a:hover, a:focus {
 }
 
 .annotations {
-	
+    font-weight: 300;
 }
 .rule {
 	color: rgb(105,105,105);
 }
 .string-term {
 	color: rgb(112,128,144);
+    font-weight: 300;
 }
 .var-term {
 	color: rgb(47,79,79);
-	font-weight: bold;
+	font-weight: 600;
 }
 .number-term {
 	color: rgb(105,105,105);
 	font-style: italic;	
 }
 .punctuation {
-	color: rgb(220,220,220);
+	color: rgb(169,169,169);
+    font-weight: 100;
 }
 .operator {
 	color: rgb(0,0,0);
+    font-weight: 600;
 }
 
 .trigger {
