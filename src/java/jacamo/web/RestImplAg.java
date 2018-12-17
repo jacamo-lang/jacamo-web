@@ -189,12 +189,14 @@ public class RestImplAg extends AbstractBinder {
                     "      var x = document.getElementById(this.id + \"autocomplete-list\");\n" + 
                     "      if (x) x = x.getElementsByTagName(\"div\");\n" + 
                     "      if (e.keyCode == 40) {\n" + 
+                    "        if (currentFocus >= 0) x[currentFocus].classList.remove(\"autocomplete-active\");\n" + 
                     "        currentFocus++;\n" + 
                     "        addActive(x);\n" + 
                     "      } else if (e.keyCode == 38) { //left arrow 37, up arrow 38, right arrow 39, down arrow 40 \n" + 
+                    "        if (currentFocus >= 0) x[currentFocus].classList.remove(\"autocomplete-active\");\n" + 
                     "        currentFocus--;\n" + 
                     "        addActive(x);\n" + 
-                    "      } else if (e.keyCode == 13) {\n" + 
+                    "      } else if (e.keyCode == 39) {\n" + 
                     "        e.preventDefault();\n" + 
                     "        if (currentFocus > -1) {\n" + 
                     "          if (x) x[currentFocus].click();\n" + 
@@ -206,11 +208,6 @@ public class RestImplAg extends AbstractBinder {
                     "    if (currentFocus >= x.length) currentFocus = 0;\n" + 
                     "    if (currentFocus < 0) currentFocus = (x.length - 1);\n" + 
                     "    x[currentFocus].classList.add(\"autocomplete-active\");\n" + 
-                    "  }\n" + 
-                    "  function removeActive(x) {\n" + 
-                    "    for (var i = 0; i < x.length; i++) {\n" + 
-                    "      x[i].classList.remove(\"autocomplete-active\");\n" + 
-                    "    }\n" + 
                     "  }\n" + 
                     "  function closeAllLists(elmnt) {\n" + 
                     "    var x = document.getElementsByClassName(\"autocomplete-items\");\n" + 
@@ -224,7 +221,7 @@ public class RestImplAg extends AbstractBinder {
                     "      closeAllLists(e.target);\n" + 
                     "  });\n" + 
                     "}\n");
-            so.append("    var suggestions = [];\n");
+            so.append("    var suggestions = ['undefined'];\n");
             so.append("    function updateSuggestions() {\n" +
                     "        h4 = new XMLHttpRequest();\n" + 
                     "        h4.onreadystatechange = function() { \n" + 
@@ -238,10 +235,18 @@ public class RestImplAg extends AbstractBinder {
                     "    }\n"); 
             so.append("updateSuggestions();\n");
             so.append("function updateCmdCodeCompletion() {\n" +
-                      "  updateSuggestions();\n" +
+                      //"  updateSuggestions();\n" +
                       "  autocomplete(document.getElementById(\"inputcmd\"), suggestions);" +
                       "}\n"); 
-            so.append("updateCmdCodeCompletion()");
+            so.append("updateCmdCodeCompletion();");
+            so.append("function waitToFillSuggestions() {\n" + 
+            		"    if(typeof suggestions[0] !== 'undefined') {\n" + 
+            		"        updateSuggestions();\n" + 
+            		"    } else {\n" + 
+            		"        setTimeout(waitToFillSuggestions, 100);\n" + 
+            		"    }\n" + 
+            		"}");
+            so.append("waitToFillSuggestions();");
             so.append("	</script>\n");
         }
 
@@ -285,7 +290,7 @@ public class RestImplAg extends AbstractBinder {
 
         so.append("<input id=\"doc-drawer-checkbox-frame\" class=\"leftmenu\" value=\"on\" type=\"checkbox\">\n"); 
         so.append("<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer-frame\">\n");
-        so.append("	</br>\n"); 
+        so.append("	<br/>\n"); 
 
         if (JCMRest.getZKHost() == null) {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
@@ -321,8 +326,8 @@ public class RestImplAg extends AbstractBinder {
                 e.printStackTrace();
             }
         }                
-        so.append("<br>");
-        so.append("<br>");
+        so.append("<br/>");
+        so.append("<br/>");
         so.append("<a href=\"/services\" target='mainframe'>directory facilitator</a>\n");
         so.append("<a href=\"/agents/forms/new_agent\" target='mainframe'>create agent</a>\n"); 
 
