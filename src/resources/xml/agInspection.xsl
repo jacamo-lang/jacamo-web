@@ -436,7 +436,8 @@
                     <span class="achieve"><xsl:value-of select="@type"/><xsl:apply-templates />	</span>
                 </xsl:when>
                 <xsl:when test="@type = '+' or @type = '-'">
-                    <span class="belief"><xsl:value-of select="@type"/><xsl:apply-templates />	</span>
+                    <span class="operator"><xsl:value-of select="@type"/> </span>
+                    <span class="belief"><xsl:apply-templates />	</span>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="@type"/><xsl:apply-templates />
