@@ -190,7 +190,7 @@ blockquote {
   color: var(--secondary-fore-color);
   margin: var(--universal-margin);
   padding: calc(3 * var(--universal-padding));
-  border: 0.0625rem solid var(--secondary-border-color);
+  /*border: 0.0625rem solid var(--secondary-border-color);*/
   border-left: 0.375rem solid var(--blockquote-color);
   border-radius: 0 var(--universal-border-radius) var(--universal-border-radius) 0;
 }
@@ -237,7 +237,7 @@ pre {
   background: var(--secondary-back-color);
   padding: calc(1.5 * var(--universal-padding));
   margin: var(--universal-margin);
-  border: 0.0625rem solid var(--secondary-border-color);
+  /*border: 0.0625rem solid var(--secondary-border-color);*/
   border-left: 0.25rem solid var(--pre-color);
   border-radius: 0 var(--universal-border-radius) var(--universal-border-radius) 0;
 }
@@ -304,7 +304,7 @@ a:hover, a:focus {
   /*color: rgb(128,128,128);*/
   margin: var(--universal-margin);
   padding: calc(3 * var(--universal-padding));
-  border: 0.0625rem solid var(--secondary-border-color);
+  /*border: 0.0625rem solid var(--secondary-border-color);*/
   border-left: 0.375rem solid rgb(211,211,211);
   border-radius: 0 var(--universal-border-radius) var(--universal-border-radius) 0;
 }
@@ -314,7 +314,7 @@ a:hover, a:focus {
   position: relative;
   margin: var(--universal-margin);
   padding: calc(3 * var(--universal-padding));
-  border: 0.0625rem solid var(--secondary-border-color);
+  /*border: 0.0625rem solid var(--secondary-border-color);*/
   border-left: 0.375rem solid rgb(211,211,211);
   border-radius: 0 var(--universal-border-radius) var(--universal-border-radius) 0;
 }
@@ -323,7 +323,7 @@ a:hover, a:focus {
   position: relative;
   margin: var(--universal-margin);
   padding: calc(3 * var(--universal-padding));
-  border: 0.0625rem solid var(--secondary-border-color);
+  /*border: 0.0625rem solid var(--secondary-border-color);*/
   border-left: 0.375rem solid rgb(211,211,211);
   border-radius: 0 var(--universal-border-radius) var(--universal-border-radius) 0;
 }
@@ -898,14 +898,14 @@ a:hover, a:focus {
   --button-group-border-color: rgba(124, 124, 124, 0.54);
 }
 
-form {
+/*form {
   background: var(--form-back-color);
   color: var(--form-fore-color);
   border: 0.0625rem solid var(--form-border-color);
   border-radius: var(--universal-border-radius);
   margin: var(--universal-margin);
   padding: calc(2 * var(--universal-padding)) var(--universal-padding);
-}
+}*/
 
 fieldset {
   border: 0.0625rem solid var(--form-border-color);
