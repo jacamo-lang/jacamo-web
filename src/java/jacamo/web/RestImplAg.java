@@ -5,12 +5,14 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
@@ -89,9 +91,8 @@ public class RestImplAg extends AbstractBinder {
         so.append("	<head>\n");
         so.append("		<title>" + title + "</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
-        so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"text/html,charset=UTF-8,width=device-width,initial-scale=1\">");
-        //so.append("     <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>");
-        so.append("     <script src=\"/js/agent.js\"></script>");
+        so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"text/html,charset=UTF-8,width=device-width,initial-scale=1\">\n");
+        so.append("     <script src=\"/js/agent.js\"></script>\n");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
@@ -103,156 +104,6 @@ public class RestImplAg extends AbstractBinder {
         so.append("			</div>\n"); 
         so.append("		</div>\n"); 
         so.append("	</body>\n");
-        
-        /*
-        // copy to 'menucontent' the menu to show on drop down main page menu
-        so.append(" <script language=\"JavaScript\">\n");
-        so.append("     var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
-        so.append("     var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n"); 
-        so.append("     var fullMenu = `${buttonClose} ${pageContent}`;\n");
-        so.append("     sessionStorage.setItem(\"menucontent\", fullMenu);\n");
-        so.append(" </script>"); 
-        // some scripts are only used when some agents is selected
-        if (!selectedItem.equals("")) {
-            // function to run Jason commands
-            so.append(" <script language=\"JavaScript\">\n");
-            so.append("     function runCMD() {\n" +
-                    "        http = new XMLHttpRequest();\n" + 
-                    "        http.onreadystatechange = function() { \n" + 
-                    "          if (http.readyState == 4 && http.status == 200) {\n" +
-                    "                location.reload();\n" + 
-                    //"                document.getElementById('display').innerHTML = \"  result: \" + http.responseText;\n" + 
-                    "        } }\n" + 
-                    "        http.open(\"POST\", \"/agents/" + selectedItem + "/cmd\", true); // true for asynchronous \n" +
-                    "        http.setRequestHeader(\"Content-type\", \"application/x-www-form-urlencoded\");\n" +
-                    "        data = 'c='+encodeURIComponent(document.getElementById(\"inputcmd\").value); \n"+
-                    //"        document.getElementById('debug').innerHTML = data\n" + 
-                    "        http.send(data);\n"+
-                    "    }\n"); 
-            so.append("    function killAg() {\n" +
-                    "        h2 = new XMLHttpRequest();\n" + 
-                    "        h2.open('DELETE', '/agents/" + selectedItem + "', false); \n" +
-                    "        h2.send(); \n" +
-                    "    }\n"); 
-            so.append("    function delLog() {\n" +
-                    "        h2 = new XMLHttpRequest();\n" + 
-                    "        h2.open('DELETE', '/agents/"+ selectedItem + "/log', false); \n" +
-                    "        h2.send(); \n" +
-                    "    }\n"); 
-            so.append("    function showLog() {\n" +
-                    "        http = new XMLHttpRequest();\n" + 
-                    "        http.onreadystatechange = function() { \n" + 
-                    "          if (http.readyState == 4 && http.status == 200) {\n" +
-                    "                document.getElementById('log').innerHTML = http.responseText;\n" + 
-                    "                if (http.responseText.length > 1) {\n" + 
-                    "                      var btn = document.createElement(\"BUTTON\"); \n" + 
-                    "                      var t = document.createTextNode(\"clear log\");\n" + 
-                    "                      btn.appendChild(t); \n" +
-                    "                      btn.onclick = function() { delLog(); location.reload(); }; \n" +
-                    "                      document.getElementById('plog').appendChild(btn);  "+
-                    "                }\n" + 
-                    "        } }\n" + 
-                    "        http.open('GET', '/agents/"+ selectedItem + "/log', true); \n" +
-                    "        http.send();\n"+
-                    "    }\n" + 
-                    "    showLog(); \n");
-            so.append("    function newAg() {\n" +
-                    "        http = new XMLHttpRequest();\n" + 
-                    "        http.open(\"POST\", '/agents/'+document.getElementById('createAgent').value, false); \n" +
-                    "        http.send();\n"+
-                    "        window.location.href = '/agents/'+document.getElementById('createAgent').value;\n"+
-                    "   }\n");
-
-            so.append("function autocomplete(inp, arr) {\n" + 
-                    "  var currentFocus;\n" + 
-                    "  inp.addEventListener(\"input\", function(e) {\n" + 
-                    "      var a, b, i, val = this.value;\n" + 
-                    "      closeAllLists();\n" + 
-                    "      if (!val) { return false;}\n" + 
-                    "      currentFocus = -1;\n" + 
-                    "      a = document.createElement(\"DIV\");\n" + 
-                    "      a.setAttribute(\"id\", this.id + \"autocomplete-list\");\n" + 
-                    "      a.setAttribute(\"class\", \"autocomplete-items\");\n" + 
-                    "      this.parentNode.appendChild(a);\n" + 
-                    "      for (i = 0; i < arr.length; i++) {\n" + 
-                    "        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {\n" + 
-                    "          b = document.createElement(\"DIV\");\n" + 
-                    "          b.innerHTML = \"<strong>\" + arr[i].substr(0, val.length) + \"</strong>\";\n" + 
-                    "          b.innerHTML += arr[i].substr(val.length);\n" + 
-                    "          b.innerHTML += \"<input type='hidden' value='\" + arr[i] + \"'>\";\n" + 
-                    "          b.addEventListener(\"click\", function(e) {\n" + 
-                    "              inp.value = this.getElementsByTagName(\"input\")[0].value;\n" + 
-                    "              closeAllLists();\n" + 
-                    "          });\n" + 
-                    "          a.appendChild(b);\n" + 
-                    "        }\n" + 
-                    "      }\n" + 
-                    "  });\n" + 
-                    "  inp.addEventListener(\"keydown\", function(e) {\n" + 
-                    "      var x = document.getElementById(this.id + \"autocomplete-list\");\n" + 
-                    "      if (x) x = x.getElementsByTagName(\"div\");\n" + 
-                    "      if (e.keyCode == 40) {\n" + 
-                    "        if (currentFocus >= 0) x[currentFocus].classList.remove(\"autocomplete-active\");\n" + 
-                    "        currentFocus++;\n" + 
-                    "        addActive(x);\n" + 
-                    "      } else if (e.keyCode == 38) { //left arrow 37, up arrow 38, right arrow 39, down arrow 40 \n" + 
-                    "        if (currentFocus >= 0) x[currentFocus].classList.remove(\"autocomplete-active\");\n" + 
-                    "        currentFocus--;\n" + 
-                    "        addActive(x);\n" + 
-                    "      } else if (e.keyCode == 39) {\n" + 
-                    "        if (currentFocus > -1) {\n" + 
-                    "          if (x) x[currentFocus].click();\n" + 
-                    "        }\n" + 
-                    "      }\n" + 
-                    "  });\n" + 
-                    "  function addActive(x) {\n" + 
-                    "    if (!x) return false;\n" + 
-                    "    if (currentFocus >= x.length) currentFocus = 0;\n" + 
-                    "    if (currentFocus < 0) currentFocus = (x.length - 1);\n" + 
-                    "    x[currentFocus].classList.add(\"autocomplete-active\");\n" + 
-                    "  }\n" + 
-                    "  function closeAllLists(elmnt) {\n" + 
-                    "    var x = document.getElementsByClassName(\"autocomplete-items\");\n" + 
-                    "    for (var i = 0; i < x.length; i++) {\n" + 
-                    "      if (elmnt != x[i] && elmnt != inp) {\n" + 
-                    "        x[i].parentNode.removeChild(x[i]);\n" + 
-                    "      }\n" + 
-                    "    }\n" + 
-                    "  }\n" + 
-                    "  document.addEventListener(\"click\", function (e) {\n" + 
-                    "      closeAllLists(e.target);\n" + 
-                    "  });\n" + 
-                    "}\n");
-            so.append("    var suggestions = ['undefined'];\n");
-            so.append("    function updateSuggestions() {\n" +
-                    "        h4 = new XMLHttpRequest();\n" + 
-                    "        h4.onreadystatechange = function() { \n" + 
-                    "          if (h4.readyState == 4 && h4.status == 200) {\n" +
-                    "                var a = h4.responseText;\n" +
-                    "                a = a.replace(/'/g, '\"');\n" +
-                    "                window.suggestions = JSON.parse(a);\n" +
-                    "        } }\n" + 
-                    "        h4.open('GET', '/agents/"+ selectedItem + "/code', true); \n" +
-                    "        h4.send();\n"+
-                    "    }\n"); 
-            so.append("updateSuggestions();\n");
-            so.append("function updateCmdCodeCompletion() {\n" +
-                      //"  updateSuggestions();\n" +
-                      "  autocomplete(document.getElementById(\"inputcmd\"), suggestions);" +
-                      "}\n"); 
-            so.append("updateCmdCodeCompletion();");
-            so.append("function waitToFillSuggestions() {\n" + 
-                    "    if(typeof suggestions[0] !== 'undefined') {\n" + 
-                    "        updateSuggestions();\n" + 
-                    "    } else {\n" + 
-                    "        setTimeout(waitToFillSuggestions, 100);\n" + 
-                    "    }\n" + 
-                    "}");
-            so.append("waitToFillSuggestions();");
-            so.append(" </script>\n");
-        }
-*/
-
         so.append("</html>\n");
         
         return so.toString();
@@ -278,14 +129,14 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("        <br/>\n");
         mainContent.append("        <p>\n");
         mainContent.append("            You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered services the agents are providing.");
-        mainContent.append("            You can also <a href=\"/agents/forms/new_agent\" target='mainframe'>create</a> a new agent and kill some existing one.\n"); 
+        mainContent.append("            You can also <a href=\"/forms/new_agent\" target='_top'>create</a> a new agent and kill some existing one.\n"); 
         mainContent.append("            <mark class=\"do\">Attention:</mark> killing agents may cause data loss. Make sure you don't need the data or the agent is using persistent belief base.\n"); 
         mainContent.append("		</p>\n");
         mainContent.append("		<br/>\n");
         mainContent.append("	</div>\n");
         mainContent.append("</div>\n");
 
-        return designPage("JaCamo-Rest - Agents","",mainContent.toString());
+        return designPage("JaCamo-web - Agents","",mainContent.toString());
     }
 
     public String getAgentsMenu(String selectedAgent) {
@@ -296,7 +147,8 @@ public class RestImplAg extends AbstractBinder {
         so.append("	<br/>\n"); 
 
         if (JCMRest.getZKHost() == null) {
-            for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
+            Collection<String> agents = new TreeSet<String>(BaseCentralisedMAS.getRunner().getAgs().keySet());
+            for (String a : agents) {
                 if (a.equals(selectedAgent)) {
                     so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>. " + a + "</h5></a>\n");
                 } else {
@@ -306,7 +158,8 @@ public class RestImplAg extends AbstractBinder {
         } else {
             // get agents from ZK
             try {
-                for (String a : JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId)) {
+                Collection<String> agents = new TreeSet<String>(JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId));
+                for (String a : agents) {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
                     if (a.equals(selectedAgent)) {
                         so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>. " + a + "</h5></a>\n");
@@ -324,7 +177,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("<br/>");
         so.append("<br/>");
         so.append("<a href=\"/services\" target='mainframe'>directory facilitator</a>\n");
-        so.append("<a href=\"/agents/forms/new_agent\" target='mainframe'>create agent</a>\n"); 
+        so.append("<a href=\"/forms/new_agent\" target='_top'>create agent</a>\n"); 
 
         so.append("</nav>\n");
         return so.toString();
@@ -448,7 +301,6 @@ public class RestImplAg extends AbstractBinder {
         // details
         mainContent.append("<div id=\"\" class=\"card fluid\">\n");
         mainContent.append("    <div class=\"section\">\n"); 
-
         try {
             if (mindInspectorTransformerHTML == null) {
                 mindInspectorTransformerHTML = TransformerFactory.newInstance().newTransformer(
@@ -465,20 +317,7 @@ public class RestImplAg extends AbstractBinder {
         } catch (Exception e) {
             e.printStackTrace();
         } // transform to HTML
-        
-        // put plans on agent's mind section
-        /*mainContent.append("        <details>\n");
-        mainContent.append("            <summary>Plans</summary>\n");
-        mainContent.append("            <embed src='/agents/"+ agName + "/plans' width=\"100%\"/>\n");
-        mainContent.append("        </details>\n");*/
         mainContent.append("    </div>\n"); 
-        /*mainContent.append("    <div class=\"section\">\n"); 
-        if (show.get("annots")) {
-            mainContent.append("        <a href='/agents/"+ agName + "/hide?annots'     style='font-family: arial; text-decoration: none'>hide annotations</a>\n");              
-        } else {
-            mainContent.append("        <a href='/agents/"+ agName + "/show?annots'     style='font-family: arial; text-decoration: none'>show annotations</a>\n");                              
-        }
-        mainContent.append("    </div>\n"); */
         mainContent.append("</div>\n"); 
         
         // upload plans
@@ -495,7 +334,7 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("</div>\n"); 
         
         
-        return designPage("JaCamo-Rest - Agents: " + agName,agName,mainContent.toString());
+        return designPage("JaCaMo-web - Agents: " + agName,agName,mainContent.toString());
     }
 
     @Path("/{agentname}")
@@ -637,7 +476,6 @@ public class RestImplAg extends AbstractBinder {
             return null;
         }
     }
-
     
     @Path("/{agentname}/plans")
     @GET
@@ -773,25 +611,6 @@ public class RestImplAg extends AbstractBinder {
             e.printStackTrace();
         }
         return Response.noContent().build(); // TODO: set response properly
-    }
-
-    @Path("/forms/new_agent")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getNewAgentForm() {
-        StringWriter mainContent = new StringWriter();
-        mainContent.append("<div id=\"create-agent\" class=\"card fluid\">\n"); 
-        mainContent.append("	<h4 class=\"section double-padded\">Create agent</h4>\n"); 
-        mainContent.append("	<div class=\"section\">\n"); 
-        mainContent.append("		<p>\n");
-        mainContent.append("			<input style=\"width: 100%; margin: 0px;\" placeholder=\"enter agent's name ...\"\n"); 
-        mainContent.append("			type=\"text\" id=\"createAgent\" onkeydown=\"if (event.keyCode == 13) newAg()\">\n");
-        mainContent.append("		</p>\n");
-        mainContent.append("		<br/>\n");
-        mainContent.append("	</div>\n");
-        mainContent.append("</div>\n");
-
-        return designPage("JaCamo-Rest - Agents: new agent","",mainContent.toString());
     }
 
     protected String getAgAsDot(String agName) {

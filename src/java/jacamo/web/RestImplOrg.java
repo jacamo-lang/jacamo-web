@@ -19,7 +19,6 @@ import javax.xml.transform.stream.StreamResult;
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
 import cartago.CartagoException;
-import cartago.CartagoService;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
@@ -88,7 +87,7 @@ public class RestImplOrg extends AbstractBinder {
          mainContent.append("	</div>\n");
          mainContent.append("</div>\n");
          
-        return designPage("JaCamo-Rest - Organisation","",mainContent.toString());
+        return designPage("JaCaMo-web - Organisation","",mainContent.toString());
     }
 
     private String getOrganisationMenu(String selectedOrganisation) {
@@ -199,7 +198,7 @@ public class RestImplOrg extends AbstractBinder {
             }
             mainContent.append("</div>\n");
 
-            return designPage("JaCamo-Rest - Organisation: " + oeName, oeName, mainContent.toString());
+            return designPage("JaCaMo-web - Organisation: " + oeName, oeName, mainContent.toString());
         } catch (Exception | TransformerFactoryConfigurationError e) {
             e.printStackTrace();
         }

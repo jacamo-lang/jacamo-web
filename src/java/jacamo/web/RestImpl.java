@@ -28,16 +28,15 @@ public class RestImpl extends AbstractBinder {
 
     // HTML interface
     
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getRootHtml() {
+    public String designPage(String title, String mainContent) {
         StringWriter so = new StringWriter();
         so.append("<!DOCTYPE html>\n"); 
         so.append("<html lang=\"en\">\n"); 
         so.append("	<head>\n");
-        so.append("		<title>JaCamo-Rest</title>\n");
+        so.append("		<title>" + title + "</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
-        so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+        so.append("     <meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
+        so.append("     <script src=\"/js/root.js\"></script>\n");
         so.append("	</head>\n");
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
@@ -45,21 +44,21 @@ public class RestImpl extends AbstractBinder {
         // logo JaCaMo
         so.append("				<span class=\"logo col-xp-2 col-sm-2 col-md\">JaCaMo</span>\n"); 
         // top menu - button agents
-        so.append("				<a class=\"button col-xp-1 col-sm-2 col-md\" href=\"agents/\" target=\"mainframe\">\n" +
+        so.append("				<a class=\"button col-xp-1 col-sm-2 col-md\" href=\"/agents/\" target=\"mainframe\">\n" +
                   "					<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"\n" + 
                   "						fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"\n" + 
                   "						stroke-linejoin=\"round\" style=\"height: 20px; vertical-align: text-top;\">\n" + 
                   "						<circle cx=\"12\" cy=\"12\" r=\"11\"/>\n" + 
                   "					</svg><span>&nbsp;Agents</span>\n" + 
                   "				</a>\n");
-        so.append("				<a class=\"button col-xp-1 col-sm-2 col-md\" href=\"workspaces/\" target=\"mainframe\">\n" + 
+        so.append("				<a class=\"button col-xp-1 col-sm-2 col-md\" href=\"/workspaces/\" target=\"mainframe\">\n" + 
                   "					<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"\n" +  
                   "						fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"\n" + 
                   "						stroke-linejoin=\"round\" style=\"height: 20px; vertical-align: text-top;\">\n" + 
                   "						<polygon points=\"0 1, 24 1, 24 8, 0 8, 0 16, 24 16, 24 23, 0 23, 0 1, 24 1, 24 23, 0 23\"></polygon>\n" +
                   "					</svg><span>&nbsp;Environment</span>\n" +
                   "				</a>\n");
-        so.append("				<a class=\"button col-xp-1 col-sm-2 col-md\" href=\"oe/\" target=\"mainframe\">\n" + 
+        so.append("				<a class=\"button col-xp-1 col-sm-2 col-md\" href=\"/oe/\" target=\"mainframe\">\n" + 
                   "					<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"\n" + 
                   "						fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"\n" + 
                   "						stroke-linejoin=\"round\" style=\"height: 20px; vertical-align: text-top;\">\n" + 
@@ -77,17 +76,24 @@ public class RestImpl extends AbstractBinder {
                   "				</nav>\n");
         so.append("			</header>\n"); 
         so.append("			<div class=\"second-row\" id=\"full-content\">\n");
-        so.append("				<iframe id=\"mainframe\" name=\"mainframe\" src=\"agents/\" width=\"100%\" height=\"100%\"\n" + 
-                  "					frameborder=0></iframe>\n"); 
+        so.append(                  mainContent);
         so.append("			</div>\n");
         so.append("		</div>\n"); 
         so.append("	</body>\n"); 
-        so.append("   <script>\n");
-        so.append("       setInterval(function(){ document.getElementById(\"nav-drawer\").innerHTML=sessionStorage.getItem(\"menucontent\"); }, 500);\n");
-        so.append("   </script>\n");
         so.append("</html>\n"); 
 
         return so.toString();
+    }
+
+    
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getRootHtml() {
+        StringWriter mainContent = new StringWriter();
+        mainContent.append("				<iframe id=\"mainframe\" name=\"mainframe\" src=\"/agents/\" width=\"100%\" height=\"100%\"\n" + 
+                           "					frameborder=0></iframe>\n"); 
+
+        return designPage("JaCamo-web", mainContent.toString());
     }
 
     private CacheControl cc = new CacheControl();  { cc.setMaxAge(20); } // in seconds
@@ -116,7 +122,25 @@ public class RestImpl extends AbstractBinder {
         return Response.ok(so.toString(), "text/css").cacheControl(cc).build();
     }
     
-    // for debug
+    @Path("/forms/new_agent")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getNewAgentForm() {
+        StringWriter mainContent = new StringWriter();
+        
+        mainContent.append("<div id=\"create-agent\" class=\"card fluid\">\n"); 
+        mainContent.append("	<h4 class=\"section double-padded\">Create agent</h4>\n"); 
+        mainContent.append("	<div class=\"section\">\n"); 
+        mainContent.append("		<p>\n");
+        mainContent.append("			<input style=\"width: 100%; margin: 0px;\" placeholder=\"enter agent's name ...\" type=\"text\" id=\"createAgent\" onkeydown=\"if (event.keyCode == 13) newAg()\">\n");
+        mainContent.append("		</p>\n");
+        mainContent.append("		<br/>\n");
+        mainContent.append("	</div>\n");
+        mainContent.append("</div>\n");
+
+        return designPage("JaCamo-web -  new agent", mainContent.toString());
+    }
+
     @Path("/js/agent.js")
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -140,19 +164,19 @@ public class RestImpl extends AbstractBinder {
         }
         return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
     }
-
-    @Path("/js/jquery-3.3.1.min.js")
+    
+    @Path("/js/root.js")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Response getJQueryMinJS() {
         StringBuilder so = new StringBuilder();
         try {
             BufferedReader in = null;
-            File f = new File("src/resources/js/jquery-3.3.1.min.js");
+            File f = new File("src/resources/js/root.js");
             if (f.exists()) {
                 in = new BufferedReader(new FileReader(f)); 
             } else {
-                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/jquery-3.3.1.min.js").openStream()));
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/root.js").openStream()));
             }
             String line = in.readLine();
             while (line != null) {

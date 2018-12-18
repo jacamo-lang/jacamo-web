@@ -46,14 +46,6 @@ function showLog() {
     http.send();
 }
 
-/* create agent */
-function newAg() {
-	http = new XMLHttpRequest(); 
-    http.open("POST", '/agents/'+document.getElementById('createAgent').value, false);
-    http.send();
-    window.location.href = '/agents/'+document.getElementById('createAgent').value;
-}
-
 /* automcomplete for cmd box */
 function autocomplete(inp, arr) { 
 	var currentFocus;

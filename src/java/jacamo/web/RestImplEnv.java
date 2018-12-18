@@ -92,7 +92,7 @@ public class RestImplEnv extends AbstractBinder {
         mainContent.append("	</div>\n");
         mainContent.append("</div>\n");
         
-        return designPage("JaCamo-Rest - Environment", "", "", mainContent.toString());
+        return designPage("JaCaMo-web - Environment", "", "", mainContent.toString());
     }
 
     private String getEnvironmentMenu(String selectedWorkspace, String selectedArtifact) {
@@ -165,7 +165,7 @@ public class RestImplEnv extends AbstractBinder {
             mainContent.append("	</div>\n"); 
             mainContent.append("</div>\n"); 
             
-            return designPage("JaCamo-Rest - Environment: " + wrksName, wrksName, "", mainContent.toString());
+            return designPage("JaCaMo-web - Environment: " + wrksName, wrksName, "", mainContent.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -204,7 +204,7 @@ public class RestImplEnv extends AbstractBinder {
             mainContent.append("	</div>\n"); 
             mainContent.append("</div>\n"); 
             
-            return designPage("JaCamo-Rest - Environment: " + wrksName, wrksName, artName, mainContent.toString());
+            return designPage("JaCaMo-web - Environment: " + wrksName, wrksName, artName, mainContent.toString());
         } catch (CartagoException e) {
             e.printStackTrace();
         }
