@@ -22,7 +22,7 @@ if (typeof Promise !== "undefined") {
 	CodeMirror.fromTextArea(document.getElementById("planstextarea"), {
 		lineNumbers : true,
 		extraKeys : { "Ctrl-Space" : "autocomplete"},
-		mode : {name : "javascript", globalVars : true},
+		mode : {name : "erlang", globalVars : true},
 		hintOptions : {hint : synonyms},
 	});
 }

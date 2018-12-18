@@ -101,6 +101,25 @@ public class RestImpl extends AbstractBinder {
 
     private CacheControl cc = new CacheControl();  { cc.setMaxAge(20); } // in seconds
 
+    @Path("/forms/new_agent")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getNewAgentForm() {
+        StringWriter mainContent = new StringWriter();
+        
+        mainContent.append("<div id=\"create-agent\" class=\"card fluid\">\n"); 
+        mainContent.append("	<h4 class=\"section double-padded\">Create agent</h4>\n"); 
+        mainContent.append("	<div class=\"section\">\n"); 
+        mainContent.append("		<p>\n");
+        mainContent.append("			<input style=\"width: 100%; margin: 0px;\" placeholder=\"enter agent's name ...\" type=\"text\" id=\"createAgent\" onkeydown=\"if (event.keyCode == 13) newAg()\">\n");
+        mainContent.append("		</p>\n");
+        mainContent.append("		<br/>\n");
+        mainContent.append("	</div>\n");
+        mainContent.append("</div>\n");
+
+        return designPage("JaCamo-web -  new agent", mainContent.toString());
+    }
+
     @Path("/css/{resourcepathfile}")
     @GET
     @Produces("text/css")
@@ -123,25 +142,6 @@ public class RestImpl extends AbstractBinder {
             e.printStackTrace();
         }
         return Response.ok(so.toString(), "text/css").cacheControl(cc).build();
-    }
-    
-    @Path("/forms/new_agent")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getNewAgentForm() {
-        StringWriter mainContent = new StringWriter();
-        
-        mainContent.append("<div id=\"create-agent\" class=\"card fluid\">\n"); 
-        mainContent.append("	<h4 class=\"section double-padded\">Create agent</h4>\n"); 
-        mainContent.append("	<div class=\"section\">\n"); 
-        mainContent.append("		<p>\n");
-        mainContent.append("			<input style=\"width: 100%; margin: 0px;\" placeholder=\"enter agent's name ...\" type=\"text\" id=\"createAgent\" onkeydown=\"if (event.keyCode == 13) newAg()\">\n");
-        mainContent.append("		</p>\n");
-        mainContent.append("		<br/>\n");
-        mainContent.append("	</div>\n");
-        mainContent.append("</div>\n");
-
-        return designPage("JaCamo-web -  new agent", mainContent.toString());
     }
 
     @Path("/js/{resourcepathfile}")
@@ -167,125 +167,4 @@ public class RestImpl extends AbstractBinder {
         }
         return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
     }
-    
-    @Path("/lib/codemirror.js")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public Response getCodemirrorJS() {
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/resources/lib/codemirror-minified/lib/codemirror.js");
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f)); 
-            } else {
-                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/lib/codemirror-minified/lib/codemirror.js").openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
-    }
-
-    @Path("/lib/codemirror.css")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public Response getCodemirrorCSS() {
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/resources/lib/codemirror-minified/lib/codemirror.css");
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f)); 
-            } else {
-                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/lib/codemirror-minified/lib/codemirror.css").openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
-    }
-
-    @Path("/lib/mode/erlang/erlang.js")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public Response getModeErlangJS() {
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/resources/lib/codemirror-minified/mode/erlang/erlang.js");
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f)); 
-            } else {
-                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/lib/codemirror-minified/mode/erlang/erlang.js").openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
-    }
-    
-    @Path("/lib/hint/show-hint.js")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public Response getShowhintJS() {
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/resources/lib/codemirror-minified/addon/hint/show-hint.js");
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f)); 
-            } else {
-                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/lib/codemirror-minified/addon/hint/show-hint.js").openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
-    }    
-    
-    @Path("/lib/hint/javascript-hint.js")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public Response getLanghintJS() {
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/resources/lib/codemirror-minified/addon/hint/javascript-hint.js");
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f)); 
-            } else {
-                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/lib/codemirror-minified/addon/hint/javascript-hint.js").openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
-    }    
-    
 }

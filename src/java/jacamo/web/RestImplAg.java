@@ -91,7 +91,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("	<head>\n");
         so.append("		<title>" + title + "</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
-        so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"text/html,charset=UTF-8,width=device-width,initial-scale=1\">\n");
+        so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n");
         so.append("     <script src=\"/js/agent.js\"></script>\n");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
@@ -354,17 +354,10 @@ public class RestImplAg extends AbstractBinder {
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
         return  "<html><head><title>load plans for "+agName+"</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">" +
                 "<meta http-equiv=\"Content-type\" content=\"text/html,charset=UTF-8\"></head>" +
-                //"<script src=\"/lib/codemirror.js\"></script>\n" +
-                //"<link rel=\"stylesheet\" href=\"/lib/codemirror.css\">\n" +
-                //"<script src=\"/lib/hint/show-hint.js\"></script>\n" +
-                //"<script src=\"/lib/hint/javascript-hint.js\"></script>\n" +
-                //"<script src=\"/lib/mode/erlang/erlang.js\"></script>\n" +
-
                 "<script src=\"/js/codemirror.js\"></script>\n" +
                 "<link rel=\"stylesheet\" href=\"/css/codemirror.css\">\n" +
                 "<script src=\"/js/show-hint.js\"></script>\n" +
                 "<script src=\"/js/erlang.js\"></script>\n" +
-                
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
                 "<textarea name=\"planstextarea\" id=\"planstextarea\" form=\"usrform\" style=\"width:99%; overflow: auto;\">" +
                 "/*Write Jason plans here...*/\n</textarea>" +
