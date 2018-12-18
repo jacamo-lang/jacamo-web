@@ -354,16 +354,22 @@ public class RestImplAg extends AbstractBinder {
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
         return  "<html><head><title>load plans for "+agName+"</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">" +
                 "<meta http-equiv=\"Content-type\" content=\"text/html,charset=UTF-8\"></head>" +
-                "<script src=\"/lib/codemirror.js\"></script>\n" +
-                "<link rel=\"stylesheet\" href=\"/lib/codemirror.css\">\n" +
-                "<script src=\"/lib/hint/show-hint.js\"></script>\n" +
-                "<script src=\"/lib/hint/javascript-hint.js\"></script>\n" +
-                "<script src=\"/lib/mode/erlang/erlang.js\"></script>\n" +
+                //"<script src=\"/lib/codemirror.js\"></script>\n" +
+                //"<link rel=\"stylesheet\" href=\"/lib/codemirror.css\">\n" +
+                //"<script src=\"/lib/hint/show-hint.js\"></script>\n" +
+                //"<script src=\"/lib/hint/javascript-hint.js\"></script>\n" +
+                //"<script src=\"/lib/mode/erlang/erlang.js\"></script>\n" +
+
+                "<script src=\"/js/codemirror.js\"></script>\n" +
+                "<link rel=\"stylesheet\" href=\"/css/codemirror.css\">\n" +
+                "<script src=\"/js/show-hint.js\"></script>\n" +
+                "<script src=\"/js/erlang.js\"></script>\n" +
+                
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
                 "<textarea name=\"planstextarea\" id=\"planstextarea\" form=\"usrform\" style=\"width:99%; overflow: auto;\">" +
                 "/*Write Jason plans here...*/\n</textarea>" +
                 "<br/>or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload\"></form>" + 
-                "<script src=\"/res/load_plans_form.js\"></script>\n" +
+                "<script src=\"/js/load_plans_form.js\"></script>\n" +
                 "</html>";
     }
 

@@ -101,18 +101,18 @@ public class RestImpl extends AbstractBinder {
 
     private CacheControl cc = new CacheControl();  { cc.setMaxAge(20); } // in seconds
 
-    @Path("/css/style.css")
+    @Path("/css/{resourcepathfile}")
     @GET
     @Produces("text/css")
-    public Response getStyleCSS() {
+    public Response getStyleCSS(@PathParam("resourcepathfile") String resourcepathfile) throws ReceiverNotFoundException {
         StringBuilder so = new StringBuilder();
         try {
             BufferedReader in = null;
-            File f = new File("src/resources/css/style.css");
+            File f = new File("src/resources/css/" + resourcepathfile);
             if (f.exists()) {
                 in = new BufferedReader(new FileReader(f)); 
             } else {
-                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/css/style.css").openStream()));
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/css/" + resourcepathfile).openStream()));
             }
             String line = in.readLine();
             while (line != null) {
@@ -144,55 +144,7 @@ public class RestImpl extends AbstractBinder {
         return designPage("JaCamo-web -  new agent", mainContent.toString());
     }
 
-    @Path("/js/agent.js")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public Response getJQueryJS() {
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/resources/js/agent.js");
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f)); 
-            } else {
-                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/agent.js").openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
-    }
-    
-    @Path("/js/root.js")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public Response getJQueryMinJS() {
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/resources/js/root.js");
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f)); 
-            } else {
-                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/root.js").openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
-    }
-    
-    @Path("/res/{resourcepathfile}")
+    @Path("/js/{resourcepathfile}")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Response getResource(@PathParam("resourcepathfile") String resourcepathfile) throws ReceiverNotFoundException {
