@@ -114,7 +114,7 @@
     <xsl:template match="events">
         <xsl:if test="count(event) > 0" >
             <details><summary>Events</summary>
-                <blockquote>
+                <div class="events">
                     <table cellspacing="0" cellpadding="3">
                         <tr>
                             <th>Sel</th>
@@ -123,7 +123,7 @@
                         </tr>
                         <xsl:apply-templates />
                     </table>
-                </blockquote>
+                </div>
             </details>
         </xsl:if>
     </xsl:template>
@@ -149,7 +149,7 @@
     <xsl:template match="intentions">
         <xsl:if test="count(intention) > 0" >
             <details><summary>Intentions</summary>
-                <blockquote>
+                <div class="intentions">
 
                     <table cellspacing="0" cellpadding="5">
                         <tr>
@@ -160,7 +160,7 @@
                         </tr>
                         <xsl:apply-templates />
                     </table>
-                </blockquote>
+                </div>
             </details>
         </xsl:if>
     </xsl:template>
@@ -187,23 +187,24 @@
             </td>
 
             <td>
-                    <details><summary><xsl:value-of select="intended-means/@trigger" /></summary>
-                        <xsl:apply-templates />
-                    </details>
-                    <xsl:if test="@finished = 'true'">
-                        <b> (finished)</b>
-                    </xsl:if>
+                <details><summary><xsl:value-of select="intended-means/@trigger" /></summary>
+          	        <div class="plans">
+                    <xsl:apply-templates />
+                    </div>
+                </details>
+                <xsl:if test="@finished = 'true'">
+                    <b> (finished)</b>
+                </xsl:if>
             </td>
         </tr>
     </xsl:template>
     <xsl:template match="intended-means">
-	        <pre><xsl:apply-templates select="@trigger"/></pre>
-            <pre>     &lt;- ... <xsl:apply-templates select="body"/> </pre>
+	       	<xsl:apply-templates select="@trigger"/>
+          	<xsl:apply-templates select="body"/> 
 
-            <font size="-2">
-                <br/>
+            <div class="unifier">
                 <xsl:apply-templates select="unifier"/>
-            </font>
+            </div>
     </xsl:template>
 
 
@@ -321,7 +322,7 @@
         <xsl:if test="count(label) > 0 and not(starts-with(label/literal/structure/@functor,'l__'))">
             <span class="plan-label">
                 @<xsl:apply-templates select="label" />
-            </span><br/>
+            </span>
         </xsl:if>
 
         <span class	="trigger">

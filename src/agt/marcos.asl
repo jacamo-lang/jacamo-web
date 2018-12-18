@@ -1,5 +1,7 @@
 price(banana,X) :- X = math.random * 100 + 20.
 
+!longTermSomething(1).
+
 !start.
 +!start
    <-
@@ -29,6 +31,22 @@ price(banana,X) :- X = math.random * 100 + 20.
     g::adoptRole(door_fitter);
     .
 
++!longTermSomething(X) : .length("xxx") > 0 & X < 1000
+   <- .wait(1000);
+      !g3(4000);
+      .print(something,X);
+      !longTermSomething(X+1);
+   .
++!g3(Vl)
+   <- !!g4(Vl*2);
+      .suspend;
+   .
+   
++!g4(T)
+   <- .wait(T);
+      .resume(longTermSomething(_));
+   .
+   
 { include("$jacamoJar/templates/common-cartago.asl") }
 { include("$jacamoJar/templates/common-moise.asl") }
 
