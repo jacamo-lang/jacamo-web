@@ -117,18 +117,18 @@ public class RestImpl extends AbstractBinder {
     }
     
     // for debug
-    @Path("/js/jquery-3.3.1.js")
+    @Path("/js/agent.js")
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_HTML)
     public Response getJQueryJS() {
         StringBuilder so = new StringBuilder();
         try {
             BufferedReader in = null;
-            File f = new File("src/resources/js/jquery-3.3.1.min.js");
+            File f = new File("src/resources/js/agent.js");
             if (f.exists()) {
                 in = new BufferedReader(new FileReader(f)); 
             } else {
-                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/jquery-3.3.1.min.js").openStream()));
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/agent.js").openStream()));
             }
             String line = in.readLine();
             while (line != null) {
@@ -138,7 +138,7 @@ public class RestImpl extends AbstractBinder {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Response.ok(so.toString(), MediaType.TEXT_PLAIN).cacheControl(cc).build();
+        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
     }
 
     @Path("/js/jquery-3.3.1.min.js")

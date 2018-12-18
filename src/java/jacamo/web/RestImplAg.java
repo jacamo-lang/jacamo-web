@@ -89,9 +89,9 @@ public class RestImplAg extends AbstractBinder {
         so.append("	<head>\n");
         so.append("		<title>" + title + "</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
-        so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+        so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"text/html,charset=UTF-8,width=device-width,initial-scale=1\">");
         //so.append("     <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>");
-        so.append("     <script src=\"/js/jquery-3.3.1.js\"></script>");
+        so.append("     <script src=\"/js/agent.js\"></script>");
         so.append("	</head>\n"); 
         so.append("	<body>\n"); 
         so.append("		<div id=\"root\">\n"); 
@@ -104,19 +104,19 @@ public class RestImplAg extends AbstractBinder {
         so.append("		</div>\n"); 
         so.append("	</body>\n");
         
+        /*
         // copy to 'menucontent' the menu to show on drop down main page menu
-        so.append("	<script language=\"JavaScript\">\n");
-        so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n");
-        so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n");
-        so.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
-        so.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
-        so.append("	</script>\n");
-
+        so.append(" <script language=\"JavaScript\">\n");
+        so.append("     var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n"); 
+        so.append("     var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n"); 
+        so.append("     var fullMenu = `${buttonClose} ${pageContent}`;\n");
+        so.append("     sessionStorage.setItem(\"menucontent\", fullMenu);\n");
+        so.append(" </script>"); 
         // some scripts are only used when some agents is selected
         if (!selectedItem.equals("")) {
             // function to run Jason commands
-            so.append("	<script language=\"JavaScript\">\n");
-            so.append("		function runCMD() {\n" +
+            so.append(" <script language=\"JavaScript\">\n");
+            so.append("     function runCMD() {\n" +
                     "        http = new XMLHttpRequest();\n" + 
                     "        http.onreadystatechange = function() { \n" + 
                     "          if (http.readyState == 4 && http.status == 200) {\n" +
@@ -161,7 +161,8 @@ public class RestImplAg extends AbstractBinder {
                     "        http.open(\"POST\", '/agents/'+document.getElementById('createAgent').value, false); \n" +
                     "        http.send();\n"+
                     "        window.location.href = '/agents/'+document.getElementById('createAgent').value;\n"+
-                    "	}\n");
+                    "   }\n");
+
             so.append("function autocomplete(inp, arr) {\n" + 
                     "  var currentFocus;\n" + 
                     "  inp.addEventListener(\"input\", function(e) {\n" + 
@@ -199,7 +200,6 @@ public class RestImplAg extends AbstractBinder {
                     "        currentFocus--;\n" + 
                     "        addActive(x);\n" + 
                     "      } else if (e.keyCode == 39) {\n" + 
-                    "        e.preventDefault();\n" + 
                     "        if (currentFocus > -1) {\n" + 
                     "          if (x) x[currentFocus].click();\n" + 
                     "        }\n" + 
@@ -242,15 +242,16 @@ public class RestImplAg extends AbstractBinder {
                       "}\n"); 
             so.append("updateCmdCodeCompletion();");
             so.append("function waitToFillSuggestions() {\n" + 
-            		"    if(typeof suggestions[0] !== 'undefined') {\n" + 
-            		"        updateSuggestions();\n" + 
-            		"    } else {\n" + 
-            		"        setTimeout(waitToFillSuggestions, 100);\n" + 
-            		"    }\n" + 
-            		"}");
+                    "    if(typeof suggestions[0] !== 'undefined') {\n" + 
+                    "        updateSuggestions();\n" + 
+                    "    } else {\n" + 
+                    "        setTimeout(waitToFillSuggestions, 100);\n" + 
+                    "    }\n" + 
+                    "}");
             so.append("waitToFillSuggestions();");
-            so.append("	</script>\n");
+            so.append(" </script>\n");
         }
+*/
 
         so.append("</html>\n");
         
@@ -298,10 +299,6 @@ public class RestImplAg extends AbstractBinder {
             for (String a : BaseCentralisedMAS.getRunner().getAgs().keySet()) {
                 if (a.equals(selectedAgent)) {
                     so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>. " + a + "</h5></a>\n");
-                    so.append("	<a href=\"/agents/" + a + "/mind#overview\" id=\"link-to-overview\" target='mainframe'><h6>.  Overview</h6></a>\n");
-                    so.append("	<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'><h6>.  Mind</h6></a>\n");
-                    so.append("	<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'><h6>.  Upload plans</h6></a>\n");
-                    so.append("	<a href='kill' onclick='killAg()'><h6>.  kill this agent</h6></a>\n");
                 } else {
                     so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>+ " + a + "</h5></a>\n");
                 }
@@ -313,10 +310,6 @@ public class RestImplAg extends AbstractBinder {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
                     if (a.equals(selectedAgent)) {
                         so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>. " + a + "</h5></a>\n");
-                        so.append("	<a href=\"/agents/" + a + "/mind#overview\" id=\"link-to-overview\" target='mainframe'><h6>.  Overview</h6></a>\n");
-                        so.append("	<a href=\"/agents/" + a + "/mind#mind\" id=\"link-to-mind\" target='mainframe'><h6>.  Mind</h6></a>\n");
-                        so.append("	<a href=\"/agents/" + a + "/mind#uploadplans\" id=\"link-to-uploadplans\" target='mainframe'><h6>.  Upload plans</h6></a>\n");
-                        so.append("	<a href='kill' onclick='killAg()'><h6>.  kill this agent</h6></a>\n");
                     } else {
                         so.append("	<a href=\"" + url + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>+ " + a + "</h5></a>\n");
                     }
@@ -495,6 +488,13 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("    </div>\n"); 
         mainContent.append("</div>\n"); 
         
+        mainContent.append("<div id=\"killagent\" class=\"card fluid\">\n");
+        mainContent.append("    <div class=\"section\">\n"); 
+        mainContent.append("        <a href='#' onclick='killAg(\"" + agName + "\")'><h5>kill this agent</h5></a>\n");
+        mainContent.append("    </div>\n"); 
+        mainContent.append("</div>\n"); 
+        
+        
         return designPage("JaCamo-Rest - Agents: " + agName,agName,mainContent.toString());
     }
 
@@ -513,7 +513,8 @@ public class RestImplAg extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
-        return  "<html><head><title>load plans for "+agName+"</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+
+        return  "<html><head><title>load plans for "+agName+"</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">"+
+                "<meta http-equiv=\"Content-type\" content=\"text/html,charset=UTF-8\"></head>"+
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
                 "<textarea name=\"plans\" form=\"usrform\" placeholder=\"Write Jason plans here...\" style=\"width:99%; overflow: auto;\"></textarea>" +
                 "<br/>or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload\"></form></html>";
