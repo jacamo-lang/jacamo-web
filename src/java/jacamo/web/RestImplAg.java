@@ -323,7 +323,7 @@ public class RestImplAg extends AbstractBinder {
         // upload plans
         mainContent.append("<div id=\"uploadplans\" class=\"card fluid\">\n");
         mainContent.append("    <div class=\"section\">\n"); 
-        mainContent.append("        <embed src='/agents/" + agName + "/load_plans_form/' width=\"100%\" height=\"180px\"/>\n");
+        mainContent.append("        <embed src='/agents/" + agName + "/load_plans_form/' width=\"100%\" height=\"440px\"/>\n");
         mainContent.append("    </div>\n"); 
         mainContent.append("</div>\n"); 
         
@@ -352,11 +352,18 @@ public class RestImplAg extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
-        return  "<html><head><title>load plans for "+agName+"</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">"+
-                "<meta http-equiv=\"Content-type\" content=\"text/html,charset=UTF-8\"></head>"+
+        return  "<html><head><title>load plans for "+agName+"</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">" +
+                "<meta http-equiv=\"Content-type\" content=\"text/html,charset=UTF-8\"></head>" +
+                "<script src=\"/lib/codemirror.js\"></script>\n" +
+                "<link rel=\"stylesheet\" href=\"/lib/codemirror.css\">\n" +
+                "<script src=\"/lib/mode/erlang/erlang.js\"></script>\n" +
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
-                "<textarea name=\"plans\" form=\"usrform\" placeholder=\"Write Jason plans here...\" style=\"width:99%; overflow: auto;\"></textarea>" +
-                "<br/>or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload\"></form></html>";
+                "<textarea name=\"plans\" id=\"planstextarea\" form=\"usrform\" placeholder=\"Write Jason plans here...\" style=\"width:99%; overflow: auto;\"></textarea>" +
+                "<br/>or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload\"></form>" + 
+                "<script>CodeMirror.fromTextArea(document.getElementById(\"planstextarea\"), {\n" + 
+                "  lineNumbers: true\n" + 
+                "}).setValue(\"/*Write Jason plans here...*/\\n\");" + 
+                "</script></html>";
     }
 
     @Path("/{agentname}/plans")

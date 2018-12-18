@@ -188,4 +188,77 @@ public class RestImpl extends AbstractBinder {
         }
         return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
     }
+    
+    @Path("/lib/codemirror.js")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getCodemirrorJS() {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/lib/codemirror-minified/lib/codemirror.js");
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f)); 
+            } else {
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/lib/codemirror-minified/lib/codemirror.js").openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+    }
+
+    @Path("/lib/codemirror.css")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getCodemirrorCSS() {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/lib/codemirror-minified/lib/codemirror.css");
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f)); 
+            } else {
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/lib/codemirror-minified/lib/codemirror.css").openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+    }
+
+    @Path("/lib/mode/erlang/erlang.js")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getModeErlangJS() {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/lib/codemirror-minified/mode/erlang/erlang.js");
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f)); 
+            } else {
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/lib/codemirror-minified/mode/erlang/erlang.js").openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+    }
+    
 }
