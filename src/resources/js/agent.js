@@ -138,7 +138,7 @@ function waitToFillSuggestions() {
         setTimeout(waitToFillSuggestions, 100); 
     } 
 }
-
+	
 /* run initialization */
 showLog();
 updateSuggestions();

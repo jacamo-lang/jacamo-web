@@ -10,12 +10,15 @@ import java.io.StringWriter;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
+
+import jason.ReceiverNotFoundException;
 
 @Singleton
 @Path("/")
@@ -189,6 +192,30 @@ public class RestImpl extends AbstractBinder {
         return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
     }
     
+    @Path("/res/{resourcepathfile}")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getResource(@PathParam("resourcepathfile") String resourcepathfile) throws ReceiverNotFoundException {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/js/" + resourcepathfile);
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f)); 
+            } else {
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/" + resourcepathfile).openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+    }
+    
     @Path("/lib/codemirror.js")
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -260,5 +287,53 @@ public class RestImpl extends AbstractBinder {
         }
         return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
     }
+    
+    @Path("/lib/hint/show-hint.js")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getShowhintJS() {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/lib/codemirror-minified/addon/hint/show-hint.js");
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f)); 
+            } else {
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/lib/codemirror-minified/addon/hint/show-hint.js").openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+    }    
+    
+    @Path("/lib/hint/javascript-hint.js")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getLanghintJS() {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/lib/codemirror-minified/addon/hint/javascript-hint.js");
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f)); 
+            } else {
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/lib/codemirror-minified/addon/hint/javascript-hint.js").openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+    }    
     
 }

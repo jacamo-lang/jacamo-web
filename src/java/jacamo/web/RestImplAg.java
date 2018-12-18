@@ -323,7 +323,7 @@ public class RestImplAg extends AbstractBinder {
         // upload plans
         mainContent.append("<div id=\"uploadplans\" class=\"card fluid\">\n");
         mainContent.append("    <div class=\"section\">\n"); 
-        mainContent.append("        <embed src='/agents/" + agName + "/load_plans_form/' width=\"100%\" height=\"440px\"/>\n");
+        mainContent.append("        <embed src='/agents/" + agName + "/load_plans_form/' width=\"100%\" height=\"400px\"/>\n");
         mainContent.append("    </div>\n"); 
         mainContent.append("</div>\n"); 
         
@@ -356,14 +356,15 @@ public class RestImplAg extends AbstractBinder {
                 "<meta http-equiv=\"Content-type\" content=\"text/html,charset=UTF-8\"></head>" +
                 "<script src=\"/lib/codemirror.js\"></script>\n" +
                 "<link rel=\"stylesheet\" href=\"/lib/codemirror.css\">\n" +
+                "<script src=\"/lib/hint/show-hint.js\"></script>\n" +
+                "<script src=\"/lib/hint/javascript-hint.js\"></script>\n" +
                 "<script src=\"/lib/mode/erlang/erlang.js\"></script>\n" +
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
-                "<textarea name=\"plans\" id=\"planstextarea\" form=\"usrform\" placeholder=\"Write Jason plans here...\" style=\"width:99%; overflow: auto;\"></textarea>" +
+                "<textarea name=\"planstextarea\" id=\"planstextarea\" form=\"usrform\" style=\"width:99%; overflow: auto;\">" +
+                "/*Write Jason plans here...*/\n</textarea>" +
                 "<br/>or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload\"></form>" + 
-                "<script>CodeMirror.fromTextArea(document.getElementById(\"planstextarea\"), {\n" + 
-                "  lineNumbers: true\n" + 
-                "}).setValue(\"/*Write Jason plans here...*/\\n\");" + 
-                "</script></html>";
+                "<script src=\"/res/load_plans_form.js\"></script>\n" +
+                "</html>";
     }
 
     @Path("/{agentname}/plans")
