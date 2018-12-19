@@ -923,11 +923,7 @@ public class RestImplAg extends AbstractBinder {
                                                 ? info.getId().getName()
                                                 : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
                                         sb.append("\t\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
-												+ " :\\n");
-										str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
-												? info.getId().getArtifactType()
-												: info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
-										sb.append(str1 + "\"\n");
+												+ "\"\n");
 
                                         sb.append("\t\t\t\tshape=record style=filled fillcolor=white\n");
                                         sb.append("\t\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName()
