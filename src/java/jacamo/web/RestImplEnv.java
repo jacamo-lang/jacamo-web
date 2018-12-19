@@ -81,7 +81,7 @@ public class RestImplEnv extends AbstractBinder {
     public String getWorkspacesHtml() {
         StringWriter mainContent = new StringWriter();
         mainContent.append("<div id=\"getting-started\" class=\"card fluid\">\n"); 
-        mainContent.append("	<h4 class=\"section double-padded\">Getting started</h4>\n"); 
+        mainContent.append("	<h4 class=\"section double-padded\">getting started</h4>\n"); 
         mainContent.append("	<div class=\"section\">\n"); 
         mainContent.append("		<p>\n");
         mainContent.append("			<a href=\"http://cartago.sourceforge.net\" target=\"_blank\">CArtAgO</a> is an <a href=\"https://github.com/cartago-lang/cartago\"" +

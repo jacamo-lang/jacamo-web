@@ -1,7 +1,10 @@
 package jacamo.web;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -114,26 +117,34 @@ public class RestImplAg extends AbstractBinder {
     public String getAgentsHtml() {
         StringWriter mainContent = new StringWriter();
         mainContent.append("<div id=\"getting-started\" class=\"card fluid\">\n"); 
-        mainContent.append("	<h4 class=\"section double-padded\">Getting started</h4>\n"); 
-        mainContent.append("	<div class=\"section\">\n"); 
-        mainContent.append("		<p>\n");
-        mainContent.append("			<a href=\"http://jason.sourceforge.net/\" target=\"_blank\">Jason</a> is an interpreter for an extended version of AgentSpeak. It implements the operational semantics of that language, ");
-        mainContent.append("			and provides a platform for the development of multi-agent systems, with many user-customisable features. Jason is ");
-        mainContent.append("			available as <a href=\"https://github.com/jason-lang/jason\" target=\"_blank\">open-source</a>, and is distributed under GNU LGPL.\n");
-        mainContent.append("		</p>\n"); 
-        mainContent.append("		<br/>\n");
-        mainContent.append("		<p>\n");
-        mainContent.append("			Using command text box you can send orders to the agents, change plans, add and \n");
-        mainContent.append("			remove beliefs and so on, just using <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>'s AgentSpeak sentences.</p>\n"); 
-        mainContent.append("        </p>\n"); 
-        mainContent.append("        <br/>\n");
-        mainContent.append("        <p>\n");
-        mainContent.append("            You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered services the agents are providing.");
-        mainContent.append("            You can also <a href=\"/forms/new_agent\" target='_top'>create</a> a new agent and kill some existing one.\n"); 
-        mainContent.append("            <mark class=\"do\">Attention:</mark> killing agents may cause data loss. Make sure you don't need the data or the agent is using persistent belief base.\n"); 
-        mainContent.append("		</p>\n");
-        mainContent.append("		<br/>\n");
-        mainContent.append("	</div>\n");
+        mainContent.append("  <h4 class=\"section double-padded\">getting started</h4>\n"); 
+        mainContent.append("  <div class=\"section\">\n"); 
+        mainContent.append("      <p>\n");
+        mainContent.append("          <a href=\"http://jason.sourceforge.net/\" target=\"_blank\">Jason</a> is an interpreter for an extended version of AgentSpeak. It implements the operational semantics of that language, ");
+        mainContent.append("          and provides a platform for the development of multi-agent systems, with many user-customisable features. Jason is ");
+        mainContent.append("          available as <a href=\"https://github.com/jason-lang/jason\" target=\"_blank\">open-source</a>, and is distributed under GNU LGPL.\n");
+        mainContent.append("      </p>\n"); 
+        mainContent.append("      <br/>\n");
+//        mainContent.append("      <p>\n");
+//        mainContent.append("          Using command text box you can send orders to the agents, change plans, add and \n");
+//        mainContent.append("          remove beliefs and so on, just using <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>'s AgentSpeak sentences.</p>\n"); 
+//        mainContent.append("        </p>\n"); 
+//        mainContent.append("        <br/>\n");
+//        mainContent.append("        <p>\n");
+//        mainContent.append("            You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered services the agents are providing.");
+//        mainContent.append("            You can also <a href=\"/forms/new_agent\" target='_top'>create</a> a new agent and kill some existing one.\n"); 
+//        mainContent.append("            <mark class=\"do\">Attention:</mark> killing agents may cause data loss.\n"); 
+//        mainContent.append("      </p>\n");
+//        mainContent.append("      <br/>\n");
+        mainContent.append("  </div>\n");
+        mainContent.append("</div>\n");
+        // overview
+        mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
+        mainContent.append("  <h4 class=\"section double-padded\">overview</h4>\n"); 
+        mainContent.append("    <div class=\"section\">\n");
+        mainContent.append("        <center><object data=\"/agents/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
+        mainContent.append("    </div>\n");
+        mainContent.append("</div>\n");
         // just to avoid html error generated by javascript method
         mainContent.append("    <div style=\"display:none\">\n");
         mainContent.append("        <input id=\"inputcmd\">\n");
@@ -634,7 +645,7 @@ public class RestImplAg extends AbstractBinder {
 
             StringBuilder sb = new StringBuilder();
 
-            // get workspaces the agent are in (including organizations)
+            // get workspaces the agent are in (including organisations)
             Set<String> workspacesIn = new HashSet<>();
             Agent ag = getAgent(agName);
             CAgentArch cartagoAgArch = getCartagoArch(ag);
@@ -742,6 +753,289 @@ public class RestImplAg extends AbstractBinder {
 
             sb.append("}\n");
             graph = sb.toString();
+
+        } catch (Exception ex) {
+        }
+        
+        return graph;
+    }
+
+    @Path("/img.svg")
+    @GET
+    @Produces("image/svg+xml")
+    public Response getMASImg() {
+        try {
+            String dot = getMASAsDot();
+            if (dot != null && !dot.isEmpty()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                MutableGraph g = Parser.read(dot);
+                Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                return Response.ok(out.toByteArray()).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.noContent().build(); // TODO: set response properly
+    }
+
+    protected String getMASAsDot() {
+        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
+        
+        try {
+
+            StringBuilder sb = new StringBuilder();
+
+            Collection<String> agents = null;
+            if (JCMRest.getZKHost() == null) {
+                agents = new TreeSet<String>(BaseCentralisedMAS.getRunner().getAgs().keySet());
+            } else {
+                // get agents from ZK
+                agents = new TreeSet<String>(JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId));
+            }
+
+            sb.append("digraph G {\n");
+            sb.append("\tgraph [\n");
+            sb.append("\t\trankdir=\"TB\"\n");
+            sb.append("\t\tbgcolor=\"transparent\"\n");
+            sb.append("\t]\n");
+
+            {// organisational dimension
+                sb.append("\tsubgraph cluster_org {\n");
+                sb.append("\t\tlabel=\"organisation\"\n");
+                sb.append("\t\tlabeljust=\"r\"\n");
+                sb.append("\t\tpencolor=gray\n");
+                sb.append("\t\tfontcolor=gray\n");
+                
+                { // groups and roles are also placed on the left
+                    for (String a : agents) {
+                        // get workspaces the agent are in (including organisations)
+                        Set<String> workspacesIn = new HashSet<>();
+                        Agent ag = getAgent(a);
+                        CAgentArch cartagoAgArch = getCartagoArch(ag);
+                        for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
+                            // TODO: revise whether the Set is necessary
+                            workspacesIn.add(wid.getName());
+                        }
+                        for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+                            if (workspacesIn.contains(gb.getOEId())) {
+                                gb.getGrpState().getPlayers().forEach(p -> {
+                                    if (p.getAg().equals(a)) {
+                                        // role
+                                        sb.append("\t\t\"" + p.getTarget() + "\" [ " + "\n\t\tlabel = \"" + p.getTarget()
+												+ "\"");
+                                        sb.append("\n\t\t\tshape=box style=\"filled,rounded\" fillcolor=white\n");
+                                        sb.append("\t\t];\n");
+                                        // group
+                                        sb.append("\t\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId()
+                        						+ "\"");
+                                        sb.append("\n\t\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
+                                        sb.append("\t\t];\n");
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                sb.append("\t};\n");
+                
+                // links out of the subgraph to ensure it is not put inside
+                for (String a : agents) {
+                    // get workspaces the agent are in (including organisations)
+                    Set<String> workspacesIn = new HashSet<>();
+                    Agent ag = getAgent(a);
+                    CAgentArch cartagoAgArch = getCartagoArch(ag);
+                    for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
+                        // TODO: revise whether the Set is necessary
+                        workspacesIn.add(wid.getName());
+                    }
+                    for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+                        if (workspacesIn.contains(gb.getOEId())) {
+                            gb.getGrpState().getPlayers().forEach(p -> {
+                                if (p.getAg().equals(a)) {
+                                    // role
+                                    sb.append("\t\"" + p.getTarget() + "\"->\"" + a
+                    						+ "\" [arrowtail=normal dir=back]\n");
+                                    // group
+                                    sb.append("\t\"" + gb.getArtId() + "\"->\"" + p.getTarget()
+                    						+ "\" [arrowtail=odiamond dir=back]\n");
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
+            {// agents dimension
+                sb.append("\tsubgraph cluster_ag {\n");
+                sb.append("\t\tlabel=\"agents\"\n");
+                sb.append("\t\tlabeljust=\"r\"\n");
+                sb.append("\t\tpencolor=gray\n");
+                sb.append("\t\tfontcolor=gray\n");
+             
+                {// beliefs will be placed on the left
+                    for (String a : agents) {
+                        sb.append("\t\tsubgraph cluster_"+ a +"_mind {\n");
+                        sb.append("\t\t\tstyle=rounded\n");
+                        sb.append("\t\t\tlabel=\""+ a + "'s mind\"\n");
+                        sb.append("\t\t\tlabeljust=\"r\"\n");
+                        sb.append("\t\t\tpencolor=gray40\n");
+                        sb.append("\t\t\tfontcolor=gray40\n");
+
+                        Agent ag = getAgent(a);
+                        ag.getBB().getNameSpaces().forEach(x -> {
+                            sb.append("\t\t\t\"" + x + "\" [ " + "\n\t\t\tlabel = \"" + x + "\"");
+                            sb.append("\n\t\t\t\tshape=\"cylinder\" style=filled pencolor=black fillcolor=cornsilk\n");
+                            sb.append("\t\t\t];\n");
+                        });
+                        sb.append("\t\t};\n");
+                        {// agent will be placed on center
+                            String s1 = (a.length() <= MAX_LENGTH) ? a : a.substring(0, MAX_LENGTH) + " ...";
+                            sb.append("\t\t\"" + a + "\" [ ");
+                            sb.append("\n\t\t\tlabel = \"" + s1 + "\"");
+                            sb.append("\n\t\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
+                            sb.append("\t\t];\n");
+                        }
+                    }
+                }
+                
+                sb.append("\t};\n");
+                // just to avoid put agent node into the cluster
+                for (String a : agents) {
+                    Agent ag = getAgent(a);
+                    ag.getBB().getNameSpaces().forEach(x -> {
+                        sb.append("\t\"" + a + "\"->\"" + x + "\" [arrowhead=none constraint=false style=dotted]\n");
+                    });
+                }
+            }
+
+            {// environment dimension
+                sb.append("\tsubgraph cluster_env {\n");
+                sb.append("\t\tlabel=\"environment\"\n");
+                sb.append("\t\tlabeljust=\"r\"\n");
+                sb.append("\t\tpencolor=gray\n");
+                sb.append("\t\tfontcolor=gray\n");
+                { // workspances and artifacts the agents is focused on
+                    for (String a : agents) {
+                        // get workspaces the agent are in (including organisations)
+                        Set<String> workspacesIn = new HashSet<>();
+                        Agent ag = getAgent(a);
+                        CAgentArch cartagoAgArch = getCartagoArch(ag);
+                        for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
+                            // TODO: revise whether the Set is necessary
+                            workspacesIn.add(wid.getName());
+
+                        }
+                        workspacesIn.forEach(w -> {
+                            String wksName = w.toString();
+                            try {
+                                sb.append("\t\tsubgraph cluster_" + wksName + " {\n");
+                                sb.append("\t\t\tlabel=\"" + wksName + "\"\n");
+                                sb.append("\t\t\tlabeljust=\"r\"\n");
+                                sb.append("\t\t\tstyle=dashed\n");
+                                sb.append("\t\t\tpencolor=gray40\n");
+                                sb.append("\t\t\tfontcolor=gray40\n");
+                                for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
+                                    ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
+                                    info.getObservers().forEach(y -> {
+                                        if ((info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
+                                                || (info.getId().getArtifactType().equals("ora4mas.nopl.GroupBoard"))
+                                                || (info.getId().getArtifactType().equals("ora4mas.nopl.OrgBoard"))
+                                                || (info.getId().getArtifactType().equals("ora4mas.nopl.SchemeBoard"))
+                                                || (info.getId().getArtifactType().equals("ora4mas.nopl.NormativeBoard"))) {
+                                            ; // do not print system artifacts
+                                        } else {
+                                            if (y.getAgentId().getAgentName().equals(a)) {
+                                                // create a cluster for each artifact even at same wks of other artifacts?
+                                                String str1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
+                                                        : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
+                                                sb.append("\t\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
+	                                                    + " :\\n");
+	                                            str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
+	                                                    ? info.getId().getArtifactType()
+	                                                    : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
+	                                            sb.append(str1 + "\"\n");
+
+                                                sb.append("\t\t\t\tshape=record style=filled fillcolor=white\n");
+                                                sb.append("\t\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName() + "\"\n");
+                                                sb.append("\t\t\t\ttarget=\"mainframe\"\n");
+                                                sb.append("\t\t\t];\n");
+
+                                                sb.append("\t\t\"" + a + "\"->\"" + info.getId().getName()
+	                                                    + "\" [arrowhead=odot]\n");
+                                            }
+                                        }
+                                    });
+                                }
+                                sb.append("\t\t};\n");
+                            } catch (CartagoException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                        workspacesIn.forEach(w -> {
+                            String wksName = w.toString();
+                            try {
+                                for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
+                                    ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
+                                    info.getObservers().forEach(y -> {
+                                        if ((info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
+                                                || (info.getId().getArtifactType().equals("ora4mas.nopl.GroupBoard"))
+                                                || (info.getId().getArtifactType().equals("ora4mas.nopl.OrgBoard"))
+                                                || (info.getId().getArtifactType().equals("ora4mas.nopl.SchemeBoard"))
+                                                || (info.getId().getArtifactType().equals("ora4mas.nopl.NormativeBoard"))) {
+                                            ; // do not print system artifacts
+                                        } else {
+                                            if (y.getAgentId().getAgentName().equals(a)) {
+                                                // create a cluster for each artifact even at same wks of other artifacts?
+                                                sb.append("\t\tsubgraph cluster_" + wksName + " {\n");
+                                                sb.append("\t\t\tlabel=\"" + wksName + "\"\n");
+                                                sb.append("\t\t\tlabeljust=\"r\"\n");
+                                                sb.append("\t\t\tgraph[style=dashed]\n");
+                                                String str1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
+                                                        : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
+                                                sb.append("\t\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
+                                                        + " :\\n");
+                                                str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
+                                                        ? info.getId().getArtifactType()
+                                                        : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
+                                                sb.append(str1 + "\"\n");
+
+                                                sb.append("\t\t\t\tshape=record style=filled fillcolor=white\n");
+                                                sb.append("\t\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName() + "\"\n");
+                                                sb.append("\t\t\t\ttarget=\"mainframe\"\n");
+                                                sb.append("\t\t\t];\n");
+
+                                                sb.append("\t\t};\n");
+
+                                                sb.append("\t\t\"" + a + "\"->\"" + info.getId().getName()
+                                                        + "\" [arrowhead=odot]\n");
+                                            }
+                                        }
+                                    });
+                                }
+                            } catch (CartagoException e) {
+                                e.printStackTrace();
+                            }
+                        });
+
+                    }
+                }
+                
+                sb.append("\t};\n");
+            }
+
+            sb.append("}\n");
+            graph = sb.toString();
+            
+            // debug
+            try (FileWriter fw = new FileWriter("graph.gv", false); 
+                    BufferedWriter bw = new BufferedWriter(fw); 
+                    PrintWriter out = new PrintWriter(bw)) {    
+                out.print(graph);   
+                out.flush();    
+                out.close();    
+            } catch (Exception ex) {    
+            }
 
         } catch (Exception ex) {
         }
