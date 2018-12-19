@@ -878,6 +878,8 @@ public class RestImplAg extends AbstractBinder {
                         sb.append("\t\t\"" + a + "\" [ ");
                         sb.append("\n\t\t\tlabel = \"" + s1 + "\"");
                         sb.append("\n\t\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
+                        sb.append("\t\t\t\tURL = \"/agents/" + a + "/mind\"\n");
+                        sb.append("\t\t\t\ttarget=\"mainframe\"\n");
                         sb.append("\t\t];\n");
                     }
 
