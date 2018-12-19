@@ -366,7 +366,7 @@ public class RestImplAg extends AbstractBinder {
                 "<style>.CodeMirror pre.CodeMirror-placeholder { color: #999; }</style> " +
                 "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
                 "<textarea name=\"planstextarea\" id=\"planstextarea\" form=\"usrform\" style=\"width:99%; overflow: auto;\"" + 
-                "placeholder=\"Write Jason plans using ctrl+space give code hints.\">" +
+                "placeholder=\"Write Jason plans (ctrl+space gives code hinting).\">" +
                 "</textarea>" +
                 "<br/>or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload\"></form>" + 
                 "<script src=\"/js/load_plans_form.js\"></script>\n" +
