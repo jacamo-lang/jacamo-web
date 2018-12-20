@@ -65,11 +65,13 @@ import jason.asSemantics.Option;
 import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
 import jason.asSyntax.ASSyntax;
+import jason.asSyntax.Literal;
 import jason.asSyntax.Plan;
 import jason.asSyntax.PlanBody;
 import jason.asSyntax.PlanLibrary;
 import jason.asSyntax.Trigger;
 import jason.asSyntax.Trigger.TEType;
+import jason.bb.BeliefBase;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
 import jason.stdlib.print;
@@ -472,12 +474,12 @@ public class RestImplAg extends AbstractBinder {
                     
                     // add namespace when it is not default
                     String ns = "";
-                    if (!plan.getNS().toString().equals("default")) {
+                    if (!plan.getNS().equals(Literal.DefaultNS)) {
                         ns = plan.getNS().toString() + "::";
                     }
 
                     // prepare terms to show between parenthesis plan_functor(Term1, Term2,...) 
-                    String terms = "";
+                    /*String terms = "";
                     if (plan.getTrigger().getLiteral().getArity() > 0) {
                         for (int i = 0; i < plan.getTrigger().getLiteral().getArity(); i++) {
                             if (i == 0) terms = "(";
@@ -487,16 +489,14 @@ public class RestImplAg extends AbstractBinder {
                             else
                                 terms += ")";
                         }
-                    }
+                    }*/
 
                     // do not add operator when type is achieve
                     if (plan.getTrigger().getType() == TEType.achieve)
-                        so.add("'" + ns + plan.getTrigger().getType().toString()
-                                + plan.getTrigger().getLiteral().getFunctor() + terms + "'");
+                        so.add("'" + ns + plan.getTrigger() + "'");
                     // when it is belief, do not add type which is anyway empty
                     else if (plan.getTrigger().getType() == TEType.belief)
-                        so.add("'" + ns + plan.getTrigger().getOperator().toString()
-                                + plan.getTrigger().getLiteral().getFunctor() + terms + "'");
+                        so.add("'" + ns + plan.getTrigger() + "'");
                     
 
                     // TODO: do nothing when type is TEType.test?
