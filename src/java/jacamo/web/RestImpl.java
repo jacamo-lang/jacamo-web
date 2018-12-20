@@ -167,4 +167,29 @@ public class RestImpl extends AbstractBinder {
         }
         return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
     }
+
+    @Path("/js/ace/{resourcepathfile}")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getAceResource(@PathParam("resourcepathfile") String resourcepathfile) throws ReceiverNotFoundException {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/js/ace/" + resourcepathfile);
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f)); 
+            } else {
+                in = new BufferedReader(new InputStreamReader(RestImpl.class.getResource("/js/ace/" + resourcepathfile).openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+    }
+
 }

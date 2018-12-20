@@ -367,20 +367,53 @@ public class RestImplAg extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
-        return  "<html><head><title>load plans for "+agName+"</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">" +
-                "<meta http-equiv=\"Content-type\" content=\"text/html,charset=UTF-8\"></head>" +
-                "<script src=\"/js/codemirror.js\"></script>\n" +
-                "<link rel=\"stylesheet\" href=\"/css/codemirror.css\">\n" +
-                "<script src=\"/js/show-hint.js\"></script>\n" +
-                "<script src=\"/js/erlang.js\"></script>\n" +
-                "<script src=\"/js/placeholder.js\"></script>\n" +
-                "<style>.CodeMirror pre.CodeMirror-placeholder { color: #999; }</style> " +
-                "<form action=\"/agents/"+agName+"/plans\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
-                "<textarea name=\"planstextarea\" id=\"planstextarea\" form=\"usrform\" style=\"width:99%; overflow: auto;\"" + 
-                "placeholder=\"Write Jason plans (ctrl+space gives code hinting).\">" +
-                "</textarea>" +
-                "<br/>or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload\"></form>" + 
-                "<script src=\"/js/load_plans_form.js\"></script>\n" +
+        return  "<html lang=\"en\">\n" + 
+                "<head>\n" + 
+                "<title>ACE in Action</title>\n" + 
+                "<style type=\"text/css\" media=\"screen\">\n" + 
+                "    #editor { \n" + 
+                "        position: absolute;\n" + 
+                "        top: 0;\n" + 
+                "        right: 0;\n" + 
+                "        bottom: 0;\n" + 
+                "        left: 0;\n" + 
+                "    }\n" + 
+                "</style>\n" + 
+                "</head>\n" + 
+                "<body>\n" + 
+                "\n" + 
+                "<div id=\"editor\">" + 
+                "  %% A process whose only job is to keep a counter.\n" + 
+                "  %% First version\n" + 
+                "  -module(counter).\n" + 
+                "  -export([start/0, codeswitch/1]).\n" + 
+                " \n" + 
+                "  start() -> loop(0).\n" + 
+                " \n" + 
+                "  loop(Sum) ->\n" + 
+                "    receive\n" + 
+                "       {increment, Count} ->\n" + 
+                "          loop(Sum+Count);\n" + 
+                "       {counter, Pid} ->\n" + 
+                "          Pid ! {counter, Sum},\n" + 
+                "          loop(Sum);\n" + 
+                "       code_switch ->\n" + 
+                "          ?MODULE:codeswitch(Sum)\n" + 
+                "          % Force the use of 'codeswitch/1' from the latest MODULE version\n" + 
+                "    end.\n" + 
+                " \n" + 
+                "  codeswitch(Sum) -> loop(Sum)." +
+                "</div>\n" + 
+                "    \n" + 
+                "<script src=\"/js/ace/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n" + 
+                "<script src=\"/js/ace/ext-language_tools.js\"></script>" +
+                "<script>\n" + 
+                "    var editor = ace.edit(\"editor\");\n" + 
+                "    editor.setTheme(\"ace/theme/textmate\");\n" + 
+                "    editor.session.setMode(\"ace/mode/erlang\");\n" +
+                "    editor.setOptions({enableBasicAutocompletion: true});" +
+                "</script>\n" + 
+                "</body>\n" + 
                 "</html>";
     }
 

@@ -1,3 +1,6 @@
+
+
+	
 if (typeof Promise !== "undefined") {
 	function synonyms(cm, option) {
 		return new Promise(function(accept) {
@@ -19,10 +22,13 @@ if (typeof Promise !== "undefined") {
 		})
 	}
 
-	CodeMirror.fromTextArea(document.getElementById("planstextarea"), {
+	var editor = CodeMirror.fromTextArea(document.getElementById("code2"), {
 		lineNumbers : true,
 		extraKeys : { "Ctrl-Space" : "autocomplete"},
 		mode : {name : "erlang", globalVars : true},
-		hintOptions : {hint : synonyms},
+	    matchBrackets: true,
+	    continueComments: "Enter",
+		/*hintOptions : {hint : synonyms},*/
+		/*mode : {name : "javascript", globalVars : true},*/
 	});
 }
