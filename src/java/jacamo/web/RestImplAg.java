@@ -449,7 +449,25 @@ public class RestImplAg extends AbstractBinder {
             ClassPath classPath = ClassPath.from(print.class.getClassLoader());
             Set<ClassInfo> allClasses = classPath.getTopLevelClassesRecursive("jason.stdlib");
             
-            allClasses.forEach(a -> {l.add(a.getSimpleName());});
+            allClasses.forEach(a -> {
+                l.add(a.getSimpleName());
+                try {
+                    Class c = a.load();
+                    if (c.isAnnotationPresent(jason.stdlib.Manual.class)) {
+                        jason.stdlib.Manual annotation = (jason.stdlib.Manual)c.getAnnotation(String.class);
+                        
+                        System.out.printf("%nforma :%s", annotation.literal());
+                        System.out.printf("%nhint :%s", annotation.hint());
+                        Literal iaLiteral = ASSyntax.parseLiteral(annotation.literal());
+                        for (int i=0; i<iaLiteral.getArity(); i++) {
+                            System.out.println("  "+iaLiteral.getTerm(i)+": "+annotation.argsHint()[i]+" "+annotation.argsType()[i]);                       
+                        }
+                    }
+                } catch (Exception e ) {
+                    e.printStackTrace();
+                }
+            });
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
