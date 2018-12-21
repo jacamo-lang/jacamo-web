@@ -127,17 +127,6 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("          available as <a href=\"https://github.com/jason-lang/jason\" target=\"_blank\">open-source</a>, and is distributed under GNU LGPL.\n");
         mainContent.append("      </p>\n"); 
         mainContent.append("      <br/>\n");
-//        mainContent.append("      <p>\n");
-//        mainContent.append("          Using command text box you can send orders to the agents, change plans, add and \n");
-//        mainContent.append("          remove beliefs and so on, just using <a href=\"http://jason.sf.net\" target=\"_blank\">Jason</a>'s AgentSpeak sentences.</p>\n"); 
-//        mainContent.append("        </p>\n"); 
-//        mainContent.append("        <br/>\n");
-//        mainContent.append("        <p>\n");
-//        mainContent.append("            You can access the <a href=\"/services\" target='mainframe'>directory facilitator</a> to check which registered services the agents are providing.");
-//        mainContent.append("            You can also <a href=\"/forms/new_agent\" target='_top'>create</a> a new agent and kill some existing one.\n"); 
-//        mainContent.append("            <mark class=\"do\">Attention:</mark> killing agents may cause data loss.\n"); 
-//        mainContent.append("      </p>\n");
-//        mainContent.append("      <br/>\n");
         mainContent.append("  </div>\n");
         mainContent.append("</div>\n");
         // overview
@@ -167,9 +156,9 @@ public class RestImplAg extends AbstractBinder {
             Collection<String> agents = new TreeSet<String>(BaseCentralisedMAS.getRunner().getAgs().keySet());
             for (String a : agents) {
                 if (a.equals(selectedAgent)) {
-                    so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>. " + a + "</h5></a>\n");
+                    so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5><b>" + a + "</b></h5></a>\n");
                 } else {
-                    so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>+ " + a + "</h5></a>\n");
+                    so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>" + a + "</h5></a>\n");
                 }
             }
         } else {
@@ -179,9 +168,9 @@ public class RestImplAg extends AbstractBinder {
                 for (String a : agents) {
                     String url = new String(JCMRest.getZKClient().getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + a));
                     if (a.equals(selectedAgent)) {
-                        so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>. " + a + "</h5></a>\n");
+                        so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5><b>" + a + "</b></h5></a>\n");
                     } else {
-                        so.append("	<a href=\"" + url + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>+ " + a + "</h5></a>\n");
+                        so.append("	<a href=\"" + url + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>" + a + "</h5></a>\n");
                     }
                     Agent ag = getAgent(a);
                     if (ag != null)
@@ -454,15 +443,16 @@ public class RestImplAg extends AbstractBinder {
                 try {
                     Class c = a.load();
                     if (c.isAnnotationPresent(jason.stdlib.Manual.class)) {
-                        jason.stdlib.Manual annotation = (jason.stdlib.Manual)c.getAnnotation(String.class);
+                        jason.stdlib.Manual annotation = (jason.stdlib.Manual)c.getAnnotation(jason.stdlib.Manual.class);
                         
                         System.out.printf("%nforma :%s", annotation.literal());
                         System.out.printf("%nhint :%s", annotation.hint());
                         Literal iaLiteral = ASSyntax.parseLiteral(annotation.literal());
                         for (int i=0; i<iaLiteral.getArity(); i++) {
-                            System.out.println("  "+iaLiteral.getTerm(i)+": "+annotation.argsHint()[i]+" "+annotation.argsType()[i]);                       
+                            System.out.println("  " + iaLiteral.getTerm(i) + ": " + annotation.argsHint()[i] + " " + annotation.argsType()[i]);                       
                         }
                     }
+
                 } catch (Exception e ) {
                     e.printStackTrace();
                 }
