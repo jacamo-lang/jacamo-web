@@ -1,7 +1,6 @@
 @charset "UTF-8";
 /* mini-default by Angelos Chalaris v3.0.1 */
 
-
 /* AUTO COMPLETE */
 /*the container must be positioned relative:*/
 .autocomplete {
@@ -34,6 +33,14 @@ input[type=text] {
   right: 0;
 }
 
+.autocomplete-items-comments {
+  position: relative;
+  padding: 20px; 
+  font-size: 14px;
+  color: green;
+  line-height: 1; /* single spaced */
+}
+
 .autocomplete-items div {
   padding: 10px;
   cursor: pointer;
@@ -51,47 +58,6 @@ input[type=text] {
   background-color: DodgerBlue !important; 
   color: #ffffff; 
 }
-
-
-/* CodeMirror hints - auto completion */
-
-.CodeMirror-hints {
-  position: absolute;
-  z-index: 10;
-  overflow: hidden;
-  list-style: none;
-
-  margin: 0;
-  padding: 2px;
-
-  -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
-  -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
-  box-shadow: 2px 3px 5px rgba(0,0,0,.2);
-  border-radius: 3px;
-  border: 1px solid silver;
-
-  background: white;
-  font-size: 90%;
-  font-family: monospace;
-
-  max-height: 20em;
-  overflow-y: auto;
-}
-
-.CodeMirror-hint {
-  margin: 0;
-  padding: 0 4px;
-  border-radius: 2px;
-  white-space: pre;
-  color: black;
-  cursor: pointer;
-}
-
-li.CodeMirror-hint-active {
-  background: #08f;
-  color: white;
-}
-
 
 /* MINI CSS - modified */
 

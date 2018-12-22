@@ -10,6 +10,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -71,7 +72,6 @@ import jason.asSyntax.PlanBody;
 import jason.asSyntax.PlanLibrary;
 import jason.asSyntax.Trigger;
 import jason.asSyntax.Trigger.TEType;
-import jason.bb.BeliefBase;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
 import jason.stdlib.print;
@@ -432,25 +432,32 @@ public class RestImplAg extends AbstractBinder {
         }
     }
 
-    public List<String> getIAlist() {
-        List<String> l = new ArrayList<>();
+    public List<Command> getIAlist() {
+        List<Command> l = new ArrayList<>();
         try {
             ClassPath classPath = ClassPath.from(print.class.getClassLoader());
             Set<ClassInfo> allClasses = classPath.getTopLevelClassesRecursive("jason.stdlib");
             
             allClasses.forEach(a -> {
-                l.add(a.getSimpleName());
                 try {
                     Class c = a.load();
                     if (c.isAnnotationPresent(jason.stdlib.Manual.class)) {
+                        // add full predicate provided by @Manual
                         jason.stdlib.Manual annotation = (jason.stdlib.Manual)c.getAnnotation(jason.stdlib.Manual.class);
+                        Command cmd = new Command("'" + annotation.literal() + "'", "'" + annotation.hint() + "'");
+                        l.add(cmd);
+                        //l.add(annotation.literal());
                         
-                        System.out.printf("%nforma :%s", annotation.literal());
-                        System.out.printf("%nhint :%s", annotation.hint());
-                        Literal iaLiteral = ASSyntax.parseLiteral(annotation.literal());
-                        for (int i=0; i<iaLiteral.getArity(); i++) {
-                            System.out.println("  " + iaLiteral.getTerm(i) + ": " + annotation.argsHint()[i] + " " + annotation.argsType()[i]);                       
-                        }
+                        //System.out.printf("%nforma :%s", annotation.literal());
+                        //System.out.printf("%nhint :%s", annotation.hint());
+                        //Literal iaLiteral = ASSyntax.parseLiteral(annotation.literal());
+                        //for (int i=0; i<iaLiteral.getArity(); i++) {
+                        //    System.out.println("  " + iaLiteral.getTerm(i) + ": " + annotation.argsHint()[i] + " " + annotation.argsType()[i]);                       
+                        //}
+                    } else {
+                        // add just the functor of the internal action
+                        Command cmd = new Command("'." + a.getSimpleName() + "'", "''");
+                        l.add(cmd);
                     }
 
                 } catch (Exception e ) {
@@ -469,7 +476,7 @@ public class RestImplAg extends AbstractBinder {
     @Produces(MediaType.TEXT_PLAIN)
     public String getCodeCompletionSuggestions(@PathParam("agentname") String agName,
             @DefaultValue("all") @QueryParam("label") String label) {
-        List<String> so = new ArrayList<>();
+        List<Command> commands = new ArrayList<>();
         try {
             // get agent's plans
             Agent ag = getAgent(agName);
@@ -486,33 +493,39 @@ public class RestImplAg extends AbstractBinder {
                         ns = plan.getNS().toString() + "::";
                     }
 
-                    // prepare terms to show between parenthesis plan_functor(Term1, Term2,...) 
-                    /*String terms = "";
+                    
+                    String terms = "";
                     if (plan.getTrigger().getLiteral().getArity() > 0) {
                         for (int i = 0; i < plan.getTrigger().getLiteral().getArity(); i++) {
-                            if (i == 0) terms = "(";
+                            if (i == 0)
+                                terms = "(";
                             terms += plan.getTrigger().getLiteral().getTerm(i).toString();
-                            if (i < plan.getTrigger().getLiteral().getArity() - 1) 
-                                terms += ", "; 
+                            if (i < plan.getTrigger().getLiteral().getArity() - 1)
+                                terms += ", ";
                             else
                                 terms += ")";
                         }
-                    }*/
-
-                    // do not add operator when type is achieve
-                    if (plan.getTrigger().getType() == TEType.achieve)
-                        so.add("'" + ns + plan.getTrigger() + "'");
-                    // when it is belief, do not add type which is anyway empty
-                    else if (plan.getTrigger().getType() == TEType.belief)
-                        so.add("'" + ns + plan.getTrigger() + "'");
+                    }
                     
+                    // do not add operator when type is achieve
+                    if (plan.getTrigger().getType() == TEType.achieve) {
+                        Command cmd = new Command("'" + ns + plan.getTrigger().getType().toString()
+                                + plan.getTrigger().getLiteral().getFunctor() + terms + "'", "''");
+                        commands.add(cmd);
+                    }
+                    // when it is belief, do not add type which is anyway empty
+                    else if (plan.getTrigger().getType() == TEType.belief) {
+                        Command cmd = new Command("'" + ns + plan.getTrigger().getOperator().toString()
+                                + plan.getTrigger().getLiteral().getFunctor() + terms + "'", "''");
+                        commands.add(cmd);
+                    }
 
                     // TODO: do nothing when type is TEType.test?
                 }
             }
             
             // get internal actions
-            getIAlist().forEach(a -> so.add("'." + a + "'"));
+            commands.addAll(getIAlist());
             
             //TODO: get external actions (from focused artifacts)
             
@@ -520,13 +533,48 @@ public class RestImplAg extends AbstractBinder {
 
         } catch (Exception e) {
             e.printStackTrace();
-            so.add("No code completion suggestions for " + agName);
+            Command cmd = new Command("No code completion suggestions for " + agName, "");
+            commands.add(cmd);
         }
-        Collections.sort(so);
-        return so.toString();
+        Collections.sort(commands, new SortByCommandName());
+        return commands.toString();
         //return  "['.desire','.drop_desire','.drop_all_desires']";
     }
 
+    class Command 
+    { 
+        String name;
+        String comment;
+        
+        Command(String name, String comment) {
+            this.name = name;
+            this.comment = comment;
+        } 
+        
+        public String getName() {
+            return this.name;
+        }
+        
+        public String getComment() {
+            return this.comment;
+        }
+        
+        public String toString() {
+            List<String> command = new ArrayList<>();
+            command.add(name);
+            command.add(comment);
+            return command.toString();
+        }
+    } 
+
+    class SortByCommandName implements Comparator<Command> 
+    { 
+        @Override
+        public int compare(Command arg0, Command arg1) {
+            return arg0.getName().compareTo(arg1.getName()); 
+        } 
+    } 
+    
     @Path("/{agentname}")
     @GET
     @Produces(MediaType.APPLICATION_XML)
