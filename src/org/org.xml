@@ -21,7 +21,7 @@
 <group-specification id="group1">
     <roles>
         <role id="role1" min="1" max="1"/>
-        <role id="role2" min="1" max="1"/>
+        <role id="role2" min="0" max="1"/>
     </roles>
 
     <links>

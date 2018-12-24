@@ -77,6 +77,8 @@ import jason.infra.centralised.CentralisedAgArch;
 import jason.stdlib.print;
 import jason.util.Config;
 import ora4mas.nopl.GroupBoard;
+import ora4mas.nopl.SchemeBoard;
+import ora4mas.nopl.oe.Group;
 
 @Singleton
 @Path("/agents")
@@ -900,52 +902,38 @@ public class RestImplAg extends AbstractBinder {
                 
                 { // groups and roles are also placed on the left
                     
-                     // set to avoid to print roles and group twice if more than one agent is playing the same or in same group
-                    Set<String> roles = new HashSet<>(); 
+                    // set to avoid to print roles and group twice if more than one agent is playing the same or in same group
                     Set<String> groups = new HashSet<>(); 
                     
-                    for (String a : agents) {
-                        // get workspaces the agent are in (including organizations)
-                        Set<String> workspacesIn = new HashSet<>();
-                        Agent ag = getAgent(a);
-                        CAgentArch cartagoAgArch = getCartagoArch(ag);
-                        for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
-                            // TODO: revise whether the Set is necessary
-                            workspacesIn.add(wid.getName());
-                        }
-                        for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-                            if (workspacesIn.contains(gb.getOEId())) {
-                                gb.getGrpState().getPlayers().forEach(p -> {
-                                    if (p.getAg().equals(a)) {
-                                        // role
-                                        sb.append("\t\t\"" + p.getTarget() + "\" [ " + "\n\t\tlabel = \"" + p.getTarget()
-												+ "\"");
-                                        sb.append("\n\t\t\tshape=box style=\"filled,rounded\" fillcolor=white\n");
-                                        sb.append("\t\t];\n");
-                                        roles.add(p.getTarget());
-                                        
-                                        // group
-                                        sb.append("\t\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId()
-                        						+ "\"");
-                                        sb.append("\n\t\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
-                                        sb.append("\t\t];\n");
-                                        groups.add(p.getTarget());
-                                        
-                                        orglinks.append("\t\"" + p.getTarget() + "\"->\"" + a
-                        						+ "\" [arrowtail=normal dir=back label=role]\n");
-                                        // group
-                                        orglinks.append("\t\"" + gb.getArtId() + "\"->\"" + p.getTarget()
-                        						+ "\" [arrowtail=odiamond dir=back]\n");
-                                    }
-                                });
-                            }
-                        }
-                        sb.append("\t\t{rank=same " + roles.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(",", "") + "};\n");
-                        sb.append("\t\t{rank=same " + groups.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(",", "") + "};\n");
-                        
-                        // for optimization purpose
-                        allwks.addAll(workspacesIn);
+                    for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+                        // group
+                        sb.append("\t\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
+                        sb.append("\n\t\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
+                        sb.append("\t\t];\n");
+                        gb.getGrpState().getPlayers().forEach(p -> {
+                            orglinks.append("\t\"" + gb.getArtId() + "\"->\"" + p.getAg()
+            						+ "\" [arrowtail=normal dir=back label=\""+p.getTarget()+"\"]\n");
+                        });
                     }
+
+                    
+                    for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
+                        // scheme
+                        sb.append("\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId()+ "\"");
+                        sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
+                        sb.append("\t\t];\n");
+                        for (Group gb: schb.getSchState().getGroupsResponsibleFor()) {
+                            orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
+                                 + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");                                
+                        }
+                        schb.getSchState().getPlayers().forEach(p -> {
+                                orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
+                						+ "\" [arrowtail=normal dir=back label=\""+p.getTarget()+"\"]\n");
+                            });
+                    }
+                    
+                    sb.append("\t\t{rank=same " + groups.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(",", "") + "};\n");
+                        
                 }
                 
                 sb.append("\t};\n");
@@ -970,6 +958,16 @@ public class RestImplAg extends AbstractBinder {
                         sb.append("\t\t\t\tURL = \"/agents/" + a + "/mind\"\n");
                         sb.append("\t\t\t\ttarget=\"mainframe\"\n");
                         sb.append("\t\t];\n");
+
+                        // get workspaces the agent are in (including organizations)
+                        Set<String> workspacesIn = new HashSet<>();
+                        Agent ag = getAgent(a);
+                        CAgentArch cartagoAgArch = getCartagoArch(ag);
+                        for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
+                            // TODO: revise whether the Set is necessary
+                            workspacesIn.add(wid.getName());
+                        }
+                        allwks.addAll(workspacesIn);
                     }
 
                     sb.append("\t\t{rank=same "
