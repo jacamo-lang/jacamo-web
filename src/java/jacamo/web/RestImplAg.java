@@ -446,7 +446,7 @@ public class RestImplAg extends AbstractBinder {
                     if (c.isAnnotationPresent(jason.stdlib.Manual.class)) {
                         // add full predicate provided by @Manual
                         jason.stdlib.Manual annotation = (jason.stdlib.Manual)c.getAnnotation(jason.stdlib.Manual.class);
-                        Command cmd = new Command("'" + annotation.literal() + "'", "'" + annotation.hint() + "'");
+                        Command cmd = new Command("'" + annotation.literal() + "'", "'" + annotation.hint().replaceAll("\"", "`").replaceAll("'", "`") + "'");
                         l.add(cmd);
                         //l.add(annotation.literal());
                         
@@ -912,7 +912,7 @@ public class RestImplAg extends AbstractBinder {
                         sb.append("\t\t];\n");
                         gb.getGrpState().getPlayers().forEach(p -> {
                             orglinks.append("\t\"" + gb.getArtId() + "\"->\"" + p.getAg()
-            						+ "\" [arrowtail=normal dir=back label=\""+p.getTarget()+"\"]\n");
+                                    + "\" [arrowtail=normal dir=back label=\""+p.getTarget()+"\"]\n");
                         });
                     }
 
@@ -928,7 +928,7 @@ public class RestImplAg extends AbstractBinder {
                         }
                         schb.getSchState().getPlayers().forEach(p -> {
                                 orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
-                						+ "\" [arrowtail=normal dir=back label=\""+p.getTarget()+"\"]\n");
+                                        + "\" [arrowtail=normal dir=back label=\""+p.getTarget()+"\"]\n");
                             });
                     }
                     
@@ -1012,11 +1012,11 @@ public class RestImplAg extends AbstractBinder {
                                                 ? info.getId().getName()
                                                 : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
                                         sb.append("\t\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
-												+ "\"\n");
+                                                + "\"\n");
 
                                         sb.append("\t\t\t\tshape=record style=filled fillcolor=white\n");
                                         sb.append("\t\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName()
-												+ "\"\n");
+                                                + "\"\n");
                                         sb.append("\t\t\t\ttarget=\"mainframe\"\n");
                                         sb.append("\t\t\t];\n");
 
