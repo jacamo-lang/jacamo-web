@@ -360,6 +360,9 @@ public class RestImplAg extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
+    	//TODO: put script back to js file
+    	//TODO: put button submit plans back to this form
+    	//TODO: find a better default text to bring with this form
         return  "<html lang=\"en\">\n" + 
                 "<head>\n" + 
                 "<title>ACE in Action</title>\n" + 
@@ -473,76 +476,113 @@ public class RestImplAg extends AbstractBinder {
         return l;
     }
 
-    @Path("/{agentname}/code")
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getCodeCompletionSuggestions(@PathParam("agentname") String agName,
-            @DefaultValue("all") @QueryParam("label") String label) {
-        List<Command> commands = new ArrayList<>();
-        try {
-            // get agent's plans
-            Agent ag = getAgent(agName);
-            if (ag != null) {
-                PlanLibrary pl = ag.getPL();
-                for (Plan plan : pl.getPlans()) {
-                    
-                    // do not add plans that comes from jar files (usually system's plans)
-                    if (plan.getFile().startsWith("jar:file")) continue;
-                    
-                    // add namespace when it is not default
-                    String ns = "";
-                    if (!plan.getNS().equals(Literal.DefaultNS)) {
-                        ns = plan.getNS().toString() + "::";
-                    }
+	@Path("/{agentname}/code")
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getCodeCompletionSuggestions(@PathParam("agentname") String agName,
+			@DefaultValue("all") @QueryParam("label") String label) {
+		List<Command> commands = new ArrayList<>();
+		try {
+			// get agent's plans
+			Agent ag = getAgent(agName);
+			if (ag != null) {
+				PlanLibrary pl = ag.getPL();
+				for (Plan plan : pl.getPlans()) {
 
-                    
-                    String terms = "";
-                    if (plan.getTrigger().getLiteral().getArity() > 0) {
-                        for (int i = 0; i < plan.getTrigger().getLiteral().getArity(); i++) {
-                            if (i == 0)
-                                terms = "(";
-                            terms += plan.getTrigger().getLiteral().getTerm(i).toString();
-                            if (i < plan.getTrigger().getLiteral().getArity() - 1)
-                                terms += ", ";
-                            else
-                                terms += ")";
-                        }
-                    }
-                    
-                    // when it is a goal or test goal, do not add operator
-                    if ((plan.getTrigger().getType() == TEType.achieve) ||
-                    	(plan.getTrigger().getType() == TEType.test)) {
-                    	
-                        Command cmd = new Command("'" + ns + plan.getTrigger().getType().toString()
-                                + plan.getTrigger().getLiteral().getFunctor() + terms + "'", "''");
-                        if (!commands.contains(cmd)) commands.add(cmd);
-                    }
-                    // when it is belief, do not add type which is anyway empty
-                    else if (plan.getTrigger().getType() == TEType.belief) {
-                        Command cmd = new Command("'" + ns + plan.getTrigger().getOperator().toString()
-                                + plan.getTrigger().getLiteral().getFunctor() + terms + "'", "''");
-                        if (!commands.contains(cmd)) commands.add(cmd);
-                    }
-                }
-            }
-            
-            // get internal actions
-            commands.addAll(getIAlist());
-            
-            //TODO: get external actions (from focused artifacts)
-            
-            //TODO: get beliefs add options to remove and to update
-            
+					// do not add plans that comes from jar files (usually system's plans)
+					if (plan.getFile().startsWith("jar:file"))
+						continue;
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            Command cmd = new Command("No code completion suggestions for " + agName, "");
-            commands.add(cmd);
-        } 
-        Collections.sort(commands, new SortByCommandName());
-        return commands.toString();
-        //return  "['.desire','.drop_desire','.drop_all_desires']";
-    }
+					// add namespace when it is not default
+					String ns = "";
+					if (!plan.getNS().equals(Literal.DefaultNS)) {
+						ns = plan.getNS().toString() + "::";
+					}
+
+					String terms = "";
+					if (plan.getTrigger().getLiteral().getArity() > 0) {
+						for (int i = 0; i < plan.getTrigger().getLiteral().getArity(); i++) {
+							if (i == 0)
+								terms = "(";
+							terms += plan.getTrigger().getLiteral().getTerm(i).toString();
+							if (i < plan.getTrigger().getLiteral().getArity() - 1)
+								terms += ", ";
+							else
+								terms += ")";
+						}
+					}
+
+					// when it is a goal or test goal, do not add operator
+					if ((plan.getTrigger().getType() == TEType.achieve)
+							|| (plan.getTrigger().getType() == TEType.test)) {
+
+						Command cmd = new Command("'" + ns + plan.getTrigger().getType().toString()
+								+ plan.getTrigger().getLiteral().getFunctor() + terms + "'", "''");
+						if (!commands.contains(cmd))
+							commands.add(cmd);
+					}
+					// when it is belief, do not add type which is anyway empty
+					else if (plan.getTrigger().getType() == TEType.belief) {
+						Command cmd = new Command("'" + ns + plan.getTrigger().getOperator().toString()
+								+ plan.getTrigger().getLiteral().getFunctor() + terms + "'", "''");
+						if (!commands.contains(cmd))
+							commands.add(cmd);
+					}
+				}
+			}
+
+			// get internal actions
+			commands.addAll(getIAlist());
+
+			// get external actions (from focused artifacts)
+			List<String> workspacesIn = new ArrayList<>();
+			CAgentArch cartagoAgArch = getCartagoArch(ag);
+			for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces())
+				workspacesIn.add(wid.getName());
+
+			workspacesIn.forEach(w -> {
+				String wksName = w.toString();
+				try {
+					for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
+
+						// operations
+						ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
+
+						info.getObservers().forEach(y -> {
+							if (y.getAgentId().getAgentName().equals(agName)) {
+								info.getOperations().forEach(z -> {
+									String params = "";
+									for (int i = 0; i < z.getOp().getNumParameters(); i++) {
+										if (i == 0) params = "(";
+										params += "arg" + i;
+										if (i == z.getOp().getNumParameters()-1) 
+											params += ")";
+										else
+											params += ", ";
+									}
+										 
+									Command cmd = new Command("'" + z.getOp().getName() + params + "'", "''");
+									if (!commands.contains(cmd))
+										commands.add(cmd);
+								});
+							}
+						});
+
+					}
+				} catch (CartagoException e) {
+					e.printStackTrace();
+				}
+			});
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			Command cmd = new Command("No code completion suggestions for " + agName, "");
+			commands.add(cmd);
+		}
+		Collections.sort(commands, new SortByCommandName());
+		return commands.toString();
+		// return "['.desire','.drop_desire','.drop_all_desires']";
+	}
 
     class Command 
     { 
@@ -744,11 +784,10 @@ public class RestImplAg extends AbstractBinder {
             StringBuilder sb = new StringBuilder();
 
             // get workspaces the agent are in (including organisations)
-            Set<String> workspacesIn = new HashSet<>();
+            List<String> workspacesIn = new ArrayList<>();
             Agent ag = getAgent(agName);
             CAgentArch cartagoAgArch = getCartagoArch(ag);
             for (WorkspaceId wid: cartagoAgArch.getSession().getJoinedWorkspaces()) {
-                // TODO: revise whether the Set is necessary
                 workspacesIn.add(wid.getName());
             }
             
