@@ -509,20 +509,20 @@ public class RestImplAg extends AbstractBinder {
                         }
                     }
                     
-                    // do not add operator when type is achieve
-                    if (plan.getTrigger().getType() == TEType.achieve) {
+                    // when it is a goal or test goal, do not add operator
+                    if ((plan.getTrigger().getType() == TEType.achieve) ||
+                    	(plan.getTrigger().getType() == TEType.test)) {
+                    	
                         Command cmd = new Command("'" + ns + plan.getTrigger().getType().toString()
                                 + plan.getTrigger().getLiteral().getFunctor() + terms + "'", "''");
-                        commands.add(cmd);
+                        if (!commands.contains(cmd)) commands.add(cmd);
                     }
                     // when it is belief, do not add type which is anyway empty
                     else if (plan.getTrigger().getType() == TEType.belief) {
                         Command cmd = new Command("'" + ns + plan.getTrigger().getOperator().toString()
                                 + plan.getTrigger().getLiteral().getFunctor() + terms + "'", "''");
-                        commands.add(cmd);
+                        if (!commands.contains(cmd)) commands.add(cmd);
                     }
-
-                    // TODO: do nothing when type is TEType.test?
                 }
             }
             
@@ -532,12 +532,13 @@ public class RestImplAg extends AbstractBinder {
             //TODO: get external actions (from focused artifacts)
             
             //TODO: get beliefs add options to remove and to update
+            
 
         } catch (Exception e) {
             e.printStackTrace();
             Command cmd = new Command("No code completion suggestions for " + agName, "");
             commands.add(cmd);
-        }
+        } 
         Collections.sort(commands, new SortByCommandName());
         return commands.toString();
         //return  "['.desire','.drop_desire','.drop_all_desires']";
@@ -566,6 +567,12 @@ public class RestImplAg extends AbstractBinder {
             command.add(name);
             command.add(comment);
             return command.toString();
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+			return this.name.equals(((Command)o).getName());
+        	
         }
     } 
 
