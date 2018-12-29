@@ -360,55 +360,31 @@ public class RestImplAg extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getLoadPlansForm(@PathParam("agentname") String agName) {
-    	//TODO: put script back to js file
-    	//TODO: put button submit plans back to this form
-    	//TODO: find a better default text to bring with this form
+        //TODO: fix upload of plans using ace text editor
+        //TODO: fix upload using files
+        //TODO: find a better default text to bring with this form
         return  "<html lang=\"en\">\n" + 
                 "<head>\n" + 
                 "<title>ACE in Action</title>\n" + 
-                "<style type=\"text/css\" media=\"screen\">\n" + 
-                "    #editor { \n" + 
-                "        position: absolute;\n" + 
-                "        top: 0;\n" + 
-                "        right: 0;\n" + 
-                "        bottom: 0;\n" + 
-                "        left: 0;\n" + 
-                "    }\n" + 
-                "</style>\n" + 
+                "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n" +
                 "</head>\n" + 
                 "<body>\n" + 
-                "\n" + 
+
                 "<div id=\"editor\">" + 
-                "  %% A process whose only job is to keep a counter.\n" + 
-                "  %% First version\n" + 
-                "  -module(counter).\n" + 
-                "  -export([start/0, codeswitch/1]).\n" + 
-                " \n" + 
-                "  start() -> loop(0).\n" + 
-                " \n" + 
-                "  loop(Sum) ->\n" + 
-                "    receive\n" + 
-                "       {increment, Count} ->\n" + 
-                "          loop(Sum+Count);\n" + 
-                "       {counter, Pid} ->\n" + 
-                "          Pid ! {counter, Sum},\n" + 
-                "          loop(Sum);\n" + 
-                "       code_switch ->\n" + 
-                "          ?MODULE:codeswitch(Sum)\n" + 
-                "          % Force the use of 'codeswitch/1' from the latest MODULE version\n" + 
-                "    end.\n" + 
-                " \n" + 
-                "  codeswitch(Sum) -> loop(Sum)." +
+                "+!test\n" +
+                "  <- .print(\"test\").\n" +
                 "</div>\n" + 
-                "    \n" + 
+
+                "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>" +
+                "<span>\n" +
+                "<button type=\"button\" onclick=\"uploadPlansLib('" + agName + "')\">Upload plans library</button>\n" +
+                "</span>\n" + 
+
+                "or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload file\">" +
+                
                 "<script src=\"/js/ace/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n" + 
-                "<script src=\"/js/ace/ext-language_tools.js\"></script>" +
-                "<script>\n" + 
-                "    var editor = ace.edit(\"editor\");\n" + 
-                "    editor.setTheme(\"ace/theme/textmate\");\n" + 
-                "    editor.session.setMode(\"ace/mode/erlang\");\n" +
-                "    editor.setOptions({enableBasicAutocompletion: true});" +
-                "</script>\n" + 
+                "<script src=\"/js/ace/ext-language_tools.js\"></script>\n" +
+                "<script src=\"/js/load_plans_form.js\"></script>\n" +
                 "</body>\n" + 
                 "</html>";
     }
@@ -427,6 +403,12 @@ public class RestImplAg extends AbstractBinder {
             Agent ag = getAgent(agName);
             if (ag != null) {
                 ag.parseAS(new StringReader(plans), "RrestAPI");
+                
+                System.out.println("agName: "+agName);
+                System.out.println("plans: "+plans);
+                System.out.println("restAPI://"+fileDetail.getFileName());
+                System.out.println("uis: "+uploadedInputStream);
+                
                 ag.load(uploadedInputStream, "restAPI://"+fileDetail.getFileName());
                 r = "ok, code uploaded!";
             }

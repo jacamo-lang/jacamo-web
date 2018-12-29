@@ -1,6 +1,17 @@
 @charset "UTF-8";
 /* mini-default by Angelos Chalaris v3.0.1 */
 
+/* ACE EDITOR */
+#editor {
+	position: absolute; 
+    top: 0; 
+    right: 0; 
+    bottom: 0; 
+    left: 0;
+    font-size: 16px;
+    height: 330px;
+} 
+
 /* AUTO COMPLETE */
 /*the container must be positioned relative:*/
 .autocomplete {
