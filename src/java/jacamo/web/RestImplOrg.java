@@ -100,12 +100,9 @@ public class RestImplOrg extends AbstractBinder {
 
         for (OrgBoard ob : OrgBoard.getOrbBoards()) {
             if (ob.getOEId().equals(selectedOrganisation)) {
-                so.append("	<a href=\"/oe/" + ob.getOEId() + "/os#specification\"><h5>. " + ob.getOEId() + "</h5></a>\n");
-                so.append("	<a href='/oe/" + ob.getOEId() + "/os#groups' target='mainframe'><h6>. Groups</h6></a>\n");
-                so.append("	<a href='/oe/" + ob.getOEId() + "/os#schemes' target='mainframe'><h6>. Schemes</h6></a>\n");
-                so.append("	<a href='/oe/" + ob.getOEId() + "/os#norms' target='mainframe'><h6>. Norms</h6></a>\n");
+                so.append("	<a href=\"/oe/" + ob.getOEId() + "/os#specification\"><h5><b>" + ob.getOEId() + "</b></h5></a>\n");
             } else {
-                so.append("	<a href=\"/oe/" + ob.getOEId() + "/os#specification\"><h5>+ " + ob.getOEId() + "</h5></a>\n");
+                so.append("	<a href=\"/oe/" + ob.getOEId() + "/os#specification\"><h5>" + ob.getOEId() + "</h5></a>\n");
             }
         }
 

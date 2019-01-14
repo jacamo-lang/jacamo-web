@@ -111,15 +111,16 @@ public class RestImplEnv extends AbstractBinder {
                         continue;
                     if (aid.getName().endsWith("-body") || aid.getArtifactType().endsWith(".OrgBoard")
                             || aid.getArtifactType().endsWith(".SchemeBoard")
+                            || aid.getArtifactType().endsWith(".NormativeBoard")
                             || aid.getArtifactType().endsWith(".GroupBoard"))
                         continue;
                     if (aid.getName().equals(selectedArtifact))
                         arts.append("	<a href=\"/workspaces/" + wname + "/" + aid.getName() + "\" id=\"link-to-"
-								+ wname + "-" + aid.getName() + "\" target='mainframe'><h6>. " + aid.getName()
-                                + "</h6></a>\n");
+								+ wname + "-" + aid.getName() + "\" target='mainframe'><h6><b>" + aid.getName()
+                                + "</b></h6></a>\n");
                     else
                         arts.append("	<a href=\"/workspaces/" + wname + "/" + aid.getName() + "\" id=\"link-to-"
-								+ wname + "-" + aid.getName() + "\" target='mainframe'><h6>+ " + aid.getName()
+								+ wname + "-" + aid.getName() + "\" target='mainframe'><h6>" + aid.getName()
                                 + "</h6></a>\n");
                 }
                 // Do not print empty workspaces, it includes workspaces that have only
@@ -127,11 +128,11 @@ public class RestImplEnv extends AbstractBinder {
                 if (!arts.toString().equals("")) {
                     if (wname.equals(selectedWorkspace)) {
                         so.append("	<a href=\"/workspaces/" + wname + "/\" id=\"link-to-" + wname
-								+ "\" target='mainframe'><h5>. " + wname + "</h5></a>\n");
+								+ "\" target='mainframe'><h5><b>" + wname + "</b></h5></a>\n");
                         so.append(arts.toString());
                     } else {
                         so.append("	<a href=\"/workspaces/" + wname + "/\" id=\"link-to-" + wname
-								+ "\" target='mainframe'><h5>+ " + wname + "</h5></a>\n");
+								+ "\" target='mainframe'><h5>" + wname + "</h5></a>\n");
                     }
                 }
             } catch (CartagoException e) {
