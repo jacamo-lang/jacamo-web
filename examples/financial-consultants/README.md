@@ -5,7 +5,7 @@ There are assistants that interacts with the user by telegram* sending a compile
 
 *The file routes.xml must be filled with a telegram bot's token
 
-![Alt text](https://g.gravizo.com/source/financialAgentsOverview?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-rest%2Fexamples%2Ffinancial-consultants%2Fmaster%2FREADME.md)
+![Alt text](https://g.gravizo.com/source/financialAgentsOverview?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-rest%2Fmaster%2Fexamples%2Ffinancial-consultants%2FREADME.md)
 <details> 
 <summary>Financial Agents Overview</summary>
 financialAgentsOverview
