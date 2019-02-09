@@ -1,0 +1,15 @@
+<routes xmlns="http://camel.apache.org/schema/spring" >
+
+  <route id="myPAproduces">
+    <from uri="jason:toTelegram"/>
+    <convertBodyTo type="java.lang.String"/>
+    <to uri="telegram:bots/***YOUR-PERSONAL-BOT-TOKEN***"/>
+  </route>
+
+  <route id="myPAconsumes">
+    <from uri="telegram:bots/***YOUR-PERSONAL-BOT-TOKEN***"/>
+    <convertBodyTo type="java.lang.String"/>
+    <to uri="jason:myPA?performative=achieve"/>
+  </route>
+  
+</routes>

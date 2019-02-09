@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?xml-stylesheet href="http://moise.sourceforge.net/xml/os.xsl" type="text/xsl" ?>
+
+<organisational-specification
+    id="financial" os-version="0.8"
+
+    xmlns='http://moise.sourceforge.net/os'
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xsi:schemaLocation='http://moise.sourceforge.net/os
+                        http://moise.sourceforge.net/xml/os.xsd'>
+
+    <structural-specification>
+        <role-definitions>
+            <role id="controller" />
+            <role id="assistant" />
+            <role id="consultant" />
+        </role-definitions>
+
+        <group-specification id="financial_group">
+            <roles>
+                <role id="assistant" min="1" max="100" />
+                <role id="consultant" min="1" max="100" />
+                <role id="controller" min="1" max="1" />
+            </roles>
+
+            <links>
+                <link from="controller" type="authority" to="consultant" scope="intra-group" />
+                <link from="controller" type="authority" to="assistant" scope="intra-group" />
+            </links>
+        </group-specification>
+    </structural-specification>
+
+    <functional-specification>
+        <scheme id="financial_sch">
+            <goal id="runsystem">
+                <plan operator="sequence">
+                    <goal id="launchsystem">
+                        <plan operator="sequence">
+                            <goal id="createagents" />
+                            <goal id="sendstartcommand" />
+                        </plan>
+                    </goal>
+                </plan>
+            </goal>
+            <mission id="mlaunchsystem" min="1" max="1">
+                <goal id="createagents" />
+                <goal id="sendstartcommand" />
+            </mission>
+        </scheme>
+    </functional-specification>
+
+    <normative-specification>
+    </normative-specification>
+
+</organisational-specification>
