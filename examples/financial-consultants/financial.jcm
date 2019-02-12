@@ -8,8 +8,7 @@
 
     (see jacamo/doc/jcm.html for more information about what can be defined in this file)
 
-    JaCaMo <VERSION>
-    <DATE>
+    JaCaMo <VERSION> <DATE>
 */
 
 mas financial {
