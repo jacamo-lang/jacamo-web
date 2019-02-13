@@ -2,6 +2,11 @@
 /* kill agent */
 function killAg(agent) {
 	h2 = new XMLHttpRequest(); 
+    h2.onreadystatechange = function() { 
+    	if ((h2.status == 200) || (h2.status == 204)) {
+    		location.assign("/agents/");
+    	}
+    };
     h2.open("DELETE", "/agents/" + agent, false);
     h2.send();
 }

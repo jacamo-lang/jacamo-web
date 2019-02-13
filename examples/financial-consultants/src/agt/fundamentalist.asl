@@ -17,9 +17,9 @@
     .
     
 +!joinFinancialGroup[source(self)] <-
-    joinWorkspace(financialagents,Ofa);
+    joinWorkspace(financialorg,Ofa);
     .print("DEBUG: Joining group...");
-    g::lookupArtifact(financial_team, GrArtId);
+    g::lookupArtifact(financialteam, GrArtId);
     g::focus(GrArtId);
     g::adoptRole(consultant);
     .

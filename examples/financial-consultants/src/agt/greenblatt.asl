@@ -20,13 +20,13 @@
     fundamentals::ebit(E) & fundamentals::valorMercado(V) & fundamentals::dividaLiq(D) & E/(V+D) >= 0.1 & 
     fundamentals::roic(R) & R >= 0.1
     <-
-    .concat("Baseado no metodo de Greenblatt, ", S," tem EBIT (",E,") sobre valor de mercado + divida liquida (",V,"+",D,") e ROIC (",R,"%) superiores a 10%: COMPRAR", CCC)
-    .send(Q,tell,recommend(S,comprar,CCC));
+    .concat("Baseado no metodo de Greenblatt, ", S," tem EBIT (",math.round(E/1000000),"mi) sobre valor de mercado + divida liquida (",math.round(V/1000000),"mi+",math.round(D/1000000),"mi) e ROIC (",R,"%) superiores a 10%: COMPRAR", CCC)
+    .send(Q,tell,stocks::recommend(S,comprar,CCC));
     .
 
 +!reply(S,Q)[source(self)] : fundamentals::ebit(E) & fundamentals::valorMercado(V) & fundamentals::dividaLiq(D) & fundamentals::roic(R) <-
-    .concat("Baseado no metodo de Greenblatt, ", S," NAO tem EBIT (",E,") sobre valor de mercado + divida liquida (",V,"+",D,") e ROIC (",R,"%) superiores a 10%: NAO COMPRAR", CCC)
-    .send(Q,tell,recommend(S,neutro,CCC));
+    .concat("Baseado no metodo de Greenblatt, ", S," NAO cumpre os requisitos de EBIT (",math.round(E/1000000),"mi) sobre valor de mercado + divida liquida (",math.round(V/1000000),"mi+",math.round(D/1000000),"mi) e ROIC (",R,"%) superiores a 10%: NAO COMPRAR", CCC)
+    .send(Q,tell,stocks::recommend(S,neutro,CCC));
     .
 
 { include("$jacamoJar/templates/common-cartago.asl") }

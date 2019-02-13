@@ -12,7 +12,21 @@
 */
 
 mas financial {
-    agent one
+    agent bazin         : bazin.asl
+    agent greenblatt    : greenblatt.asl
+    agent grahan        : grahan.asl
+    agent myPA          : assistant.asl
+ 
+    workspace financialagents {
+        artifact fundamentus: dynamic.stock.FundamentusArtifact
+    }
+
+    organisation financialorg : financial.xml {
+        group financialteam : financialgroup {
+            responsible-for : financialsch
+        }
+        scheme financialsch : financialsch
+    }
  
     asl-path: src/agt
               src/agt/inc

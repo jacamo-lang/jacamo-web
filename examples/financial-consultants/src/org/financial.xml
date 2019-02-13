@@ -12,27 +12,24 @@
 
     <structural-specification>
         <role-definitions>
-            <role id="controller" />
             <role id="assistant" />
             <role id="consultant" />
         </role-definitions>
 
-        <group-specification id="financial_group">
+        <group-specification id="financialgroup">
             <roles>
                 <role id="assistant" min="1" max="100" />
                 <role id="consultant" min="1" max="100" />
-                <role id="controller" min="1" max="1" />
             </roles>
 
             <links>
-                <link from="controller" type="authority" to="consultant" scope="intra-group" />
-                <link from="controller" type="authority" to="assistant" scope="intra-group" />
+                <link from="assistant" type="authority" to="consultant" scope="intra-group" />
             </links>
         </group-specification>
     </structural-specification>
 
     <functional-specification>
-        <scheme id="financial_sch">
+        <scheme id="financialsch">
             <goal id="runsystem">
                 <plan operator="sequence">
                     <goal id="launchsystem">

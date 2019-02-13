@@ -350,6 +350,7 @@ public class RestImplAg extends AbstractBinder {
     @Produces(MediaType.TEXT_PLAIN)
     public String killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
         try {
+            BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web");
             return "result of kill: "+BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web");
         } catch (Exception e) {
             return "Agent "+agName+" in unknown."+e.getMessage();
@@ -814,20 +815,21 @@ public class RestImplAg extends AbstractBinder {
                     }
                 }
               
-                for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
-                    // scheme
-                    sb.append("\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId()+ "\"");
-                    sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
-                    sb.append("\t\t];\n");
-                    for (Group gb: schb.getSchState().getGroupsResponsibleFor()) {
-                        orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
-                             + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");                                
-                    }
-                    schb.getSchState().getPlayers().forEach(p -> {
-                            orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
-                                    + "\" [arrowtail=normal dir=back label=\""+p.getTarget()+"\"]\n");
-                        });
-                }
+				for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
+					// scheme
+					sb.append("\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId() + "\"");
+					sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
+					sb.append("\t\t];\n");
+					for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
+						orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
+                                + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
+						sb.append("\t\t{rank=same "+gb.getId()+" "+schb.getArtId()+"};\n");
+					}
+					schb.getSchState().getPlayers().forEach(p -> {
+						orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
+                                + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
+					});
+				}
 
                 sb.append(orglinks);
             }
@@ -948,7 +950,7 @@ public class RestImplAg extends AbstractBinder {
                 { // groups and roles are also placed on the left
                     
                     // set to avoid to print roles and group twice if more than one agent is playing the same or in same group
-                    Set<String> groups = new HashSet<>(); 
+                    //Set<String> groups = new HashSet<>(); 
                     
                     for (GroupBoard gb : GroupBoard.getGroupBoards()) {
                         // group
@@ -961,22 +963,23 @@ public class RestImplAg extends AbstractBinder {
                         });
                     }
 
-                    for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
-                        // scheme
-                        sb.append("\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId()+ "\"");
-                        sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
-                        sb.append("\t\t];\n");
-                        for (Group gb: schb.getSchState().getGroupsResponsibleFor()) {
-                            orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
-                                 + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");                                
-                        }
-                        schb.getSchState().getPlayers().forEach(p -> {
-                                orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
-                                        + "\" [arrowtail=normal dir=back label=\""+p.getTarget()+"\"]\n");
-                            });
-                    }
+					for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
+						// scheme
+						sb.append("\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId() + "\"");
+						sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
+						sb.append("\t\t];\n");
+						for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
+							orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
+                                    + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
+							sb.append("\t\t{rank=same "+gb.getId()+" "+schb.getArtId()+"};\n");
+						}
+						schb.getSchState().getPlayers().forEach(p -> {
+							orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
+                                    + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
+						});
+					}
                     
-                    sb.append("\t\t{rank=same " + groups.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(",", "") + "};\n");
+                    //sb.append("\t\t{rank=same " + groups.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(",", "") + "};\n");
                         
                 }
                 

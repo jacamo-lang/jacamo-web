@@ -9,6 +9,7 @@ import org.jsoup.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.apache.commons.lang.mutable.MutableDouble;
 
 import cartago.Artifact;
 import cartago.OPERATION;
@@ -27,9 +28,8 @@ public class FundamentusArtifact extends Artifact {
             Elements rows;
             Element row;
             Elements cols;
-            Number number;
-            String tmp;
-            NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
+            MutableDouble number = new MutableDouble(0.0);
+            NumberFormat format = NumberFormat.getInstance(Locale.ENGLISH);
             if (doc.select("table").size() > 0) {
                                 
                 // Go to 1st table to get Current Price
@@ -37,7 +37,7 @@ public class FundamentusArtifact extends Artifact {
                 rows = table.select("tr");
                 row = rows.get(0);
                 cols = row.select("td");
-                number = format.parse(cols.get(3).text());
+                if (isNumericThisBRLStr(cols.get(3).text(), number));
                 signal("setPreco", number.doubleValue());
 
                 // Go to 2nd table to get Market Value
@@ -45,8 +45,7 @@ public class FundamentusArtifact extends Artifact {
                 rows = table.select("tr");
                 row = rows.get(0);
                 cols = row.select("td");
-                tmp = cols.get(1).text().replaceAll("\\.", "");
-                number = format.parse(tmp);
+                if (isNumericThisBRLStr(cols.get(1).text(), number));
                 signal("setValorMercado", number.doubleValue());
 
                 // Go to 3rd table to get "Div. Yield" and "Div Br/ Patrim" = "D/E Debt over Equity"
@@ -54,28 +53,31 @@ public class FundamentusArtifact extends Artifact {
                 rows = table.select("tr");
                 row = rows.get(8);
                 cols = row.select("td");
-                number = format.parse(cols.get(3).text());
+                if (isNumericThisBRLStr(cols.get(3).text(), number));
                 signal("setDivYield", number.doubleValue());
+
                 rows = table.select("tr");
                 row = rows.get(1);
                 cols = row.select("td");
-                number = format.parse(cols.get(5).text());
+                if (isNumericThisBRLStr(cols.get(5).text(), number));
                 signal("setLPA", number.doubleValue());
+                
                 rows = table.select("tr");
                 row = rows.get(2);
                 cols = row.select("td");
-                number = format.parse(cols.get(5).text());
+                if (isNumericThisBRLStr(cols.get(5).text(), number));
                 signal("setVPA", number.doubleValue());
+                
                 rows = table.select("tr");
                 row = rows.get(7);
                 cols = row.select("td");
-                number = format.parse(cols.get(5).text());
+                if (isNumericThisBRLStr(cols.get(5).text(), number));
                 signal("setROIC", number.doubleValue());
+                
                 rows = table.select("tr");
                 row = rows.get(10);
                 cols = row.select("td");
-                tmp = cols.get(5).text().replaceAll("\\.", "");
-                number = format.parse(tmp);
+                if (isNumericThisBRLStr(cols.get(5).text(), number));
                 signal("setDivBrutaPatr", number.doubleValue());
 
                 // Go to 4th table to get Market Value
@@ -83,8 +85,7 @@ public class FundamentusArtifact extends Artifact {
                 rows = table.select("tr");
                 row = rows.get(2);
                 cols = row.select("td");
-                tmp = cols.get(3).text().replaceAll("\\.", "");
-                number = format.parse(tmp);
+                if (isNumericThisBRLStr(cols.get(3).text(), number));
                 signal("setDividaLiq", number.doubleValue());
                 
                 // Go to 5th table to get Market Value
@@ -92,8 +93,7 @@ public class FundamentusArtifact extends Artifact {
                 rows = table.select("tr");
                 row = rows.get(3);
                 cols = row.select("td");
-                tmp = cols.get(1).text().replaceAll("\\.", "");
-                number = format.parse(tmp);
+                if (isNumericThisBRLStr(cols.get(1).text(), number));
                 signal("setEBIT", number.doubleValue());
                 
                 log("Consulta ao site fundamentus.com.br feita com sucesso!");
@@ -102,10 +102,19 @@ public class FundamentusArtifact extends Artifact {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
         }
 
     }
 
+    private boolean isNumericThisBRLStr(String str, MutableDouble number) {
+        try {
+            str = str.replaceAll("\\.", "").replaceAll("%", "").replaceAll(",", "\\.");
+            double n = Double.parseDouble(str); //Test if is parseble
+            number.setValue(n);
+        } catch (NumberFormatException nfe) {
+            number.setValue(0.0);
+            return false;
+        }
+        return true;
+    }
 }
