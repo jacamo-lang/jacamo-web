@@ -1,10 +1,11 @@
 package jacamo.web;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
-import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.FileWriter;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -1091,16 +1092,6 @@ public class RestImplAg extends AbstractBinder {
 
             sb.append("}\n");
             graph = sb.toString();
-            
-            // debug
-            try (FileWriter fw = new FileWriter("graph.gv", false); 
-                    BufferedWriter bw = new BufferedWriter(fw); 
-                    PrintWriter out = new PrintWriter(bw)) {    
-                out.print(graph);   
-                out.flush();    
-                out.close();    
-            } catch (Exception ex) {    
-            }
 
         } catch (Exception ex) {
         }

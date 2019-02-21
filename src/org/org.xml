@@ -16,6 +16,7 @@
 <role-definitions>
     <role id="role1" />
     <role id="role2" />
+    <role id="role3"> <extends role="role2"/>  </role>
 </role-definitions>
 
 <group-specification id="group1">

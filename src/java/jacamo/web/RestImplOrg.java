@@ -1,10 +1,17 @@
 package jacamo.web;
 
+import java.awt.Image;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Singleton;
+import javax.swing.ImageIcon;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -18,18 +25,27 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
+import cartago.ArtifactId;
+import cartago.ArtifactInfo;
 import cartago.CartagoException;
+import cartago.CartagoService;
+import cartago.WorkspaceId;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
+import jaca.CAgentArch;
+import jason.asSemantics.Agent;
 import moise.os.OS;
+import moise.tools.os2dot;
+import moise.tools.os2dotGUI;
 import moise.xml.DOMUtils;
 import ora4mas.nopl.GroupBoard;
 import ora4mas.nopl.OrgArt;
 import ora4mas.nopl.OrgBoard;
 import ora4mas.nopl.NormativeBoard;
 import ora4mas.nopl.SchemeBoard;
+import ora4mas.nopl.oe.Group;
 
 @Singleton
 @Path("/oe")
@@ -122,31 +138,33 @@ public class RestImplOrg extends AbstractBinder {
             mainContent.append("	<div class=\"section\">\n");
             for (OrgBoard ob : OrgBoard.getOrbBoards()) {
                 if (ob.getOEId().equals(oeName)) {
-                    OS os = OS.loadOSFromURI(ob.getOSFile());
-                    String osSpec = ob.specToStr(os,
-                            DOMUtils.getTransformerFactory().newTransformer(DOMUtils.getXSL("os")));
-                    mainContent.append(osSpec);
+//                  OS os = OS.loadOSFromURI(ob.getOSFile());
+//                  String osSpec = ob.specToStr(os,
+//                          DOMUtils.getTransformerFactory().newTransformer(DOMUtils.getXSL("os")));
+                    mainContent.append("		<center><img src='/oe/" + oeName + "/os/img.svg' /></center><br/>");
+//                  mainContent.append(osSpec);
                 }
             }
             mainContent.append("	</div>\n");
             mainContent.append("</div>\n");
 
+            /* cleaning this area to have only the full organisation chart
             mainContent.append("<div id=\"groups\" class=\"card fluid\">\n");
-            mainContent.append("	<h2 class=\"section double-padded\">Groups</h2>\n");
+            mainContent.append("    <h2 class=\"section double-padded\">Groups</h2>\n");
 
             // add groups sub section
             for (GroupBoard gb : GroupBoard.getGroupBoards()) {
                 if (gb.getOEId().equals(oeName)) {
                     if (((OrgArt) gb).getStyleSheet() != null) {
-                        mainContent.append("	<div class=\"section\">\n");
+                        mainContent.append("    <div class=\"section\">\n");
                         StringWriter so = new StringWriter();
                         ((OrgArt) gb).getStyleSheet().setParameter("show-oe-img", "true");
                         // TODO: links that comes from xsl specification are wrong!!!
                         ((OrgArt) gb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb))),
                                 new StreamResult(so));
-                        mainContent.append("		<center><img src='/oe/" + oeName + "/group/" + gb.getArtId()
+                        mainContent.append("        <center><img src='/oe/" + oeName + "/group/" + gb.getArtId()
                                 + "/img.svg' /></center><br/>");
-                        mainContent.append("	</div>\n");
+                        mainContent.append("    </div>\n");
                         mainContent.append(so.toString());
                     }
                     StringWriter so = new StringWriter();
@@ -157,9 +175,11 @@ public class RestImplOrg extends AbstractBinder {
                 }
             }
             mainContent.append("</div>\n");
-            
+            */
+
+            /* cleaning this area to have only the full organisation chart
             mainContent.append("<div id=\"schemes\" class=\"card fluid\">\n");
-            mainContent.append("	<h2 class=\"section double-padded\">Schemes</h2>\n");
+            mainContent.append("    <h2 class=\"section double-padded\">Schemes</h2>\n");
 
             for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
                 if (sb.getOEId().equals(oeName)) {
@@ -168,8 +188,8 @@ public class RestImplOrg extends AbstractBinder {
                         ((OrgArt) sb).getStyleSheet().setParameter("show-oe-img", "true");
                         ((OrgArt) sb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb))),
                                 new StreamResult(so));
-                        mainContent.append("	<center><img src='/oe/" + oeName + "/scheme/"
-                                + sb.getArtId() + "/img.svg' /></center><br/>");
+                        mainContent.append("    <center><img src='/oe/" + oeName + "/scheme/" + sb.getArtId()
+                                + "/img.svg' /></center><br/>");
                         mainContent.append(so.toString());
                     }
                     StringWriter so = new StringWriter();
@@ -180,9 +200,11 @@ public class RestImplOrg extends AbstractBinder {
                 }
             }
             mainContent.append("</div>\n");
+            */
 
+            /* cleaning this area to have only the full organisation chart
             mainContent.append("<div id=\"norms\" class=\"card fluid\">\n");
-            mainContent.append("	<h2 class=\"section double-padded\">Norms</h2>\n");
+            mainContent.append("    <h2 class=\"section double-padded\">Norms</h2>\n");
 
             for (NormativeBoard nb : NormativeBoard.getNormativeBoards()) {
                 if (nb.getOEId().equals(oeName)) {
@@ -194,6 +216,7 @@ public class RestImplOrg extends AbstractBinder {
                 }
             }
             mainContent.append("</div>\n");
+            */
 
             return designPage("JaCaMo-web - Organisation: " + oeName, oeName, mainContent.toString());
         } catch (Exception | TransformerFactoryConfigurationError e) {
@@ -202,6 +225,30 @@ public class RestImplOrg extends AbstractBinder {
         return "error"; // TODO: set response properly
     }
 
+    // TODO: An org spec can not be called img.svg?
+    @Path("/{oename}/os/img.svg")
+    @GET
+    @Produces("image/svg+xml")
+    public Response getOSImg(@PathParam("oename") String oeName) {
+        try {
+            for (OrgBoard ob : OrgBoard.getOrbBoards()) {
+                if (ob.getOEId().equals(oeName)) {
+                    OS os = OS.loadOSFromURI(ob.getOSFile());
+                    String dot = getOSAsDot(os);
+                    if (dot != null && !dot.isEmpty()) {
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        MutableGraph g = Parser.read(dot);
+                        Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                        return Response.ok(out.toByteArray()).build();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.noContent().build(); // TODO: set response properly
+    }
+    
     // this method is not being used anymore, should be kept for other rest requests?
     @Path("/{oename}/group/{groupname}")
     @GET
@@ -393,4 +440,49 @@ public class RestImplOrg extends AbstractBinder {
         }
         return "error"; // TODO: set response properly
     }
+    
+    protected String getOSAsDot(OS os) {
+        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
+        
+        try {
+
+            StringBuilder sb = new StringBuilder();
+
+            os2dot transformer = new os2dot();
+            transformer.showLinks = true;
+            transformer.showMissions = true;
+            transformer.showConditions = true;
+            transformer.showSS    = true;
+            transformer.showFS    = true;
+            transformer.showNS    = true;
+
+            String dotProgram = transformer.transform(os);
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            MutableGraph g = Parser.read(dotProgram);
+            Format f = Format.XDOT;
+
+            Graphviz.fromGraph(g).render(f).toOutputStream(out);
+            sb.append(out.toString());
+
+            graph = sb.toString();
+            
+            // debug
+            try (FileWriter fw = new FileWriter("graph.gv", false); 
+                    BufferedWriter bw = new BufferedWriter(fw); 
+                    PrintWriter printout = new PrintWriter(bw)) {    
+                printout.print(graph);   
+                printout.flush();    
+                printout.close();    
+            } catch (Exception ex) {    
+            }
+
+
+        } catch (Exception ex) {
+        }
+        
+        return graph;
+    }
+
 }
+
