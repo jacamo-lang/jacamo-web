@@ -13,6 +13,7 @@ import org.apache.commons.lang.mutable.MutableDouble;
 
 import cartago.Artifact;
 import cartago.OPERATION;
+import jason.architecture.AgArch;
 
 public class FundamentusArtifact extends Artifact {
 
@@ -21,7 +22,7 @@ public class FundamentusArtifact extends Artifact {
         URL url;
         try {
             url = new URL("http://www.fundamentus.com.br/detalhes.php?papel=" + stock);
-            log("Buscando fundamentos " + url.toString());
+            log(getCurrentOpAgentBody().getName()+" buscando fundamentos de " + url.toString());
             Document doc = (Document) Jsoup.parse(url, 3000);
 
             Element table;
@@ -29,7 +30,6 @@ public class FundamentusArtifact extends Artifact {
             Element row;
             Elements cols;
             MutableDouble number = new MutableDouble(0.0);
-            NumberFormat format = NumberFormat.getInstance(Locale.ENGLISH);
             if (doc.select("table").size() > 0) {
                                 
                 // Go to 1st table to get Current Price
@@ -38,7 +38,7 @@ public class FundamentusArtifact extends Artifact {
                 row = rows.get(0);
                 cols = row.select("td");
                 if (isNumericThisBRLStr(cols.get(3).text(), number));
-                signal("setPreco", number.doubleValue());
+                signal("setPreco", stock, number.doubleValue());
 
                 // Go to 2nd table to get Market Value
                 table = ((Element) doc).select("table").get(1);
@@ -46,7 +46,7 @@ public class FundamentusArtifact extends Artifact {
                 row = rows.get(0);
                 cols = row.select("td");
                 if (isNumericThisBRLStr(cols.get(1).text(), number));
-                signal("setValorMercado", number.doubleValue());
+                signal("setValorMercado", stock, number.doubleValue());
 
                 // Go to 3rd table to get "Div. Yield" and "Div Br/ Patrim" = "D/E Debt over Equity"
                 table = ((Element) doc).select("table").get(2);
@@ -54,31 +54,31 @@ public class FundamentusArtifact extends Artifact {
                 row = rows.get(8);
                 cols = row.select("td");
                 if (isNumericThisBRLStr(cols.get(3).text(), number));
-                signal("setDivYield", number.doubleValue());
+                signal("setDivYield", stock, number.doubleValue());
 
                 rows = table.select("tr");
                 row = rows.get(1);
                 cols = row.select("td");
                 if (isNumericThisBRLStr(cols.get(5).text(), number));
-                signal("setLPA", number.doubleValue());
+                signal("setLPA", stock, number.doubleValue());
                 
                 rows = table.select("tr");
                 row = rows.get(2);
                 cols = row.select("td");
                 if (isNumericThisBRLStr(cols.get(5).text(), number));
-                signal("setVPA", number.doubleValue());
+                signal("setVPA", stock, number.doubleValue());
                 
                 rows = table.select("tr");
                 row = rows.get(7);
                 cols = row.select("td");
                 if (isNumericThisBRLStr(cols.get(5).text(), number));
-                signal("setROIC", number.doubleValue());
+                signal("setROIC", stock, number.doubleValue());
                 
                 rows = table.select("tr");
                 row = rows.get(10);
                 cols = row.select("td");
                 if (isNumericThisBRLStr(cols.get(5).text(), number));
-                signal("setDivBrutaPatr", number.doubleValue());
+                signal("setDivBrutaPatr", stock, number.doubleValue());
 
                 // Go to 4th table to get Market Value
                 table = ((Element) doc).select("table").get(3);
@@ -86,7 +86,7 @@ public class FundamentusArtifact extends Artifact {
                 row = rows.get(2);
                 cols = row.select("td");
                 if (isNumericThisBRLStr(cols.get(3).text(), number));
-                signal("setDividaLiq", number.doubleValue());
+                signal("setDividaLiq", stock, number.doubleValue());
                 
                 // Go to 5th table to get Market Value
                 table = ((Element) doc).select("table").get(4);
@@ -94,9 +94,9 @@ public class FundamentusArtifact extends Artifact {
                 row = rows.get(3);
                 cols = row.select("td");
                 if (isNumericThisBRLStr(cols.get(1).text(), number));
-                signal("setEBIT", number.doubleValue());
+                signal("setEBIT", stock, number.doubleValue());
                 
-                log("Consulta ao site fundamentus.com.br feita com sucesso!");
+                log("Consulta ao site fundamentus.com.br realizada com sucesso por "+getCurrentOpAgentBody().getName()+"!");
             } else {
                 log("Erro ao obter fundamentos!");
             }

@@ -3,8 +3,8 @@
 
 /* * * * setup plans * * * */
 
-!focusFundamentusArtifact.
-!joinFinancialGroup.
+//!focusFundamentusArtifact.
+//!joinFinancialGroup.
 
 /* * * * plans * * * */
 
@@ -19,13 +19,12 @@
 +!joinFinancialGroup[source(self)] <-
     joinWorkspace(financialorg,Ofa);
     .print("DEBUG: Joining group...");
-    g::lookupArtifact(financialteam, GrArtId);
-    g::focus(GrArtId);
-    g::adoptRole(consultant);
+    g::lookupArtifact(financialteam, GrArtId)[wid(Ofa)];
+    g::focus(GrArtId)[wid(Ofa)];
+    g::adoptRole(consultant)[wid(Ofa)];
+    s::lookupArtifact(financialsch, ScArtId)[wid(Ofa)];
+    s::focus(ScArtId)[wid(Ofa)];
+    s::commitMission("mConsultant")[artifact_id(ScArtId),wid(Ofa)];
     .
-
-+!opinion(S)[source(Q)] <- 
-    getFundamentals(S);
-    .wait(1000);
-    !reply(S,Q);
-    .
+  
+    

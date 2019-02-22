@@ -1,11 +1,16 @@
 package jacamo.web;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -18,7 +23,24 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
+import cartago.ArtifactId;
+import cartago.ArtifactInfo;
+import cartago.CartagoException;
+import cartago.CartagoService;
+import cartago.WorkspaceId;
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.model.MutableGraph;
+import guru.nidi.graphviz.parse.Parser;
+import jaca.CAgentArch;
 import jason.ReceiverNotFoundException;
+import jason.architecture.AgArch;
+import jason.asSemantics.Agent;
+import jason.infra.centralised.BaseCentralisedMAS;
+import jason.infra.centralised.CentralisedAgArch;
+import ora4mas.nopl.GroupBoard;
+import ora4mas.nopl.SchemeBoard;
+import ora4mas.nopl.oe.Group;
 
 @Singleton
 @Path("/")
@@ -45,7 +67,7 @@ public class RestImpl extends AbstractBinder {
         so.append("		<div id=\"root\">\n"); 
         so.append("			<header class=\"row\">\n");
         // logo JaCaMo
-        so.append("				<span class=\"logo col-xp-2 col-sm-2 col-md\">JaCaMo</span>\n"); 
+        so.append("				<a class=\"logo col-xp-2 col-sm-2 col-md\" href=\"/\">JaCaMo</a>\n"); 
         // top menu - button agents
         so.append("				<a class=\"button col-xp-1 col-sm-2 col-md\" href=\"/agents/\" target=\"mainframe\">\n" +
                   "					<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"\n" + 
@@ -93,12 +115,58 @@ public class RestImpl extends AbstractBinder {
     @Produces(MediaType.TEXT_HTML)
     public String getRootHtml() {
         StringWriter mainContent = new StringWriter();
-        mainContent.append("				<iframe id=\"mainframe\" name=\"mainframe\" src=\"/agents/\" width=\"100%\" height=\"100%\"\n" + 
+        mainContent.append("				<iframe id=\"mainframe\" name=\"mainframe\" src=\"/overview\" width=\"100%\" height=\"100%\"\n" + 
                            "					frameborder=0></iframe>\n"); 
 
         return designPage("JaCamo-web", mainContent.toString());
     }
 
+    @Path("/overview")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getOverviewHtml() {
+        StringWriter so = new StringWriter();
+        so.append("<!DOCTYPE html>\n");
+        so.append("<html lang=\"en\" target=\"mainframe\">\n");
+        so.append("	<head>\n");
+        so.append("		<title>Overview</title>\n");
+        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+        so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n");
+        so.append("	</head>\n"); 
+        so.append("	<body>\n"); 
+        so.append("		<div id=\"root\">\n"); 
+        so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
+        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-12 col-lg-12\" id=\"doc-content\">\n"); 
+        so.append("        			<center><object data=\"img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
+        so.append("				</main>\n"); 
+        so.append("			</div>\n"); 
+        so.append("		</div>\n"); 
+        so.append("	</body>\n");
+        so.append("<script src=\"/js/agent.js\"></script>\n");
+        so.append("</html>\n");
+        
+        return so.toString();
+    }
+    
+    @Path("/img.svg")
+    @GET
+    @Produces("image/svg+xml")
+    public Response getMASImg() {
+        try {
+            String dot = getMASAsDot();
+            if (dot != null && !dot.isEmpty()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                MutableGraph g = Parser.read(dot);
+                Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                return Response.ok(out.toByteArray()).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.noContent().build(); // TODO: set response properly
+    }
+
+    protected int MAX_LENGTH = 35;
     private CacheControl cc = new CacheControl();  { cc.setMaxAge(20); } // in seconds
 
     @Path("/forms/new_agent")
@@ -192,4 +260,204 @@ public class RestImpl extends AbstractBinder {
         return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
     }
 
+    private Agent getAgent(String agName) {
+        CentralisedAgArch cag = BaseCentralisedMAS.getRunner().getAg(agName);
+        if (cag != null)
+            return cag.getTS().getAg();
+        else
+            return null;
+    }
+    
+    protected CAgentArch getCartagoArch(Agent ag) {
+        AgArch arch = ag.getTS().getUserAgArch().getFirstAgArch();
+        while (arch != null) {
+            if (arch instanceof CAgentArch) {
+                return (CAgentArch)arch;
+            }
+            arch = arch.getNextAgArch();
+        }
+        return null;
+    }
+
+    protected String getMASAsDot() {
+        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
+        
+        try {
+
+            StringBuilder sb = new StringBuilder();
+            Set<String> allwks = new HashSet<>();
+
+            Collection<String> agents = null;
+            if (JCMRest.getZKHost() == null) {
+                agents = new TreeSet<String>(BaseCentralisedMAS.getRunner().getAgs().keySet());
+            } else {
+                // get agents from ZK
+                agents = new TreeSet<String>(JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKAgNodeId));
+            }
+
+            sb.append("digraph G {\n");
+            sb.append("\tgraph [\n");
+            sb.append("\t\trankdir=\"TB\"\n");
+            sb.append("\t\tbgcolor=\"transparent\"\n");
+            sb.append("\t]\n");
+
+            {// organisational dimension
+                sb.append("\tsubgraph cluster_org {\n");
+                sb.append("\t\tlabel=\"organisation\"\n");
+                sb.append("\t\tlabeljust=\"r\"\n");
+                sb.append("\t\tpencolor=gray\n");
+                sb.append("\t\tfontcolor=gray\n");
+                
+                StringBuilder orglinks = new StringBuilder();
+                
+                { // groups and roles are also placed on the left
+                    
+                    // set to avoid to print roles and group twice if more than one agent is playing the same or in same group
+                    //Set<String> groups = new HashSet<>(); 
+                    
+                    for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+                        // group
+                        sb.append("\t\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
+                        sb.append("\n\t\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
+                        sb.append("\t\t];\n");
+                        gb.getGrpState().getPlayers().forEach(p -> {
+                            orglinks.append("\t\"" + gb.getArtId() + "\"->\"" + p.getAg()
+                                    + "\" [arrowtail=normal dir=back label=\""+p.getTarget()+"\"]\n");
+                        });
+                    }
+
+					for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
+						// scheme
+						sb.append("\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId() + "\"");
+						sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
+						sb.append("\t\t];\n");
+						for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
+							orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
+                                    + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
+							sb.append("\t\t{rank=same "+gb.getId()+" "+schb.getArtId()+"};\n");
+						}
+						schb.getSchState().getPlayers().forEach(p -> {
+							orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
+                                    + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
+						});
+					}
+                    
+                    //sb.append("\t\t{rank=same " + groups.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(",", "") + "};\n");
+                        
+                }
+                
+                sb.append("\t};\n");
+                
+                // links out of the subgraph to ensure it is not put inside
+                sb.append(orglinks);
+            }
+
+            {// agents dimension
+                sb.append("\tsubgraph cluster_ag {\n");
+                sb.append("\t\tlabel=\"agents\"\n");
+                sb.append("\t\tlabeljust=\"r\"\n");
+                sb.append("\t\tpencolor=gray\n");
+                sb.append("\t\tfontcolor=gray\n");
+             
+                {// agent's mind
+                    for (String a : agents) {
+                        String s1 = (a.length() <= MAX_LENGTH) ? a : a.substring(0, MAX_LENGTH) + " ...";
+                        sb.append("\t\t\"" + a + "\" [ ");
+                        sb.append("\n\t\t\tlabel = \"" + s1 + "\"");
+                        sb.append("\n\t\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
+                        sb.append("\t\t\t\tURL = \"/agents/" + a + "/mind\"\n");
+                        sb.append("\t\t\t\ttarget=\"mainframe\"\n");
+                        sb.append("\t\t];\n");
+
+                        // get workspaces the agent are in (including organizations)
+                        Set<String> workspacesIn = new HashSet<>();
+                        Agent ag = getAgent(a);
+                        CAgentArch cartagoAgArch = getCartagoArch(ag);
+                        for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
+                            // TODO: revise whether the Set is necessary
+                            workspacesIn.add(wid.getName());
+                        }
+                        allwks.addAll(workspacesIn);
+                    }
+
+                    sb.append("\t\t{rank=same "
+                            + agents.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(",", "")
+                            + "};\n");
+
+                    sb.append("\t};\n");
+                }
+            }
+
+            {// environment dimension
+                StringBuilder envlinks = new StringBuilder();
+
+                sb.append("\tsubgraph cluster_env {\n");
+                sb.append("\t\tlabel=\"environment\"\n");
+                sb.append("\t\tlabeljust=\"r\"\n");
+                sb.append("\t\tpencolor=gray\n");
+                sb.append("\t\tfontcolor=gray\n");
+                allwks.forEach(w -> {
+                    Set<String> wksartifacts = new HashSet<>(); 
+                    String wksName = w.toString();
+                    try {
+                        if (CartagoService.getController(wksName).getCurrentArtifacts() != null) {
+                            sb.append("\t\tsubgraph cluster_" + wksName + " {\n");
+                            sb.append("\t\t\tlabel=\"" + wksName + "\"\n");
+                            sb.append("\t\t\tlabeljust=\"r\"\n");
+                            sb.append("\t\t\tstyle=dashed\n");
+                            sb.append("\t\t\tpencolor=gray40\n");
+                            sb.append("\t\t\tfontcolor=gray40\n");
+                            for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
+                                ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
+                                info.getObservers().forEach(y -> {
+                                    if ((info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
+                                            || (info.getId().getArtifactType().equals("ora4mas.nopl.GroupBoard"))
+                                            || (info.getId().getArtifactType().equals("ora4mas.nopl.OrgBoard"))
+                                            || (info.getId().getArtifactType().equals("ora4mas.nopl.SchemeBoard"))
+                                            || (info.getId().getArtifactType().equals("ora4mas.nopl.NormativeBoard"))) {
+                                        ; // do not print system artifacts
+                                    } else {
+                                        // create a cluster for each artifact even at same wks of other artifacts?
+                                        String str1 = (info.getId().getName().length() <= MAX_LENGTH)
+                                                ? info.getId().getName()
+                                                : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
+                                        sb.append("\t\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
+                                                + "\"\n");
+
+                                        sb.append("\t\t\t\tshape=record style=filled fillcolor=white\n");
+                                        sb.append("\t\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName()
+                                                + "\"\n");
+                                        sb.append("\t\t\t\ttarget=\"mainframe\"\n");
+                                        sb.append("\t\t\t];\n");
+
+                                        wksartifacts.add(info.getId().getName());
+                                        
+                                        envlinks.append(
+                                                "\t\t\"" + y.getAgentId().getAgentName() + "\"->\"" + info.getId().getName() + "\" [arrowhead=odot]\n");
+                                    }
+                                });
+                            }
+                            
+                            //put artifacts of same wks at same line
+                            sb.append("{rank=same " + wksartifacts.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(",", "") + "};\n");
+                            
+                            sb.append("\t\t};\n");
+                        }
+                    } catch (CartagoException e) {
+                        e.printStackTrace();
+                    }
+                });
+                sb.append("\t};\n");
+                
+                sb.append(envlinks);
+            }
+
+            sb.append("}\n");
+            graph = sb.toString();
+
+        } catch (Exception ex) {
+        }
+        
+        return graph;
+    }
 }

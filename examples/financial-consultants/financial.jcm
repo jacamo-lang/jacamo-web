@@ -12,10 +12,22 @@
 */
 
 mas financial {
-    agent bazin         : bazin.asl
-    agent greenblatt    : greenblatt.asl
-    agent grahan        : grahan.asl
-    agent myPA          : assistant.asl
+    agent bazin         : bazin.asl {
+        join:       financialorg
+        roles:      consultant in financialteam 
+    }
+    agent greenblatt    : greenblatt.asl {
+        join:       financialorg
+        roles:      consultant in financialteam
+    }
+    agent grahan        : grahan.asl {
+        join:       financialorg
+        roles:      consultant in financialteam
+    }
+    agent myPA          : assistant.asl {
+        join:       financialorg
+        roles:      assistant in financialteam
+    }
  
     workspace financialagents {
         artifact fundamentus: dynamic.stock.FundamentusArtifact

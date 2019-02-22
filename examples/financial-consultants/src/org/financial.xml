@@ -3,9 +3,7 @@
 <?xml-stylesheet href="http://moise.sourceforge.net/xml/os.xsl" type="text/xsl" ?>
 
 <organisational-specification
-    id="financial" os-version="0.8"
-
-    xmlns='http://moise.sourceforge.net/os'
+    id="financial" os-version="0.8" xmlns='http://moise.sourceforge.net/os'
     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
     xsi:schemaLocation='http://moise.sourceforge.net/os
                         http://moise.sourceforge.net/xml/os.xsd'>
@@ -23,31 +21,37 @@
             </roles>
 
             <links>
-                <link from="assistant" type="authority" to="consultant" scope="intra-group" />
+                <link from="assistant" type="communication" to="consultant"
+                    scope="intra-group" />
             </links>
         </group-specification>
     </structural-specification>
 
     <functional-specification>
         <scheme id="financialsch">
-            <goal id="runsystem">
+            <goal id="getOpportunities">
                 <plan operator="sequence">
-                    <goal id="launchsystem">
-                        <plan operator="sequence">
-                            <goal id="createagents" />
-                            <goal id="sendstartcommand" />
-                        </plan>
-                    </goal>
+                    <goal id="focusFundamentusArtifact" ttf="30 seconds" />
+                    <goal id="lookForOpportunities" ttf="20 minutes" />
+                    <goal id="checkOpportunities" ttf="10 minutes" />
                 </plan>
             </goal>
-            <mission id="mlaunchsystem" min="1" max="1">
-                <goal id="createagents" />
-                <goal id="sendstartcommand" />
+            <mission id="mAssistant" min="1" max="100">
+                <goal id="lookForOpportunities" />
+                <goal id="checkOpportunities" />
+            </mission>
+            <mission id="mConsultant" min="3" max="100">
+                <goal id="focusFundamentusArtifact" />
             </mission>
         </scheme>
     </functional-specification>
 
     <normative-specification>
+        <norm id="n1" type="obligation" role="assistant"
+            mission="mAssistant" />
+        <norm id="n2" type="obligation" role="consultant"
+            mission="mConsultant" />
+
     </normative-specification>
 
 </organisational-specification>

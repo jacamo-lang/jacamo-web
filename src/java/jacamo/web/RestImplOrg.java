@@ -1,17 +1,13 @@
 package jacamo.web;
 
-import java.awt.Image;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Singleton;
-import javax.swing.ImageIcon;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,27 +21,22 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
-import cartago.ArtifactId;
-import cartago.ArtifactInfo;
 import cartago.CartagoException;
-import cartago.CartagoService;
-import cartago.WorkspaceId;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
-import jaca.CAgentArch;
-import jason.asSemantics.Agent;
 import moise.os.OS;
-import moise.tools.os2dot;
-import moise.tools.os2dotGUI;
+import moise.os.fs.Goal;
+import moise.os.fs.Mission;
+import jacamo.web.os2dot;
 import moise.xml.DOMUtils;
 import ora4mas.nopl.GroupBoard;
 import ora4mas.nopl.OrgArt;
 import ora4mas.nopl.OrgBoard;
 import ora4mas.nopl.NormativeBoard;
 import ora4mas.nopl.SchemeBoard;
-import ora4mas.nopl.oe.Group;
+import ora4mas.nopl.oe.Player;
 
 @Singleton
 @Path("/oe")
@@ -133,22 +124,22 @@ public class RestImplOrg extends AbstractBinder {
     public String getSpecificationHtml(@PathParam("oename") String oeName) {
         try {
             StringBuilder mainContent = new StringBuilder();
+            /*
             mainContent.append("<div id=\"specification\" class=\"card fluid\">\n");
-            mainContent.append("	<h2 class=\"section double-padded\">Specification</h2>\n");
-            mainContent.append("	<div class=\"section\">\n");
+            mainContent.append("    <h2 class=\"section double-padded\">Specification</h2>\n");
+            mainContent.append("    <div class=\"section\">\n");
             for (OrgBoard ob : OrgBoard.getOrbBoards()) {
                 if (ob.getOEId().equals(oeName)) {
 //                  OS os = OS.loadOSFromURI(ob.getOSFile());
 //                  String osSpec = ob.specToStr(os,
 //                          DOMUtils.getTransformerFactory().newTransformer(DOMUtils.getXSL("os")));
-                    mainContent.append("		<center><img src='/oe/" + oeName + "/os/img.svg' /></center><br/>");
+                    mainContent.append("        <center><img src='/oe/" + oeName + "/os/img.svg' /></center><br/>");
 //                  mainContent.append(osSpec);
                 }
             }
-            mainContent.append("	</div>\n");
+            mainContent.append("    </div>\n");
             mainContent.append("</div>\n");
-
-            /* cleaning this area to have only the full organisation chart
+            */
             mainContent.append("<div id=\"groups\" class=\"card fluid\">\n");
             mainContent.append("    <h2 class=\"section double-padded\">Groups</h2>\n");
 
@@ -158,26 +149,24 @@ public class RestImplOrg extends AbstractBinder {
                     if (((OrgArt) gb).getStyleSheet() != null) {
                         mainContent.append("    <div class=\"section\">\n");
                         StringWriter so = new StringWriter();
-                        ((OrgArt) gb).getStyleSheet().setParameter("show-oe-img", "true");
                         // TODO: links that comes from xsl specification are wrong!!!
-                        ((OrgArt) gb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb))),
-                                new StreamResult(so));
+                        //((OrgArt) gb).getStyleSheet().setParameter("show-oe-img", "true");
+                        //((OrgArt) gb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb))),
+                        //        new StreamResult(so));
                         mainContent.append("        <center><img src='/oe/" + oeName + "/group/" + gb.getArtId()
                                 + "/img.svg' /></center><br/>");
                         mainContent.append("    </div>\n");
                         mainContent.append(so.toString());
                     }
-                    StringWriter so = new StringWriter();
-                    ((OrgArt) gb).getNSTransformer().transform(
-                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb).getNormativeEngine())),
-                            new StreamResult(so));
-                    mainContent.append(so.toString());
+//                    StringWriter so = new StringWriter();
+//                    ((OrgArt) gb).getNSTransformer().transform(
+//                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb).getNormativeEngine())),
+//                            new StreamResult(so));
+//                    mainContent.append(so.toString());
                 }
             }
             mainContent.append("</div>\n");
-            */
-
-            /* cleaning this area to have only the full organisation chart
+            
             mainContent.append("<div id=\"schemes\" class=\"card fluid\">\n");
             mainContent.append("    <h2 class=\"section double-padded\">Schemes</h2>\n");
 
@@ -185,38 +174,39 @@ public class RestImplOrg extends AbstractBinder {
                 if (sb.getOEId().equals(oeName)) {
                     if (((OrgArt) sb).getStyleSheet() != null) {
                         StringWriter so = new StringWriter();
-                        ((OrgArt) sb).getStyleSheet().setParameter("show-oe-img", "true");
-                        ((OrgArt) sb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb))),
-                                new StreamResult(so));
+                        //((OrgArt) sb).getStyleSheet().setParameter("show-oe-img", "true");
+                        //((OrgArt) sb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb))),
+                        //        new StreamResult(so));
                         mainContent.append("    <center><img src='/oe/" + oeName + "/scheme/" + sb.getArtId()
                                 + "/img.svg' /></center><br/>");
                         mainContent.append(so.toString());
                     }
-                    StringWriter so = new StringWriter();
-                    ((OrgArt) sb).getNSTransformer().transform(
-                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb).getNormativeEngine())),
-                            new StreamResult(so));
-                    mainContent.append(so.toString());
+//                    StringWriter so = new StringWriter();
+//                    ((OrgArt) sb).getNSTransformer().transform(
+//                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb).getNormativeEngine())),
+//                            new StreamResult(so));
+//                    mainContent.append(so.toString());
                 }
             }
             mainContent.append("</div>\n");
-            */
 
-            /* cleaning this area to have only the full organisation chart
             mainContent.append("<div id=\"norms\" class=\"card fluid\">\n");
             mainContent.append("    <h2 class=\"section double-padded\">Norms</h2>\n");
 
             for (NormativeBoard nb : NormativeBoard.getNormativeBoards()) {
                 if (nb.getOEId().equals(oeName)) {
                     StringWriter so = new StringWriter();
-                    ((OrgArt) nb).getNSTransformer().transform(
-                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) nb).getNormativeEngine())),
-                            new StreamResult(so));
+//                    ((OrgArt) nb).getNSTransformer().transform(
+//                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) nb).getNormativeEngine())),
+//                            new StreamResult(so));
+                    // TODO: Send right group.scheme, it is only working because getasdot is not using these data
+                    mainContent.append("    <center><img src='/oe/" + oeName + "/norm/" + nb.getOEId() + "." + nb.getArtId()
+                            + "/img.svg' /></center><br/>");
+                    
                     mainContent.append(so.toString());
                 }
             }
             mainContent.append("</div>\n");
-            */
 
             return designPage("JaCaMo-web - Organisation: " + oeName, oeName, mainContent.toString());
         } catch (Exception | TransformerFactoryConfigurationError e) {
@@ -234,7 +224,7 @@ public class RestImplOrg extends AbstractBinder {
             for (OrgBoard ob : OrgBoard.getOrbBoards()) {
                 if (ob.getOEId().equals(oeName)) {
                     OS os = OS.loadOSFromURI(ob.getOSFile());
-                    String dot = getOSAsDot(os);
+                    String dot = getOSAsDot(os, true, true, true);
                     if (dot != null && !dot.isEmpty()) {
                         ByteArrayOutputStream out = new ByteArrayOutputStream();
                         MutableGraph g = Parser.read(dot);
@@ -293,9 +283,10 @@ public class RestImplOrg extends AbstractBinder {
     @Produces("image/svg+xml")
     public Response getGroupImg(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
         try {
-            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-                if (gb.getOEId().equals(oeName) && gb.getArtId().equals(groupName)) {
-                    String dot = gb.getAsDot();
+            for (OrgBoard ob : OrgBoard.getOrbBoards()) {
+                if (ob.getOEId().equals(oeName)) {
+                    OS os = OS.loadOSFromURI(ob.getOSFile());
+                    String dot = getOSAsDot(os,true,false,false);
                     if (dot != null && !dot.isEmpty()) {
                         ByteArrayOutputStream out = new ByteArrayOutputStream();
                         MutableGraph g = Parser.read(dot);
@@ -304,6 +295,17 @@ public class RestImplOrg extends AbstractBinder {
                     }
                 }
             }
+//            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+//                if (gb.getOEId().equals(oeName) && gb.getArtId().equals(groupName)) {
+//                    String dot = gb.getAsDot();
+//                    if (dot != null && !dot.isEmpty()) {
+//                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//                        MutableGraph g = Parser.read(dot);
+//                        Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+//                        return Response.ok(out.toByteArray()).build();
+//                    }
+//                }
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -397,9 +399,10 @@ public class RestImplOrg extends AbstractBinder {
     @Produces("image/svg+xml")
     public Response getSchemeImg(@PathParam("oename") String oeName, @PathParam("schemename") String schemeName) {
         try {
-            for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
-                if (sb.getOEId().equals(oeName)) {
-                    String dot = sb.getAsDot();
+            for (OrgBoard ob : OrgBoard.getOrbBoards()) {
+                if (ob.getOEId().equals(oeName)) {
+                    OS os = OS.loadOSFromURI(ob.getOSFile());
+                    String dot = getOSAsDot(os,false,true,false);
                     if (dot != null && !dot.isEmpty()) {
                         ByteArrayOutputStream out = new ByteArrayOutputStream();
                         MutableGraph g = Parser.read(dot);
@@ -408,12 +411,24 @@ public class RestImplOrg extends AbstractBinder {
                     }
                 }
             }
+//            for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
+//                if (sb.getOEId().equals(schemeName)) {
+//                    //String dot = sb.getAsDot();
+//                  String dot = getOSAsDot(OS os, boolean showSS, boolean showFS, boolean showNS);
+//                    if (dot != null && !dot.isEmpty()) {
+//                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//                        MutableGraph g = Parser.read(dot);
+//                        Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+//                        return Response.ok(out.toByteArray()).build();
+//                    }
+//                }
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return Response.noContent().build(); // TODO: set response properly
     }
-
+    
     // this method is not being used anymore, should be kept for other rest requests?
     @Path("/{oename}/norm/{groupname}.{schemename}")
     @GET
@@ -441,46 +456,57 @@ public class RestImplOrg extends AbstractBinder {
         return "error"; // TODO: set response properly
     }
     
-    protected String getOSAsDot(OS os) {
-        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
-        
+    @Path("/{oename}/norm/{groupname}.{schemename}/img.svg")
+    @GET
+    @Produces("image/svg+xml")
+    public Response getNormImg(@PathParam("oename") String oeName, @PathParam("groupname") String groupName,
+            @PathParam("schemename") String schemeName) {
         try {
+            for (OrgBoard ob : OrgBoard.getOrbBoards()) {
+                if (ob.getOEId().equals(oeName)) {
+                    OS os = OS.loadOSFromURI(ob.getOSFile());
+                    String dot = getOSAsDot(os,false,false,true);
+                    if (dot != null && !dot.isEmpty()) {
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        MutableGraph g = Parser.read(dot);
+                        Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                        return Response.ok(out.toByteArray()).build();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.noContent().build(); // TODO: set response properly
+    }
 
-            StringBuilder sb = new StringBuilder();
+    protected String getOSAsDot(OS os, boolean showSS, boolean showFS, boolean showNS) {
+        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
+
+        try {
 
             os2dot transformer = new os2dot();
             transformer.showLinks = true;
             transformer.showMissions = true;
             transformer.showConditions = true;
-            transformer.showSS    = true;
-            transformer.showFS    = true;
-            transformer.showNS    = true;
+            transformer.showSS = showSS;
+            transformer.showFS = showFS;
+            transformer.showNS = showNS;
 
-            String dotProgram = transformer.transform(os);
-
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            MutableGraph g = Parser.read(dotProgram);
-            Format f = Format.XDOT;
-
-            Graphviz.fromGraph(g).render(f).toOutputStream(out);
-            sb.append(out.toString());
-
-            graph = sb.toString();
-            
-            // debug
-            try (FileWriter fw = new FileWriter("graph.gv", false); 
-                    BufferedWriter bw = new BufferedWriter(fw); 
-                    PrintWriter printout = new PrintWriter(bw)) {    
-                printout.print(graph);   
-                printout.flush();    
-                printout.close();    
-            } catch (Exception ex) {    
-            }
-
+            graph = transformer.transform(os);
 
         } catch (Exception ex) {
         }
-        
+
+        // debug
+        try (FileWriter fw = new FileWriter("graph.gv", false);
+                BufferedWriter bw = new BufferedWriter(fw);
+                PrintWriter printout = new PrintWriter(bw)) {
+            printout.print(graph);
+            printout.flush();
+            printout.close();
+        } catch (Exception ex) {
+        }
         return graph;
     }
 
