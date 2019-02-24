@@ -14,7 +14,7 @@
 
 //TODO: It was not easy to realize that the artifact is sending a string back and it is not being treated as a term
 
-// get cached Fundamentals if the earlier data is younger than 5 minutes
+// get cached Fundamentals if earlier data are younger than 30 minutes
 +!opinion(T)[source(Q)] 
     : .term2string(T,S) & fundamentals::preco(S,_)[seconds_of_day(SSS)] & .time(HH,MM,SS) & (SS+MM*60+HH*60*60 - SSS < 30*60)
     & .date(YY,OO,DD) & lastDate(YYY,OOO,DDD) & YY == YYY & OO == OOO & DD == DDD 

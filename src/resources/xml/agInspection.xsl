@@ -69,28 +69,56 @@
         </xsl:if>
     </xsl:template>
 
-    <xsl:template match="plans">
-        <xsl:if test="count(plan) > 0" >
-            <details><summary>Plans</summary>
-                    <xsl:for-each select="plan[not(@file=preceding-sibling::plan/@file)]/@file">
-		                <div class="plans">
-                    	<details><summary><xsl:value-of select="." /></summary>
-		                    <xsl:variable name="fId" select="." />
-		                    <xsl:for-each select="../../plan[@file=$fId]">
-                                    <div class="plan">
-                                        <xsl:apply-templates select="." />
-                                    </div>
-		                    </xsl:for-each>
-                    	</details>
- 		                </div>
-                	</xsl:for-each>
-                    <xsl:for-each select="plan[not(@file)]">
-                                    <div class="plan">
-                                        <xsl:apply-templates select="." />
-                                    </div>
-                    </xsl:for-each>
-           </details>
-        </xsl:if>
+	<xsl:template match="plans">
+		<xsl:if test="count(plan) > 0">
+			<details>
+				<summary>Plans</summary>
+				<xsl:for-each
+					select="plan[not(@file=preceding-sibling::plan/@file)]/@file">
+					<xsl:choose>
+						<xsl:when test="not(starts-with(., 'jar:'))">
+							<div class="plans">
+								<xsl:variable name="aslfilename" select="." />
+								<details>
+									<summary>
+										<xsl:value-of select="." />
+										&#160;
+										<a href="aslfile/{$aslfilename}">[edit]</a>
+									</summary>
+									<xsl:variable name="fId" select="." />
+									<xsl:for-each select="../../plan[@file=$fId]">
+										<div class="plan">
+											<xsl:apply-templates select="." />
+										</div>
+									</xsl:for-each>
+								</details>
+							</div>
+						</xsl:when>
+						<xsl:otherwise>
+							<div class="plans">
+								<xsl:variable name="aslfilename" select="." />
+								<details>
+									<summary>
+										<xsl:value-of select="." />
+									</summary>
+									<xsl:variable name="fId" select="." />
+									<xsl:for-each select="../../plan[@file=$fId]">
+										<div class="plan">
+											<xsl:apply-templates select="." />
+										</div>
+									</xsl:for-each>
+								</details>
+							</div>
+						</xsl:otherwise>
+					</xsl:choose>
+				</xsl:for-each>
+				<xsl:for-each select="plan[not(@file)]">
+					<div class="plan">
+						<xsl:apply-templates select="." />
+					</div>
+				</xsl:for-each>
+			</details>
+		</xsl:if>
 	</xsl:template>
 	
 	

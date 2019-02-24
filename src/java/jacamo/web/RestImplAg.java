@@ -1,7 +1,12 @@
 package jacamo.web;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -324,12 +329,12 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("    </div>\n"); 
         mainContent.append("</div>\n"); 
         
-        // upload plans
-        mainContent.append("<div id=\"uploadplans\" class=\"card fluid\">\n");
-        mainContent.append("    <div class=\"section\">\n"); 
-        mainContent.append("        <embed src='/agents/" + agName + "/load_plans_form/' width=\"100%\" height=\"400px\"/>\n");
-        mainContent.append("    </div>\n"); 
-        mainContent.append("</div>\n"); 
+//        // upload plans
+//        mainContent.append("<div id=\"uploadplans\" class=\"card fluid\">\n");
+//        mainContent.append("    <div class=\"section\">\n"); 
+//        mainContent.append("        <embed src='/agents/" + agName + "/load_plans_form/' width=\"100%\" height=\"400px\"/>\n");
+//        mainContent.append("    </div>\n"); 
+//        mainContent.append("</div>\n"); 
         
         mainContent.append("<div id=\"killagent\" class=\"card fluid\">\n");
         mainContent.append("    <div class=\"section\">\n"); 
@@ -353,13 +358,34 @@ public class RestImplAg extends AbstractBinder {
         }
     }
 
-    @Path("/{agentname}/load_plans_form")
+    //@Path("/{agentname}/load_plans_form")
+    @Path("/{agentname}/aslfile/{aslfilename}")
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public String getLoadPlansForm(@PathParam("agentname") String agName) {
+    public String getLoadPlansForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName) {
         //TODO: fix upload of plans using ace text editor
         //TODO: fix upload using files
         //TODO: find a better default text to bring with this form
+        
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/agt/" + aslFileName);
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f));
+            } else {
+                in = new BufferedReader(
+                        new InputStreamReader(RestImpl.class.getResource("../src/agt/" + aslFileName).openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line + "\n");
+                line = in.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
         return  "<html lang=\"en\">\n" + 
                 "<head>\n" + 
                 "<title>ACE in Action</title>\n" + 
@@ -368,16 +394,20 @@ public class RestImplAg extends AbstractBinder {
                 "<body>\n" + 
 
                 "<div id=\"editor\">" + 
-                "+!test\n" +
-                "  <- .print(\"test\").\n" +
+                so.toString() +
                 "</div>\n" + 
 
-                "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>" +
-                "<span>\n" +
-                "<button type=\"button\" onclick=\"uploadPlansLib('" + agName + "')\">Upload plans library</button>\n" +
-                "</span>\n" + 
+//                "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>" +
+                "<footer>\n" + 
+                //"<span>\n" +
+                //"<button type=\"button\" onclick=\"uploadPlansLib('" + agName + "')\">Upload plans library</button>\n" +
+                "<button type=\"button\" onclick=\"uploadPlansLib('" + agName + "')\">Save</button>\n" +
+                "<button type=\"button\" onclick=\"uploadPlansLib('" + agName + "')\">Save and reload agent</button>\n" +
+                "<button type=\"button\" onclick=\"location.href='/agents/"+ agName + "/mind';\">Discard changes</button>\n" +
+                //"</span>\n" + 
 
-                "or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload file\">" +
+                //"or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload file\">" +
+                "</footer>"+
                 
                 "<script src=\"/js/ace/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n" + 
                 "<script src=\"/js/ace/ext-language_tools.js\"></script>\n" +

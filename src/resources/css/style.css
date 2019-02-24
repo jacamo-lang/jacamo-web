@@ -8,8 +8,10 @@
     right: 0; 
     bottom: 0; 
     left: 0;
-    font-size: 16px;
-    height: 330px;
+    font-size: 12px;
+    line-height: 1.8;
+    height: 300px;
+    min-height: 85%;
 } 
 
 /* AUTO COMPLETE */
