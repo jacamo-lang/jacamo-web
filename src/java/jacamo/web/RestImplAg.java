@@ -795,35 +795,38 @@ public class RestImplAg extends AbstractBinder {
 
             { // groups and roles are also placed on the left
 
-            	for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-                    if (workspacesIn.contains(gb.getOEId())) {
-                        // group and role (arrow)
-                        sb.append("\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
-                        sb.append("\n\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
-                        sb.append("\t];\n");
-                        gb.getGrpState().getPlayers().forEach(p -> {
-                            if (p.getAg().equals(agName)) {
-                                // roles (arrows)
-                                orglinks.append("\t\"" + gb.getArtId() + "\"->\"" + agName
-                                            + "\" [arrowtail=normal dir=back label=\""+p.getTarget()+"\"]\n");
-                            }
-                        });
-                    }
-                }
-              
-				for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
-					// scheme
-					sb.append("\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId() + "\"");
-					sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
-					sb.append("\t\t];\n");
-					for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
-						orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
-                                + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
-						sb.append("\t\t{rank=same "+gb.getId()+" "+schb.getArtId()+"};\n");
+				for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+					if (workspacesIn.contains(gb.getOEId())) {
+						gb.getGrpState().getPlayers().forEach(p -> {
+							if (p.getAg().equals(agName)) {
+								// group and role (arrow)
+								sb.append("\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
+								sb.append("\n\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
+								sb.append("\t];\n");
+								// roles (arrows)
+								orglinks.append("\t\"" + gb.getArtId() + "\"->\"" + agName
+                                        + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
+							}
+						});
 					}
+				}
+
+				for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
 					schb.getSchState().getPlayers().forEach(p -> {
-						orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
-                                + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
+						if (p.getAg().equals(agName)) {
+							// scheme
+							sb.append(
+									"\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId() + "\"");
+							sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
+							sb.append("\t\t];\n");
+							for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
+								orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
+                                        + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
+								sb.append("\t\t{rank=same " + gb.getId() + " " + schb.getArtId() + "};\n");
+							}
+							orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
+                                    + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
+						}
 					});
 				}
 

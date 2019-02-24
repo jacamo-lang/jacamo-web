@@ -13,16 +13,19 @@
 
 // get cached Fundamentals if the earlier data is younger than 5 minutes 
 +!opinion(T)[source(Q)] 
-    : .term2string(T,S) & fundamentals::divYield(S,_)[seconds_of_day(SSS)] & .time(HH,MM,SS) & (SS+MM*60+HH*60*60 - SSS < 5*60)
+    : .term2string(T,S) & fundamentals::divYield(S,_)[seconds_of_day(SSS)] & .time(HH,MM,SS) & (SS+MM*60+HH*60*60 - SSS < 30*60)
+    & .date(YY,OO,DD) & lastDate(YYY,OOO,DDD) & YY == YYY & OO == OOO & DD == DDD 
     & fundamentals::divBrutaPatr(S,_)
     <- 
+    .print("Getting cached fundamentals from ",S); 
     !reply(S,Q);
     .
 
 // get Fundamentals again
-+!opinion(T)[source(Q)] : .term2string(T,S) <- 
++!opinion(T)[source(Q)] : .term2string(T,S) & .date(YY,OO,DD) <- 
     .print("Getting fundamentals from ",S); 
     getFundamentals(S);
+    -+lastDate(YY,OO,DD);
     !reply(S,Q);
     .
 
