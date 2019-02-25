@@ -1,6 +1,7 @@
 price(banana,X) :- X = math.random * 100 + 20.
 
 !longTermSomething(1).
+
 !start.
 
 +!start
@@ -92,3 +93,7 @@ price(banana,X) :- X = math.random * 100 + 20.
 
 // uncomment the include below to have an agent compliant with its organisation
 { include("$moiseJar/asl/org-obedient.asl") }
+            
+            
+            
+			

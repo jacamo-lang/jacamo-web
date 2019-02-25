@@ -3,6 +3,7 @@ package jacamo.web;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -358,14 +359,10 @@ public class RestImplAg extends AbstractBinder {
         }
     }
 
-    //@Path("/{agentname}/load_plans_form")
     @Path("/{agentname}/aslfile/{aslfilename}")
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public String getLoadPlansForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName) {
-        //TODO: fix upload of plans using ace text editor
-        //TODO: fix upload using files
-        //TODO: find a better default text to bring with this form
+    public String getLoadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName) {
         
         StringBuilder so = new StringBuilder();
         try {
@@ -392,23 +389,20 @@ public class RestImplAg extends AbstractBinder {
                 "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n" +
                 "</head>\n" + 
                 "<body>\n" + 
-
-                "<div id=\"editor\">" + 
-                so.toString() +
-                "</div>\n" + 
-
-//                "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>" +
-                "<footer>\n" + 
-                //"<span>\n" +
-                //"<button type=\"button\" onclick=\"uploadPlansLib('" + agName + "')\">Upload plans library</button>\n" +
-                "<button type=\"button\" onclick=\"uploadPlansLib('" + agName + "')\">Save</button>\n" +
-                "<button type=\"button\" onclick=\"uploadPlansLib('" + agName + "')\">Save and reload agent</button>\n" +
-                "<button type=\"button\" onclick=\"location.href='/agents/"+ agName + "/mind';\">Discard changes</button>\n" +
-                //"</span>\n" + 
-
-                //"or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload file\">" +
-                "</footer>"+
-                
+                "	<form action=\"/agents/"+agName+"/aslfile/"+aslFileName+"\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
+                "		<div>\n" + 
+                "			<textarea name=\"aslfile\" form=\"usrform\" style=\"height:300px\">" +
+                                so.toString() +
+                "			</textarea>\n" + 
+                "		</div>\n" + 
+                "	<footer>\n" + 
+                "		<div>\n" + 
+                "			<input type=\"submit\" value=\"Save\">\n" + 
+                "			<button type=\"button\" onclick=\"location.href='/agents/"+ agName + "/mind';\">Discard changes</button>\n" +
+                "		</div>\n" + 
+                "	</footer>"+
+                "	</form>\n" + 
+                "<script src=\"http://ajaxorg.github.io/ace-builds/src/ace.js\"></script>\n" +
                 "<script src=\"/js/ace/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n" + 
                 "<script src=\"/js/ace/ext-language_tools.js\"></script>\n" +
                 "<script src=\"/js/load_plans_form.js\"></script>\n" +
@@ -416,6 +410,80 @@ public class RestImplAg extends AbstractBinder {
                 "</html>";
     }
 
+    @Path("/{agentname}/aslfile/{aslfilename}")
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.TEXT_HTML)
+    public String loadASLfileForm(@PathParam("agentname") String agName,
+            @PathParam("aslfilename") String aslFileName,
+            @FormDataParam("aslfile") InputStream uploadedInputStream
+            ) {
+        try {
+            String r = "nok";
+            Agent ag = getAgent(agName);
+            if (ag != null) {
+                System.out.println("agName: "+agName);
+                System.out.println("restAPI://"+aslFileName);
+                System.out.println("uis: "+uploadedInputStream);
+
+                StringBuilder stringBuilder = new StringBuilder();
+                String line = null;
+                
+                FileOutputStream outputFile = new FileOutputStream("src/agt/" + aslFileName, false);
+                BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
+                
+                while ((line = out.readLine()) != null) {
+                    stringBuilder.append(line + "\n");
+                }
+                
+                byte[] bytes=stringBuilder.toString().getBytes();
+                outputFile.write(bytes);
+                outputFile.close();
+                
+                r = "ok, file saved! Redirecting...";
+            }
+            return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/agents/"+agName+"/mind'\"/></head>"+r;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error "+e.getMessage();
+        }
+    }
+
+    //TODO: not being used anymore, remove it? 
+    @Path("/{agentname}/load_plans_form")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getLoadPlansForm(@PathParam("agentname") String agName) {
+        //TODO: fix upload of plans using ace text editor
+        //TODO: fix upload using files
+        //TODO: find a better default text to bring with this form
+        return  "<html lang=\"en\">\n" + 
+                "<head>\n" + 
+                "<title>ACE in Action</title>\n" + 
+                "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n" +
+                "</head>\n" + 
+                "<body>\n" + 
+
+                "<div id=\"editor\">" + 
+                "+!test\n" +
+                "  <- .print(\"test\").\n" +
+                "</div>\n" + 
+
+                "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>" +
+                "<span>\n" +
+                "<button type=\"button\" onclick=\"uploadPlansLib('" + agName + "')\">Upload plans library</button>\n" +
+                "</span>\n" + 
+
+                "or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload file\">" +
+                
+                "<script src=\"/js/ace/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n" + 
+                "<script src=\"/js/ace/ext-language_tools.js\"></script>\n" +
+                "<script src=\"/js/load_plans_form.js\"></script>\n" +
+                "</body>\n" + 
+                "</html>";
+    }
+    
+    //TODO: not being used anymore, remove it? 
     @Path("/{agentname}/plans")
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -445,7 +513,7 @@ public class RestImplAg extends AbstractBinder {
             return "error "+e.getMessage();
         }
     }
-
+    
     public List<Command> getIAlist() {
         List<Command> l = new ArrayList<>();
         try {

@@ -2,14 +2,16 @@
 /* mini-default by Angelos Chalaris v3.0.1 */
 
 /* ACE EDITOR */
-#editor {
+.ace_editor {
 	position: absolute; 
     top: 0; 
     right: 0; 
     bottom: 0; 
     left: 0;
-    font-size: 12px;
     line-height: 1.8;
+    font-family: Courier,monospace;
+    font-size:12px;
+    color:inherit;
     height: 300px;
     min-height: 85%;
 } 
