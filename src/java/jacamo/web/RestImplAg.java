@@ -164,6 +164,9 @@ public class RestImplAg extends AbstractBinder {
                 } else {
                     so.append("	<a href=\"/agents/" + a + "/mind\" id=\"link-to-" + a + "\" target='mainframe'><h5>" + a + "</h5></a>\n");
                 }
+                Agent ag = getAgent(a);
+                if (ag != null)
+                    createAgLog(a, ag);
             }
         } else {
             // get agents from ZK
@@ -385,7 +388,7 @@ public class RestImplAg extends AbstractBinder {
         
         return  "<html lang=\"en\">\n" + 
                 "<head>\n" + 
-                "<title>ACE in Action</title>\n" + 
+                "<title>JaCaMo - Editing: "+aslFileName+"</title>\n" + 
                 "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n" +
                 "</head>\n" + 
                 "<body>\n" + 
@@ -397,7 +400,8 @@ public class RestImplAg extends AbstractBinder {
                 "		</div>\n" + 
                 "	<footer>\n" + 
                 "		<div>\n" + 
-                "			<input type=\"submit\" value=\"Save\">\n" + 
+                "			<p>Editing: " + aslFileName +
+                "			<input type=\"submit\" value=\"Save & Reload\">\n" + 
                 "			<button type=\"button\" onclick=\"location.href='/agents/"+ agName + "/mind';\">Discard changes</button>\n" +
                 "		</div>\n" + 
                 "	</footer>"+
@@ -440,7 +444,9 @@ public class RestImplAg extends AbstractBinder {
                 outputFile.write(bytes);
                 outputFile.close();
                 
-                r = "ok, file saved! Redirecting...";
+                ag.initAg("src/agt/" + aslFileName,true,false,false);
+                
+                r = "ok, file saved agent reloaded! Redirecting...";
             }
             return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/agents/"+agName+"/mind'\"/></head>"+r;
         } catch (Exception e) {
