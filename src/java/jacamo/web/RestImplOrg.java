@@ -3,21 +3,20 @@ package jacamo.web;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
@@ -27,16 +26,10 @@ import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
 import moise.os.OS;
-import moise.os.fs.Goal;
-import moise.os.fs.Mission;
 import jacamo.web.os2dot;
-import moise.xml.DOMUtils;
 import ora4mas.nopl.GroupBoard;
 import ora4mas.nopl.OrgArt;
 import ora4mas.nopl.OrgBoard;
-import ora4mas.nopl.NormativeBoard;
-import ora4mas.nopl.SchemeBoard;
-import ora4mas.nopl.oe.Player;
 
 @Singleton
 @Path("/oe")
@@ -124,24 +117,7 @@ public class RestImplOrg extends AbstractBinder {
     public String getSpecificationHtml(@PathParam("oename") String oeName) {
         try {
             StringBuilder mainContent = new StringBuilder();
-            /*
-            mainContent.append("<div id=\"specification\" class=\"card fluid\">\n");
-            mainContent.append("    <h2 class=\"section double-padded\">Specification</h2>\n");
-            mainContent.append("    <div class=\"section\">\n");
-            for (OrgBoard ob : OrgBoard.getOrbBoards()) {
-                if (ob.getOEId().equals(oeName)) {
-//                  OS os = OS.loadOSFromURI(ob.getOSFile());
-//                  String osSpec = ob.specToStr(os,
-//                          DOMUtils.getTransformerFactory().newTransformer(DOMUtils.getXSL("os")));
-                    mainContent.append("        <center><img src='/oe/" + oeName + "/os/img.svg' /></center><br/>");
-//                  mainContent.append(osSpec);
-                }
-            }
-            mainContent.append("    </div>\n");
-            mainContent.append("</div>\n");
-            */
             mainContent.append("<div id=\"groups\" class=\"card fluid\">\n");
-            mainContent.append("    <h2 class=\"section double-padded\">Groups</h2>\n");
 
             // add groups sub section
             for (GroupBoard gb : GroupBoard.getGroupBoards()) {
@@ -150,60 +126,25 @@ public class RestImplOrg extends AbstractBinder {
                         mainContent.append("    <div class=\"section\">\n");
                         StringWriter so = new StringWriter();
                         // TODO: links that comes from xsl specification are wrong!!!
-                        //((OrgArt) gb).getStyleSheet().setParameter("show-oe-img", "true");
-                        //((OrgArt) gb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb))),
-                        //        new StreamResult(so));
-                        mainContent.append("        <center><img src='/oe/" + oeName + "/group/" + gb.getArtId()
-                                + "/img.svg' /></center><br/>");
+                        mainContent.append("        <center><img src='/oe/" + oeName + "/os/img.svg' /></center><br/>");
+                        if (show.get("groups")) 
+                            mainContent.append("<a href='hide?groups'>hide groups</a>&#160;&#160;");
+                        else
+                            mainContent.append("<a href='show?groups'>show groups</a>&#160;&#160;");
+                        
+                        if (show.get("schemes")) 
+                            mainContent.append("<a href='hide?schemes'>hide schemes</a>&#160;&#160;");
+                        else
+                            mainContent.append("<a href='show?schemes'>show schemes</a>&#160;&#160;");
+                        
+                        if (show.get("norms")) 
+                            mainContent.append("<a href='hide?norms'>hide norms</a>");
+                        else
+                            mainContent.append("<a href='show?norms'>show norms</a>");
+
                         mainContent.append("    </div>\n");
                         mainContent.append(so.toString());
                     }
-//                    StringWriter so = new StringWriter();
-//                    ((OrgArt) gb).getNSTransformer().transform(
-//                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb).getNormativeEngine())),
-//                            new StreamResult(so));
-//                    mainContent.append(so.toString());
-                }
-            }
-            mainContent.append("</div>\n");
-            
-            mainContent.append("<div id=\"schemes\" class=\"card fluid\">\n");
-            mainContent.append("    <h2 class=\"section double-padded\">Schemes</h2>\n");
-
-            for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
-                if (sb.getOEId().equals(oeName)) {
-                    if (((OrgArt) sb).getStyleSheet() != null) {
-                        StringWriter so = new StringWriter();
-                        //((OrgArt) sb).getStyleSheet().setParameter("show-oe-img", "true");
-                        //((OrgArt) sb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb))),
-                        //        new StreamResult(so));
-                        mainContent.append("    <center><img src='/oe/" + oeName + "/scheme/" + sb.getArtId()
-                                + "/img.svg' /></center><br/>");
-                        mainContent.append(so.toString());
-                    }
-//                    StringWriter so = new StringWriter();
-//                    ((OrgArt) sb).getNSTransformer().transform(
-//                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb).getNormativeEngine())),
-//                            new StreamResult(so));
-//                    mainContent.append(so.toString());
-                }
-            }
-            mainContent.append("</div>\n");
-
-            mainContent.append("<div id=\"norms\" class=\"card fluid\">\n");
-            mainContent.append("    <h2 class=\"section double-padded\">Norms</h2>\n");
-
-            for (NormativeBoard nb : NormativeBoard.getNormativeBoards()) {
-                if (nb.getOEId().equals(oeName)) {
-                    StringWriter so = new StringWriter();
-//                    ((OrgArt) nb).getNSTransformer().transform(
-//                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) nb).getNormativeEngine())),
-//                            new StreamResult(so));
-                    // TODO: Send right group.scheme, it is only working because getasdot is not using these data
-                    mainContent.append("    <center><img src='/oe/" + oeName + "/norm/" + nb.getOEId() + "." + nb.getArtId()
-                            + "/img.svg' /></center><br/>");
-                    
-                    mainContent.append(so.toString());
                 }
             }
             mainContent.append("</div>\n");
@@ -215,16 +156,51 @@ public class RestImplOrg extends AbstractBinder {
         return "error"; // TODO: set response properly
     }
 
-    // TODO: An org spec can not be called img.svg?
+    Map<String,Boolean> show = new HashMap<>();
+    {
+        // by default show only groups
+        show.put("groups", true);
+        show.put("schemes", false);
+        show.put("norms", false);
+    }
+    
+    @Path("/{oename}/hide")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String setHide(@PathParam("oename") String oeName,
+            @QueryParam("groups") String groups,
+            @QueryParam("schemes") String schemes,
+            @QueryParam("norms") String norms) {
+        if (groups != null) show.put("groups",false);
+        if (schemes != null) show.put("schemes",false);
+        if (norms != null) show.put("norms",false);
+        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/oe/"+oeName+"/os'\" /></head>ok";
+    }
+
+    @Path("/{oename}/show")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String setShow(@PathParam("oename") String oeName,
+            @QueryParam("groups") String groups,
+            @QueryParam("schemes") String schemes,
+            @QueryParam("norms") String norms) {
+        if (groups != null) show.put("groups",true);
+        if (schemes != null) show.put("schemes",true);
+        if (norms != null) show.put("norms",true);
+        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/oe/"+oeName+"/os'\" /></head>ok";
+    }
+    
+    
     @Path("/{oename}/os/img.svg")
     @GET
     @Produces("image/svg+xml")
     public Response getOSImg(@PathParam("oename") String oeName) {
         try {
+
             for (OrgBoard ob : OrgBoard.getOrbBoards()) {
                 if (ob.getOEId().equals(oeName)) {
                     OS os = OS.loadOSFromURI(ob.getOSFile());
-                    String dot = getOSAsDot(os, true, true, true);
+                    String dot = getOSAsDot(os, show.get("groups"), show.get("schemes"), show.get("norms"));
                     if (dot != null && !dot.isEmpty()) {
                         ByteArrayOutputStream out = new ByteArrayOutputStream();
                         MutableGraph g = Parser.read(dot);
@@ -233,79 +209,7 @@ public class RestImplOrg extends AbstractBinder {
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Response.noContent().build(); // TODO: set response properly
-    }
-    
-    // this method is not being used anymore, should be kept for other rest requests?
-    @Path("/{oename}/group/{groupname}")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getGrouptHtml(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
-        try {
-            StringBuilder out = new StringBuilder();
-            out.append("<html target=\"mainframe\"><head><title>Group: " + groupName + "</title></head><body>");
-            String img = "<img src='" + groupName + "/img.svg' /><br/>";
-            out.append("<details>");
-            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-                if (gb.getOEId().equals(oeName) && gb.getArtId().equals(groupName)) {
-                    if (((OrgArt) gb).getStyleSheet() != null) {
-                        StringWriter so = new StringWriter();
-                        ((OrgArt) gb).getStyleSheet().setParameter("show-oe-img", "true");
-                        // TODO: links that comes from xsl specification are wrong!!!
-                        ((OrgArt) gb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb))),
-                                new StreamResult(so));
-                        out.append(so.toString());
-                    }
-                    StringWriter so = new StringWriter();
-                    ((OrgArt) gb).getNSTransformer().transform(
-                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) gb).getNormativeEngine())),
-                            new StreamResult(so));
-                    out.append(so.toString());
-                }
-            }
-            out.append("</details>");
-            out.append("<hr/><a href='" + groupName + "/" + groupName + ".npl'>NPL program</a>");
-            out.append(" / <a href='" + groupName + "/debug'>debug page</a>");
-            out.append("</body></html>");
 
-            return img + out.toString();
-        } catch (TransformerException | TransformerFactoryConfigurationError | IOException e) {
-            e.printStackTrace();
-        }
-        return "error"; // TODO: set response properly
-    }
-
-    @Path("/{oename}/group/{groupname}/img.svg")
-    @GET
-    @Produces("image/svg+xml")
-    public Response getGroupImg(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
-        try {
-            for (OrgBoard ob : OrgBoard.getOrbBoards()) {
-                if (ob.getOEId().equals(oeName)) {
-                    OS os = OS.loadOSFromURI(ob.getOSFile());
-                    String dot = getOSAsDot(os,true,false,false);
-                    if (dot != null && !dot.isEmpty()) {
-                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        MutableGraph g = Parser.read(dot);
-                        Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
-                        return Response.ok(out.toByteArray()).build();
-                    }
-                }
-            }
-//            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-//                if (gb.getOEId().equals(oeName) && gb.getArtId().equals(groupName)) {
-//                    String dot = gb.getAsDot();
-//                    if (dot != null && !dot.isEmpty()) {
-//                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-//                        MutableGraph g = Parser.read(dot);
-//                        Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
-//                        return Response.ok(out.toByteArray()).build();
-//                    }
-//                }
-//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -355,129 +259,6 @@ public class RestImplOrg extends AbstractBinder {
             e.printStackTrace();
         }
         return "error"; // TODO: set response properly
-    }
-
-    // this method is not being used anymore, should be kept for other rest requests?
-    @Path("/{oename}/scheme/{schemename}")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getSchemeHtml(@PathParam("oename") String oeName, @PathParam("schemename") String schemeName) {
-
-        try {
-            StringBuilder out = new StringBuilder();
-            out.append("<html target=\"mainframe\"><head><title>Scheme: " + schemeName + "</title></head><body>");
-            String img = "<img src='" + schemeName + "/img.svg' /><br/>";
-            out.append("<details>");
-            for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
-                if (sb.getOEId().equals(oeName) && sb.getArtId().equals(schemeName)) {
-                    if (((OrgArt) sb).getStyleSheet() != null) {
-                        StringWriter so = new StringWriter();
-                        ((OrgArt) sb).getStyleSheet().setParameter("show-oe-img", "true");
-                        ((OrgArt) sb).getStyleSheet().transform(new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb))),
-                                new StreamResult(so));
-                        out.append(so.toString());
-                    }
-                    StringWriter so = new StringWriter();
-                    ((OrgArt) sb).getNSTransformer().transform(
-                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) sb).getNormativeEngine())),
-                            new StreamResult(so));
-                    out.append(so.toString());
-                }
-            }
-            out.append("</details>");
-            out.append("</body></html>");
-
-            return img + out.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "error"; // TODO: set response properly
-    }
-
-    @Path("/{oename}/scheme/{schemename}/img.svg")
-    @GET
-    @Produces("image/svg+xml")
-    public Response getSchemeImg(@PathParam("oename") String oeName, @PathParam("schemename") String schemeName) {
-        try {
-            for (OrgBoard ob : OrgBoard.getOrbBoards()) {
-                if (ob.getOEId().equals(oeName)) {
-                    OS os = OS.loadOSFromURI(ob.getOSFile());
-                    String dot = getOSAsDot(os,false,true,false);
-                    if (dot != null && !dot.isEmpty()) {
-                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        MutableGraph g = Parser.read(dot);
-                        Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
-                        return Response.ok(out.toByteArray()).build();
-                    }
-                }
-            }
-//            for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
-//                if (sb.getOEId().equals(schemeName)) {
-//                    //String dot = sb.getAsDot();
-//                  String dot = getOSAsDot(OS os, boolean showSS, boolean showFS, boolean showNS);
-//                    if (dot != null && !dot.isEmpty()) {
-//                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-//                        MutableGraph g = Parser.read(dot);
-//                        Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
-//                        return Response.ok(out.toByteArray()).build();
-//                    }
-//                }
-//            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Response.noContent().build(); // TODO: set response properly
-    }
-    
-    // this method is not being used anymore, should be kept for other rest requests?
-    @Path("/{oename}/norm/{groupname}.{schemename}")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getNormHtml(@PathParam("oename") String oeName, @PathParam("groupname") String groupName,
-            @PathParam("schemename") String schemeName) {
-        try {
-            StringBuilder out = new StringBuilder();
-            out.append("<html target=\"mainframe\"><head><title>Scheme: " + schemeName + "</title></head><body>");
-            for (NormativeBoard nb : NormativeBoard.getNormativeBoards()) {
-                if (nb.getOEId().equals(oeName) && nb.getArtId().equals(groupName + "." + schemeName)) {
-                    StringWriter so = new StringWriter();
-                    ((OrgArt) nb).getNSTransformer().transform(
-                            new DOMSource(DOMUtils.getAsXmlDocument(((OrgArt) nb).getNormativeEngine())),
-                            new StreamResult(so));
-                    out.append(so.toString());
-                }
-            }
-            out.append("</body></html>");
-
-            return out.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "error"; // TODO: set response properly
-    }
-    
-    @Path("/{oename}/norm/{groupname}.{schemename}/img.svg")
-    @GET
-    @Produces("image/svg+xml")
-    public Response getNormImg(@PathParam("oename") String oeName, @PathParam("groupname") String groupName,
-            @PathParam("schemename") String schemeName) {
-        try {
-            for (OrgBoard ob : OrgBoard.getOrbBoards()) {
-                if (ob.getOEId().equals(oeName)) {
-                    OS os = OS.loadOSFromURI(ob.getOSFile());
-                    String dot = getOSAsDot(os,false,false,true);
-                    if (dot != null && !dot.isEmpty()) {
-                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        MutableGraph g = Parser.read(dot);
-                        Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
-                        return Response.ok(out.toByteArray()).build();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Response.noContent().build(); // TODO: set response properly
     }
 
     protected String getOSAsDot(OS os, boolean showSS, boolean showFS, boolean showNS) {
