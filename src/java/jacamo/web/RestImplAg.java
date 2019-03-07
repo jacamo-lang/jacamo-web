@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -444,7 +445,8 @@ public class RestImplAg extends AbstractBinder {
                 outputFile.write(bytes);
                 outputFile.close();
                 
-                ag.initAg("src/agt/" + aslFileName,true,false,false);
+                ag.getPL().clear();
+                ag.parseAS(new FileInputStream("src/agt/" + aslFileName), "src/agt/" + aslFileName);
                 
                 r = "ok, file saved agent reloaded! Redirecting...";
             }
