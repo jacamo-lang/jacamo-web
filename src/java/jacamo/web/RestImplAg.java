@@ -400,11 +400,9 @@ public class RestImplAg extends AbstractBinder {
                 "			</textarea>\n" + 
                 "		</div>\n" + 
                 "	<footer>\n" + 
-                "		<div>\n" + 
-                "			<p>Editing: " + aslFileName +
-                "			<input type=\"submit\" value=\"Save & Reload\">\n" + 
+                "			Editing: " + aslFileName +
+                "			<button type=\"submit\" onclick=\"location.href='/agents/"+ agName + "/mind';\">Save & Reload</button>\n" +
                 "			<button type=\"button\" onclick=\"location.href='/agents/"+ agName + "/mind';\">Discard changes</button>\n" +
-                "		</div>\n" + 
                 "	</footer>"+
                 "	</form>\n" + 
                 "<script src=\"http://ajaxorg.github.io/ace-builds/src/ace.js\"></script>\n" +
@@ -446,49 +444,16 @@ public class RestImplAg extends AbstractBinder {
                 outputFile.close();
                 
                 ag.getPL().clear();
-                ag.parseAS(new FileInputStream("src/agt/" + aslFileName), "src/agt/" + aslFileName);
+                ag.parseAS(new FileInputStream("src/agt/" + aslFileName), aslFileName);
                 
-                r = "ok, file saved agent reloaded! Redirecting...";
+                r = "ok, file saved. Agent reloaded but keeping intentions! Redirecting...";
             }
-            return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/agents/"+agName+"/mind'\"/></head>"+r;
+            return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/agents/"+agName+
+            	   "/mind'\"/><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+r;
         } catch (Exception e) {
             e.printStackTrace();
             return "error "+e.getMessage();
         }
-    }
-
-    //TODO: not being used anymore, remove it? 
-    @Path("/{agentname}/load_plans_form")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getLoadPlansForm(@PathParam("agentname") String agName) {
-        //TODO: fix upload of plans using ace text editor
-        //TODO: fix upload using files
-        //TODO: find a better default text to bring with this form
-        return  "<html lang=\"en\">\n" + 
-                "<head>\n" + 
-                "<title>ACE in Action</title>\n" + 
-                "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n" +
-                "</head>\n" + 
-                "<body>\n" + 
-
-                "<div id=\"editor\">" + 
-                "+!test\n" +
-                "  <- .print(\"test\").\n" +
-                "</div>\n" + 
-
-                "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>" +
-                "<span>\n" +
-                "<button type=\"button\" onclick=\"uploadPlansLib('" + agName + "')\">Upload plans library</button>\n" +
-                "</span>\n" + 
-
-                "or upload a file: <input type=\"file\" name=\"file\"><input type=\"submit\" value=\"Upload file\">" +
-                
-                "<script src=\"/js/ace/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n" + 
-                "<script src=\"/js/ace/ext-language_tools.js\"></script>\n" +
-                "<script src=\"/js/load_plans_form.js\"></script>\n" +
-                "</body>\n" + 
-                "</html>";
     }
     
     //TODO: not being used anymore, remove it? 

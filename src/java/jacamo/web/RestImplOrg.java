@@ -128,14 +128,14 @@ public class RestImplOrg extends AbstractBinder {
                         // TODO: links that comes from xsl specification are wrong!!!
                         mainContent.append("        <center><img src='/oe/" + oeName + "/os/img.svg' /></center><br/>");
                         if (show.get("groups")) 
-                            mainContent.append("<a href='hide?groups'>hide groups</a>&#160;&#160;");
+                            mainContent.append("<a href='hide?groups'>hide groups</a>&#160;&#160;&#160;");
                         else
-                            mainContent.append("<a href='show?groups'>show groups</a>&#160;&#160;");
+                            mainContent.append("<a href='show?groups'>show groups</a>&#160;&#160;&#160;");
                         
                         if (show.get("schemes")) 
-                            mainContent.append("<a href='hide?schemes'>hide schemes</a>&#160;&#160;");
+                            mainContent.append("<a href='hide?schemes'>hide schemes</a>&#160;&#160;&#160;");
                         else
-                            mainContent.append("<a href='show?schemes'>show schemes</a>&#160;&#160;");
+                            mainContent.append("<a href='show?schemes'>show schemes</a>&#160;&#160;&#160;");
                         
                         if (show.get("norms")) 
                             mainContent.append("<a href='hide?norms'>hide norms</a>");
