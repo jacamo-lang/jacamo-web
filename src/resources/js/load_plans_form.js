@@ -31,25 +31,3 @@ function createEditor(name) {
     }, true);
 }
 createEditor("aslfile");
-
-/*function to upload plans library*/
-function uploadPlansLib(agent) {
-    var textarea = document.querySelector("form textarea[name=editor]");
-
-    h4 = new XMLHttpRequest(); 
-    h4.open("POST", "/agents/" + agent + "/plans", true);
-    h4.setRequestHeader("Content-type", "multipart/form-data");
-    
-    
-    data = textarea.value;
-    
-    window.alert("under construction!");
-
-    h4.onreadystatechange = function() { 
-    	if (h4.readyState == 4 && h4.status == 200) {
-    		location.reload();
-    		window.alert(http.responseText);
-    	}
-    };
-    h4.send(data);
-} 
