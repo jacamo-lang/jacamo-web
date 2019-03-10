@@ -38,6 +38,7 @@ function showLog() {
     http.onreadystatechange = function() { 
     	if (http.readyState == 4 && http.status == 200) {
     		document.getElementById('log').innerHTML = http.responseText; 
+    		setLogScroll();
     		if (http.responseText.length > 1) {
     			var btn = document.createElement("BUTTON"); 
     			var t = document.createTextNode("clear log"); 
@@ -162,3 +163,12 @@ var pageContent = document.getElementById("nav-drawer-frame").innerHTML;
 var fullMenu = buttonClose + " " + pageContent;
 sessionStorage.setItem("menucontent", fullMenu);
 
+/* scroll log automatically */
+var textarea = document.getElementById('log');
+function setLogScroll(){
+    textarea.scrollTop = textarea.scrollHeight;
+}
+
+setInterval(function(){
+	showLog();
+}, 1000);

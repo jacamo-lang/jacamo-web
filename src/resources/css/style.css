@@ -1,21 +1,6 @@
 @charset "UTF-8";
 /* mini-default by Angelos Chalaris v3.0.1 */
 
-/* ACE EDITOR */
-.ace_editor {
-	position: absolute; 
-    top: 0; 
-    right: 0; 
-    bottom: 0; 
-    left: 0;
-    line-height: 1.8;
-    font-family: Courier,monospace;
-    font-size:12px;
-    color:inherit;
-    height: 300px;
-    min-height: 85%;
-} 
-
 /* AUTO COMPLETE */
 /*the container must be positioned relative:*/
 .autocomplete {
@@ -129,8 +114,20 @@ body {
   width: 100%; height: 100%; margin: 0; padding: 0;
 }
 
-.second-row {position: absolute; top: 50px; left: 0; right: 0; bottom: 0; }
-.second-row iframe {display: block; width: 100%; height: 100%; border: none;}
+.second-row {
+	position: absolute; 
+	top: 50px; 
+	left: 0; 
+	right: 0; 
+	bottom: 0; 
+}
+
+.second-row iframe {
+		display: block; 
+		width: 100%; 
+		height: 100%; 
+		border: none;
+}
 
 details {
   display: block;
@@ -1257,6 +1254,46 @@ button.large, [type="button"].large, [type="submit"].large, [type="file"].large,
   --drawer-close-color: #444;
 }
 
+/* ACE EDITOR */
+.ace_editor {
+	position: absolute; 
+    top: 0; 
+    right: 0; 
+    bottom: 0; 
+    left: 0;
+    line-height: 1.8;
+    font-family: Courier,monospace;
+    font-size:12px;
+    color:inherit;
+    /*height: 50px;*/
+    width: 100%;
+    /*height: 800px;*/
+    min-height: 92%;
+} 
+
+.editor_footer {
+  background: var(--footer-back-color);
+  color: var(--footer-fore-color);
+  /*border-top: 0.0625rem solid var(--footer-border-color);*/
+  padding: calc(2 * var(--universal-padding)) var(--universal-padding);
+  font-size: 0.875rem;
+  bottom: 0;
+  position: fixed;
+  height:36px;
+  width: 100%;
+  background-attachment: scroll;  
+}
+
+.logarea {
+	width: 100%; 
+	height: 100px;
+	left: 0px; 
+	top: 0px; 
+	margin: 0px;
+	background: #f8f8f8; 
+}
+
+/* MINI style */
 header {
   height: 3.1875rem;
   background: var(--header-back-color);
@@ -1361,6 +1398,9 @@ footer {
   font-size: 0.875rem;
   bottom: 0;
   position: fixed;
+  height:80px;
+  width: 100%;
+  background-attachment: scroll;  
 }
 
 footer a, footer a:visited {
