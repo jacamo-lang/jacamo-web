@@ -24,6 +24,7 @@ import moise.os.ss.Link;
 import moise.os.ss.Role;
 import moise.os.ss.RoleRel.RoleRelScope;
 import moise.os.ss.SS;
+import ora4mas.nopl.GroupBoard;
 import ora4mas.nopl.SchemeBoard;
 import ora4mas.nopl.oe.Player;
 
@@ -72,7 +73,7 @@ public class os2dot {
         return so.toString();
     }
 
-    public String transform(SS ss, ora4mas.nopl.oe.Group grInstance) {
+    public String transform(SS ss, GroupBoard grInstance) {
         StringWriter so = new StringWriter();
 
         so.append("\n    subgraph cluster_SS { \n"); // label=\"Structure\" labelloc=t labeljust=r fontname=\"Italic\" \n");
@@ -100,15 +101,16 @@ public class os2dot {
         return so.toString();
     }
 
-    String transform(Role r) {
-        String font = ",fontname=\"Helvetic\"";
+    public String transform(Role r) {
+        String font = "fontname=\"Arial\",shape=box,style=rounded";
         if (r.isAbstract()) {
-            font=",fontname=\"Italic\""; //,style=filled,fillcolor=wheat
+            font="fontname=\"Times\",shape=box,style=rounded"; //,style=filled,fillcolor=wheat ";
         }
-        return "        "+r.getId()+" [shape=box,style=rounded"+font+"];\n";
+        return "        "+r.getId()+" ["+font+"];\n";
     }
 
-    public String transform(Group g, ora4mas.nopl.oe.Group gInstance) {
+    public String transform(Group g, GroupBoard gb) {
+        ora4mas.nopl.oe.Group gInstance = gb.getGrpState();
         StringWriter so = new StringWriter();
 
         so.append("\n        // group "+g.getId()+"\n");
@@ -118,7 +120,11 @@ public class os2dot {
             id    = gInstance.getId();
             label = gInstance.getId() + ": " + label;
         }
-        so.append("        "+id+" [label=\""+label+"\",shape=tab, fontname=\"Courier-Bold\",style=filled];\n");
+        String fillcolor = "lightgrey";
+        if (gb.isWellFormed())
+            fillcolor = "gold";
+            
+        so.append("        "+id+" [label=\""+label+"\",shape=tab, fontname=\"Courier\",style=filled,fillcolor="+fillcolor+"];\n");
         //so.append("     "+g.getId()+" [shape=box, fontname=\"Courier-Bold\",style=filled,fillcolor=lightyellow];\n");
         for (Role r: g.getRoles().getAll()) {
             String card = g.getRoleCardinality(r).toStringFormat2();
@@ -133,7 +139,7 @@ public class os2dot {
                 for (ora4mas.nopl.oe.Group sgi: gInstance.getSubgroups()) {
                     if (sgi.getGrType().equals(sg.getId())) {
                         so.append("        "+id+" -> "+sgi.getId()+"  [arrowtail=odiamond, arrowhead=none, dir=both, label=\""+card+"\",fontname=\"Times\",arrowsize=1.5];\n");
-                        so.append(transform(sg, sgi));
+                        so.append(transform(sg, gb));
                     }
                 }
             }
@@ -168,21 +174,41 @@ public class os2dot {
 
         if (gInstance != null) {
             for (Player p: gInstance.getPlayers()) {
-                so.append("        "+p.getAg()+ " [URL=\"/agents/"+p.getAg()+"/all\"];\n"); // [shape=plaintext]
+                so.append("        "+p.getAg()+ " ["+getAgStyle()+",URL=\"/agents/"+p.getAg()+"/all\"];\n"); // [shape=plaintext]
                 so.append("        "+p.getAg()+" -> "+p.getTarget()+" [arrowsize=0.5];\n");
                 //so.append("        "+p.getAg()+" -> "+p.getTarget()+" [label=\""+id+"\",arrowsize=0.5];\n");
             }
 
             for (String s: gInstance.getSchemesResponsibleFor()) {
-                so.append("        "+s+ "[shape=hexagon, style=filled, fontname=\"Courier\", URL=\"/scheme/"+s+"\"];\n");
-                so.append("        "+id+" -> "+s+" [label=\"responsible\nfor\",labelfontsize=8,fontname=\"Italic\",arrowhead=open];\n");
-
+                boolean wf = false;
+                SchemeBoard sb = findSchemeBoard(s);
+                if (sb != null)
+                    wf = sb.isWellFormed();
+                so.append("        "+s+ getSchemeInstanceStyle(s,wf)+";\n");
+                so.append("        "+id+" -> "+s+" [label=\"responsible\nfor\",labelfontsize=8,fontname=\"times italic\",arrowhead=open];\n");
             }
         }
 
         return so.toString();
     }
+    
+    private SchemeBoard findSchemeBoard(String id) {
+        for (SchemeBoard sb: SchemeBoard.getSchemeBoards()) {
+            if (sb.getArtId().equals(id))
+                return sb;
+        }
+        return null;
+    }
 
+    public String getAgStyle() {
+        return "shape=\"ellipse\",style=filled,pencolor=black,fillcolor=lightyellow,fontsize=16";
+    }
+    public String getSchemeInstanceStyle(String id, boolean wellFormed) {
+        String fillcolor = "lightgrey";
+        if (wellFormed) 
+            fillcolor = "gold";            
+        return "[shape=hexagon, style=filled, fontname=\"Courier\", URL=\"/scheme/"+id+"\",fillcolor="+fillcolor+"]";
+    }
     public String transform(FS fs) {
         StringWriter so = new StringWriter();
         // schemes
@@ -206,18 +232,30 @@ public class os2dot {
         return so.toString();
     }
 
-    String transform(Mission m) {
-        return "        "+m.getId()+" [fontname=\"Helvetic\", shape=diamond, style=rounded];\n";
+    public String getMissionStyle() {
+        return " fontname=\"Arial\", shape=plaintext, style=rounded";
+    }
+    public String transform(Mission m) {
+        return "        "+m.getId()+" ["+getMissionStyle()+"];\n";
     }
 
-    public static String transform(Mission m, Scheme spec) {
+    public String transform(Mission m, Scheme spec) {
         String card = "";
         if (! spec.getMissionCardinality(m).equals(Cardinality.defaultValue)) {
             card = "\n("+spec.getMissionCardinality(m).toStringFormat2()+")";
         }
-        return "        "+m.getId()+" [label=\""+m.getId()+card+"\", fontname=\"Helvetic\", shape=plaintext,fontsize=10];\n";
+        return "        "+m.getId()+" [label=\""+m.getId()+card+"\", "+getMissionStyle()+"];\n";
     }
 
+    public String transform(Mission m, SchemeBoard sb) {
+        String card = "";
+        if (! sb.getSpec().getMissionCardinality(m).equals(Cardinality.defaultValue)) {
+            card = sb.getSpec().getMissionCardinality(m).toStringFormat2();
+        }
+        return "        "+m.getId()+" [label=\""+m.getId()+"\", "+getMissionStyle()+"];\n" + 
+               "        "+sb.getArtId()+" -> "+m.getId() + " [fontname=times,label=\""+card+"\",arrowsize=0.5];\n";
+        
+    }
 
     public static String transform(Goal g, int pos, SchemeBoard sch) {
         StringBuilder so = new StringBuilder();
@@ -228,8 +266,10 @@ public class os2dot {
             } else {
                 Term tSch = ASSyntax.createString(sch.getSchState().getId());
                 Atom aGoal  = new Atom(g.getId());
-                if (sch.getNormativeEngine().holds(ASSyntax.createLiteral("well_formed", tSch)) && sch.getNormativeEngine().holds(ASSyntax.createLiteral("enabled", tSch, aGoal))) {
-                    color = "green4";
+                System.out.println("try ");
+                if (sch.isWellFormed() && sch.getNormativeEngine().holds(ASSyntax.createLiteral("enabled", tSch, aGoal))) {
+                    color = "green";
+                    System.out.println(" green ");
                 }
             }
         }
@@ -247,7 +287,7 @@ public class os2dot {
                 peri = "2";
             }
         }
-        so.append("        "+g.getId()+" [label=\""+label+"\", shape="+shape+",peripheries="+peri+",fontname=\"Helvetic\",fontcolor="+color+"]; \n");
+        so.append("        "+g.getId()+" [label=\""+label+"\", shape="+shape+",peripheries="+peri+",fontname=\"fantasy\",fontcolor="+color+"]; \n");
         if (g.hasPlan()) {
             String type=",arrowhead=none";
 
@@ -261,7 +301,7 @@ public class os2dot {
                 if (ppos > 0) {
                     ppos++;
                     if (previous != null)
-                        so.append("        "+previous.getId()+" -> "+sg.getId()+" [style=dotted, constraint=false, arrowhead=empty,arrowsize=0.5,color=lightgrey];\n");
+                        so.append("        "+previous.getId()+" -> "+sg.getId()+" [style=dotted, constraint=false, arrowhead=empty,arrowsize=0.5,color=grey];\n");
                     previous = sg;
                 }
             }

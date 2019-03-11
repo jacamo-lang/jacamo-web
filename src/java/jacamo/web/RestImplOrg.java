@@ -6,7 +6,9 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -23,13 +25,18 @@ import org.glassfish.jersey.internal.inject.AbstractBinder;
 import cartago.CartagoException;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
-import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
 import moise.os.OS;
-import jacamo.web.os2dot;
+import moise.os.fs.Goal;
+import moise.os.fs.Mission;
+import moise.os.ns.Norm;
+import moise.os.ns.NS.OpTypes;
 import ora4mas.nopl.GroupBoard;
+import ora4mas.nopl.NormativeBoard;
 import ora4mas.nopl.OrgArt;
 import ora4mas.nopl.OrgBoard;
+import ora4mas.nopl.SchemeBoard;
+import ora4mas.nopl.oe.Player;
 
 @Singleton
 @Path("/oe")
@@ -197,18 +204,20 @@ public class RestImplOrg extends AbstractBinder {
     public Response getOSImg(@PathParam("oename") String oeName) {
         try {
 
-            for (OrgBoard ob : OrgBoard.getOrbBoards()) {
-                if (ob.getOEId().equals(oeName)) {
-                    OS os = OS.loadOSFromURI(ob.getOSFile());
-                    String dot = getOSAsDot(os, show.get("groups"), show.get("schemes"), show.get("norms"));
+            //for (OrgBoard ob : OrgBoard.getOrbBoards()) {
+            //    if (ob.getOEId().equals(oeName)) {
+            //        OS os = OS.loadOSFromURI(ob.getOSFile());
+                    String dot = getOSAsDot(oeName, show.get("groups"), show.get("schemes"), show.get("norms"));
                     if (dot != null && !dot.isEmpty()) {
                         ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        MutableGraph g = Parser.read(dot);
-                        Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                        Graphviz
+                            .fromGraph(Parser.read(dot))
+                            .render(Format.SVG)
+                            .toOutputStream(out);
                         return Response.ok(out.toByteArray()).build();
                     }
-                }
-            }
+            //    }
+            //}
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -261,22 +270,88 @@ public class RestImplOrg extends AbstractBinder {
         return "error"; // TODO: set response properly
     }
 
-    protected String getOSAsDot(OS os, boolean showSS, boolean showFS, boolean showNS) {
+    protected String getOSAsDot(String oeName, boolean showSS, boolean showFS, boolean showNS) {
         String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
 
         try {
+            os2dot t = new os2dot();
+            
+            StringWriter so = new StringWriter();
+            so.append("digraph "+oeName+" {\n");
+            so.append("    rankdir=BT;\n");
+            so.append("    compound=true;\n\n");
 
-            os2dot transformer = new os2dot();
-            transformer.showLinks = true;
-            transformer.showMissions = true;
-            transformer.showConditions = true;
-            transformer.showSS = showSS;
-            transformer.showFS = showFS;
-            transformer.showNS = showNS;
+            OS os = null;
+            // groups
+            if (showSS) {
+                for (GroupBoard gb: GroupBoard.getGroupBoards()) {
+                    if (gb.getOEId().equals(oeName)) {
+                        os = gb.getSpec().getSS().getOS();
 
-            graph = transformer.transform(os);
+                        so.append( t.transformRolesDef(gb.getSpec().getSS()));
+                        so.append( t.transform(gb.getSpec(), gb) );
+                    }
+                }
+            }
+            
+            Set<String> done = new HashSet<>();
 
+            // schemes
+            if (showFS) {
+                for (SchemeBoard sb: SchemeBoard.getSchemeBoards()) {
+                    if (sb.getOEId().equals(oeName)) {
+                        os = sb.getSpec().getFS().getOS();
+
+                        so.append("        "+sb.getArtId()+ t.getSchemeInstanceStyle(sb.getArtId(), sb.isWellFormed())+";\n");
+                        so.append( t.transform( sb.getSpec().getRoot(), 0, sb));    
+                        //so.append("        "+sb.getArtId()+ " -> "+sb.getSpec().getRoot()+" [arrowhead=open];\n");
+                        
+                        // missions
+                        for (Mission m: sb.getSpec().getMissions()) {
+                            so.append( t.transform(m, sb));
+                            for (Goal g: m.getGoals()) {
+                                so.append("        "+m.getId()+" -> "+g.getId()+" [arrowsize=0.5];\n");
+                            }
+                        }
+                        for (Player p: sb.getSchState().getPlayers()) {
+                            so.append("        "+p.getAg()+ "["+t.getAgStyle()+"];\n");
+                            so.append("        "+p.getAg()+" -> "+p.getTarget()+" [arrowsize=0.5];\n");
+                        }                    
+                    }                
+                }
+            }
+            
+            if (showNS) {
+                if (os == null) {
+                    for (OrgBoard ob : OrgBoard.getOrbBoards())
+                        if (ob.getOEId().equals(oeName))
+                            os = OS.loadOSFromURI(ob.getOSFile());                  
+                }
+                for (Norm n: os.getNS().getNorms()) {
+                    String e = n.getRole().toString()+n.getMission();
+                    if (!done.contains(e)) {
+                        done.add(e);
+
+                        String s = "bold";
+                        if (n.getType() == OpTypes.permission)
+                            s = "filled";
+                        String cond = "";
+
+                        if (!showSS)
+                            so.append( t.transform(n.getRole()));
+                        if (!showFS)
+                            so.append( t.transform(n.getMission()));
+
+                        so.append("        "+n.getRole()+" -> "+n.getMission().getId()+" [arrowhead=inv,style="+s+",label=\""+cond+"\"];\n"); // decorate=true,
+                    }
+                }
+            }
+
+            so.append("}\n");                   
+            
+            graph = so.toString();
         } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
         // debug

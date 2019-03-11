@@ -51,7 +51,7 @@
             <goal id="goal2"/>
             <goal id="goal4"/>
         </mission>
-        <mission id="mission2" min="1" max="1">
+        <mission id="mission2" min="0" max="1">
             <goal id="goal3"/>
         </mission>
     </scheme>

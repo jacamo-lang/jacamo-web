@@ -95,5 +95,8 @@ price(banana,X) :- X = math.random * 100 + 20.
 { include("$moiseJar/asl/org-obedient.asl") }
             
             
++!testNewPlan(X)    : X > 10 <- .print(X*4).
+
             
-			
++!goal2 <- .print("Ok do goal 2").
+            
