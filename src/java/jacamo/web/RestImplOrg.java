@@ -133,7 +133,7 @@ public class RestImplOrg extends AbstractBinder {
                         mainContent.append("    <div class=\"section\">\n");
                         StringWriter so = new StringWriter();
                         // TODO: links that comes from xsl specification are wrong!!!
-                        mainContent.append("        <center><img src='/oe/" + oeName + "/os/img.svg' /></center><br/>");
+                        mainContent.append("        <center><object data='/oe/" + oeName + "/os/img.svg' type=\"image/svg+xml\"/></center><br/>");
                         if (show.get("groups")) 
                             mainContent.append("<a href='hide?groups'>hide groups</a>&#160;&#160;&#160;");
                         else
@@ -203,22 +203,15 @@ public class RestImplOrg extends AbstractBinder {
     @Produces("image/svg+xml")
     public Response getOSImg(@PathParam("oename") String oeName) {
         try {
-
-            //for (OrgBoard ob : OrgBoard.getOrbBoards()) {
-            //    if (ob.getOEId().equals(oeName)) {
-            //        OS os = OS.loadOSFromURI(ob.getOSFile());
-                    String dot = getOSAsDot(oeName, show.get("groups"), show.get("schemes"), show.get("norms"));
-                    if (dot != null && !dot.isEmpty()) {
-                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        Graphviz
-                            .fromGraph(Parser.read(dot))
-                            .render(Format.SVG)
-                            .toOutputStream(out);
-                        return Response.ok(out.toByteArray()).build();
-                    }
-            //    }
-            //}
-
+            String dot = getOSAsDot(oeName, show.get("groups"), show.get("schemes"), show.get("norms"));
+            if (dot != null && !dot.isEmpty()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                Graphviz
+                    .fromGraph(Parser.read(dot))
+                    .render(Format.SVG)
+                    .toOutputStream(out);
+                return Response.ok(out.toByteArray()).build();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
