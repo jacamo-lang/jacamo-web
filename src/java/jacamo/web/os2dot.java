@@ -51,6 +51,7 @@ public class os2dot {
 
         so.append("digraph "+os.getId()+" {\n");
         so.append("  graph [\n");
+        so.append("  bgcolor=transparent;\n");
         
         if (!showSS && !showFS && showNS)
             so.append("    rankdir=LR;\n");
@@ -174,7 +175,7 @@ public class os2dot {
 
         if (gInstance != null) {
             for (Player p: gInstance.getPlayers()) {
-                so.append("        "+p.getAg()+ " ["+getAgStyle()+",URL=\"/agents/"+p.getAg()+"/mind\"];\n"); // [shape=plaintext]
+                so.append("        "+p.getAg()+ " ["+getAgStyle()+",URL=\"/agents/"+p.getAg()+"/mind\" target=\"mainframe\"];\n"); // [shape=plaintext]
                 so.append("        "+p.getAg()+" -> "+p.getTarget()+" [arrowsize=0.5];\n");
                 //so.append("        "+p.getAg()+" -> "+p.getTarget()+" [label=\""+id+"\",arrowsize=0.5];\n");
             }
@@ -207,7 +208,7 @@ public class os2dot {
         String fillcolor = "lightgrey";
         if (wellFormed) 
             fillcolor = "gold";            
-        return "[shape=hexagon, style=filled, fontname=\"Courier\", URL=\"/scheme/"+id+"\",fillcolor="+fillcolor+"]";
+        return "[shape=hexagon, style=filled, fontname=\"Courier\", fillcolor="+fillcolor+"]";
     }
     public String transform(FS fs) {
         StringWriter so = new StringWriter();

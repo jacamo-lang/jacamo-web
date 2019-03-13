@@ -133,7 +133,7 @@ public class RestImplOrg extends AbstractBinder {
                         mainContent.append("    <div class=\"section\">\n");
                         StringWriter so = new StringWriter();
                         // TODO: links that comes from xsl specification are wrong!!!
-                        mainContent.append("        <center><object data='/oe/" + oeName + "/os/img.svg' type=\"image/svg+xml\"/></center><br/>");
+                        mainContent.append("        <center><object data=\"/oe/" + oeName + "/os/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>");
                         if (show.get("groups")) 
                             mainContent.append("<a href='hide?groups'>hide groups</a>&#160;&#160;&#160;");
                         else
@@ -273,6 +273,7 @@ public class RestImplOrg extends AbstractBinder {
             so.append("digraph "+oeName+" {\n");
             so.append("    rankdir=BT;\n");
             so.append("    compound=true;\n\n");
+            so.append("    bgcolor=transparent;\n");
 
             OS os = null;
             // groups
