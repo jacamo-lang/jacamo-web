@@ -259,8 +259,44 @@ public class RestImplAg extends AbstractBinder {
             BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
             // set some source for the agent
             Agent ag = getAgent(name);
-            ag.setASLSrc("no-inicial.asl");
+            
+            System.out.println("#1");
+
+            StringBuilder so = new StringBuilder();
+            try {
+                BufferedReader in = null;
+                File f = new File("src/agt/" + agName + ".asl");
+                if (f.exists()) {
+                    in = new BufferedReader(new FileReader(f));
+                } else {
+                    in = new BufferedReader(
+                            new InputStreamReader(RestImpl.class.getResource("../src/agt/" + agName + ".asl").openStream()));
+                }
+                if (in.toString().isEmpty()) {
+                    FileOutputStream outputFile = new FileOutputStream("src/agt/" + agName + ".asl", false);
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append("//Agent created automatically\n\n");
+                    stringBuilder.append("!start.\n\n");
+                    stringBuilder.append("+!start <- .print(\"Hi\").\n\n");
+                    stringBuilder.append("{ include(\"$jacamoJar/templates/common-cartago.asl\") }\n");
+                    stringBuilder.append("{ include(\"$jacamoJar/templates/common-moise.asl\") }\n");
+                    stringBuilder.append("// uncomment the include below to have an agent compliant with its organisation\n");
+                    stringBuilder.append("//{ include(\"$moiseJar/asl/org-obedient.asl\") }");
+                    byte[] bytes = stringBuilder.toString().getBytes();
+                    outputFile.write(bytes);            
+                    outputFile.close();
+                    
+                    System.out.println("#2");
+                }
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ag.load(new FileInputStream("src/agt/" + agName + ".asl"), agName + ".asl");
+            //ag.parseAS(new FileInputStream("src/agt/" + agName + ".asl"), agName + ".asl");
+            //ag.setASLSrc("no-inicial.asl");
             createAgLog(agName, ag);
+            System.out.println("#3");
             
             return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+name+"/mind'\" /></head>ok for "+name;
         } catch (Exception e) {
