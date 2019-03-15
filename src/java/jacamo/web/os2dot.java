@@ -51,7 +51,6 @@ public class os2dot {
 
         so.append("digraph "+os.getId()+" {\n");
         so.append("  graph [\n");
-        so.append("  bgcolor=transparent;\n");
         
         if (!showSS && !showFS && showNS)
             so.append("    rankdir=LR;\n");

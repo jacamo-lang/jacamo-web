@@ -1,13 +1,23 @@
 package jacamo.web;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -15,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import cartago.ArtifactId;
 import cartago.ArtifactInfo;
@@ -26,6 +37,7 @@ import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
 import jacamo.platform.EnvironmentWebInspector;
+import jason.asSemantics.Agent;
 
 @Singleton
 @Path("/workspaces")
@@ -190,8 +202,10 @@ public class RestImplEnv extends AbstractBinder {
             mainContent.append("</div>\n");
             mainContent.append("<div id=\"inspection\" class=\"card fluid\">\n");
             mainContent.append("	<div class=\"section\">\n"); 
-            mainContent.append("		Artifact <b>" + info.getId().getName() + "</b> in workspace <b>" + wrksName + "</b>\n");
-            mainContent.append("		<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
+            
+            mainContent.append("		Artifact <b>" + info.getId().getName() + "</b> in workspace <b>" + wrksName + "</b>");
+            mainContent.append("		<a href=\"javafile/" + info.getId().getArtifactType() + "\">[edit]</a>\n");
+            mainContent.append("        <table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
             for (ArtifactObsProperty op: info.getObsProperties()) {
                 StringBuilder vls = new StringBuilder();
                 String v = "";
@@ -199,10 +213,10 @@ public class RestImplEnv extends AbstractBinder {
                     vls.append(v+vl);
                     v = ",";
                 }
-                mainContent.append("		<tr><td>"+op.getName()+"</td><td>"+vls+"</td></tr>");
+                mainContent.append("        <tr><td>"+op.getName()+"</td><td>"+vls+"</td></tr>");
             }
-            mainContent.append("		</table>");
-            mainContent.append("	</div>\n"); 
+            mainContent.append("        </table>");
+            mainContent.append("    </div>\n"); 
             mainContent.append("</div>\n"); 
             
             return designPage("JaCaMo-web - Environment: " + wrksName, wrksName, artName, mainContent.toString());
@@ -268,7 +282,7 @@ public class RestImplEnv extends AbstractBinder {
                     sb.append(s1 + "\"\n");
                     sb.append("\t\tshape=record style=filled fillcolor=white\n");
                     sb.append("\t\tURL = \"/workspaces/" + info.getId().getWorkspaceId().getName() + "/" +  
-                    		info.getId().getName() + "\"\n");
+                            info.getId().getName() + "\"\n");
                     sb.append("\t\ttarget=\"mainframe\"\n");
                     sb.append("\t\t];\n");
                 }
@@ -326,6 +340,97 @@ public class RestImplEnv extends AbstractBinder {
             e.printStackTrace();
         }
         return Response.noContent().build(); // TODO: set response properly
+    }
+    
+    @Path("/{wrksname}/javafile/{javafilename}")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getLoadJavafileForm(@PathParam("wrksname") String wrksName, @PathParam("javafilename") String javaFileName) {
+        
+        
+        System.out.println("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
+            System.out.println("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f));
+            } else {
+                in = new BufferedReader(
+                        new InputStreamReader(RestImpl.class.getResource("../src/env/" + javaFileName.replaceAll("\\.", "/") + ".java").openStream()));
+            }
+            System.out.println("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line + "\n");
+                line = in.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        return  "<html lang=\"en\">\n" + 
+                "<head>\n" + 
+                "<title>JaCaMo - Editing: "+javaFileName+"</title>\n" + 
+                "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n" +
+                "</head>\n" + 
+                "<body>\n" + 
+                "   <form action=\"/"+wrksName+"/javafile/"+javaFileName+"\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
+                "       <div>\n" + 
+                "           <textarea name=\"javafile\" form=\"usrform\">" +
+                                so.toString() +
+                "           </textarea>\n" + 
+                "       </div>\n" + 
+                "   <div class=\"editor_footer\">\n" +
+                "           Editing: " + javaFileName +
+                "           <button type=\"submit\" onclick=\"location.href='/workspaces/" + wrksName + "/';\">Save & Reload</button>\n" +
+                "           <button type=\"button\" onclick=\"location.href='/workspaces/" + wrksName + "/';\">Discard changes</button>\n" +
+                "   </div>"+
+                "   </form>\n" + 
+                "<script src=\"http://ajaxorg.github.io/ace-builds/src/ace.js\"></script>\n" +
+                "<script src=\"/js/ace/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n" + 
+                "<script src=\"/js/ace/ext-language_tools.js\"></script>\n" +
+                "<script src=\"/js/load_artifacts_form.js\"></script>\n" +
+                "</body>\n" + 
+                "</html>";
+    }
+
+    @Path("/{wrksname}/javafile/{javafilename}")
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.TEXT_HTML)
+    public String loadJavafileForm(@PathParam("wrksname") String wrksName,
+            @PathParam("aslfilename") String javaFileName,
+            @FormDataParam("aslfile") InputStream uploadedInputStream
+            ) {
+        try {
+            String r = "nok";
+                System.out.println("wrksName: "+wrksName);
+                System.out.println("restAPI://"+javaFileName);
+                System.out.println("uis: "+uploadedInputStream);
+
+                StringBuilder stringBuilder = new StringBuilder();
+                String line = null;
+                
+                FileOutputStream outputFile = new FileOutputStream("src/env/" + javaFileName, false);
+                BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
+                
+                while ((line = out.readLine()) != null) {
+                    stringBuilder.append(line + "\n");
+                }
+                
+                byte[] bytes=stringBuilder.toString().getBytes();
+                outputFile.write(bytes);
+                outputFile.close();
+                
+                r = "ok, file saved. Agent reloaded but keeping intentions! Redirecting...";
+            return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/agents/"+
+            	   "/mind'\"/><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+r;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error "+e.getMessage();
+        }
     }
     
     @SuppressWarnings("finally")
