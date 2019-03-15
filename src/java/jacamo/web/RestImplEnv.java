@@ -348,19 +348,16 @@ public class RestImplEnv extends AbstractBinder {
     public String getLoadJavafileForm(@PathParam("wrksname") String wrksName, @PathParam("javafilename") String javaFileName) {
         
         
-        System.out.println("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
         StringBuilder so = new StringBuilder();
         try {
             BufferedReader in = null;
             File f = new File("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
-            System.out.println("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
             if (f.exists()) {
                 in = new BufferedReader(new FileReader(f));
             } else {
                 in = new BufferedReader(
                         new InputStreamReader(RestImpl.class.getResource("../src/env/" + javaFileName.replaceAll("\\.", "/") + ".java").openStream()));
             }
-            System.out.println("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
             String line = in.readLine();
             while (line != null) {
                 so.append(line + "\n");
@@ -376,7 +373,7 @@ public class RestImplEnv extends AbstractBinder {
                 "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n" +
                 "</head>\n" + 
                 "<body>\n" + 
-                "   <form action=\"/"+wrksName+"/javafile/"+javaFileName+"\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
+                "   <form action=\"/workspaces/"+wrksName+"/javafile/"+javaFileName+"\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
                 "       <div>\n" + 
                 "           <textarea name=\"javafile\" form=\"usrform\">" +
                                 so.toString() +
@@ -384,7 +381,7 @@ public class RestImplEnv extends AbstractBinder {
                 "       </div>\n" + 
                 "   <div class=\"editor_footer\">\n" +
                 "           Editing: " + javaFileName +
-                "           <button type=\"submit\" onclick=\"location.href='/workspaces/" + wrksName + "/';\">Save & Reload</button>\n" +
+                "           <button type=\"submit\" onclick=\"location.href='/workspaces/" + wrksName + "/';\">Save</button>\n" +
                 "           <button type=\"button\" onclick=\"location.href='/workspaces/" + wrksName + "/';\">Discard changes</button>\n" +
                 "   </div>"+
                 "   </form>\n" + 
@@ -401,32 +398,32 @@ public class RestImplEnv extends AbstractBinder {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
     public String loadJavafileForm(@PathParam("wrksname") String wrksName,
-            @PathParam("aslfilename") String javaFileName,
-            @FormDataParam("aslfile") InputStream uploadedInputStream
+            @PathParam("javafilename") String javaFileName,
+            @FormDataParam("javafile") InputStream uploadedInputStream
             ) {
         try {
             String r = "nok";
-                System.out.println("wrksName: "+wrksName);
-                System.out.println("restAPI://"+javaFileName);
-                System.out.println("uis: "+uploadedInputStream);
+            System.out.println("wrksName: " + wrksName);
+            System.out.println("restAPI://" + javaFileName);
+            System.out.println("uis: " + uploadedInputStream);
 
-                StringBuilder stringBuilder = new StringBuilder();
-                String line = null;
-                
-                FileOutputStream outputFile = new FileOutputStream("src/env/" + javaFileName, false);
-                BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
-                
-                while ((line = out.readLine()) != null) {
-                    stringBuilder.append(line + "\n");
-                }
-                
-                byte[] bytes=stringBuilder.toString().getBytes();
-                outputFile.write(bytes);
-                outputFile.close();
-                
-                r = "ok, file saved. Agent reloaded but keeping intentions! Redirecting...";
-            return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/agents/"+
-            	   "/mind'\"/><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+r;
+            StringBuilder stringBuilder = new StringBuilder();
+            String line = null;
+
+            FileOutputStream outputFile = new FileOutputStream("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java", false);
+            BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
+
+            while ((line = out.readLine()) != null) {
+                stringBuilder.append(line + "\n");
+            }
+
+            byte[] bytes = stringBuilder.toString().getBytes();
+            outputFile.write(bytes);
+            outputFile.close();
+
+            r = "<br/><center>Artifact saved! Next instances will use this new file!<br/>Redirecting...</center>";
+            return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/workspaces/" + wrksName +
+				   "/'\"/><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+r;
         } catch (Exception e) {
             e.printStackTrace();
             return "error "+e.getMessage();

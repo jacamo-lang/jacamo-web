@@ -432,7 +432,7 @@ public class RestImplAg extends AbstractBinder {
                 ag.getPL().clear();
                 ag.parseAS(new FileInputStream("src/agt/" + aslFileName), aslFileName);
                 
-                r = "ok, file saved. Agent reloaded but keeping intentions! Redirecting...";
+                r = "<br/><center>Agent reloaded but keeping intentions!<br/>Redirecting...</center>";
             }
             return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/agents/"+agName+
             	   "/mind'\"/><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+r;
@@ -922,16 +922,26 @@ public class RestImplAg extends AbstractBinder {
                                         sb.append("\t\tgraph[style=dashed]\n");
                                         String str1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
                                                 : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
-                                        sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
-                                                + " :\\n");
+                                        //sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
+                                        //        + " :\\n");
+                                        
+                                        sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "label=<<table><tr><td tooltip=\"\n\n" + 
+                                        		  "This think is for...\n\n" + 
+                                        		  "\">" + str1 + "</td></tr></table>>\n");
+                                        
                                         str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
                                                 ? info.getId().getArtifactType()
                                                 : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
-                                        sb.append(str1 + "\"\n");
+                                        //sb.append(str1 + "\"\n");
 
-                                        sb.append("\t\t\tshape=record style=filled fillcolor=white\n");
-                                        sb.append("\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName() + "\"\n");
-                                        sb.append("\t\t\ttarget=\"mainframe\"\n");
+                                        sb.append("\t\t\tshape=record style=filled fillcolor=white;\n");
+                                        sb.append("\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName() + "\";\n");
+                                        
+                                        sb.append("\t\t\tlabeltooltip=\"teste teste\";\n");
+                                        sb.append("\t\t\theadlabel=\"teste2\";\n");
+                                        
+                                        
+                                        sb.append("\t\t\ttarget=\"mainframe\";\n");
                                         sb.append("\t\t];\n");
 
                                         sb.append("\t};\n");
