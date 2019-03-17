@@ -1,4 +1,3 @@
-
 /* kill agent */
 function killAg(agent) {
 	h2 = new XMLHttpRequest(); 
@@ -44,7 +43,7 @@ function showLog() {
     			var t = document.createTextNode("clear log"); 
     			btn.appendChild(t);
     			btn.onclick = function() { delLog(); location.reload(); };
-    			document.getElementById('plog').appendChild(btn);
+    			/*document.getElementById('plog').appendChild(btn);*/
     		}
     	}
     }; 
@@ -167,8 +166,25 @@ sessionStorage.setItem("menucontent", fullMenu);
 var textarea = document.getElementById('log');
 function setLogScroll(){
     textarea.scrollTop = textarea.scrollHeight;
-}
+};
 
 setInterval(function(){
 	showLog();
 }, 1000);
+
+/* modal window */
+var modal = document.getElementById('modalinspection');
+var btnModal = document.getElementById("btninspection");
+var span = document.getElementsByClassName("close")[0];
+btnModal.onclick = function() {
+  modal.style.display = "block";
+};
+span.onclick = function() {
+  modal.style.display = "none";
+};
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};
+

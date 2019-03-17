@@ -94,7 +94,7 @@ public class RestImplOrg extends AbstractBinder {
          mainContent.append("	</div>\n");
          mainContent.append("</div>\n");
          
-        return designPage("JaCaMo-web - Organisation","",mainContent.toString());
+        return designPage("jacamo-web - organisation","",mainContent.toString());
     }
 
     private String getOrganisationMenu(String selectedOrganisation) {
@@ -156,7 +156,7 @@ public class RestImplOrg extends AbstractBinder {
             }
             mainContent.append("</div>\n");
 
-            return designPage("JaCaMo-web - Organisation: " + oeName, oeName, mainContent.toString());
+            return designPage("jacamo-web - organisation: " + oeName, oeName, mainContent.toString());
         } catch (Exception | TransformerFactoryConfigurationError e) {
             e.printStackTrace();
         }

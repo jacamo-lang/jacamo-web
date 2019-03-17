@@ -142,7 +142,7 @@ public class RestImplAg extends AbstractBinder {
         mainContent.append("    </div>\n");
         mainContent.append("</div>\n");
 
-        return designPage("JaCamo-web - Agents","",mainContent.toString());
+        return designPage("jacamo-web - agents","",mainContent.toString());
     }
 
     public String getAgentsMenu(String selectedAgent) {
@@ -204,15 +204,13 @@ public class RestImplAg extends AbstractBinder {
 
     protected Transformer  mindInspectorTransformerHTML = null;
     protected int MAX_LENGTH = 35;
+    /**
+     * Configure to show or hide window items
+     * Items: "bels", "annots", "rules", "evt", "mb", "int", "int-details"
+     */
     Map<String,Boolean> show = new HashMap<>();
     {
-        //show.put("bels", true);
         show.put("annots", Config.get().getBoolean(Config.SHOW_ANNOTS));
-        //show.put("rules", false);
-        //show.put("evt", true);
-        //show.put("mb", true);
-        //show.put("int", true);
-        //show.put("int-details", false);
     }
 
     @Path("/{agentname}/hide")
@@ -260,9 +258,6 @@ public class RestImplAg extends AbstractBinder {
             // set some source for the agent
             Agent ag = getAgent(name);
             
-            System.out.println("#1");
-
-            StringBuilder so = new StringBuilder();
             try {
                 BufferedReader in = null;
                 File f = new File("src/agt/" + agName + ".asl");
@@ -286,17 +281,14 @@ public class RestImplAg extends AbstractBinder {
                     outputFile.write(bytes);            
                     outputFile.close();
                     
-                    System.out.println("#2");
                 }
                 
             } catch (IOException e) {
                 e.printStackTrace();
             }
             ag.load(new FileInputStream("src/agt/" + agName + ".asl"), agName + ".asl");
-            //ag.parseAS(new FileInputStream("src/agt/" + agName + ".asl"), agName + ".asl");
             //ag.setASLSrc("no-inicial.asl");
             createAgLog(agName, ag);
-            System.out.println("#3");
             
             return "<head><meta http-equiv=\"refresh\" content=\"2; URL='/agents/"+name+"/mind'\" /></head>ok for "+name;
         } catch (Exception e) {
@@ -311,9 +303,16 @@ public class RestImplAg extends AbstractBinder {
     public String getAgentHtml(@PathParam("agentname") String agName) {
         StringWriter mainContent = new StringWriter();
 
+        // overview
+        mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
+        mainContent.append("    <div class=\"section\">\n");
+        mainContent.append("        <center><object data=\"/agents/"+ agName + "/mind/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
+        mainContent.append("    </div>\n");
+        mainContent.append("</div>\n");
+        
         // command box
         mainContent.append("<div id=\"command\" class=\"card fluid\">\n"); 
-        mainContent.append("<form autocomplete=\"off\" action=\"\">\n");
+        mainContent.append("<form autocomplete=\"off\", action=\"#command\">\n");
         mainContent.append("    <div class=\"autocomplete\">\n");
         mainContent.append("        <input style=\"width: 100%; margin: 0px;\" placeholder=\"Command (" + helpMsg1 + ") ...\"\n"); 
         mainContent.append("        type=\"text\" id=\"inputcmd\" onkeydown=\"if (event.keyCode == 13) {runCMD();} else {updateCmdCodeCompletion();}\">\n");
@@ -332,45 +331,48 @@ public class RestImplAg extends AbstractBinder {
             mainContent.append("      		<textarea class=logarea readonly style=\"display:none;\" type=\"text\" id=\"log\"></textarea>");
             mainContent.append("			</div>\n"); 
         }
-
-        // overview
-        mainContent.append("<div id=\"overview\" class=\"card fluid\">\n"); 
-        mainContent.append("    <div class=\"section\">\n");
-        mainContent.append("        <center><object data=\"/agents/"+ agName + "/mind/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
-        mainContent.append("    </div>\n");
-        mainContent.append("</div>\n");
+        
+        //agent foot menu
+        mainContent.append("<div id=\"agentfoot\" class=\"card fluid\">\n");
+        mainContent.append("    <div class=\"section\">\n"); 
+        mainContent.append("        <a href=\"#modalinspection\" id=\"btninspection\">inspection</a>&#160;&#160;&#160;\n");
+        mainContent.append("        <a href='' onclick='delLog()'>clear log</a>&#160;&#160;&#160;\n");
+        mainContent.append("        <a href='#' onclick='killAg(\"" + agName + "\")'>kill agent</a>&#160;&#160;&#160;\n");
+        mainContent.append("    </div>\n"); 
+        mainContent.append("</div>\n"); 
         
         // details
-        mainContent.append("<div id=\"\" class=\"card fluid\">\n");
-        mainContent.append("    <div class=\"section\">\n"); 
+        mainContent.append("<div id=\"modalinspection\" class=\"modal fade\" role=\"dialog\">\n"); 
+        mainContent.append("  <div class=\"modal-dialog\">\n");
+        mainContent.append("  <div class=\"modal-content\">\n");
+        mainContent.append("    <div class=\"modal-header\">\n");
+        mainContent.append("      <button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>\n"); 
+        mainContent.append("      <h4 class=\"modal-title\">Inspection</h4>\n"); 
+        mainContent.append("    </div>\n"); 
+        mainContent.append("    <div class=\"modal-body\">\n"); 
         try {
             if (mindInspectorTransformerHTML == null) {
                 mindInspectorTransformerHTML = TransformerFactory.newInstance().newTransformer(
-                        new StreamSource(this.getClass().getResource("/xml/agInspection.xsl").openStream()));//new asl2html("/xml/agInspection.xsl");
+                        new StreamSource(this.getClass().getResource("/xml/agInspection.xsl").openStream()));// new
+                                                                                                                // asl2html("/xml/agInspection.xsl");
             }
             for (String p : show.keySet())
                 mindInspectorTransformerHTML.setParameter("show-" + p, show.get(p) + "");
             Agent ag = getAgent(agName);
             if (ag != null) {
                 StringWriter so = new StringWriter();
-                mindInspectorTransformerHTML.transform(new DOMSource(ag.getAgState()), new StreamResult(so) );
+                mindInspectorTransformerHTML.transform(new DOMSource(ag.getAgState()), new StreamResult(so));
                 mainContent.append(so.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();
         } // transform to HTML
         mainContent.append("    </div>\n"); 
-        mainContent.append("</div>\n"); 
-
-        //kill agent
-        mainContent.append("<div id=\"killagent\" class=\"card fluid\">\n");
-        mainContent.append("    <div class=\"section\">\n"); 
-        mainContent.append("        <a href='#' onclick='killAg(\"" + agName + "\")'><h5>kill this agent</h5></a>\n");
-        mainContent.append("    </div>\n"); 
+        mainContent.append("  </div>\n"); 
+        mainContent.append("  </div>\n"); 
         mainContent.append("</div>\n"); 
         
-        
-        return designPage("JaCaMo-web - Agents: " + agName,agName,mainContent.toString());
+        return designPage("jacamo-web - agents: " + agName,agName,mainContent.toString());
     }
 
     @Path("/{agentname}")
@@ -813,7 +815,7 @@ public class RestImplAg extends AbstractBinder {
         } else {
         	o.append("\n");
         }
-        String dt = new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date());
+        String dt = new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date());
         o.append("["+dt+"] "+msg);
     }
     
@@ -958,17 +960,13 @@ public class RestImplAg extends AbstractBinder {
                                         sb.append("\t\tgraph[style=dashed]\n");
                                         String str1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
                                                 : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
-                                        //sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
-                                        //        + " :\\n");
-                                        
-                                        sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "label=<<table><tr><td tooltip=\"\n\n" + 
-                                        		  "This think is for...\n\n" + 
-                                        		  "\">" + str1 + "</td></tr></table>>\n");
+                                        sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
+                                                + " :\\n");
                                         
                                         str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
                                                 ? info.getId().getArtifactType()
                                                 : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
-                                        //sb.append(str1 + "\"\n");
+                                        sb.append(str1 + "\"\n");
 
                                         sb.append("\t\t\tshape=record style=filled fillcolor=white;\n");
                                         sb.append("\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName() + "\";\n");

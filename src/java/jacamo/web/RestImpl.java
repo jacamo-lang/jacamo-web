@@ -118,7 +118,7 @@ public class RestImpl extends AbstractBinder {
         mainContent.append("				<iframe id=\"mainframe\" name=\"mainframe\" src=\"/overview\" width=\"100%\" height=\"100%\"\n" + 
                            "					frameborder=0></iframe>\n"); 
 
-        return designPage("JaCamo-web", mainContent.toString());
+        return designPage("jacamo-web", mainContent.toString());
     }
 
     @Path("/overview")
@@ -185,7 +185,7 @@ public class RestImpl extends AbstractBinder {
         mainContent.append("	</div>\n");
         mainContent.append("</div>\n");
 
-        return designPage("JaCamo-web -  new agent", mainContent.toString());
+        return designPage("jacamo-web -  new agent", mainContent.toString());
     }
 
     @Path("/css/{resourcepathfile}")

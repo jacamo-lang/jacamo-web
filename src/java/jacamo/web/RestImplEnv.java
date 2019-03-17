@@ -104,7 +104,7 @@ public class RestImplEnv extends AbstractBinder {
         mainContent.append("	</div>\n");
         mainContent.append("</div>\n");
         
-        return designPage("JaCaMo-web - Environment", "", "", mainContent.toString());
+        return designPage("jacamo-web - environment", "", "", mainContent.toString());
     }
 
     private String getEnvironmentMenu(String selectedWorkspace, String selectedArtifact) {
@@ -178,7 +178,7 @@ public class RestImplEnv extends AbstractBinder {
             mainContent.append("	</div>\n"); 
             mainContent.append("</div>\n"); 
             
-            return designPage("JaCaMo-web - Environment: " + wrksName, wrksName, "", mainContent.toString());
+            return designPage("jacamo-web - environment: " + wrksName, wrksName, "", mainContent.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -219,7 +219,7 @@ public class RestImplEnv extends AbstractBinder {
             mainContent.append("    </div>\n"); 
             mainContent.append("</div>\n"); 
             
-            return designPage("JaCaMo-web - Environment: " + wrksName, wrksName, artName, mainContent.toString());
+            return designPage("jacamo-web - environment: " + wrksName, wrksName, artName, mainContent.toString());
         } catch (CartagoException e) {
             e.printStackTrace();
         }
@@ -474,13 +474,26 @@ public class RestImplEnv extends AbstractBinder {
             // linked artifacts
             info.getLinkedArtifacts().forEach(y -> {
                 // print node with defined shape
-                String s2 = (y.getName().length() <= MAX_LENGTH) ? y.getName()
-                        : y.getName().substring(0, MAX_LENGTH) + "...";
-                sb.append("\t\"" + y.getName() + "\" [ " + "\n\t\tlabel = \""
-                        + s2 + "|");
-                s2 = (y.getArtifactType().length() <= MAX_LENGTH) ? y.getArtifactType()
-                        : y.getArtifactType().substring(0, MAX_LENGTH) + "...";
-                sb.append(s2 + "\"\n");
+//                String s2 = (y.getName().length() <= MAX_LENGTH) ? y.getName()
+//                        : y.getName().substring(0, MAX_LENGTH) + "...";
+//                sb.append("\t\"" + y.getName() + "\" [ " + "\n\t\tlabel = \""
+//                        + s2 + "|");
+//                s2 = (y.getArtifactType().length() <= MAX_LENGTH) ? y.getArtifactType()
+//                        : y.getArtifactType().substring(0, MAX_LENGTH) + "...";
+//                sb.append(s2 + "\"\n");
+                
+                
+                String str1 = (y.getName().length() <= MAX_LENGTH) ? y.getName()
+                        : y.getName().substring(0, MAX_LENGTH) + " ...";
+                sb.append("\t\t\"" + y.getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
+                        + " :\\n");
+                
+                str1 = (y.getArtifactType().length() <= MAX_LENGTH)
+                        ? y.getArtifactType()
+                        : y.getArtifactType().substring(0, MAX_LENGTH) + " ...";
+                sb.append(str1 + "\"\n");
+                
+                
                 sb.append("\t\tURL = \"/workspaces/" + y.getWorkspaceId().getName() + "/" +  
                 			y.getName() + "\"\n");
                 sb.append("\t\ttarget=\"mainframe\"\n");
