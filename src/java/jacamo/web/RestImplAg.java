@@ -259,16 +259,11 @@ public class RestImplAg extends AbstractBinder {
             Agent ag = getAgent(name);
             
             try {
-                BufferedReader in = null;
+                
                 File f = new File("src/agt/" + agName + ".asl");
-                if (f.exists()) {
-                    in = new BufferedReader(new FileReader(f));
-                } else {
-                    in = new BufferedReader(
-                            new InputStreamReader(RestImpl.class.getResource("../src/agt/" + agName + ".asl").openStream()));
-                }
-                if (in.toString().isEmpty()) {
-                    FileOutputStream outputFile = new FileOutputStream("src/agt/" + agName + ".asl", false);
+                if (!f.exists()) {
+                    f.createNewFile(); 
+                    FileOutputStream outputFile = new FileOutputStream(f, false);
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.append("//Agent created automatically\n\n");
                     stringBuilder.append("!start.\n\n");
@@ -280,8 +275,7 @@ public class RestImplAg extends AbstractBinder {
                     byte[] bytes = stringBuilder.toString().getBytes();
                     outputFile.write(bytes);            
                     outputFile.close();
-                    
-                }
+                } 
                 
             } catch (IOException e) {
                 e.printStackTrace();
