@@ -438,7 +438,9 @@ public class RestImpl extends AbstractBinder {
                                         String str1 = (info.getId().getName().length() <= MAX_LENGTH)
                                                 ? info.getId().getName()
                                                 : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
-                                        sb.append("\t\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
+                                                
+                                        // It is possible to have same artifact name in different workspaces
+                                        sb.append("\t\t\t\"" + wksName + "_" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
                                                 + "\"\n");
 
                                         sb.append("\t\t\t\tshape=record style=filled fillcolor=white\n");
@@ -447,10 +449,10 @@ public class RestImpl extends AbstractBinder {
                                         sb.append("\t\t\t\ttarget=\"mainframe\"\n");
                                         sb.append("\t\t\t];\n");
 
-                                        wksartifacts.add(info.getId().getName());
+                                        wksartifacts.add(wksName + "_" + info.getId().getName());
                                         
                                         envlinks.append(
-                                                "\t\t\"" + y.getAgentId().getAgentName() + "\"->\"" + info.getId().getName() + "\" [arrowhead=odot]\n");
+                                                "\t\t\"" + y.getAgentId().getAgentName() + "\"->\"" + wksName + "_" + info.getId().getName() + "\" [arrowhead=odot]\n");
                                     }
                                 });
                             }

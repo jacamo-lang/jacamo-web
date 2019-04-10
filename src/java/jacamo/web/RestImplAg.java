@@ -954,7 +954,8 @@ public class RestImplAg extends AbstractBinder {
                                         sb.append("\t\tgraph[style=dashed]\n");
                                         String str1 = (info.getId().getName().length() <= MAX_LENGTH) ? info.getId().getName()
                                                 : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
-                                        sb.append("\t\t\"" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
+                                        // It is possible to have same artifact name in different workspaces
+                                        sb.append("\t\t\"" + wksName + "_" + info.getId().getName() + "\" [ " + "\n\t\t\tlabel=\"" + str1
                                                 + " :\\n");
                                         
                                         str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
@@ -974,7 +975,7 @@ public class RestImplAg extends AbstractBinder {
 
                                         sb.append("\t};\n");
 
-                                        sb.append("\t\"" + agName + "\"->\"" + info.getId().getName()
+                                        sb.append("\t\"" + agName + "\"->\"" + wksName + "_" + info.getId().getName()
                                                 + "\" [arrowhead=odot]\n");
                                     }
                                 }
