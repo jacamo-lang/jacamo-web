@@ -24,27 +24,55 @@ public class RestImplDF extends AbstractBinder {
         bind(new RestImplDF()).to(RestImplDF.class);
     }
 
-
+    public String designPage(String title, String mainContent) {
+        StringWriter so = new StringWriter();
+        so.append("<!DOCTYPE html>\n");
+        so.append("<html lang=\"en\" target=\"mainframe\">\n");
+        so.append("	<head>\n");
+        so.append("		<title>" + title + "</title>\n");
+        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+        so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n");
+        so.append("	</head>\n"); 
+        so.append("	<body>\n"); 
+        so.append("		<div id=\"root\">\n"); 
+        so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
+        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-12 col-lg-12\" id=\"doc-content\">\n"); 
+        so.append(                  mainContent);
+        so.append("				</main>\n"); 
+        so.append("			</div>\n");
+        so.append("		</div>\n"); 
+        so.append("	</body>\n");
+        so.append("<script src=\"/js/agent.js\"></script>\n");
+        so.append("</html>\n");
+        
+        return so.toString();
+    }
+    
+    
     /** DF **/
 
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getDFHtml() {
-        StringWriter so = new StringWriter();
-        so.append("<html><head><title>Directory Facilitator State</title></head><body>");
-        so.append("<font size=\"+2\"><p style='color: red; font-family: arial;'>Directory Facilitator State</p></font>");
-                            
-        so.append("<table border=\"0\" cellspacing=\"3\" cellpadding=\"6\" >");
-        so.append("<tr style='background-color: #ece7e6; font-family: arial;'><td><b>Agent</b></td><td><b>Services</b></td></tr>");
+        
+        StringWriter mainContent = new StringWriter();
+        
+        mainContent.append("<div id=\"directory-facilitator\" class=\"card fluid\">\n"); 
+        mainContent.append("	<h4 class=\"section double-padded\">Directory Facilitator</h4>\n"); 
+        mainContent.append("	<div class=\"section\">\n"); 
+        mainContent.append("		<table class=\"striped\">");
+        mainContent.append("			<thead><tr><th>Agent</th><th>Services</th></tr></thead>");
+        mainContent.append("			<tbody>");
+        
         if (JCMRest.getZKHost() == null) {
             // get DF locally 
             Map<String, Set<String>> df = BaseCentralisedMAS.getRunner().getDF();
             for (String a: df.keySet()) {
-                so.append("<tr style='font-family: arial;'><td>"+a+"</td>");
+                mainContent.append("				<tr><td>"+a+"</td>");
                 for (String s: df.get(a)) {
-                    so.append("<td>"+s+"<br/></td>");
+                    mainContent.append("				<td>"+s+"<br/></td>");
                 }
-                so.append("</tr>");
+                mainContent.append("				</tr>");
                     
             }
         } else {
@@ -52,18 +80,23 @@ public class RestImplDF extends AbstractBinder {
             try {
                 for (String s: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKDFNodeId)) {
                     for (String a: JCMRest.getZKClient().getChildren().forPath(JCMRest.JaCaMoZKDFNodeId+"/"+s)) {
-                        so.append("<tr style='font-family: arial;'><td>"+a+"</td>");
-                        so.append("<td>"+s+"<br/></td>");
-                        so.append("</tr>");                 
+                        mainContent.append("				<tr><td data-label=\"Agent\">"+a+"</td>");
+                        mainContent.append("				<td data-label=\"Services\">"+s+"<br/></td>");
+                        mainContent.append("				</tr>");                 
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        so.append("</table></body></html>");
+        mainContent.append("			</tbody>");
+        mainContent.append("		</table>");
+        mainContent.append("	</div>\n");
+        mainContent.append("</div>\n");
 
-        return so.toString();            
+        return designPage("jacamo-web - directory facilitator", mainContent.toString());
     }
 
+    
+    
 }
