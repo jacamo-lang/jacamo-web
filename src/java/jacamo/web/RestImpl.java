@@ -173,19 +173,36 @@ public class RestImpl extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getNewAgentForm() {
-        StringWriter mainContent = new StringWriter();
+        StringWriter so = new StringWriter();
+        so.append("<!DOCTYPE html>\n");
+        so.append("<html lang=\"en\" target=\"mainframe\">\n");
+        so.append("	<head>\n");
+        so.append("		<title>Overview</title>\n");
+        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+        so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n");
+        so.append("     <script src=\"/js/root.js\"></script>\n");
+        so.append("	</head>\n"); 
+        so.append("	<body>\n"); 
+        so.append("		<div id=\"root\">\n"); 
+        so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
+        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-12 col-lg-12\" id=\"doc-content\">\n"); 
+        so.append("					<div id=\"create-agent\" class=\"card fluid\">\n"); 
+        so.append("						<h4 class=\"section double-padded\">Create agent</h4>\n"); 
+        so.append("						<div class=\"section\">\n"); 
+        so.append("							<p>\n");
+        so.append("								<input style=\"width: 100%; margin: 0px;\" placeholder=\"enter agent's name ...\" type=\"text\" id=\"createAgent\" onkeydown=\"if (event.keyCode == 13) newAg()\">\n");
+        so.append("							</p>\n");
+        so.append("							<br/>\n");
+        so.append("						</div>\n");
+        so.append("					</div>\n");
+        so.append("				</main>\n"); 
+        so.append("			</div>\n"); 
+        so.append("		</div>\n"); 
+        so.append("	</body>\n");
+        so.append("<script src=\"/js/agent.js\"></script>\n");
+        so.append("</html>\n");
         
-        mainContent.append("<div id=\"create-agent\" class=\"card fluid\">\n"); 
-        mainContent.append("	<h4 class=\"section double-padded\">Create agent</h4>\n"); 
-        mainContent.append("	<div class=\"section\">\n"); 
-        mainContent.append("		<p>\n");
-        mainContent.append("			<input style=\"width: 100%; margin: 0px;\" placeholder=\"enter agent's name ...\" type=\"text\" id=\"createAgent\" onkeydown=\"if (event.keyCode == 13) newAg()\">\n");
-        mainContent.append("		</p>\n");
-        mainContent.append("		<br/>\n");
-        mainContent.append("	</div>\n");
-        mainContent.append("</div>\n");
-
-        return designPage("jacamo-web -  new agent", mainContent.toString());
+        return so.toString();
     }
 
     @Path("/css/{resourcepathfile}")
@@ -326,21 +343,21 @@ public class RestImpl extends AbstractBinder {
                         });
                     }
 
-					for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
-						// scheme
-						sb.append("\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId() + "\"");
-						sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
-						sb.append("\t\t];\n");
-						for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
-							orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
+                    for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
+                        // scheme
+                        sb.append("\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId() + "\"");
+                        sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
+                        sb.append("\t\t];\n");
+                        for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
+                            orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
                                     + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
-							sb.append("\t\t{rank=same "+gb.getId()+" "+schb.getArtId()+"};\n");
-						}
-						schb.getSchState().getPlayers().forEach(p -> {
-							orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
+                            sb.append("\t\t{rank=same "+gb.getId()+" "+schb.getArtId()+"};\n");
+                        }
+                        schb.getSchState().getPlayers().forEach(p -> {
+                            orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
                                     + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
-						});
-					}
+                        });
+                    }
                     
                     //sb.append("\t\t{rank=same " + groups.toString().replaceAll("\\[", "").replaceAll("\\]", "").replaceAll(",", "") + "};\n");
                         
