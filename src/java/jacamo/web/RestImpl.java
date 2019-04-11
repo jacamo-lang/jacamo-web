@@ -3,6 +3,8 @@ package jacamo.web;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,7 +15,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -177,7 +181,7 @@ public class RestImpl extends AbstractBinder {
         so.append("<!DOCTYPE html>\n");
         so.append("<html lang=\"en\" target=\"mainframe\">\n");
         so.append("	<head>\n");
-        so.append("		<title>Overview</title>\n");
+        so.append("		<title>New Agent</title>\n");
         so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
         so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n");
         so.append("     <script src=\"/js/root.js\"></script>\n");
@@ -205,6 +209,42 @@ public class RestImpl extends AbstractBinder {
         return so.toString();
     }
 
+    @Path("/forms/new_artifact")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getNewArtifactForm() {
+        StringWriter so = new StringWriter();
+        so.append("<!DOCTYPE html>\n");
+        so.append("<html lang=\"en\" target=\"mainframe\">\n");
+        so.append("	<head>\n");
+        so.append("		<title>New Artifact</title>\n");
+        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+        so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n");
+        so.append("     <script src=\"/js/root.js\"></script>\n");
+        so.append("	</head>\n"); 
+        so.append("	<body>\n"); 
+        so.append("		<div id=\"root\">\n"); 
+        so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
+        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-12 col-lg-12\" id=\"doc-content\">\n"); 
+        so.append("					<div id=\"create-artifact\" class=\"card fluid\">\n"); 
+        so.append("						<h4 class=\"section double-padded\">Create artifact template</h4>\n"); 
+        so.append("						<div class=\"section\">\n"); 
+        so.append("							<p>\n");
+        so.append("								<input style=\"width: 100%; margin: 0px;\" placeholder=\"enter package.artifact's name ...\"");
+        so.append("								 type=\"text\" id=\"createArtifact\" onkeydown=\"if (event.keyCode == 13) {newArt();}\">\n");
+        so.append("							</p>\n");
+        so.append("							<br/>\n");
+        so.append("						</div>\n");
+        so.append("					</div>\n");
+        so.append("				</main>\n"); 
+        so.append("			</div>\n"); 
+        so.append("		</div>\n"); 
+        so.append("	</body>\n");
+        so.append("</html>\n");
+        
+        return so.toString();
+    }
+    
     @Path("/css/{resourcepathfile}")
     @GET
     @Produces("text/css")

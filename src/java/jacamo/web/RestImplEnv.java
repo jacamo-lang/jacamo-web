@@ -151,6 +151,11 @@ public class RestImplEnv extends AbstractBinder {
                 e.printStackTrace();
             }
         }
+        so.append("<br/>");
+        so.append("<br/>");
+        so.append("<a href=\"/forms/new_artifact\" target='mainframe'>create artifact</a>\n"); 
+        
+        
         so.append("</nav>\n");
         
         return so.toString();
@@ -226,6 +231,56 @@ public class RestImplEnv extends AbstractBinder {
         return "error"; // TODO: set response properly
     }
 
+    @Path("/{wrksname}/{artname}")
+    @POST
+    @Produces(MediaType.TEXT_HTML)
+    public String createNewArtifact(@PathParam("wrksname") String wrksName, @PathParam("artname") String artName) {
+        try {
+            String r = "nok";
+            
+            System.out.println("#1");
+            File f = new File("src/env/" + artName.replaceAll("\\.", "/") + ".java");
+            if (!f.exists()) {
+                f.getParentFile().mkdirs();
+                f.createNewFile();
+                FileOutputStream outputFile = new FileOutputStream(f, false);
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("/* Artifact created automatically by jacamo-web */\n\n");
+                
+                System.out.println(artName.lastIndexOf(".") > 0);
+                System.out.println(artName.lastIndexOf("."));
+                System.out.println(artName.substring(0, "test.Temp".lastIndexOf(".")));
+                
+                // Check whether there is a package
+                if (artName.lastIndexOf(".") > 0) {
+                    stringBuilder.append("package " + artName.substring(0, artName.lastIndexOf(".")) + ";\n\n");
+                    System.out.println(artName.lastIndexOf("."));
+                }
+                
+                stringBuilder.append("import cartago.*;\n\n");
+                stringBuilder.append("@ARTIFACT_INFO(outports = { @OUTPORT(name = \"out-1\") })\n\n");
+                stringBuilder.append("public class " + artName.substring(artName.lastIndexOf(".")+1,artName.length()) + " extends Artifact {\n");
+                stringBuilder.append("\tvoid init(int initialValue) {\n");
+                stringBuilder.append("\t}\n");
+                stringBuilder.append("}\n");
+                
+                byte[] bytes = stringBuilder.toString().getBytes();
+                outputFile.write(bytes);
+                outputFile.close();
+                System.out.println("#2");
+            }
+            r = "<br/><center>Artifact template file created!<br/>Redirecting...</center>";
+            System.out.println("#3");
+            
+            return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/workspaces/" + wrksName + "/javafile/" + artName +
+                  "'\"/><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+r;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error " + e.getMessage();
+        }
+    }
+    
+    
     EnvironmentWebInspector bend = new EnvironmentWebInspector();
     
     @Path("/{wrksname}/img.svg")
