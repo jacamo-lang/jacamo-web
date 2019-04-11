@@ -177,9 +177,7 @@ public class RestImplEnv extends AbstractBinder {
             mainContent.append("</div>\n");
             mainContent.append("<div id=\"inspection\" class=\"card fluid\">\n");
             mainContent.append("	<div class=\"section\">\n"); 
-            mainContent.append("		Artifact <b></b> in workspace <b>" + wrksName + "</b>\n");
-            mainContent.append("		<table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
-            mainContent.append("		</table>");
+            mainContent.append("		Workspace <b>" + wrksName + "</b>\n");
             mainContent.append("	</div>\n"); 
             mainContent.append("</div>\n"); 
             
@@ -210,7 +208,11 @@ public class RestImplEnv extends AbstractBinder {
             
             mainContent.append("		Artifact <b>" + info.getId().getName() + "</b> in workspace <b>" + wrksName + "</b>");
             mainContent.append("		<a href=\"javafile/" + info.getId().getArtifactType() + "\">[edit]</a>\n");
-            mainContent.append("        <table border=0 cellspacing=3 cellpadding=6 style='font-family:verdana'>");
+            mainContent.append("		<br/>");
+            mainContent.append("		<br/>");
+            mainContent.append("		<table>");
+            mainContent.append("        	<thead><tr><th>Description</th><th>Value</th></tr></thead>");
+            mainContent.append("			<tbody>");
             for (ArtifactObsProperty op: info.getObsProperties()) {
                 StringBuilder vls = new StringBuilder();
                 String v = "";
@@ -220,6 +222,7 @@ public class RestImplEnv extends AbstractBinder {
                 }
                 mainContent.append("        <tr><td>"+op.getName()+"</td><td>"+vls+"</td></tr>");
             }
+            mainContent.append("			</tbody>");
             mainContent.append("        </table>");
             mainContent.append("    </div>\n"); 
             mainContent.append("</div>\n"); 
