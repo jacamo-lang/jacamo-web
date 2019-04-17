@@ -3,8 +3,6 @@ package jacamo.web;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,9 +13,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -192,6 +188,8 @@ public class RestImpl extends AbstractBinder {
         so.append("				<main class=\"col-xs-12 col-sm-12 col-md-12 col-lg-12\" id=\"doc-content\">\n"); 
         so.append("					<div id=\"create-agent\" class=\"card fluid\">\n"); 
         so.append("						<h4 class=\"section double-padded\">Create agent</h4>\n"); 
+     // TODO: The current method used window.open on the js, which is not showing the html to feedback the user after the post. 
+     // Maybe a solution is changing it to a form using submit function
         so.append("						<div class=\"section\">\n"); 
         so.append("							<p>\n");
         so.append("								<input style=\"width: 100%; margin: 0px;\" placeholder=\"enter agent's name ...\" type=\"text\" id=\"createAgent\" onkeydown=\"if (event.keyCode == 13) newAg()\">\n");
@@ -229,6 +227,8 @@ public class RestImpl extends AbstractBinder {
         so.append("					<div id=\"create-artifact\" class=\"card fluid\">\n"); 
         so.append("						<h4 class=\"section double-padded\">Create artifact template</h4>\n"); 
         so.append("						<div class=\"section\">\n"); 
+     // TODO: The current method used window.open on the js, which is not showing the html to feedback the user after the post. 
+     // Maybe a solution is changing it to a form using submit function
         so.append("							<p>\n");
         so.append("								<input style=\"width: 100%; margin: 0px;\" placeholder=\"enter package.artifact's name ...\"");
         so.append("								 type=\"text\" id=\"createArtifact\" onkeydown=\"if (event.keyCode == 13) {newArt();}\">\n");
@@ -245,6 +245,55 @@ public class RestImpl extends AbstractBinder {
         return so.toString();
     }
     
+    @Path("/forms/new_role")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getNewRoleForm() {
+        StringWriter so = new StringWriter();
+        so.append("<!DOCTYPE html>\n");
+        so.append("<html lang=\"en\" target=\"mainframe\">\n");
+        so.append("	<head>\n");
+        so.append("		<title>New Role</title>\n");
+        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
+        so.append("     <meta http-equiv=\"Content-type\" name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n");
+        so.append("     <script src=\"/js/root.js\"></script>\n");
+        so.append("	</head>\n"); 
+        so.append("	<body>\n"); 
+        so.append("		<div id=\"root\">\n"); 
+        so.append("			<div class=\"row\" id=\"doc-wrapper\">\n"); 
+        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-12 col-lg-12\" id=\"doc-content\">\n"); 
+        so.append("					<div id=\"create-role\" class=\"card fluid\">\n"); 
+        so.append("						<h4 class=\"section double-padded\">Create role</h4>\n"); 
+        so.append("						<div class=\"section\">\n"); 
+        so.append("                           <p>\n");
+        so.append("                               <input style=\"width: 100%; margin: 0px;\" placeholder=\"enter organisation.group.role's name ...\"");
+        so.append("                                type=\"text\" id=\"orgGrRole\" onkeydown=\"if (event.keyCode == 13) {newRole();}\">\n");
+        so.append("                           </p>\n");
+        so.append("                           <br/>\n");
+
+// TODO: The current method used window.open on the js, which is not showing the html to feedback the user after the post. 
+// Maybe a solution is changing it to a form using submit function
+//        so.append("	<form action=\"/oe/"+oeName+"/group/"+groupName+"\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">");
+//        so.append("		<div>\n");
+//        so.append("			<textarea name=\"role\" form=\"usrform\">" + so.toString());
+//        so.append("			</textarea>\n");
+//        so.append("		</div>\n");
+//        so.append("	<div class=\"editor_footer\">\n");
+//        so.append("			<button type=\"submit\" onclick=\"location.href='/oe/"+ oeName + "/os';\">Create</button>\n");
+//        so.append("	</div>");
+//        so.append("	</form>\n"); 
+        
+        so.append("						</div>\n");
+        so.append("					</div>\n");
+        so.append("				</main>\n"); 
+        so.append("			</div>\n"); 
+        so.append("		</div>\n"); 
+        so.append("	</body>\n");
+        so.append("</html>\n");
+        
+        return so.toString();
+    }
+
     @Path("/css/{resourcepathfile}")
     @GET
     @Produces("text/css")

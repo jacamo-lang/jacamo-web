@@ -11,7 +11,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -30,9 +33,9 @@ import moise.os.OS;
 import moise.os.fs.Goal;
 import moise.os.fs.Mission;
 import moise.os.ns.Norm;
+import moise.os.ss.Role;
 import moise.os.ns.NS.OpTypes;
 import ora4mas.nopl.GroupBoard;
-import ora4mas.nopl.NormativeBoard;
 import ora4mas.nopl.OrgArt;
 import ora4mas.nopl.OrgBoard;
 import ora4mas.nopl.SchemeBoard;
@@ -113,6 +116,10 @@ public class RestImplOrg extends AbstractBinder {
             }
         }
 
+        so.append("<br/>");
+        so.append("<br/>");
+        so.append("<a href=\"/forms/new_role\" target='mainframe'>create role</a>\n"); 
+        
         so.append("</nav>\n");
 
         return so.toString();
@@ -162,6 +169,40 @@ public class RestImplOrg extends AbstractBinder {
         }
         return "error"; // TODO: set response properly
     }
+    
+    @Path("/{oename}/group/{groupname}")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.TEXT_HTML)
+    public String createNewArtifact(@PathParam("oename") String oeName, @PathParam("groupname") String groupName,
+            @FormParam("role") String role) {
+        try {
+            String r = "nok";
+            
+            System.out.println("#1");
+                
+            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+                if (gb.getOEId().equals(oeName)) {
+                    Role newRole = new Role(role, gb.getSpec().getSS());
+                    newRole.addSuperRole("soc");
+                    gb.getSpec().getSS().addRoleDef(newRole,true);
+                    gb.getSpec().addRole(role);
+                    System.out.println("#2");
+                }
+            }
+
+            r = "<br/><center>Role created!<br/>Redirecting...</center>";
+            System.out.println("#3");
+            
+            return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/oe/" + oeName + "/group/" + groupName +
+                  "'\"/><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+r;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error " + e.getMessage();
+        }
+    }
+    
+
 
     Map<String,Boolean> show = new HashMap<>();
     {
