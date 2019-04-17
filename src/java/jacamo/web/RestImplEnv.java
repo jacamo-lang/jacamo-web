@@ -241,7 +241,6 @@ public class RestImplEnv extends AbstractBinder {
         try {
             String r = "nok";
             
-            System.out.println("#1");
             File f = new File("src/env/" + artName.replaceAll("\\.", "/") + ".java");
             if (!f.exists()) {
                 f.getParentFile().mkdirs();
@@ -250,14 +249,9 @@ public class RestImplEnv extends AbstractBinder {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("/* Artifact created automatically by jacamo-web */\n\n");
                 
-                System.out.println(artName.lastIndexOf(".") > 0);
-                System.out.println(artName.lastIndexOf("."));
-                System.out.println(artName.substring(0, "test.Temp".lastIndexOf(".")));
-                
                 // Check whether there is a package
                 if (artName.lastIndexOf(".") > 0) {
                     stringBuilder.append("package " + artName.substring(0, artName.lastIndexOf(".")) + ";\n\n");
-                    System.out.println(artName.lastIndexOf("."));
                 }
                 
                 stringBuilder.append("import cartago.*;\n\n");
@@ -270,10 +264,8 @@ public class RestImplEnv extends AbstractBinder {
                 byte[] bytes = stringBuilder.toString().getBytes();
                 outputFile.write(bytes);
                 outputFile.close();
-                System.out.println("#2");
             }
             r = "<br/><center>Artifact template file created!<br/>Redirecting...</center>";
-            System.out.println("#3");
             
             return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/workspaces/" + wrksName + "/javafile/" + artName +
                   "'\"/><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+r;
@@ -404,7 +396,6 @@ public class RestImplEnv extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getLoadJavafileForm(@PathParam("wrksname") String wrksName, @PathParam("javafilename") String javaFileName) {
-        
         
         StringBuilder so = new StringBuilder();
         try {
