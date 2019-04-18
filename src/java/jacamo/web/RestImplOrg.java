@@ -174,7 +174,7 @@ public class RestImplOrg extends AbstractBinder {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_HTML)
-    public String createNewArtifact(@PathParam("oename") String oeName, @PathParam("groupname") String groupName,
+    public String createNewRole(@PathParam("oename") String oeName, @PathParam("groupname") String groupName,
             @FormParam("role") String role) {
         try {
             String r = "nok";
