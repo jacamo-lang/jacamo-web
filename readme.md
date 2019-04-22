@@ -1,7 +1,7 @@
 
 Jacamo-web (formerly jacamo-rest) is an interactive programming IDE based on JaCaMo (Jason + CArtAgO + Moise) Multi-Agent Oriented Programming platform.
 
-![Alt text](https://g.gravizo.com/source/programmingconcept?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-rest%2Fmaster%2Freadme.md)
+![Alt text](https://g.gravizo.com/source/programmingconcept?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-web%2Fmaster%2Freadme.md)
 <details> 
 <summary>Interactive programming concept with jacamo-web</summary>
 programmingconcept
