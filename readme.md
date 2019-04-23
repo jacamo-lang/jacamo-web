@@ -74,37 +74,6 @@ See ClientTest.java for an example of Java client. It can be run with `gradle te
 
 # REST API
 
-## for humans
-
-* GET HTML `/agents`:
-    returns the list of running agents
-
-* GET HTML `/agents/{agentname}/mind`
-    returns the mind state of the agent
-
-* GET HTML `/services`
-    returns the DF state
-
-## for machine (or intelligent humans)
-
-* POST `/agents/{agentname}`
-    creates a new agent.
-
-* DELETE `/agents/{agentname}`
-    Kills the agent.
-
-* POST XML `/agents/{agentname}/mb`
-    Adds a message in the agent's mailbox. See class Message.java for details of the fields.
-
-* GET XML `/agents/{agentname}/mind`
-    returns the mind state of the agent
-
-* GET TXT `/agents/{agentname}/plans`
-    returns the agent's plans. A label can be used as argument:
-    `/agents/{agentname}/plans?label=planT`
-
-* POST FORM `/agents/{agentname}/plans`
-    upload some plans into the agent's plan library
+REST API https://app.swaggerhub.com/apis/sma-das/jacamo-rest/1.0.0[documentation]
 
 
-See RestImpl.java for more
