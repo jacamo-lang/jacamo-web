@@ -74,6 +74,6 @@ See ClientTest.java for an example of Java client. It can be run with `gradle te
 
 # REST API
 
-REST API https://app.swaggerhub.com/apis/sma-das/jacamo-rest/1.0.0[Documentation]
+REST API [Documentation](https://app.swaggerhub.com/apis/sma-das/jacamo-rest/1.0.0)
 
 
