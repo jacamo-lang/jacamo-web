@@ -12,6 +12,9 @@
 */
 
 mas financial {
+/*
+    agent one
+
     agent bazin         : bazin.asl {
         join:       financialorg
         roles:      consultant in financialteam 
@@ -39,7 +42,7 @@ mas financial {
         }
         scheme financialsch : financialsch
     }
- 
+*/ 
     asl-path: src/agt
               src/agt/inc
               

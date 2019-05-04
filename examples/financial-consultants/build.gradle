@@ -50,16 +50,15 @@ dependencies {
 	//Java compiler
 	compile group: 'net.openhft', name: 'compiler', version: '2.3.1'
 	//Jacamo-web
-	//compile files ('lib/jacamo-rest-0.1-SNAPSHOT.jar')
-	compile group: 'org.jacamo', name: 'jacamo-rest', version: '0.1-SNAPSHOT', changing: true, transitive: true
+
 	//Jason for Apache Camel
 	compile files ('lib/jasonComponent-1.2.1.jar')
 	//Graphviz
 	compile group: 'guru.nidi', name: 'graphviz-java', version: '0.7.0'
 	//Log4j is used by camel
 	compile group: 'org.springframework', name: 'spring-context', version: '5.0.10.RELEASE'
-
-	compile files ('lib/jacamo-rest-0.1-SNAPSHOT.jar')
+	//compile group: 'org.jacamo', name: 'jacamo-rest', version: '0.1-SNAPSHOT', changing: true, transitive: true
+	compile files ('../../build/libs/jacamo-rest-0.1-SNAPSHOT.jar')
 
 	compile 'javax.xml.bind:jaxb-api:+'
 	compile 'com.sun.xml.bind:jaxb-core:+'

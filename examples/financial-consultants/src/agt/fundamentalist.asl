@@ -1,10 +1,9 @@
-
 /* * * * initial beliefs * * * */
 
 /* * * * setup plans * * * */
 
-//!focusFundamentusArtifact.
-//!joinFinancialGroup.
+!focusFundamentusArtifact.
+!joinFinancialGroup.
 
 /* * * * plans * * * */
 
@@ -15,16 +14,24 @@
     joinWorkspace(financialagents,Omain); 
     focusWhenAvailable("fundamentus")
     .
+
++!makeFundamentusArtifact <-
+    joinWorkspace(financialagents,Omain); 
+    makeArtifact("fundamentus","dynamic.stock.FundamentusArtifact",[],Aid);
+    .
     
 +!joinFinancialGroup[source(self)] <-
-    joinWorkspace(financialorg,Ofa);
+    joinWorkspace(financialagents,Ofa);
     .print("DEBUG: Joining group...");
     g::lookupArtifact(financialteam, GrArtId)[wid(Ofa)];
     g::focus(GrArtId)[wid(Ofa)];
     g::adoptRole(consultant)[wid(Ofa)];
-    s::lookupArtifact(financialsch, ScArtId)[wid(Ofa)];
-    s::focus(ScArtId)[wid(Ofa)];
-    s::commitMission("mConsultant")[artifact_id(ScArtId),wid(Ofa)];
     .
   
++!acceptScheme[source(self)] <-
+    s::lookupArtifact(financialsch, ScArtId);
+    s::focus(ScArtId);
+    s::commitMission("mConsultant")[artifact_id(ScArtId)];
+    .
     
+            
