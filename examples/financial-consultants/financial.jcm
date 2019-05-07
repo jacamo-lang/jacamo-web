@@ -47,8 +47,8 @@ mas financial {
               src/agt/inc
               
     platform:   jacamo.web.JCMRest("--restPort 8080")
-    jasonComponent.JasonCamel("routes.xml") 
-
+    			//jacamo.web.JCMRest("--main 2181 --restPort 8080") // zookeeper
+                jasonComponent.JasonCamel("routes.xml")
 }
 
 /*

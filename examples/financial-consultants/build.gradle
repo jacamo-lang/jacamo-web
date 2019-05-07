@@ -18,6 +18,7 @@ targetCompatibility = 1.8
 
 repositories {
   mavenCentral()
+  maven { url "https://github.com/cleberjamaral/camel-artifact/raw/maven2" }
   maven { url "http://jacamo.sourceforge.net/maven2" }
   maven { url "http://jade.tilab.com/maven/" }
   flatDir { dirs 'lib' }
@@ -36,7 +37,7 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.apache.camel/camel-core
 	compile group: 'org.apache.camel', name: 'camel-core', version: versions.camel
 	// https://mvnrepository.com/artifact/org.apache.camel/camel-telegram
-	compile group: 'org.apache.camel', name: 'camel-telegram', version: '2.22.1'
+	compile group: 'org.apache.camel', name: 'camel-telegram', version: versions.camel
 	// https://mvnrepository.com/artifact/javax.xml.soap/javax.xml.soap-api
 	compile group: 'javax.xml.soap', name: 'javax.xml.soap-api', version: '1.4.0'
 	// https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
@@ -49,7 +50,6 @@ dependencies {
 	compile files ('lib/cartago-2.4-DYN-SNAPSHOT.jar')
 	//Java compiler
 	compile group: 'net.openhft', name: 'compiler', version: '2.3.1'
-	//Jacamo-web
 
 	//Jason for Apache Camel
 	compile files ('lib/jasonComponent-1.2.1.jar')
@@ -60,7 +60,6 @@ dependencies {
 	//compile group: 'org.jacamo', name: 'jacamo-rest', version: '0.1-SNAPSHOT', changing: true, transitive: true
 	compile files ('../../build/libs/jacamo-rest-0.1-SNAPSHOT.jar')
 
-	compile 'javax.xml.bind:jaxb-api:+'
 	compile 'com.sun.xml.bind:jaxb-core:+'
 	compile 'com.sun.xml.bind:jaxb-impl:+'
 	compile 'org.glassfish.jersey.containers:jersey-container-servlet:2.27'
@@ -72,15 +71,9 @@ dependencies {
 	compile 'org.apache.zookeeper:zookeeper:3.5.4-beta'
 	compile 'org.apache.curator:curator-framework:4.0.1'
 	compile 'org.apache.curator:curator-x-async:4.0.1'
-	compile files ('lib/jasonComponent-1.2.1.jar')
-	compile files ('lib/cartago-2.4-DYN-SNAPSHOT.jar')
 	compile group: 'log4j', name: 'log4j', version: '1.2.17'
-	compile group: 'guru.nidi', name: 'graphviz-java', version: '0.7.0'
-	compile group: 'net.openhft', name: 'compiler', version: '2.3.1'
-	compile group: 'org.springframework', name: 'spring-context', version: '5.0.10.RELEASE'
 	compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
 	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-
 }
 
 configurations.all {
