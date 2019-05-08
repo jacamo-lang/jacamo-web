@@ -178,7 +178,8 @@ public class JCMRest extends DefaultPlatformImpl {
             //JdkHttpServerFactory.createHttpServer(baseUri, config);
             System.out.println("JaCaMo Rest API is running on "+restServerURI);
             return s;
-        } catch (javax.ws.rs.ProcessingException e) {           
+        } catch (javax.ws.rs.ProcessingException e) {  
+            System.out.println("trying next port for web server "+(port+1)+". e="+e);
             return startRestServer(port+1);
         } catch (Exception e) {
             e.printStackTrace();
