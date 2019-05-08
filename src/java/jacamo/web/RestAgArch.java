@@ -103,36 +103,37 @@ public class RestAgArch extends AgArch {
             super.sendMsg(m);
             return;
         } catch (ReceiverNotFoundException e) {
-            String adr = null;
+            try {
+                String adr = null;
 
-            if (m.getReceiver().startsWith("http://")) {
-                adr = m.getReceiver();
-            } else {
-                // try ZK
-                byte[] badr = zkClient.getData().forPath(JCMRest.JaCaMoZKAgNodeId+"/"+m.getReceiver());
-                if (badr != null)
-                    adr = new String(badr);
-            }
-            
-            // try by rest to send the message by REST API
-            if (adr != null) {
-                // do POST
-                String r = null;
-                if (adr.startsWith("http")) {
-                    r = restClient
-                              .target(adr)
-                              .path("mb")
-                              .request(MediaType.APPLICATION_XML)
-                              .accept(MediaType.TEXT_PLAIN)
-                              .post(Entity.xml( new jacamo.web.Message(m)), String.class);
+                if (m.getReceiver().startsWith("http://")) {
+                    adr = m.getReceiver();
+                } else {
+                    // try ZK
+                    byte[] badr = zkClient.getData().forPath(JCMRest.JaCaMoZKAgNodeId + "/" + m.getReceiver());
+                    if (badr != null)
+                        adr = new String(badr);
                 }
-                if (!"ok".equals(r)) {
+
+                // try by rest to send the message by REST API
+                if (adr != null) {
+                    // do POST
+                    String r = null;
+                    if (adr.startsWith("http")) {
+                        r = restClient.target(adr).path("mb").request(MediaType.APPLICATION_XML)
+                                .accept(MediaType.TEXT_PLAIN).post(Entity.xml(new jacamo.web.Message(m)), String.class);
+                    }
+                    if (!"ok".equals(r)) {
+                        throw e;
+                    }
+                } else {
                     throw e;
                 }
-            } else {
+            } catch (Exception ex) {
+                System.err.println("Error " + ex);
                 throw e;
             }
-        }        
+        }
     }
     
     public void dfRegister(String service, String type) {
