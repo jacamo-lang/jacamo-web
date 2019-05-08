@@ -461,7 +461,13 @@ public class RestImplAg extends AbstractBinder {
                 outputFile.write(bytes);
                 outputFile.close();
                 
-                ag.getPL().clear();
+                //ag.getPL().clear();
+                for (Plan p: new ArrayList<>(ag.getPL().getPlans())) {
+                	if (p.getSource().equals(aslFileName)) {
+                		ag.getPL().remove(p.getLabel());
+                	}
+                }
+                
                 ag.parseAS(new FileInputStream("src/agt/" + aslFileName), aslFileName);
                 
                 r = "<br/><center>Agent reloaded but keeping intentions!<br/>Redirecting...</center>";

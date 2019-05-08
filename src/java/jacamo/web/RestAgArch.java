@@ -103,7 +103,7 @@ public class RestAgArch extends AgArch {
             super.sendMsg(m);
             return;
         } catch (ReceiverNotFoundException e) {
-            String adr = null;
+            String adr = null;	
 
             if (m.getReceiver().startsWith("http://")) {
                 adr = m.getReceiver();
