@@ -120,31 +120,35 @@ public class Account extends Artifact {
 ```[bob] .send(alice,askOne,marry(bob),R); .print(R)```
 
 7. Since the folder src/org/ already has family.xml file, let's create this organisation
-```[bob] createWorkspace(family); 
-	joinWorkspace(family,Ofa);
-	o::makeArtifact(family, "ora4mas.nopl.OrgBoard", ["src/org/family.xml"], OrgArtId)[wid(Ofa)];
-	o::focus(OrgArtId);
-	g::createGroup(familygroup, familygroup, GrArtId);
-	g::focus(GrArtId);
+```[bob] 
+createWorkspace(family); 
+joinWorkspace(family,Ofa);
+o::makeArtifact(family, "ora4mas.nopl.OrgBoard", ["src/org/family.xml"], OrgArtId)[wid(Ofa)];
+o::focus(OrgArtId);
+g::createGroup(familygroup, familygroup, GrArtId);
+g::focus(GrArtId);
 ```
 8. bob takes husband role
-```[bob] joinWorkspace(family,Ofa);
-	g::lookupArtifact(familygroup, GrArtId)[wid(Ofa)];
-	g::focus(GrArtId)[wid(Ofa)];
-	g::adoptRole(husband)[wid(Ofa)];
+```[bob] 
+joinWorkspace(family,Ofa);
+g::lookupArtifact(familygroup, GrArtId)[wid(Ofa)];
+g::focus(GrArtId)[wid(Ofa)];
+g::adoptRole(husband)[wid(Ofa)];
 ```
 9. alice takes wife role
-```[alice] joinWorkspace(family,Ofa);
-	g::lookupArtifact(familygroup, GrArtId)[wid(Ofa)];
-	g::focus(GrArtId)[wid(Ofa)];
-    	g::adoptRole(wife)[wid(Ofa)];
+```[alice] 
+joinWorkspace(family,Ofa);
+g::lookupArtifact(familygroup, GrArtId)[wid(Ofa)];
+g::focus(GrArtId)[wid(Ofa)];
+g::adoptRole(wife)[wid(Ofa)];
 ```
 10. They will have a child, create role "family.familygroup.son"
 
 11. Using other existing files (one.asl, graham.asl,...), create agent called "one"
-```[one] !create_group
-	!create_agents
-	!create_scheme
+```[one] 
+!create_group
+!create_agents
+!create_scheme
 ```
 12. Agents take their roles. From agents graham, greenblatt, bazin and myPA execute:
 ```!acceptScheme```
