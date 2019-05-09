@@ -108,19 +108,35 @@ public class Account extends Artifact {
 }
 ```
 3. Create agent bob. From bob intantiate a bank account
-```[bob] makeArtifact(account,"dynamic.Account",[],I); focus(I)```
+```
+[bob] 
+makeArtifact(account,"dynamic.Account",[],I); 
+focus(I)
+```
 
 4. Create agent alice. Then, bob ask alice for marriage, but at this moment she denies
-```[bob] .send(alice,askOne,marry(bob),R); .print(R)```
+```
+[bob] 
+.send(alice,askOne,marry(bob),R); 
+.print(R)
+```
 
 5. alice becomes willing to marry bob
-```[alice] +marry(bob)```
+```
+[alice] 
++marry(bob)
+```
 
 6. bob tries again
-```[bob] .send(alice,askOne,marry(bob),R); .print(R)```
+```
+[bob] 
+.send(alice,askOne,marry(bob),R); 
+.print(R)
+```
 
 7. Since the folder src/org/ already has family.xml file, let's create this organisation
-```[bob] 
+```
+[bob] 
 createWorkspace(family); 
 joinWorkspace(family,Ofa);
 o::makeArtifact(family, "ora4mas.nopl.OrgBoard", ["src/org/family.xml"], OrgArtId)[wid(Ofa)];
@@ -129,14 +145,16 @@ g::createGroup(familygroup, familygroup, GrArtId);
 g::focus(GrArtId);
 ```
 8. bob takes husband role
-```[bob] 
+```
+[bob] 
 joinWorkspace(family,Ofa);
 g::lookupArtifact(familygroup, GrArtId)[wid(Ofa)];
 g::focus(GrArtId)[wid(Ofa)];
 g::adoptRole(husband)[wid(Ofa)];
 ```
 9. alice takes wife role
-```[alice] 
+```
+[alice] 
 joinWorkspace(family,Ofa);
 g::lookupArtifact(familygroup, GrArtId)[wid(Ofa)];
 g::focus(GrArtId)[wid(Ofa)];
@@ -145,15 +163,25 @@ g::adoptRole(wife)[wid(Ofa)];
 10. They will have a child, create role "family.familygroup.son"
 
 11. Using other existing files (one.asl, graham.asl,...), create agent called "one"
-```[one] 
+```
+[one]
 !create_group
 !create_agents
 !create_scheme
 ```
 12. Agents take their roles. From agents graham, greenblatt, bazin and myPA execute:
-```!acceptScheme```
+```
+[graham],[greenblatt],[bazin] and [myPA]
+!acceptScheme
+```
 
 13. An agent create the artifact that allow to consult assets data. From bazin execute:
-```!makeFundamentusArtifact```
+```
+[bazin] 
+!makeFundamentusArtifact
+```
 14. Now the system are fully instantiated, we can explore the MAS dimensions and finally shutdown the demo:
-```.stopMAS```
+```
+[one] 
+.stopMAS
+```
