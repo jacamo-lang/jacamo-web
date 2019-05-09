@@ -1,5 +1,5 @@
 /*
-   Project JaCaMo REST
+   Project JaCaMo web
 
    Gradle build file for JaCaMo Applications
    October 13, 2018 - 16:23:38
@@ -21,7 +21,7 @@ repositories {
     mavenCentral()
 
     maven { url "http://jacamo.sourceforge.net/maven2" }
-    maven { url "http://jade.tilab.com/maven/" }
+    maven { url "https://jade.tilab.com/maven/" }
 
     flatDir {
        dirs 'lib'
@@ -54,6 +54,9 @@ dependencies {
 	compile group: 'guru.nidi', name: 'graphviz-java', version: '0.7.0'
 	// https://mvnrepository.com/artifact/com.google.guava/guava
 	compile group: 'com.google.guava', name: 'guava', version: '11.0.2'
+	
+	//Java compiler
+	compile group: 'net.openhft', name: 'compiler', version: '2.3.1'
 
 	//compile files ('lib/moise-0.12-SNAPSHOT.jar')	
 	//compile files ('lib/jason-2.4-SNAPSHOT.jar')
@@ -152,7 +155,7 @@ clean {
 
 
 jar {
-    baseName 'jacamo-rest'
+    baseName 'jacamo-web'
 }
 
 // the following lines is used to avoid errors while generating javadoc
@@ -165,13 +168,13 @@ if (JavaVersion.current().isJava8Compatible()) {
 }
 
 task javadocJar (type: Jar, dependsOn: javadoc) {
-    baseName 'jacamo-rest'
+    baseName 'jacamo-web'
     classifier = 'javadoc'
     from '${docsDir}/../../doc/api'
 }
 
 task sourceJar (type : Jar) {
-    baseName 'jacamo-rest'
+    baseName 'jacamo-web'
     classifier = 'sources'
     from sourceSets.main.allSource
 }
@@ -184,7 +187,7 @@ publishing {
             artifact sourceJar
             artifact javadocJar
 
-            artifactId 'jacamo-rest'
+            artifactId 'jacamo-web'
         }
     }
 }
@@ -192,8 +195,8 @@ publishing {
 // transfer local maven artifact to our maven2 repository at sourceforge
 task publishMavenSF(dependsOn: [ 'build', 'publishToMavenLocal']) {
   doLast {
-    def wdir = System.getProperty("user.home")+'/.m2/repository/org/jacamo/jacamo-rest'
-    def tdir = 'jomifred,jacamo@web.sf.net:/home/project-web/jacamo/htdocs/maven2/org/jacamo/jacamo-rest'
+    def wdir = System.getProperty("user.home")+'/.m2/repository/org/jacamo/jacamo-web'
+    def tdir = 'jomifred,jacamo@web.sf.net:/home/project-web/jacamo/htdocs/maven2/org/jacamo/jacamo-web'
     exec {
         commandLine 'scp', '-r', project.version, tdir
         workingDir wdir
