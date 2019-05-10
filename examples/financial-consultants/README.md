@@ -129,8 +129,11 @@ credit(100)
 
 6. Let's see how intentions are kept running while changed plans will produce different intentions
 ```
-+balance(X) <- 
-    .print("Balance changed to ",X).
++hi <- 
+    .wait(2000);
+    .print("hi");
+    !hi;
+    .
 ```
 
 7. Create agent alice. Then, bob ask alice for marriage, but at this moment she denies
