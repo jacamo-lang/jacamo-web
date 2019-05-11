@@ -114,27 +114,49 @@ makeArtifact(account,"dynamic.Account",[],I);
 focus(I)
 ```
 
-4. Create agent alice. Then, bob ask alice for marriage, but at this moment she denies
+4. Create agent father. From father watch bob's account and give him some money
+```
+[bob] 
+lookupArtifact(account,I); 
+focus(I);
+credit(100)
+```
+5. Let's edit bob's code, making him react when the balance changes
+```
++balance(X) <- 
+    .print("Balance changed to ",X).
+```
+
+6. Let's see how intentions are kept running while changed plans will produce different intentions
+```
++hi <- 
+    .wait(2000);
+    .print("hi");
+    !hi;
+    .
+```
+
+7. Create agent alice. Then, bob ask alice for marriage, but at this moment she denies
 ```
 [bob] 
 .send(alice,askOne,marry(bob),R); 
 .print(R)
 ```
 
-5. alice becomes willing to marry bob
+8. alice becomes willing to marry bob
 ```
 [alice] 
 +marry(bob)
 ```
 
-6. bob tries again
+9. bob tries again
 ```
 [bob] 
 .send(alice,askOne,marry(bob),R); 
 .print(R)
 ```
 
-7. Since the folder src/org/ already has family.xml file, let's create this organisation
+10. Since the folder src/org/ already has family.xml file, let's create this organisation
 ```
 [bob] 
 createWorkspace(family); 
@@ -144,7 +166,7 @@ o::focus(OrgArtId);
 g::createGroup(familygroup, familygroup, GrArtId);
 g::focus(GrArtId);
 ```
-8. bob takes husband role
+11. bob takes husband role
 ```
 [bob] 
 joinWorkspace(family,Ofa);
@@ -152,7 +174,7 @@ g::lookupArtifact(familygroup, GrArtId)[wid(Ofa)];
 g::focus(GrArtId)[wid(Ofa)];
 g::adoptRole(husband)[wid(Ofa)];
 ```
-9. alice takes wife role
+12. alice takes wife role
 ```
 [alice] 
 joinWorkspace(family,Ofa);
@@ -160,27 +182,19 @@ g::lookupArtifact(familygroup, GrArtId)[wid(Ofa)];
 g::focus(GrArtId)[wid(Ofa)];
 g::adoptRole(wife)[wid(Ofa)];
 ```
-10. They will have a child, create role "family.familygroup.son"
+13. They will have a child, create role "family.familygroup.son"
 
-11. Using other existing files (one.asl, graham.asl,...), create agent called "one"
+14. Using other existing files (one.asl, graham.asl,...), create agent called "one"
 ```
 [one]
-!create_group
-!create_agents
-!create_scheme
+!launchFinancialAgents
 ```
-12. Agents take their roles. From agents graham, greenblatt, bazin and myPA execute:
+15. Send a message through Telegram:
 ```
-[graham],[greenblatt],[bazin] and [myPA]
-!acceptScheme
+[myPA]
+.send(toTelegram,tell,hiEmas)
 ```
-
-13. An agent create the artifact that allow to consult assets data. From bazin execute:
-```
-[bazin] 
-!makeFundamentusArtifact
-```
-14. Now the system are fully instantiated, we can explore the MAS dimensions and finally shutdown the demo:
+16. Now the system are fully instantiated, we can explore the MAS dimensions and finally shutdown the demo:
 ```
 [one] 
 .stopMAS
