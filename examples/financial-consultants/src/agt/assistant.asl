@@ -1,6 +1,7 @@
 stocks::radar(['ABEV3','B3SA3','BBAS3','CYRE3','ECOR3','EGIE3','ELET3','VIVT4']).
 
 !joinFinancialGroup.
+!acceptScheme.
 
 +!joinFinancialGroup <-
     joinWorkspace(financialagents,Ofa);
@@ -11,9 +12,10 @@ stocks::radar(['ABEV3','B3SA3','BBAS3','CYRE3','ECOR3','EGIE3','ELET3','VIVT4'])
     .
     
 +!acceptScheme[source(self)] <-
-    s::lookupArtifact(financialsch, ScArtId)[wid(Ofa)];
-    s::focus(ScArtId)[wid(Ofa)];
-    s::commitMission("mAssistant")[artifact_id(ScArtId),wid(Ofa)];
+    joinWorkspace(financialagents,Omain);
+    s::focusWhenAvailable(financialsch);
+    s::lookupArtifact(financialsch, ScArtId);
+    s::commitMission("mAssistant")[artifact_id(ScArtId)];
     .
 
 +!lookForOpportunities : stocks::radar(L) <-

@@ -21,7 +21,8 @@
             </roles>
 
             <links>
-                <link from="wife" type="authority" to="husband" scope="intra-group" />
+                <link from="wife" type="communication" to="husband" scope="intra-group" />
+                <link from="husband" type="communication" to="wife" scope="intra-group" />
             </links>
         </group-specification>
     </structural-specification>
@@ -31,8 +32,8 @@
 
     <normative-specification>
         <properties>
-        	<property id="default_management"  value="ignore" />
-    	</properties>
+            <property id="default_management"  value="ignore" />
+        </properties>
     </normative-specification>
 
 </organisational-specification>

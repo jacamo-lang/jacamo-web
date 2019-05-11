@@ -4,6 +4,7 @@
 
 !focusFundamentusArtifact.
 !joinFinancialGroup.
+!acceptScheme.
 
 /* * * * plans * * * */
 
@@ -29,8 +30,9 @@
     .
   
 +!acceptScheme[source(self)] <-
+    joinWorkspace(financialagents,Omain);
+    s::focusWhenAvailable(financialsch);
     s::lookupArtifact(financialsch, ScArtId);
-    s::focus(ScArtId);
     s::commitMission("mConsultant")[artifact_id(ScArtId)];
     .
     

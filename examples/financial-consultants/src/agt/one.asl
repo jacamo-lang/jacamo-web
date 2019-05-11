@@ -44,6 +44,11 @@
     g::addScheme("financialsch");
     .
   
++!launchFinancialAgents <-
+    !create_group;
+    !create_scheme;
+    !create_agents;
+    .
 +!destroySystem <-
     !!killAgent(graham);
     !!killAgent(greenblatt);
@@ -54,5 +59,7 @@
 { include("$jacamoJar/templates/common-cartago.asl") }
 { include("$jacamoJar/templates/common-moise.asl") }
 { include("$moiseJar/asl/org-obedient.asl") }
+            
+            
             
             

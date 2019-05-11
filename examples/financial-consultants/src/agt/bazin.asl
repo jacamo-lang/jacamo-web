@@ -3,6 +3,7 @@
 /* * * * initial beliefs * * * */
 
 /* * * * setup plans * * * */
+!makeFundamentusArtifact.
 
 /* * * * perceptions from artifact * * * */
 
