@@ -129,7 +129,7 @@ credit(100)
 
 6. Let's see how intentions are kept running while changed plans will produce different intentions
 ```
-+hi <- 
++!hi <- 
     .wait(2000);
     .print("hi");
     !hi;
