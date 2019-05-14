@@ -19,6 +19,7 @@ targetCompatibility = 1.8
 repositories {
   mavenCentral()
   maven { url "https://github.com/cleberjamaral/camel-artifact/raw/maven2" }
+  maven { url "https://raw.github.com/jacamo-lang/mvn-repo/master" }
   maven { url "http://jacamo.sourceforge.net/maven2" }
   maven { url "http://jade.tilab.com/maven/" }
   flatDir { dirs 'lib' }
@@ -44,11 +45,13 @@ dependencies {
 	compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
 	// https://mvnrepository.com/artifact/javax.activation/activation
 	compile group: 'javax.activation', name: 'activation', version: '1.1.1'
-	//To parse HTML	
+	//To parse HTML
 	compile 'org.jsoup:jsoup:1.10.2'
 
 	//Jason for Apache Camel
-	compile files ('lib/jasonComponent-1.2.1.jar')
+	//compile files ('lib/jasonComponent-1.2.1.jar')
+  compile group: 'org.jacamo-lang',     name: 'camel-jason' ,   version: '1.0'
+
 	//Graphviz
 	compile group: 'guru.nidi', name: 'graphviz-java', version: '0.7.0'
 	//Log4j is used by camel
@@ -57,7 +60,7 @@ dependencies {
 	compile files ('../../build/libs/jacamo-web-0.1-SNAPSHOT.jar')
 	//Java compiler
 	compile group: 'net.openhft', name: 'compiler', version: '2.3.1'
-	
+
 	compile 'com.sun.xml.bind:jaxb-core:+'
 	compile 'com.sun.xml.bind:jaxb-impl:+'
 	compile 'org.glassfish.jersey.containers:jersey-container-servlet:2.27'
