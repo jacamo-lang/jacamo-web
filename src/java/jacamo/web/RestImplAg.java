@@ -65,6 +65,7 @@ import jaca.CAgentArch;
 import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
+import jason.asSemantics.GoalListenerForMetaEvents;
 import jason.asSemantics.IntendedMeans;
 import jason.asSemantics.Intention;
 import jason.asSemantics.Option;
@@ -463,12 +464,17 @@ public class RestImplAg extends AbstractBinder {
                 
                 //ag.getPL().clear();
                 for (Plan p: new ArrayList<>(ag.getPL().getPlans())) {
-                	if (p.getSource().equals(aslFileName)) {
-                		ag.getPL().remove(p.getLabel());
-                	}
+                    if (p.getSource().equals(aslFileName)) {
+                        ag.getPL().remove(p.getLabel());
+                    }
                 }
                 
                 ag.parseAS(new FileInputStream("src/agt/" + aslFileName), aslFileName);
+                if (ag.getPL().hasMetaEventPlans())
+                    ag.getTS().addGoalListener(new GoalListenerForMetaEvents(ag.getTS()));
+
+                //ag.fixAgInIAandFunctions(ag); // used to fix agent reference in functions used inside includes
+                ag.loadKqmlPlans();
                 
                 r = "<br/><center>Agent reloaded but keeping intentions!<br/>Redirecting...</center>";
             }
