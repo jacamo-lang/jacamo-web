@@ -375,8 +375,8 @@ public class RestImplAg extends AbstractBinder {
     @Produces(MediaType.TEXT_PLAIN)
     public String killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
         try {
-            BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web");
-            return "result of kill: "+BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web");
+            BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web",0);
+            return "result of kill: "+BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web",0);
         } catch (Exception e) {
             return "Agent "+agName+" in unknown."+e.getMessage();
         }

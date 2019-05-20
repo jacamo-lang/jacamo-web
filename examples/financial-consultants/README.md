@@ -3,6 +3,8 @@
 This project is an on-the-fly programming application of a Multi-Agent System composed by "financial consultants". 
 Each consultant uses a particular formula to recommend an asset or not. The assistant interacts with the user by telegram* sending a compiled suggestion about assets.
 
+It was presented on [EMAS 2019 - 7th International Workshop on Engineering Multi-Agent Systems](http://cgi.csc.liv.ac.uk/~lad/emas2019/). [Slides available](https://pt.slideshare.net/clebercbr/jacamo-web-is-on-the-fly-an-interactive-multiagent-systems-programming-environment).
+
 ![Alt text](https://g.gravizo.com/source/financialAgentsOverview?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-rest%2Fmaster%2Fexamples%2Ffinancial-consultants%2FREADME.md)
 <details> 
 <summary>Financial Agents Overview</summary>
