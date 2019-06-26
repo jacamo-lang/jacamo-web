@@ -16,6 +16,7 @@ import com.summit.camel.opc.Opcda2Component;
 import camelartifact.CamelArtifact;
 import camelartifact.ArtifactComponent;
 import cartago.INTERNAL_OPERATION;
+import cartago.OPERATION;
 import cartago.ObsProperty;
 
 public class PLC extends CamelArtifact {
@@ -23,14 +24,12 @@ public class PLC extends CamelArtifact {
     static Opcda2Component opcda2;
     static String containerId;
     
-    static String domain = "ADMINISTRADOR";
-    static String user = "Administrador";
-    static String password = "administrador";
+    static String domain = "WORKGROUP";//"ADMINISTRADOR";
+    static String user = "IEUser";//"Administrador";
+    static String password = "Passw0rd";//"administrador";
     static String clsid = "f8582cf2-88fb-11d0-b850-00c0f0104305";
                        //"{F8582CF2-88FB-11D0-B850-00C0F0104305}"
-    static String host = "192.168.56.101";
-
-    int contagem = 0;
+    static String host = "192.168.56.3";
 
     void init() {
 
@@ -49,14 +48,14 @@ public class PLC extends CamelArtifact {
                 @Override
                 public void configure() {
                     
-                	System.out.println("\n\nReceiving opc messages...\n\n");
+                    System.out.println("\n\nReceiving opc messages...\n\n");
                     
                     //***********************************************************************************
                     //OPC-DA Tests step 1: Receiving a message from OPC-DA
                     //Matrikon simulation server is sending a unique message continuously without any asking proccess
                     //Bellow this project is testing camel artifact producer with this feature of matrikon server
                     //The expected response is like ...Bucket Brigade.ArrayOfString={value=[Ljava.lang.String;@14070c0}, 
-                    //Bucket Brigade.Boolean={value=false}, Bucket Brigade.Int1={value=1}, Bucket Brigade.Int2={value=2}... 
+                    //Bucket Brigade.Boole{an=value=false}, Bucket Brigade.Int1={value=1}, Bucket Brigade.Int2={value=2}... 
                     String uriString = "opcda2:Matrikon.OPC.Simulation.1?delay=2000&host=" 
                             + host + "&clsId=" + clsid + "&username=" + user + "&password=" + password + "&domain=" 
                             + domain + "&diffOnly=false";
@@ -72,9 +71,9 @@ public class PLC extends CamelArtifact {
                                 //For this test we are looking for Bucket Brigade.Int1 tag. It is simulating
                                 //a receiving process of a tag, so this tagname and tagvalue are being added
                                 //in the object list to be processed be producer
-                                if (tagName.equals("Bucket Brigade.Int1")){
+                                if (tagName.equals("Random.Int1")){
                                     log("Adding tag" + tagName + " = " + value.toString() + " in the queue");
-                                    listObj.add("Bucket Brigade.Int1");
+                                    listObj.add("Random.Int1");
                                     listObj.add(value);
                                 }
                             }
@@ -82,7 +81,7 @@ public class PLC extends CamelArtifact {
                         }
                     })
                     .to("artifact:cartago").to("log:OPCDALogger1?level=info");
-                    //OPC-DA Tests step 2: Setting a tag
+                    
                     from("artifact:cartago").process(new Processor() {
                         public void process(Exchange exchange) throws Exception {
                             log.trace("Processing sending msgs...");
@@ -113,16 +112,14 @@ public class PLC extends CamelArtifact {
 
     @INTERNAL_OPERATION
     void getIntTag(String str, int i) {
-    	System.out.println("Router: getIntTag called!");
-        if (str.equals("Bucket Brigade.Int1")) {
-            ObsProperty prop = getObsProperty("plcinfo");
-            prop.updateValue(i);
-        }
+        System.out.println("Router: getIntTag called!");
+        ObsProperty prop = getObsProperty("plcinfo");
+        prop.updateValue(i);
     }
     
-    @INTERNAL_OPERATION
-    void setIntTag(String str, int i) {
-    	System.out.println("Router: setIntTag called!");
+    @OPERATION
+    void setIntTag(int i) {
+        System.out.println("Router: setIntTag called!");
         List<Object> params  = new ArrayList<Object>();
         params.add("Bucket Brigade.Int1");
         params.add(i);
@@ -130,4 +127,6 @@ public class PLC extends CamelArtifact {
     }
 }
 
+           
+           
            

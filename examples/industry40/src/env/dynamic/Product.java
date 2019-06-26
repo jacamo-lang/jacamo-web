@@ -12,67 +12,62 @@ import org.apache.camel.impl.DefaultCamelContext;
 import camelartifact.CamelArtifact;
 import camelartifact.ArtifactComponent;
 import cartago.INTERNAL_OPERATION;
-import cartago.OPERATION;
 import cartago.ObsProperty;
 
 public class Product extends CamelArtifact {
 
-	void init() {
+    void init() {
 
-		final CamelContext camelContext = new DefaultCamelContext();
+        final CamelContext camelContext = new DefaultCamelContext();
 
-		// This simple application has only one component receiving messages from the route and producing operations
-		camelContext.addComponent("artifact", new ArtifactComponent(this.getIncomingOpQueue(),this.getOutgoingOpQueue()));
+        // This simple application has only one component receiving messages from the route and producing operations
+        camelContext.addComponent("artifact", new ArtifactComponent(this.getIncomingOpQueue(),this.getOutgoingOpQueue()));
 
-		defineObsProperty("position", 0);
+        defineObsProperty("position", 0);
 
-		try {
-			camelContext.addRoutes(new RouteBuilder() {
-				@Override
-				public void configure() {
+        try {
+            camelContext.addRoutes(new RouteBuilder() {
+                @Override
+                public void configure() {
 
-					from("timer:test?period=1000")
-					.process(new Processor() {
-						public void process(Exchange exchange) throws Exception {
-							exchange.getIn().setHeader("ArtifactName", "product");
-							exchange.getIn().setHeader("OperationName", "updatePosition");
+                    from("timer:test?period=1000")
+                    .process(new Processor() {
+                        public void process(Exchange exchange) throws Exception {
+                            ObsProperty prop = getObsProperty("position");
+                            exchange.getIn().setBody(Integer.toString(prop.intValue()+1));
+                    }})
+                    .transform(body().convertToString())
+                    .to("mqtt:camelArtifact?host=tcp://broker.mqttdashboard.com:1883&publishTopicName=paams19pos")
+                    .to("log:MQTTLogger1?level=info");
 
-							ObsProperty prop = getObsProperty("position");
-                            List<Object> listObj = new ArrayList<Object>();
-                            listObj.add(prop.intValue()+1);
-							exchange.getIn().setBody(listObj);
+                    from("mqtt:camelArtifact?host=tcp://broker.mqttdashboard.com:1883&subscribeTopicName=paams19pos")
+                    .transform(body().convertToString())
+                      .process(new Processor() {
+                          public void process(Exchange exchange) throws Exception {
+                        	  System.out.println("body:"+exchange.getIn().getBody());
+                              exchange.getIn().setHeader("ArtifactName", "product");
+                              exchange.getIn().setHeader("OperationName", "updatePosition");
+                              List<Object> listObj = new ArrayList<Object>();
+                              listObj.add(Integer.parseInt((String) exchange.getIn().getBody()));
+                              exchange.getIn().setBody(listObj);
+                    }})
+                    .to("artifact:cartago")
+                    .to("log:MQTTLogger3?level=info");
+                    
+                }
+            });
 
-					}})
-					//.to("mqtt:camelArtifact?host=tcp://broker.mqttdashboard.com:1883&publishTopicName=paams19pos")
-					//.to("log:MQTTLogger1?level=info");
+            camelContext.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-					//from("mqtt:camelArtifact?host=tcp://broker.mqttdashboard.com:1883&subscribeTopicName=paams19pos")
-					//	.process(new Processor() {
-					//		public void process(Exchange exchange) throws Exception {
-					//			exchange.getIn().setHeader("ArtifactName", "product");
-					//			exchange.getIn().setHeader("OperationName", "updatePosition");
-					//}})
-					.to("artifact:cartago")
-					.to("log:MQTTLogger3?level=info");
-					
-				}
-			});
+    @INTERNAL_OPERATION
+    void updatePosition(int pos) {
+        System.out.println("updatePosition to:"+pos);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		try {
-			camelContext.start();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@INTERNAL_OPERATION
-	void updatePosition(int pos) {
-		System.out.println("updatePosition to:"+pos);
-
-		ObsProperty prop = getObsProperty("position");
-		prop.updateValue(pos);
-	}
+        ObsProperty prop = getObsProperty("position");
+        prop.updateValue(pos);
+    }
 }
