@@ -29,7 +29,7 @@ public class Telegram extends CamelArtifact {
     
     @OPERATION
     public void startCamel() {
-        String token = "700859698:AAGS06B9darPqxD3wrEoCnXB47xs9zWIa2A";
+        String token = "your-token";
         String telegramURI = "telegram:bots/" + token + "?" + "chatId=" + "-274694619";
         final CamelContext camelContext = new DefaultCamelContext();
 
