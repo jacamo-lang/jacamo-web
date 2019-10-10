@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" target="mainframe">
+
+<head>
+  <title>" + title + "</title>
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <meta http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
+  <!--
+  <a href="/services" target='mainframe'>directory facilitator</a>
+  <a href="/new_agent.html" target='mainframe'>create agent</a>
+
+  <a href =  id="link-to-"+a+"" target = 'mainframe'></a>"<h5><b>" + n + " < /b></h5>"
+    -->
+</head>
+
+<body>
+  <div id="root">
+    <div class="row" id="doc-wrapper">
+      <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
+      <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
+        <script type="text/javascript">
+          var ag = ["kk","marcos"];
+          ag.forEach(function(n) {
+            var lag = document.createElement('a');
+            lag.setAttribute('href',"/agents/" + n + "/mind");
+            lag.setAttribute('id',"link-to-" + n);
+            lag.setAttribute('target',"mainframe");
+            lag.innerHTML = "<h5><b>" + n + "</b></h5>";
+            console.log(n);
+            document.getElementById("nav-drawer-frame").appendChild(lag);
+          });
+        </script>
+        <br />
+        <br />
+        <br />
+      </nav>
+      <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
+        <div id="getting-started" class="card fluid">
+          <h4 class="section double-padded">getting started</h4>
+          <div class="section">
+            <p>
+              <a href="http://jason.sourceforge.net/" target="_blank">Jason</a> is an interpreter for an extended version of AgentSpeak. It implements the operational semantics of that language, ");
+              and provides a platform for the development of multi-agent systems, with many user-customisable features. Jason is ");
+              available as <a href="https://github.com/jason-lang/jason" target="_blank">open-source</a>, and is distributed under GNU LGPL.
+            </p>
+            <br />
+          </div>
+        </div>
+        <div style="display:none">
+          <input id="inputcmd">
+        </div>
+    </div>
+    </main>
+  </div>
+  </div>
+</body>
+<script src="/js/agent.js"></script>
+
+</html>

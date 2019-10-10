@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +53,8 @@ import org.w3c.dom.Document;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
+import com.google.gson.Gson;
+
 import cartago.ArtifactId;
 import cartago.ArtifactInfo;
 import cartago.CartagoException;
@@ -66,6 +69,7 @@ import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
 import jason.asSemantics.GoalListenerForMetaEvents;
+import jason.asSemantics.Circumstance;
 import jason.asSemantics.IntendedMeans;
 import jason.asSemantics.Intention;
 import jason.asSemantics.Option;
@@ -91,6 +95,7 @@ import ora4mas.nopl.oe.Group;
 public class RestImplAg extends AbstractBinder {
 
     Map<String, StringBuilder> agLog = new HashMap<>();
+    Gson gson = new Gson();     
     
     @Override
     protected void configure() {
@@ -122,6 +127,13 @@ public class RestImplAg extends AbstractBinder {
         return so.toString();
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getAgentsJSON() {
+        return gson.toJson(BaseCentralisedMAS.getRunner().getAgs().keySet());
+    }
+
+    @Path("/a")
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getAgentsHtml() {
@@ -187,7 +199,7 @@ public class RestImplAg extends AbstractBinder {
         so.append("<br/>");
         so.append("<br/>");
         so.append("<a href=\"/services\" target='mainframe'>directory facilitator</a>\n");
-        so.append("<a href=\"/new_agent.html\" target='mainframe'>create agent</a>\n"); 
+        so.append("<a href=\"/forms/new_agent\" target='mainframe'>create agent</a>\n"); 
 
         so.append("</nav>\n");
         return so.toString();
@@ -291,6 +303,68 @@ public class RestImplAg extends AbstractBinder {
             return "error "+e.getMessage();
         }
     }
+
+    @Path("/{agentname}")
+    @DELETE
+    @Produces(MediaType.TEXT_PLAIN)
+    public String killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
+        try {
+            boolean r = BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web", 0);
+            return "result of kill: "+r;
+        } catch (Exception e) {
+            return "Agent "+agName+" in unknown."+e.getMessage();
+        }
+    }
+
+    @Path("/{agentname}/status")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getAgentStatusJSON(@PathParam("agentname") String agName) {
+        Agent ag = getAgent(agName);
+        Circumstance c = ag.getTS().getC();
+        
+        Map<String,Object> props = new HashMap<>();
+        
+        props.put("idle", ag.getTS().canSleep());
+                
+        props.put("nbIntentions", c.getNbRunningIntentions()+
+                c.getPendingIntentions().size());
+        
+        List<Map<String,Object>> ints = new ArrayList<>();
+        Iterator<Intention> ii = c.getAllIntentions();
+        while (ii.hasNext()) {
+            Intention i = ii.next();
+            Map<String,Object> iprops = new HashMap<>();
+            iprops.put("id", i.getId());
+            iprops.put("finished", i.isFinished());
+            iprops.put("suspended", i.isSuspended());
+            if (i.isSuspended()) {
+                iprops.put("suspendedReason", i.getSuspendedReason());
+            }
+            iprops.put("size", i.size());
+            ints.add(iprops);
+        }
+        props.put("intentions", ints);
+        return gson.toJson(props);
+    }
+
+
+    @Path("/{agentname}/mind")
+    @GET
+    @Produces(MediaType.APPLICATION_XML)
+    public Document getAgentMindXml(@PathParam("agentname") String agName) {
+        try {
+            Agent ag = getAgent(agName);
+            if (ag != null)
+                return ag.getAgState();
+            else
+                return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     
     @Path("/{agentname}/mind")
     @GET
@@ -370,16 +444,43 @@ public class RestImplAg extends AbstractBinder {
         return designPage("jacamo-web - agents: " + agName,agName,mainContent.toString());
     }
 
-    @Path("/{agentname}")
-    @DELETE
-    @Produces(MediaType.TEXT_PLAIN)
-    public String killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
-        try {
-            BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web",0);
-            return "result of kill: "+BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web",0);
-        } catch (Exception e) {
-            return "Agent "+agName+" in unknown."+e.getMessage();
+    @Path("/{agentname}/mind/bb")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getAgentBBJSON(@PathParam("agentname") String agName) {
+        Agent ag = getAgent(agName);
+        List<String> bbs = new ArrayList<>();
+        for (Literal l: ag.getBB()) {
+            bbs.add(l.toString());
         }
+        return gson.toJson(bbs);
+    }
+
+    // ****
+    //      Plans
+    // ****
+
+    
+    @Path("/{agentname}/plans")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getAgentPlansTxt(@PathParam("agentname") String agName,
+            @DefaultValue("all") @QueryParam("label") String label) {
+        StringWriter so = new StringWriter();
+        try {
+            Agent ag = getAgent(agName);
+            if (ag != null) {
+                PlanLibrary pl = ag.getPL();
+                if (label.equals("all"))
+                    so.append(pl.getAsTxt(false));
+                else
+                    so.append(pl.get(label).toASString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            so.append("Agent "+agName+" does not exist or cannot be observed.");
+        }
+        return so.toString();
     }
 
     @Path("/{agentname}/aslfile/{aslfilename}")
@@ -720,29 +821,6 @@ public class RestImplAg extends AbstractBinder {
         }
     }
     
-    @Path("/{agentname}/plans")
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getAgentPlansTxt(@PathParam("agentname") String agName,
-            @DefaultValue("all") @QueryParam("label") String label) {
-        StringWriter so = new StringWriter();
-        try {
-            Agent ag = getAgent(agName);
-            if (ag != null) {
-                PlanLibrary pl = ag.getPL();
-                if (label.equals("all"))
-                    so.append(pl.getAsTxt(false));
-                else
-                    so.append(pl.get(label).toASString());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            so.append("Agent "+agName+" does not exist or cannot be observed.");
-        }
-        return so.toString();
-    }
- 
-
     @Path("/{agentname}/cmd")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
