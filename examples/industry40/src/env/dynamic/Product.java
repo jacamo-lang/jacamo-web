@@ -44,7 +44,7 @@ public class Product extends CamelArtifact {
                     .transform(body().convertToString())
                       .process(new Processor() {
                           public void process(Exchange exchange) throws Exception {
-                        	  System.out.println("body:"+exchange.getIn().getBody());
+                              System.out.println("body:"+exchange.getIn().getBody());
                               exchange.getIn().setHeader("ArtifactName", "product");
                               exchange.getIn().setHeader("OperationName", "updatePosition");
                               List<Object> listObj = new ArrayList<Object>();

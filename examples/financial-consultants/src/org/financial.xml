@@ -48,8 +48,8 @@
 
     <normative-specification>
         <properties>
-        	<property id="default_management"  value="ignore" />
-    	</properties>
+            <property id="default_management"  value="ignore" />
+        </properties>
 
         <norm id="n1" type="obligation" role="assistant"
             mission="mAssistant" />

@@ -118,7 +118,7 @@ public class RestImplOrg extends AbstractBinder {
 
         so.append("<br/>");
         so.append("<br/>");
-        so.append("<a href=\"/forms/new_role\" target='mainframe'>create role</a>\n"); 
+        so.append("<a href=\"/new_role.html\" target='mainframe'>create role</a>\n"); 
         
         so.append("</nav>\n");
 

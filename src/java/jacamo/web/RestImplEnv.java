@@ -153,7 +153,7 @@ public class RestImplEnv extends AbstractBinder {
         }
         so.append("<br/>");
         so.append("<br/>");
-        so.append("<a href=\"/forms/new_artifact\" target='mainframe'>create artifact</a>\n"); 
+        so.append("<a href=\"/new_artifact.html\" target='mainframe'>create artifact</a>\n"); 
         
         
         so.append("</nav>\n");
