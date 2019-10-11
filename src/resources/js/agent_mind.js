@@ -1,46 +1,60 @@
 /* kill agent */
 function killAg(agent) {
-  var r = confirm("Kill this agent?");
+  var r = confirm("Kill agent '"+agent+"'?");
   if (r == true) {
     h2 = new XMLHttpRequest();
     h2.onreadystatechange = function() {
       if ((h2.status == 200) || (h2.status == 204)) {
-        location.assign("/agents/");
+        location.assign("./agents.html");
       }
     };
-    h2.open("DELETE", "/agents/" + agent, false);
+    h2.open("DELETE", "./agents/" + agent, false);
     h2.send();
   }
 }
 
-/* clear agent's log */
-function delLog() {
-  h2 = new XMLHttpRequest();
-  h2.open("DELETE", "log", false);
-  h2.send();
-}
-
 /*function to run Jason commands*/
 function runCMD() {
+  var selectedAgent = window.location.hash.substr(1);
   h3 = new XMLHttpRequest();
   h3.onreadystatechange = function() {
     if (h3.readyState == 4 && h3.status == 200) {
       location.reload();
     }
   };
-  h3.open("POST", "cmd", true);
+  h3.open("POST", "./agents/" + selectedAgent + "/cmd", true);
   h3.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   data = "c=" + encodeURIComponent(document.getElementById("inputcmd").value);
   h3.send(data);
 }
 
+/*
+LOG FUNCTIONS
+*/
+
+/* clear agent's log */
+function delLog() {
+  var selectedAgent = window.location.hash.substr(1);
+  console.log(selectedAgent);
+  h2 = new XMLHttpRequest();
+  h2.onreadystatechange = function() {
+    if (h2.readyState == 4 && h2.status == 200) {
+      location.reload();
+    }
+  };
+  h2.open("DELETE", "./agents/" + selectedAgent + "/log");
+  h2.send();
+}
+
 /* show agent's log */
 function showLog() {
+  var selectedAgent = window.location.hash.substr(1);
   http = new XMLHttpRequest();
   http.onreadystatechange = function() {
     if (http.readyState == 4 && http.status == 200) {
-      document.getElementById('log').innerHTML = http.responseText;
-      setLogScroll();
+      var textarea = document.getElementById('log');
+      textarea.innerHTML = http.responseText;
+      textarea.scrollTop = textarea.scrollHeight;
       if (http.responseText.length > 1) {
         var btn = document.createElement("BUTTON");
         var t = document.createTextNode("clear log");
@@ -53,8 +67,32 @@ function showLog() {
       }
     }
   };
-  http.open('GET', 'log', true);
+  http.open('GET', "./agents/" + selectedAgent + "/log", true);
   http.send();
+}
+
+/*
+CODE COMPLETION FUNCTIONS
+*/
+
+/* fill suggestions for code completion */
+var suggestions = [
+  ['undefined']
+];
+
+/* get sugestions for the selected agent */
+function updateSuggestions() {
+  var selectedAgent = window.location.hash.substr(1);
+  h4 = new XMLHttpRequest();
+  h4.onreadystatechange = function() {
+    if (h4.readyState == 4 && h4.status == 200) {
+      var a = h4.responseText;
+      a = a.replace(/'/g, '\"');
+      window.suggestions = JSON.parse(a);
+    }
+  };
+  h4.open('GET', "./agents/" + selectedAgent + "/code", true);
+  h4.send();
 }
 
 /* automcomplete for cmd box */
@@ -131,47 +169,6 @@ function autocomplete(inp, arr) {
   });
 }
 
-/* fill suggestions for code completion */
-var suggestions = [
-  ['undefined']
-];
-
-function updateSuggestions() {
-  h4 = new XMLHttpRequest();
-  h4.onreadystatechange = function() {
-    if (h4.readyState == 4 && h4.status == 200) {
-      var a = h4.responseText;
-      a = a.replace(/'/g, '\"');
-      window.suggestions = JSON.parse(a);
-    }
-  };
-  h4.open('GET', 'code', true);
-  h4.send();
-}
-
-/*Get list of agent from backend*/
-function getAgents() {
-  var agents = ["agent1", "agent2"];
-  const Http = new XMLHttpRequest();
-  Http.open("GET", "./agents");
-  Http.send();
-  Http.onreadystatechange = (e) => {
-    agents = Http.responseText.replace('[', '').replace(/"/g, '').replace(']', '').split(',');
-    /* agents = JSON.parse(Http.responseText); is producing error since the response is something
-    like ["agent1", "agent2"] which is an array, not an JSON */
-    console.log(agents);
-    agents.forEach(function(n) {
-      var lag = document.createElement('a');
-      lag.setAttribute("href", "./agent_mind.html");
-      lag.setAttribute('onclick', "selectAgent('"+n+"')");
-      lag.setAttribute('id', "link-to-" + n);
-      /*lag.setAttribute('target', "mainframe");*/
-      lag.innerHTML = "<h5><b>" + n + "</b></h5>";
-      document.getElementById("nav-drawer-frame").appendChild(lag);
-    });
-  };
-}
-
 /* update cmb box with suggestions */
 function updateCmdCodeCompletion() {
   autocomplete(document.getElementById("inputcmd"), suggestions);
@@ -187,7 +184,7 @@ function waitToFillSuggestions() {
 }
 
 /* run initialization */
-showLog();
+
 updateSuggestions();
 /*updateCmdCodeCompletion();
 waitToFillSuggestions();*/
@@ -198,11 +195,6 @@ var pageContent = document.getElementById("nav-drawer-frame").innerHTML;
 var fullMenu = buttonClose + " " + pageContent;
 sessionStorage.setItem("menucontent", fullMenu);*/
 
-/* To inform which agent is select - or undefined */
-function selectAgent(agent) {
-  selectedAgent = agent;
-}
-var selectedAgent = "";
 
 /* scroll log automatically
 var textarea = document.getElementById('log');

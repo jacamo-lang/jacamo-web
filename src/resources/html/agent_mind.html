@@ -5,7 +5,8 @@
   <title>jacamo-web - agents</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
-  <script src="/js/agent.js"></script>
+  <script src="/js/agent_mind.js"></script>
+  <script src="/js/agent_common.js"></script>
   <script type="text/javascript">
     function getGraph() {
       var selectedAgent = window.location.hash.substr(1);
@@ -16,7 +17,7 @@
   </script>
 </head>
 
-<body onload="{getGraph(); createMenu();}">
+<body onload="{getGraph(); createMenu(); showLog();}">
 
   <div id="root">
     <header class="row">
@@ -58,14 +59,14 @@
       <form autocomplete="off" , action="#command">
         <div class="autocomplete">
           <input style="width: 100%; margin: 0px;" placeholder="Command (Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });) ..." type="text" id="inputcmd"
-            onkeydown="if (event.keyCode == 13) {runCMD();} else {updateCmdCodeCompletion();}">
+            onkeydown="if (event.keyCode == 13) {runCMD();}">
         </div>
       </form>
     </div>
 
     <!-- log -->
-    <div class="card fluid" style="display:none;">
-      <textarea class=logarea readonly style="display:none;" type="text" id="log"></textarea>");
+    <div class="card fluid">
+      <textarea class=logarea readonly type="text" id="log"></textarea>
     </div>
 
     <!-- footer -->

@@ -1,12 +1,4 @@
 /* create agent */
-function newAg() {
-	http = new XMLHttpRequest();
-    http.open("POST", '/agents/'+document.getElementById('createAgent').value, false);
-    http.send();
-    window.open('/agent_mind.html#'+document.getElementById('createAgent').value);
-}
-
-/* create agent */
 function newArt() {
 	http = new XMLHttpRequest();
 	/*Probably there is not an artifact with the referred name in a wks called 'temp', if so, its source will be opened*/
