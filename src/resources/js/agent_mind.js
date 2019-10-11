@@ -5,10 +5,10 @@ function killAg(agent) {
     h2 = new XMLHttpRequest();
     h2.onreadystatechange = function() {
       if ((h2.status == 200) || (h2.status == 204)) {
-        location.assign("./agents.html");
+        location.assign("/agents/");
       }
     };
-    h2.open("DELETE", "./agents/" + agent, false);
+    h2.open("DELETE", "/agents/" + agent, false);
     h2.send();
   }
 }
@@ -149,12 +149,8 @@ function updateSuggestions() {
   h4.send();
 }
 
-/*
- SELECTED AGENT FUNCTIONS
-*/
-
 /*Get list of agent from backend*/
-function createMenu() {
+function getAgents() {
   var agents = ["agent1", "agent2"];
   const Http = new XMLHttpRequest();
   Http.open("GET", "./agents");
@@ -164,41 +160,17 @@ function createMenu() {
     /* agents = JSON.parse(Http.responseText); is producing error since the response is something
     like ["agent1", "agent2"] which is an array, not an JSON */
     console.log(agents);
-
-    /* Remove all existing children */
-    const menu = document.getElementById("nav-drawer-frame");
-    while (menu.firstChild) {
-      menu.removeChild(menu.firstChild);
-    }
-
-    /* Add each agent and then DF and Create Agent*/
-    var selectedAgent = window.location.hash.substr(1);
     agents.forEach(function(n) {
       var lag = document.createElement('a');
-      lag.setAttribute("href", "./agent_mind.html#" + n);
-      lag.setAttribute('onclick', '{window.location.assign("./agent_mind.html#' + n + '");window.location.reload();}');
-      if (selectedAgent === n) {
-        lag.innerHTML = "<h5><b>" + n + "</b></h5>";
-      } else {
-        lag.innerHTML = "<h5>" + n + "</h5>";
-      }
+      lag.setAttribute("href", "./agent_mind.html");
+      lag.setAttribute('onclick', "selectAgent('"+n+"')");
+      lag.setAttribute('id', "link-to-" + n);
+      /*lag.setAttribute('target', "mainframe");*/
+      lag.innerHTML = "<h5><b>" + n + "</b></h5>";
       document.getElementById("nav-drawer-frame").appendChild(lag);
     });
-    var br = document.createElement("br");
-    document.getElementById("nav-drawer-frame").appendChild(br);
-    document.getElementById("nav-drawer-frame").appendChild(br);
-    var ldf = document.createElement('a');
-    ldf.setAttribute("href", "./services");
-    ldf.innerHTML = "directory facilitator";
-    document.getElementById("nav-drawer-frame").appendChild(ldf);
-    var lnew = document.createElement('a');
-    lnew.setAttribute("href", "./new_agent.html");
-    lnew.innerHTML = "create agent";
-    document.getElementById("nav-drawer-frame").appendChild(lnew);
   };
 }
-
-
 
 /* update cmb box with suggestions */
 function updateCmdCodeCompletion() {
@@ -226,6 +198,11 @@ var pageContent = document.getElementById("nav-drawer-frame").innerHTML;
 var fullMenu = buttonClose + " " + pageContent;
 sessionStorage.setItem("menucontent", fullMenu);*/
 
+/* To inform which agent is select - or undefined */
+function selectAgent(agent) {
+  selectedAgent = agent;
+}
+var selectedAgent = "";
 
 /* scroll log automatically
 var textarea = document.getElementById('log');

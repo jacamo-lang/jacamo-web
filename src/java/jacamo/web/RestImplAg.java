@@ -104,8 +104,8 @@ public class RestImplAg extends AbstractBinder {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getAgentsJSON() {
-        return gson.toJson(BaseCentralisedMAS.getRunner().getAgs().keySet());
+    public Response getAgentsJSON() {
+        return Response.ok().entity(gson.toJson(BaseCentralisedMAS.getRunner().getAgs().keySet())).header("Access-Control-Allow-Origin", "*").build();
     }
 
     private Agent getAgent(String agName) {

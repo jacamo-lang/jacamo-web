@@ -1,76 +1,97 @@
 <!DOCTYPE html>
-<html lang="en" target="mainframe">
+<html lang="en">
 
 <head>
   <title>jacamo-web - agents</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
   <script src="/js/agent.js"></script>
+  <script type="text/javascript">
+    function getGraph() {
+      var selectedAgent = window.location.hash.substr(1);
+      /*document.getElementById('overviewgraph').data = "./agents/" + window.location.hash.substr(1) + "/mind/img.svg";*/
+      document.getElementById('overviewgraph').setAttribute('data', "./agents/" + selectedAgent + "/mind/img.svg");
+      document.getElementById('agentfootmenu').getElementsByTagName('a')[2].setAttribute('onclick', "killAg('" + selectedAgent + "');");
+    }
+  </script>
 </head>
 
-<body>
+<body onload="{getGraph(); createMenu();}">
+
   <div id="root">
-    <div class="row" id="doc-wrapper">
-      <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
-      <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
-        <script type="text/javascript">
-          getAgents();
-        </script>
-        <br />
-        <br />
-        <br />
-        <a href="/services" target='mainframe'>directory facilitator</a>
-        <a href="/new_agent.html" target='mainframe'>create agent</a>
-      </nav>
-      <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
-
-        <!-- overview -->
-        <div id="overview" class="card fluid">
-          <div class="section">
-            <center><object data="/agents/" + agName + "/mind/img.svg" type="image/svg+xml" style="max-width:100%;"></object></center><br />
-          </div>
-        </div>
-
-        <!-- command box -->
-        <div id="command" class="card fluid">
-          <form autocomplete="off" , action="#command">
-            <div class="autocomplete">
-              <input style="width: 100%; margin: 0px;" placeholder="Command (Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });) ..." type="text" id="inputcmd" onkeydown="if (event.keyCode == 13) {runCMD();} else {updateCmdCodeCompletion();}">
-            </div>
-          </form>
-        </div>
-
-        <!-- log -->
-        <div class="card fluid" style="display:none;">
-          <textarea class=logarea readonly style="display:none;" type="text" id="log"></textarea>");
-        </div>
-
-        <!-- footer -->
-        <div id="agentfoot" class="card fluid">
-          <div class="section">
-            <a href="#modalinspection" id="btninspection">inspection</a>&#160;&#160;&#160;
-            <a href='' onclick='delLog()'>clear log</a>&#160;&#160;&#160;
-            <a href='#' onclick='killAg("" + agName + "")'>kill agent</a>&#160;&#160;&#160;
-          </div>
-        </div>
-
-        <!-- modal inspection -->
-        <div id="modalinspection" class="modal fade" role="dialog">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Inspection</h4>
-              </div>
-              <div class="modal-body">
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-
-  </div>
-</body>
+    <header class="row">
+      <a class="logo col-xp-2 col-sm-2 col-md" href="./">JaCaMo</a>
+      <a class="button col-xp-1 col-sm-2 col-md" href="./agents.html">
 
 </html>
+<!-- target="mainframe"-->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="height: 20px; vertical-align: text-top;">
+  <circle cx="12" cy="12" r="11" /></svg><span>&nbsp;Agents</span>
+</a>
+<a class="button col-xp-1 col-sm-2 col-md" href="./workspaces/" target="mainframe">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="height: 20px; vertical-align: text-top;">
+    <polygon points="0 1, 24 1, 24 8, 0 8, 0 16, 24 16, 24 23, 0 23, 0 1, 24 1, 24 23, 0 23"></polygon>
+  </svg><span>&nbsp;Environment</span>
+</a>
+<a class="button col-xp-1 col-sm-2 col-md" href="./oe/" target="mainframe">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="height: 20px; vertical-align: text-top;">
+    <polygon points="0 1, 10 1, 10 6, 24 6, 24 23, 0 23, 0 6, 10 6, 0 6, 0 1"></polygon>
+  </svg><span>&nbsp;Organisation</span>
+</a>
+<label for="doc-drawer-checkbox" class="button drawer-toggle col-sm"></label>
+</header>
+
+<div class="row" id="doc-wrapper">
+  <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
+  <nav class="col-xp-1 col-md-2" id="nav-drawer-frame"></nav>
+  <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
+
+    <!-- overview -->
+    <div id="overview" class="card fluid">
+      <div class="section">
+        <center><object id="overviewgraph" data="" type="image/svg+xml" style="max-width:100%;"></object></center><br />
+      </div>
+    </div>
+
+    <!-- command box -->
+    <div id="command" class="card fluid">
+      <form autocomplete="off" , action="#command">
+        <div class="autocomplete">
+          <input style="width: 100%; margin: 0px;" placeholder="Command (Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });) ..." type="text" id="inputcmd"
+            onkeydown="if (event.keyCode == 13) {runCMD();} else {updateCmdCodeCompletion();}">
+        </div>
+      </form>
+    </div>
+
+    <!-- log -->
+    <div class="card fluid" style="display:none;">
+      <textarea class=logarea readonly style="display:none;" type="text" id="log"></textarea>");
+    </div>
+
+    <!-- footer -->
+    <div id="agentfoot" class="card fluid">
+      <div id="agentfootmenu" class="section">
+        <a href="#modalinspection" id="btninspection">inspection</a>&#160;&#160;&#160;
+        <a href='' onclick='delLog()'>clear log</a>&#160;&#160;&#160;
+        <a href='#' onclick='killAg(agent_name)'>kill agent</a>&#160;&#160;&#160;
+      </div>
+    </div>
+
+    <!-- modal inspection -->
+    <div id="modalinspection" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Inspection</h4>
+          </div>
+          <div class="modal-body">
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+</div>
+</body>
