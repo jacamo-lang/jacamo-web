@@ -5,8 +5,8 @@
   <title>jacamo-web - agents</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
-  <script src="/js/agent_mind.js"></script>
-  <script src="/js/agent_common.js"></script>
+  <script src="./js/agent_mind.js"></script>
+  <script src="./js/agent_common.js"></script>
   <script type="text/javascript">
     function getGraph() {
       var selectedAgent = window.location.hash.substr(1);
@@ -17,7 +17,7 @@
   </script>
 </head>
 
-<body onload="{getGraph(); createMenu(); showLog();}">
+<body onload="{getGraph(); createMenu(); showLog(); loadAndTransform('./agents/marcos/mind', './xml/agInspection.xsl', document.getElementById('inspection')); updateCmdCodeCompletion(); }">
 
   <div id="root">
     <header class="row">
@@ -43,8 +43,10 @@
 </header>
 
 <div class="row" id="doc-wrapper">
-  <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
-  <nav class="col-xp-1 col-md-2" id="nav-drawer-frame"></nav>
+  <input id="doc-drawer-checkbox" class="leftmenu" value="on" type="checkbox">
+  <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
+    <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
+  </nav>
   <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
 
     <!-- overview -->
@@ -54,12 +56,18 @@
       </div>
     </div>
 
+    <!-- inspection -->
+    <div id="inspection-div" class="card fluid">
+      <div class="section">
+        <p id="inspection"></p>
+      </div>
+    </div>
+
     <!-- command box -->
     <div id="command" class="card fluid">
       <form autocomplete="off" , action="#command">
         <div class="autocomplete">
-          <input style="width: 100%; margin: 0px;" placeholder="Command (Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });) ..." type="text" id="inputcmd"
-            onkeydown="if (event.keyCode == 13) {runCMD();}">
+          <input style="width: 100%; margin: 0px;" placeholder="Command (Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });) ..." type="text" id="inputcmd" onkeydown="if (event.keyCode == 13) {runCMD();}">
         </div>
       </form>
     </div>
@@ -74,7 +82,7 @@
       <div id="agentfootmenu" class="section">
         <a href="#modalinspection" id="btninspection">inspection</a>&#160;&#160;&#160;
         <a href='' onclick='delLog()'>clear log</a>&#160;&#160;&#160;
-        <a href='#' onclick='killAg(agent_name)'>kill agent</a>&#160;&#160;&#160;
+        <a href='' onclick='killAg(agent_name)'>kill agent</a>&#160;&#160;&#160;
       </div>
     </div>
 

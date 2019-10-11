@@ -105,6 +105,32 @@ public class RestImpl extends AbstractBinder {
         cc.setMaxAge(20);
     } // in seconds
 
+    @Path("/xml/{resourcepathfile}")
+    @GET
+    @Produces("text/xml")
+    public Response getXML(@PathParam("resourcepathfile") String resourcepathfile)
+            throws ReceiverNotFoundException {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/xml/" + resourcepathfile);
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f));
+            } else {
+                in = new BufferedReader(
+                        new InputStreamReader(RestImpl.class.getResource("/xml/" + resourcepathfile).openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.ok(so.toString(), "text/xml").cacheControl(cc).build();
+    }
+
     @Path("/css/{resourcepathfile}")
     @GET
     @Produces("text/css")

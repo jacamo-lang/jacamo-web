@@ -55,16 +55,6 @@ function showLog() {
       var textarea = document.getElementById('log');
       textarea.innerHTML = http.responseText;
       textarea.scrollTop = textarea.scrollHeight;
-      if (http.responseText.length > 1) {
-        var btn = document.createElement("BUTTON");
-        var t = document.createTextNode("clear log");
-        btn.appendChild(t);
-        btn.onclick = function() {
-          delLog();
-          location.reload();
-        };
-        /*document.getElementById('plog').appendChild(btn);*/
-      }
     }
   };
   http.open('GET', "./agents/" + selectedAgent + "/log", true);
@@ -184,31 +174,24 @@ function waitToFillSuggestions() {
 }
 
 /* run initialization */
-
 updateSuggestions();
-/*updateCmdCodeCompletion();
-waitToFillSuggestions();*/
-
-/* paint and fill drawer menu from frame to on page
-var buttonClose = "<label for='doc-drawer-checkbox' class='button drawer-close'></label>";
-var pageContent = document.getElementById("nav-drawer-frame").innerHTML;
-var fullMenu = buttonClose + " " + pageContent;
-sessionStorage.setItem("menucontent", fullMenu);*/
-
+updateCmdCodeCompletion();
+waitToFillSuggestions();
 
 /* scroll log automatically
-var textarea = document.getElementById('log');
-
-function setLogScroll() {
-  textarea.scrollTop = textarea.scrollHeight;
-};
-
 setInterval(function() {
   showLog();
 }, 1000);
 */
 
-/* modal window
+
+/* paint and fill drawer menu from frame to on page */
+var buttonClose = "<label for='doc-drawer-checkbox' class='button drawer-close'></label>";
+var pageContent = document.getElementById("nav-drawer-frame").innerHTML;
+var fullMenu = buttonClose + " " + pageContent;
+sessionStorage.setItem("menucontent", fullMenu);
+
+/* modal window */
 var modal = document.getElementById('modalinspection');
 var btnModal = document.getElementById("btninspection");
 var span = document.getElementsByClassName("close")[0];
@@ -223,4 +206,46 @@ window.onclick = function(event) {
     modal.style.display = "none";
   };
 };
+
+/*
+XML Agent's mind
 */
+function makeRequest(url, loadedData, property, elementToAddResult) {
+  var req = new XMLHttpRequest();
+  req.open('GET', url);
+  /* to allow us doing XSLT in IE */
+  try {
+    req.responseType = "msxml-document"
+  } catch (ex) {}
+  req.onload = function() {
+    loadedData[property] = req.responseXML;
+    if (checkLoaded(loadedData)) {
+      displayResult(loadedData.xmlInput, loadedData.xsltSheet, elementToAddResult);
+    };
+  };
+  req.send();
+}
+
+function checkLoaded(loadedData) {
+  return loadedData.xmlInput != null && loadedData.xsltSheet != null;
+}
+
+function loadAndTransform(xml, xsl, elementToAddResult) {
+  var loadedData = {
+    xmlInput: null,
+    xsltSheet: null
+  };
+
+  makeRequest(xml, loadedData, 'xmlInput', elementToAddResult);
+  makeRequest(xsl, loadedData, 'xsltSheet', elementToAddResult);
+}
+
+function displayResult(xmlInput, xsltSheet, elementToAddResult) {
+  if (typeof XSLTProcessor !== 'undefined') {
+    var proc = new XSLTProcessor();
+    proc.importStylesheet(xsltSheet);
+    elementToAddResult.appendChild(proc.transformToFragment(xmlInput, document));
+  } else if (typeof xmlInput.transformNode !== 'undefined') {
+    elementToAddResult.innerHTML = xmlInput.transformNode(xsltSheet);
+  }
+}
