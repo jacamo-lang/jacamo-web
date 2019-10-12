@@ -1,0 +1,25 @@
+<html lang="en">
+
+<head>
+  <title>JaCaMo - Jason asl file Editor</title>
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <script src="./js/agent_editor.js"></script>
+</head>
+
+<body onload="{getCurrentAslContent();}">
+  <form action="/agents/agent_name/aslfile/aslfile_name" method="post" id="usrform" enctype="multipart/form-data">
+    <div>
+      <textarea name="aslfile" form="usrform">
+			</textarea>
+    </div>
+    <div class="editor_footer" id="footer_menu">
+      Editing: aslFileName
+      <button type="submit" onclick="location.href='./agent_editor.html#aslfile'">Save & Reload</button>
+      <button type="button" onclick="location.href='./agent_editor.html#aslfile'">Discard changes</button>
+    </div>
+  </form>
+  <script src="http://ajaxorg.github.io/ace-builds/src/ace.js"></script>
+  <script src="http://ajaxorg.github.io/ace-builds/src/ext-language_tools.js"></script>
+</body>
+
+</html>

@@ -13,7 +13,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -22,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
@@ -39,11 +37,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -85,7 +78,6 @@ import jason.asSyntax.Trigger.TEType;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
 import jason.stdlib.print;
-import jason.util.Config;
 import ora4mas.nopl.GroupBoard;
 import ora4mas.nopl.SchemeBoard;
 import ora4mas.nopl.oe.Group;
@@ -117,50 +109,6 @@ public class RestImplAg extends AbstractBinder {
     }
 
     /** AGENT **/
-
-    protected Transformer  mindInspectorTransformerHTML = null;
-    protected int MAX_LENGTH = 35;
-    /**
-     * Configure to show or hide window items
-     * Items: "bels", "annots", "rules", "evt", "mb", "int", "int-details"
-     */
-    Map<String,Boolean> show = new HashMap<>();
-    {
-        show.put("annots", Config.get().getBoolean(Config.SHOW_ANNOTS));
-    }
-
-    @Path("/{agentname}/hide")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String setHide(@PathParam("agentname") String agName,
-            @QueryParam("bels") String bels,
-            @QueryParam("rules") String rules,
-            @QueryParam("int-details") String intd,
-            @QueryParam("annots") String annots) {
-        if (bels != null) show.put("bels",false);
-        if (rules != null) show.put("rules",false);
-        if (intd != null) show.put("int-details",false);
-        if (annots != null) show.put("annots",false);
-        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/mind'\" /></head>ok";
-    }
-
-    @Path("/{agentname}/show")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String setShow(@PathParam("agentname") String agName,
-            @QueryParam("bels") String bels,
-            @QueryParam("rules") String rules,
-            @QueryParam("int-details") String intd,
-            @QueryParam("annots") String annots) {
-        if (bels != null) show.put("bels",true);
-        if (rules != null) show.put("rules",true);
-        if (intd != null) show.put("int-details",true);
-        if (annots != null) show.put("annots",true);
-        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/agents/"+agName+"/mind'\" /></head>ok";
-    }
-
-    static String helpMsg1 = "Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });";
-
 
     @Path("/{agentname}")
     @POST
@@ -210,13 +158,16 @@ public class RestImplAg extends AbstractBinder {
     @Path("/{agentname}")
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
-    public String killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
+    public Response killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
         try {
             boolean r = BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName,"web", 0);
-            return "result of kill: "+r;
+            
+            return Response.ok("result of kill: "+r).build();
         } catch (Exception e) {
-            return "Agent "+agName+" in unknown."+e.getMessage();
+            e.printStackTrace();
         }
+        /*Error codes: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        return Response.status(500).build();
     }
 
     @Path("/{agentname}/status")
@@ -309,8 +260,8 @@ public class RestImplAg extends AbstractBinder {
 
     @Path("/{agentname}/aslfile/{aslfilename}")
     @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getLoadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName) {
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response getLoadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName) {
         
         StringBuilder so = new StringBuilder();
         try {
@@ -327,41 +278,19 @@ public class RestImplAg extends AbstractBinder {
                 so.append(line + "\n");
                 line = in.readLine();
             }
+            return Response.ok(so.toString()).build();
         } catch (IOException e) {
             e.printStackTrace();
         }
         
-        return  "<html lang=\"en\">\n" + 
-                "<head>\n" + 
-                "<title>JaCaMo - Editing: "+aslFileName+"</title>\n" + 
-                "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n" +
-                "</head>\n" + 
-                "<body>\n" + 
-                "	<form action=\"/agents/"+agName+"/aslfile/"+aslFileName+"\" method=\"post\" id=\"usrform\" enctype=\"multipart/form-data\">" +
-                "		<div>\n" + 
-                "			<textarea name=\"aslfile\" form=\"usrform\">" +
-                                so.toString() +
-                "			</textarea>\n" + 
-                "		</div>\n" + 
-                "	<div class=\"editor_footer\">\n" +
-                "			Editing: " + aslFileName +
-                "			<button type=\"submit\" onclick=\"location.href='/agents/"+ agName + "/mind';\">Save & Reload</button>\n" +
-                "			<button type=\"button\" onclick=\"location.href='/agents/"+ agName + "/mind';\">Discard changes</button>\n" +
-                "	</div>"+
-                "	</form>\n" + 
-                "<script src=\"http://ajaxorg.github.io/ace-builds/src/ace.js\"></script>\n" +
-                "<script src=\"/js/ace/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n" + 
-                "<script src=\"/js/ace/ext-language_tools.js\"></script>\n" +
-                "<script src=\"/js/load_plans_form.js\"></script>\n" +
-                "</body>\n" + 
-                "</html>";
+        return Response.noContent().build(); // TODO: set response properly
     }
 
     @Path("/{agentname}/aslfile/{aslfilename}")
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
-    public String loadASLfileForm(@PathParam("agentname") String agName,
+    public Response loadASLfileForm(@PathParam("agentname") String agName,
             @PathParam("aslfilename") String aslFileName,
             @FormDataParam("aslfile") InputStream uploadedInputStream
             ) {
@@ -401,14 +330,16 @@ public class RestImplAg extends AbstractBinder {
                 //ag.fixAgInIAandFunctions(ag); // used to fix agent reference in functions used inside includes
                 ag.loadKqmlPlans();
                 
-                r = "<br/><center>Agent reloaded but keeping intentions!<br/>Redirecting...</center>";
+                r = "<html><head><meta http-equiv=\"refresh\" content=\"1; URL='/'\"/></head><body>"+
+                    "<br/><center>Agent reloaded but keeping intentions!<br/>Redirecting...</center></body></html>";
             }
-            return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/agents/"+agName+
-            	   "/mind'\"/><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+r;
+            return Response.ok(r).build();
+
         } catch (Exception e) {
             e.printStackTrace();
-            return "error "+e.getMessage();
         }
+        /*Error codes: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        return Response.status(500).build();
     }
     
     //TODO: not being used anymore, remove it? 
@@ -450,7 +381,7 @@ public class RestImplAg extends AbstractBinder {
             
             allClasses.forEach(a -> {
                 try {
-                    Class c = a.load();
+                    Class<?> c = a.load();
                     if (c.isAnnotationPresent(jason.stdlib.Manual.class)) {
                         // add full predicate provided by @Manual
                         jason.stdlib.Manual annotation = (jason.stdlib.Manual)c.getAnnotation(jason.stdlib.Manual.class);
@@ -762,6 +693,7 @@ public class RestImplAg extends AbstractBinder {
     }
 
     protected String getAgAsDot(String agName) {
+        int MAX_LENGTH = 35;
         String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
         
         try {

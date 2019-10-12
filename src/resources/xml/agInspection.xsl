@@ -3,6 +3,10 @@
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
+    <!--
+    TODO: Implement show/hide agent's properties on fullstack pure JS version
+    Here it is allways true
+  -->
     <xsl:param name="show-annots"  select="'true'" />
 
     <xsl:output method="html" />
@@ -26,7 +30,7 @@
             <xsl:for-each select="namespaces/namespace">
                     <div class="namespace">
                     <details><summary><xsl:value-of select="@id" /></summary>
-                    
+
                     <xsl:variable name="nsId" select="@id" />
                     <xsl:for-each select="../../literal[@namespace=$nsId]">
                         <!-- xsl:sort select="structure/@functor" / -->
@@ -43,14 +47,18 @@
                     </div>
             </xsl:for-each>
             <br/>
+
+            <!-- TODO: Implement show/hide agent's properties on fullstack pure JS version
+            <xsl:variable name="agentname" select="/agent/@name"/>
             <div align="right">
             <xsl:if test="$show-annots='true'">
-            	<a href='hide?annots'>hide annotations</a>
+            	<a href='/agents/{$agentname}/hide?annots'>hide annotations</a>
             </xsl:if>
             <xsl:if test="$show-annots='false'">
-            	<a href='show?annots'>show annotations</a>
+            	<a href='/agents/{$agentname}/show?annots'>show annotations</a>
             </xsl:if>
             </div>
+          -->
             </details>
         </xsl:if>
 
@@ -78,14 +86,17 @@
 					<xsl:choose>
 						<xsl:when test="not(starts-with(., 'jar:'))">
 							<div class="plans">
-								<xsl:variable name="aslfilename" select="." />
+								<xsl:variable name="fId" select="."/>
+                <xsl:variable name="separator" select="'.'"/>
+                <xsl:variable name="agentname" select="/agent/@name"/>
 								<details>
 									<summary>
 										<xsl:value-of select="." />
-										&#160;
-										<a href="aslfile/{$aslfilename}">[edit]</a>
+                    <!--Allows editing asl file only if it has the same name of the agent -->
+                    <xsl:if test="normalize-space(substring-before($fId, $separator)) = $agentname">
+										  &#160; <a href="./agent_editor.html#{$fId}">[edit]</a>
+                    </xsl:if>
 									</summary>
-									<xsl:variable name="fId" select="." />
 									<xsl:for-each select="../../plan[@file=$fId]">
 										<div class="plan">
 											<xsl:apply-templates select="." />
@@ -96,7 +107,6 @@
 						</xsl:when>
 						<xsl:otherwise>
 							<div class="plans">
-								<xsl:variable name="aslfilename" select="." />
 								<details>
 									<summary>
 										<xsl:value-of select="." />
@@ -120,8 +130,8 @@
 			</details>
 		</xsl:if>
 	</xsl:template>
-	
-	
+
+
     <xsl:template match="mailbox">
         <xsl:if test="count(message) > 0" >
             <details><summary>MailBox</summary>
@@ -228,7 +238,7 @@
     </xsl:template>
     <xsl:template match="intended-means">
 	       	<xsl:apply-templates select="@trigger"/>
-          	<xsl:apply-templates select="body"/> 
+          	<xsl:apply-templates select="body"/>
 
             <div class="unifier">
                 <xsl:apply-templates select="unifier"/>
@@ -346,7 +356,7 @@
 
     <xsl:template match="plan">
     	<!-- xsl:if test="not(starts-with(label/literal/structure/@functor,'kqml'))" -->
-    	
+
         <xsl:if test="count(label) > 0 and not(starts-with(label/literal/structure/@functor,'l__'))">
             <span class="plan-label">
                 @<xsl:apply-templates select="label" />

@@ -6,9 +6,11 @@ function createMenu() {
   Http.send();
   Http.onreadystatechange = (e) => {
     agents = Http.responseText.replace('[', '').replace(/"/g, '').replace(']', '').split(',');
-    /* agents = JSON.parse(Http.responseText); is producing error since the response is something
-    like ["agent1", "agent2"] which is an array, not an JSON */
+    /* agents = JSON.parse(Http.responseText);
+    It is producing error since the response is something
+    like ["agent1", "agent2"] which is an array, not an JSON
     console.log(agents);
+    */
 
     /* Remove all existing children */
     const menu = document.getElementById("nav-drawer-frame");
@@ -37,7 +39,7 @@ function createMenu() {
     ldf.innerHTML = "directory facilitator";
     document.getElementById("nav-drawer-frame").appendChild(ldf);
     var lnew = document.createElement('a');
-    lnew.setAttribute("href", "./new_agent.html");
+    lnew.setAttribute("href", "./agent_new.html");
     lnew.innerHTML = "create agent";
     document.getElementById("nav-drawer-frame").appendChild(lnew);
   };
@@ -48,5 +50,5 @@ function newAg() {
 	http = new XMLHttpRequest();
     http.open("POST", '/agents/'+document.getElementById('createAgent').value, false);
     http.send();
-    window.open('/agent_mind.html#'+document.getElementById('createAgent').value);
+    window.location.assign('/agent_mind.html#'+document.getElementById('createAgent').value);
 }

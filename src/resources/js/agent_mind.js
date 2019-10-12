@@ -1,19 +1,26 @@
-/* kill agent */
-function killAg(agent) {
-  var r = confirm("Kill agent '"+agent+"'?");
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+KILL AN AGENT
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+function killAg() {
+  var selectedAgent = window.location.hash.substr(1);
+  var r = confirm("Kill agent '"+selectedAgent+"'?");
   if (r == true) {
     h2 = new XMLHttpRequest();
     h2.onreadystatechange = function() {
       if ((h2.status == 200) || (h2.status == 204)) {
-        location.assign("./agents.html");
+        window.location.assign("./agents.html");
       }
     };
-    h2.open("DELETE", "./agents/" + agent, false);
+    h2.open("DELETE", "./agents/" + selectedAgent);
     h2.send();
   }
 }
 
-/*function to run Jason commands*/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+SEND COMMANDS TO AN AGENT
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 function runCMD() {
   var selectedAgent = window.location.hash.substr(1);
   h3 = new XMLHttpRequest();
@@ -28,9 +35,9 @@ function runCMD() {
   h3.send(data);
 }
 
-/*
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 LOG FUNCTIONS
-*/
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* clear agent's log */
 function delLog() {
@@ -61,24 +68,27 @@ function showLog() {
   http.send();
 }
 
-/*
-CODE COMPLETION FUNCTIONS
-*/
+/* scroll log automatically */
+setInterval(function() {
+  showLog();
+}, 1000);
 
-/* fill suggestions for code completion */
-var suggestions = [
-  ['undefined']
-];
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+CODE COMPLETION FUNCTIONS
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* get sugestions for the selected agent */
 function updateSuggestions() {
+  var suggestions = [ ['undefined'] ];
   var selectedAgent = window.location.hash.substr(1);
   h4 = new XMLHttpRequest();
   h4.onreadystatechange = function() {
     if (h4.readyState == 4 && h4.status == 200) {
       var a = h4.responseText;
       a = a.replace(/'/g, '\"');
-      window.suggestions = JSON.parse(a);
+      suggestions = JSON.parse(a);
+      autocomplete(document.getElementById("inputcmd"), suggestions);
     }
   };
   h4.open('GET', "./agents/" + selectedAgent + "/code", true);
@@ -159,57 +169,23 @@ function autocomplete(inp, arr) {
   });
 }
 
-/* update cmb box with suggestions */
-function updateCmdCodeCompletion() {
-  autocomplete(document.getElementById("inputcmd"), suggestions);
-}
-
-/* just to have sure the /code content was taken */
-function waitToFillSuggestions() {
-  if (typeof suggestions[0] !== 'undefined') {
-    updateSuggestions();
-  } else {
-    setTimeout(waitToFillSuggestions, 100);
-  }
-}
-
-/* run initialization */
-updateSuggestions();
-updateCmdCodeCompletion();
-waitToFillSuggestions();
-
-/* scroll log automatically
-setInterval(function() {
-  showLog();
-}, 1000);
-*/
-
-
-/* paint and fill drawer menu from frame to on page */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+MENU FOR AGENT'S INTERFACE
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+MENU - deprecated
+paint and fill drawer menu from frame to on page
 var buttonClose = "<label for='doc-drawer-checkbox' class='button drawer-close'></label>";
 var pageContent = document.getElementById("nav-drawer-frame").innerHTML;
 var fullMenu = buttonClose + " " + pageContent;
 sessionStorage.setItem("menucontent", fullMenu);
-
-/* modal window */
-var modal = document.getElementById('modalinspection');
-var btnModal = document.getElementById("btninspection");
-var span = document.getElementsByClassName("close")[0];
-btnModal.onclick = function() {
-  modal.style.display = "block";
-};
-span.onclick = function() {
-  modal.style.display = "none";
-};
-window.onclick = function(event) {
-  if (event.target == modal) {
-    modal.style.display = "none";
-  };
-};
-
-/*
-XML Agent's mind
 */
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+AGENT'S MIND (XML FUNCTIONS)
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* TODO: Implement show/hide agent's properties on fullstack pure JS version */
 function makeRequest(url, loadedData, property, elementToAddResult) {
   var req = new XMLHttpRequest();
   req.open('GET', url);
@@ -249,3 +225,7 @@ function displayResult(xmlInput, xsltSheet, elementToAddResult) {
     elementToAddResult.innerHTML = xmlInput.transformNode(xsltSheet);
   }
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+END OF THE FILE
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
