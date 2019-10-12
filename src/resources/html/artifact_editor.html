@@ -1,16 +1,16 @@
 <html lang="en">
 
 <head>
-  <title>JaCaMo - Jason ASL files Editor</title>
+  <title>JaCaMo - CArtAgO Java files Editor</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
-  <script src="./js/agent_editor.js"></script>
+  <script src="./js/artifact_editor.js"></script>
 </head>
 
-<body onload="{getCurrentAslContent();}">
-  <form action="/agents/agent_name/aslfile/aslfile_name" method="post" id="usrform" enctype="multipart/form-data">
-    
+<body onload="{getCurrentJavaContent();}">
+  <form action="/workspaces/workspace_name/javafile/javafilename" method="post" id="usrform" enctype="multipart/form-data">
+
     <div>
-      <textarea name="aslfile" form="usrform"></textarea>
+      <textarea name="javafile" form="usrform"></textarea>
     </div>
     <div class="editor_footer" id="footer_menu">
       <!-- Content filled by javascript function -->

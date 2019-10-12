@@ -1,11 +1,3 @@
-/* create agent */
-function newArt() {
-	http = new XMLHttpRequest();
-	/*Probably there is not an artifact with the referred name in a wks called 'temp', if so, its source will be opened*/
-    http.open("POST", '/workspaces/temp/'+document.getElementById('createArtifact').value, false);
-    http.send();
-    window.open('/workspaces/temp/javafile/'+document.getElementById('createArtifact').value, 'mainframe');
-}
 
 /* create role: POST in "/{oename}/group/{groupname}" */
 function newRole(org, gr) {
@@ -35,8 +27,3 @@ function newRole(org, gr) {
     http.send(data);
     window.open('/oe/' + org + '/os', 'mainframe', 'location=yes,status=yes');
 }
-
-/* update navigation bar according to frames changes */
-setInterval(function() {
-	document.getElementById("nav-drawer").innerHTML = sessionStorage.getItem("menucontent");
-}, 500);

@@ -279,11 +279,13 @@ public class RestImplAg extends AbstractBinder {
                 line = in.readLine();
             }
             return Response.ok(so.toString()).build();
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
         
-        return Response.noContent().build(); // TODO: set response properly
+        /*Error codes: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        return Response.status(500).build();
     }
 
     @Path("/{agentname}/aslfile/{aslfilename}")
@@ -332,13 +334,16 @@ public class RestImplAg extends AbstractBinder {
                 
                 r = "<html><head><meta http-equiv=\"refresh\" content=\"1; URL='/'\"/></head><body>"+
                     "<br/><center>Agent reloaded but keeping intentions!<br/>Redirecting...</center></body></html>";
+                
+                return Response.ok(r).build();
             }
-            return Response.ok(r).build();
+            /*412 Precondition Failed - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+            return Response.status(412).build();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        /*Error codes: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
         return Response.status(500).build();
     }
     

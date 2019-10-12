@@ -4,13 +4,13 @@
 // Maybe a solution is changing it to a form using submit function
   -->
 <!DOCTYPE html>
-<html lang="en" target="mainframe">
+<html lang="en">
 
 <head>
   <title>New Artifact</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
-  <script src="/js/root.js"></script>
+  <script src="/js/artifact_common.js"></script>
 </head>
 
 <body>
@@ -21,7 +21,7 @@
           <h4 class="section double-padded">Create artifact template</h4>
           <div class="section">
             <p>
-              <input style="width: 100%; margin: 0px;" placeholder="enter package.artifact's name ..." type="text" id="createArtifact" onkeydown="if (event.keyCode == 13) {newArt();}">
+              <input style="width: 100%; margin: 0px;" placeholder="enter package.artifact's name ... (e.g.: dynamic.test)" type="text" id="createArtifact" onkeydown="if (event.keyCode == 13) {newArt();}">
             </p>
             <br />
           </div>

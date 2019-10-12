@@ -4,7 +4,7 @@ KILL AN AGENT
 
 function killAg() {
   var selectedAgent = window.location.hash.substr(1);
-  var r = confirm("Kill agent '"+selectedAgent+"'?");
+  var r = confirm("Kill agent '" + selectedAgent + "'?");
   if (r == true) {
     h2 = new XMLHttpRequest();
     h2.onreadystatechange = function() {
@@ -69,10 +69,21 @@ function showLog() {
 }
 
 /* scroll log automatically */
-setInterval(function() {
-  showLog();
-}, 1000);
+function setAutoUpdateLog() {
+  setInterval(function() {
+    showLog();
+  }, 1000);
+}
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+GET AGENT'S GRAPH
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+function getGraph() {
+  var selectedAgent = window.location.hash.substr(1);
+  /*document.getElementById('overviewgraph').data = "./agents/" + window.location.hash.substr(1) + "/mind/img.svg";*/
+  document.getElementById('overviewgraph').setAttribute('data', "./agents/" + selectedAgent + "/mind/img.svg");
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 CODE COMPLETION FUNCTIONS
@@ -80,7 +91,9 @@ CODE COMPLETION FUNCTIONS
 
 /* get sugestions for the selected agent */
 function updateSuggestions() {
-  var suggestions = [ ['undefined'] ];
+  var suggestions = [
+    ['undefined']
+  ];
   var selectedAgent = window.location.hash.substr(1);
   h4 = new XMLHttpRequest();
   h4.onreadystatechange = function() {
@@ -170,20 +183,13 @@ function autocomplete(inp, arr) {
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-MENU FOR AGENT'S INTERFACE
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-/*
-MENU - deprecated
-paint and fill drawer menu from frame to on page
-var buttonClose = "<label for='doc-drawer-checkbox' class='button drawer-close'></label>";
-var pageContent = document.getElementById("nav-drawer-frame").innerHTML;
-var fullMenu = buttonClose + " " + pageContent;
-sessionStorage.setItem("menucontent", fullMenu);
-*/
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 AGENT'S MIND (XML FUNCTIONS)
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+function getInspectionDetails() {
+  var selectedAgent = window.location.hash.substr(1);
+  loadAndTransform('./agents/' + selectedAgent + '/mind', './xml/agInspection.xsl', document.getElementById('inspection'));
+}
 
 /* TODO: Implement show/hide agent's properties on fullstack pure JS version */
 function makeRequest(url, loadedData, property, elementToAddResult) {

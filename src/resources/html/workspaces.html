@@ -2,19 +2,13 @@
 <html lang="en">
 
 <head>
-  <title>jacamo-web - agents</title>
-  <!--
-  <link rel="stylesheet" type="text/css" href="./css/mini-default.css">
-  <link rel="stylesheet" type="text/css" href="./css/style.css">
-  -->
-  <link rel="stylesheet" type="text/css" href="./css/style.css">
-  <meta http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
-  <script src="./js/agent_mind.js"></script>
-  <script src="./js/agent_common.js"></script>
+  <title>jacamo-web - environment</title>
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-<body onload="{createMenu(); getGraph(); getInspectionDetails(); updateSuggestions(); setAutoUpdateLog();}">
-
+<body>
   <div id="root">
 
     <header class="row">
@@ -36,56 +30,39 @@
       <label for="doc-drawer-checkbox" class="button drawer-toggle col-sm" style="right: 10px; width: 50px; position: fixed;"></label>
       <input id="doc-drawer-checkbox" class="drawer" value="on" type="checkbox" />
       <nav class="col-xp-1 col-md-2" id="nav-drawer">
-        <!-- Content filled by javascript function -->
+        <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
       </nav>
     </header>
 
     <div class="row" id="doc-wrapper">
-      <input id="doc-drawer-checkbox" class="leftmenu" value="on" type="checkbox">
+      <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
       <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
-        <!-- Content filled by javascript function -->
+        <br />
+        <br />
+        <a href="/artifact_new.html">create artifact</a>
       </nav>
 
       <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
-
-        <!-- overview -->
-        <div id="overview" class="card fluid">
+        <div id="getting-started" class="card fluid">
+          <h4 class="section double-padded">getting started</h4>
           <div class="section">
-            <center><object id="overviewgraph" data="" type="image/svg+xml" style="max-width:100%;"></object></center><br />
+            <p>
+              <a href="http://cartago.sourceforge.net" target="_blank">CArtAgO</a> is an <a href="https://github.com/cartago-lang/cartago" target="_blank">open-source</a> Java-based Framework for Programming Environments in Agent-oriented
+              Applications. Notice that the menu does not show empty workspaces.
+            </p>
+            <br />
           </div>
         </div>
-
-        <!-- inspection -->
-        <div id="inspection-div" class="card fluid">
-          <div class="section">
-            <p id="inspection"></p>
-          </div>
-        </div>
-
-        <!-- command box -->
-        <div id="command" class="card fluid">
-          <form autocomplete="off" , action="#command">
-            <div class="autocomplete">
-              <input style="width: 100%; margin: 0px;" placeholder="Command (Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });) ..." type="text" id="inputcmd" onkeydown="if (event.keyCode == 13) {runCMD();}">
-            </div>
-          </form>
-        </div>
-
-        <!-- log -->
-        <div class="card fluid">
-          <textarea class=logarea readonly type="text" id="log"></textarea>
-        </div>
-
-        <!-- footer -->
-        <div id="agentfoot" class="card fluid">
-          <div id="agentfootmenu" class="section">
-            <a href='' onclick='delLog()'>clear log</a>&#160;&#160;&#160;
-            <a href='' onclick='killAg()'>kill agent</a>&#160;&#160;&#160;
-          </div>
-        </div>
-
       </main>
     </div>
-
   </div>
 </body>
+
+<script>
+  var buttonClose = "<label for='doc-drawer-checkbox' class='button drawer-close'></label>";
+  var pageContent = document.getElementById("nav-drawer-frame").innerHTML;
+  var fullMenu = `${buttonClose} ${pageContent}`;
+  sessionStorage.setItem("menucontent", fullMenu);
+</script>
+
+</html>
