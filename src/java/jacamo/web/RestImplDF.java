@@ -1,7 +1,9 @@
 package jacamo.web;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -67,7 +69,7 @@ public class RestImplDF extends AbstractBinder {
              * Testing platform: http://json.parser.online.fr/
              */
             Map<String, Set<String>> sortedCommonDF = new TreeMap<>(commonDF);          
-            Set<Object> jsonifiedDF = new HashSet<Object>();
+            List<Object> jsonifiedDF = new ArrayList<Object>();
             for (String s : sortedCommonDF.keySet()) {
                 Map<String, Object> agent = new HashMap<String, Object>();
                 agent.put("agent", s);

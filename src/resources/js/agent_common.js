@@ -8,15 +8,12 @@ function createMenu() {
   const Http = new XMLHttpRequest();
   Http.open("GET", "./agents");
   Http.send();
-  Http.onreadystatechange = (e) => {
-    agents = Http.responseText.replace('[', '').replace(/"/g, '').replace(']', '').split(',');
-    /* agents = JSON.parse(Http.responseText);
-    It is producing error since the response is something
-    like ["agent1", "agent2"] which is an array, not an JSON
-    console.log(agents);
-    */
-    updateMenu("nav-drawer", agents);
-    updateMenu("nav-drawer-frame", agents);
+  Http.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      agents = JSON.parse(Http.responseText);
+      updateMenu("nav-drawer", agents);
+      updateMenu("nav-drawer-frame", agents);
+    }
   };
 };
 
@@ -32,8 +29,8 @@ function updateMenu(nav, agents) {
   var selectedAgent = window.location.hash.substr(1);
   agents.forEach(function(n) {
     var lag = document.createElement('a');
-    lag.setAttribute("href", "./agent_mind.html#" + n);
-    lag.setAttribute('onclick', '{window.location.assign("./agent_mind.html#' + n + '");window.location.reload();}');
+    lag.setAttribute("href", "./agent.html#" + n);
+    lag.setAttribute('onclick', '{window.location.assign("./agent.html#' + n + '");window.location.reload();}');
     if (selectedAgent === n) {
       lag.innerHTML = "<h5><b>" + n + "</b></h5>";
     } else {
@@ -63,5 +60,5 @@ function newAg() {
   http = new XMLHttpRequest();
   http.open("POST", '/agents/' + document.getElementById('createAgent').value, false);
   http.send();
-  window.location.assign('/agent_mind.html#' + document.getElementById('createAgent').value);
+  window.location.assign('/agent.html#' + document.getElementById('createAgent').value);
 }

@@ -5,9 +5,10 @@
   <title>jacamo-web - environment</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta charset="UTF-8" http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
+  <script src="/js/workspaces.js"></script>
 </head>
 
-<body>
+<body onload="{getWS();}">
   <div id="root">
 
     <header class="row">
@@ -36,9 +37,7 @@
     <div class="row" id="doc-wrapper">
       <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
       <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
-        <br />
-        <br />
-        <a href="/artifact_new.html">create artifact</a>
+        <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
       </nav>
 
       <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
@@ -56,12 +55,5 @@
     </div>
   </div>
 </body>
-
-<script>
-  var buttonClose = "<label for='doc-drawer-checkbox' class='button drawer-close'></label>";
-  var pageContent = document.getElementById("nav-drawer-frame").innerHTML;
-  var fullMenu = `${buttonClose} ${pageContent}`;
-  sessionStorage.setItem("menucontent", fullMenu);
-</script>
 
 </html>

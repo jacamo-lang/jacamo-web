@@ -11,9 +11,12 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,8 +74,11 @@ public class RestImplEnv extends AbstractBinder {
              * [{"agent":"ag1","services":["s1","s2"]},{"agent":"ag2","services":["s2","s3"]}]
              * Testing platform: http://json.parser.online.fr/
              */
-            Set<Object> workspaces = new HashSet<Object>();
-            for (String wname : CartagoService.getNode().getWorkspaces()) {
+            List<Object> workspaces = new ArrayList<Object>();
+            List<String> wnames = new ArrayList<>(CartagoService.getNode().getWorkspaces());
+            Collections.sort(wnames);
+            for (String wname : wnames) {
+             
                 Map<String, Object> workspace = new HashMap<String, Object>();
                 try {
                     Set<Object> artifacts = new HashSet<Object>();
@@ -129,13 +135,15 @@ public class RestImplEnv extends AbstractBinder {
                         artifacts.add(artifact);
                     }
 
-                    workspace.put(wname, artifacts);
+                    workspace.put("name", wname);
+                    workspace.put("artifacts", artifacts);
                     
                     workspaces.add(workspace);
                 } catch (CartagoException e) {
                     e.printStackTrace();
                 }
             }
+            
 
             return Response.ok().entity(gson.toJson(workspaces)).header("Access-Control-Allow-Origin", "*").build();
 
