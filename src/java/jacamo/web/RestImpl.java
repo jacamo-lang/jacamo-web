@@ -75,10 +75,14 @@ public class RestImpl extends AbstractBinder {
                 so.append(line);
                 line = in.readLine();
             }
+
+            return Response.ok(so.toString()).cacheControl(cc).build();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+
+        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        return Response.status(500).build();
     }
 
     @Path("/img.svg")
@@ -91,12 +95,15 @@ public class RestImpl extends AbstractBinder {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 MutableGraph g = Parser.read(dot);
                 Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+                
                 return Response.ok(out.toByteArray()).build();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return Response.noContent().build(); // TODO: set response properly
+
+        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        return Response.status(500).build();
     }
 
     protected int MAX_LENGTH = 35;
@@ -125,10 +132,14 @@ public class RestImpl extends AbstractBinder {
                 so.append(line);
                 line = in.readLine();
             }
+
+            return Response.ok(so.toString()).cacheControl(cc).build();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Response.ok(so.toString(), "text/xml").cacheControl(cc).build();
+
+        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        return Response.status(500).build();
     }
 
     @Path("/css/{resourcepathfile}")
@@ -151,15 +162,19 @@ public class RestImpl extends AbstractBinder {
                 so.append(line);
                 line = in.readLine();
             }
+
+            return Response.ok(so.toString()).cacheControl(cc).build();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Response.ok(so.toString(), "text/css").cacheControl(cc).build();
+
+        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        return Response.status(500).build();
     }
 
     @Path("/js/{resourcepathfile}")
     @GET
-    @Produces("text/javascript")
+    @Produces("application/javascript")
     public Response getResource(@PathParam("resourcepathfile") String resourcepathfile)
             throws ReceiverNotFoundException {
         StringBuilder so = new StringBuilder();
@@ -177,10 +192,14 @@ public class RestImpl extends AbstractBinder {
                 so.append(line);
                 line = in.readLine();
             }
+
+            return Response.ok(so.toString()).cacheControl(cc).build();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+
+        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        return Response.status(500).build();
     }
 
     private Agent getAgent(String agName) {

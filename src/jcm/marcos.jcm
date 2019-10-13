@@ -5,6 +5,9 @@ mas marcos {
                testwks.b
     }
 
+    agent pedro {
+        focus: testwks.a
+    }
 
     workspace testwks {
         artifact a: tools.Counter(10)

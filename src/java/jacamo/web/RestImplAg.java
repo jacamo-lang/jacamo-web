@@ -166,7 +166,7 @@ public class RestImplAg extends AbstractBinder {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        /*Error codes: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
         return Response.status(500).build();
     }
 
@@ -284,7 +284,7 @@ public class RestImplAg extends AbstractBinder {
             e.printStackTrace();
         }
         
-        /*Error codes: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
+        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
         return Response.status(500).build();
     }
 

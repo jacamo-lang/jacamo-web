@@ -2,14 +2,13 @@
 <html lang="en">
 
 <head>
-  <title>jacamo-web - agents</title>
+  <title>jacamo-web - directory facilitator</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta charset="UTF-8" http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
-  <script src="/js/agent_common.js"></script>
+  <script src="/js/df.js"></script>
 </head>
 
-<body onload="createMenu();">
-
+<body onload="{ getDF(); }">
   <div id="root">
 
     <header class="row">
@@ -28,39 +27,38 @@
           <polygon points="0 1, 10 1, 10 6, 24 6, 24 23, 0 23, 0 6, 10 6, 0 6, 0 1"></polygon>
         </svg><span>&nbsp;Organisation</span>
       </a>
-      <label for="doc-drawer-checkbox" class="button drawer-toggle col-sm" style="right: 10px; width: 50px; position: fixed;"></label>
+      <label for="doc-drawer-checkbox" class="button drawer-toggle" style="right: 10px; width: 50px; position: fixed;"></label>
       <input id="doc-drawer-checkbox" class="drawer" value="on" type="checkbox" />
       <nav class="col-xp-1 col-md-2" id="nav-drawer">
-        <!-- Content filled by javascript function -->
+        <label for="doc-drawer-checkbox" class="button drawer-close"></label>
+        <h3>.</h3>
+        <a hef="./agents.html">Agents</a>
+        <a hef="./workspaces.html">Environment</a>
+        <a hef="./oe.html">Organisation</a>
       </nav>
     </header>
 
     <div class="row" id="doc-wrapper">
+      <main class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="doc-content">
 
-      <input id="doc-drawer-checkbox" class="leftmenu" value="on" type="checkbox">
-      <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
-        <!-- Content filled by javascript function -->
-      </nav>
-
-      <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
-
-        <div id="getting-started" class="card fluid">
-          <h4 class="section double-padded">getting started</h4>
+        <div id="directory-facilitator" class="card fluid">
+          <h4 class="section double-padded">Directory Facilitator</h4>
           <div class="section">
-            <p>
-              <a href="http://jason.sourceforge.net/" target="_blank">Jason</a> is an interpreter for an extended version of AgentSpeak. It implements the operational semantics of that language, and provides a platform for the development of
-              multi-agent systems, with many user-customisable features. Jason is available as <a href="https://github.com/jason-lang/jason" target="_blank">open-source</a>, and is distributed under GNU LGPL.
-            </p>
-            <br />
+            <table class="striped" id="dftable">
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Service</th>
+                </tr>
+              </thead>
+              <!-- Content filled by javascript function -->
+              <!-- Sample row <tbody><tr><td>agent1</td><td>service1<br /></td></tr></tbody> -->
+            </table>
           </div>
+        </div>
 
-        </div>
-        <div style="display:none">
-          <input id="inputcmd">
-        </div>
       </main>
     </div>
-
   </div>
 </body>
 

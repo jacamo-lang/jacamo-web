@@ -26,7 +26,6 @@ import jason.asSyntax.Literal;
 import jason.asSyntax.StringTermImpl;
 import jason.asSyntax.Term;
 import jason.asSyntax.UnnamedVar;
-import jason.infra.centralised.*;
 import jason.runtime.*;
 
 public class RestAgArch extends AgArch {

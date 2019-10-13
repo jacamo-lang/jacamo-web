@@ -45,7 +45,7 @@ function updateMenu(nav, agents) {
   document.getElementById(nav).appendChild(br);
   document.getElementById(nav).appendChild(br);
   var ldf = document.createElement('a');
-  ldf.setAttribute("href", "./services");
+  ldf.setAttribute("href", "./df.html");
   ldf.innerHTML = "directory facilitator";
   document.getElementById(nav).appendChild(ldf);
   var lnew = document.createElement('a');

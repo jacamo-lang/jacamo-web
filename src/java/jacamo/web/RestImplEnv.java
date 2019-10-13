@@ -12,7 +12,9 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Singleton;
@@ -27,6 +29,8 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import com.google.gson.Gson;
 
 import cartago.ArtifactId;
 import cartago.ArtifactInfo;
@@ -53,32 +57,97 @@ public class RestImplEnv extends AbstractBinder {
     static Set<String> hidenArts = new HashSet<>(
             Arrays.asList(new String[] { "node", "console", "blackboard", "workspace", "manrepo", }));
 
-    @Path("/{wrksname}")
     @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getWorkspaceHtml(@PathParam("wrksname") String wrksName) {
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getWorkspaceHtml(@PathParam("wrksname") String wrksName) {
         try {
-            StringWriter mainContent = new StringWriter();
+            Gson gson = new Gson();
 
-            // overview
-            mainContent.append("<div id=\"overview\" class=\"card fluid\">\n");
-            mainContent.append("	<div class=\"section\">\n");
-            mainContent.append("        <center><object data=\"/workspaces/" + wrksName
-					+ "/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>\n");
+            /**
+             * Following the format suggested in the second example of
+             * https://opensource.adobe.com/Spry/samples/data_region/JSONDataSetSample.html
+             * 
+             * Sample jsonifiedDF:
+             * [{"agent":"ag1","services":["s1","s2"]},{"agent":"ag2","services":["s2","s3"]}]
+             * Testing platform: http://json.parser.online.fr/
+             */
+            Set<Object> workspaces = new HashSet<Object>();
+            for (String wname : CartagoService.getNode().getWorkspaces()) {
+                Map<String, Object> workspace = new HashMap<String, Object>();
+                try {
+                    Set<Object> artifacts = new HashSet<Object>();
+                    for (ArtifactId aid : CartagoService.getController(wname).getCurrentArtifacts()) {
+                        // Skip system's artifacts
+                        if (hidenArts.contains(aid.getName()))
+                            continue;
+                        if (aid.getName().endsWith("-body") || aid.getArtifactType().endsWith(".OrgBoard")
+                                || aid.getArtifactType().endsWith(".SchemeBoard")
+                                || aid.getArtifactType().endsWith(".NormativeBoard")
+                                || aid.getArtifactType().endsWith(".GroupBoard"))
+                            continue;
 
-            mainContent.append("	</div>\n");
-            mainContent.append("</div>\n");
-            mainContent.append("<div id=\"inspection\" class=\"card fluid\">\n");
-            mainContent.append("	<div class=\"section\">\n");
-            mainContent.append("		Workspace <b>" + wrksName + "</b>\n");
-            mainContent.append("	</div>\n");
-            mainContent.append("</div>\n");
+                        ArtifactInfo info = CartagoService.getController(wname).getArtifactInfo(aid.getName());
 
-            return "jacamo-web - environment: ";
+                        // Get artifact's properties
+                        Set<Object> properties = new HashSet<>();
+                        for (ArtifactObsProperty op : info.getObsProperties()) {
+                            for (Object vl : op.getValues()) {
+                                Map<String, Object> property = new HashMap<String, Object>();
+                                property.put(op.getName(), vl);
+                                properties.add(property);
+                            }
+                        }
+
+                        // Get artifact's operations
+                        Set<String> operations = new HashSet<>();
+                        info.getOperations().forEach(y -> {operations.add(y.getOp().getName());});
+                        
+                        // Get agents that are observing the artifact
+                        Set<Object> observers = new HashSet<>();
+                        info.getObservers().forEach(y -> {
+                            // do not print agents_body observation
+                            if (!info.getId().getArtifactType().equals("cartago.AgentBodyArtifact")) {
+                                observers.add(y.getAgentId().getAgentName());
+                            }
+                        });
+
+                        // linked artifacts
+                        Set<Object> linkedArtifacts = new HashSet<>();
+                        info.getLinkedArtifacts().forEach(y -> {
+                            // linked artifact node already exists if it belongs to this workspace
+                            linkedArtifacts.add(y.getName());
+                        });
+                        
+                        // Build returning object
+                        Map<String, Object> artifact = new HashMap<String, Object>();
+                        artifact.put("artifact", aid.getName());
+                        artifact.put("type", info.getId().getArtifactType());
+                        artifact.put("properties", properties);   
+                        artifact.put("operations", operations); 
+                        artifact.put("observers", observers);
+                        artifact.put("linkedArtifacts", linkedArtifacts);
+                        artifacts.add(artifact);
+                    }
+
+                    workspace.put(wname, artifacts);
+                    
+                    workspaces.add(workspace);
+                } catch (CartagoException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return Response.ok().entity(gson.toJson(workspaces)).header("Access-Control-Allow-Origin", "*").build();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "error"; // TODO: set response properly
+
+        /*
+         * 500 Internal Server Error -
+         * https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+         */
+        return Response.status(500).build();
     }
 
     @Path("/{wrksname}/{artname}")
@@ -141,12 +210,14 @@ public class RestImplEnv extends AbstractBinder {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 MutableGraph g = Parser.read(dot);
                 Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+
                 return Response.ok(out.toByteArray()).build();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return Response.noContent().build(); // TODO: set response properly
+        /* 500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html */
+        return Response.status(500).build();
     }
 
     @SuppressWarnings("finally")
@@ -236,12 +307,15 @@ public class RestImplEnv extends AbstractBinder {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 MutableGraph g = Parser.read(dot);
                 Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
+
                 return Response.ok(out.toByteArray()).build();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return Response.noContent().build(); // TODO: set response properly
+
+        /* 500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html */
+        return Response.status(500).build();
     }
 
     @Path("/{wrksname}/javafile/{javafilename}")
@@ -287,8 +361,8 @@ public class RestImplEnv extends AbstractBinder {
                 so.append(line + "\n");
                 line = in.readLine();
             }
+            
             return Response.ok(so.toString()).build();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -340,9 +414,9 @@ public class RestImplEnv extends AbstractBinder {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
         /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
         return Response.status(500).build();
-
     }
 
     @SuppressWarnings("finally")
