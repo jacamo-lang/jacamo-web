@@ -19,6 +19,7 @@ function getCurrentAslContent() {
       document.getElementById("footer_menu").appendChild(text);
       const submit = document.createElement('button');
       submit.setAttribute("type", "submit");
+      submit.setAttribute("onclick", "window.location.replace('./agent.html#" + selectedASLFile.split(".")[0]  + "')");
       submit.innerHTML = "Save & Reload";
       document.getElementById("footer_menu").appendChild(submit);
       const cancel = document.createElement('button');

@@ -428,7 +428,7 @@ public class RestImplAg extends AbstractBinder {
                 // used inside includes
                 ag.loadKqmlPlans();
 
-                return Response.ok("Agent reloaded with updated file. Old intentions not affected.").build();
+                return Response.ok("Agent reloaded with updated file. Old intentions were not affected.").build();
             }
 
             return Response.status(500, "Internal Server Error! Agent'" + agName + " Does not exists!").build();

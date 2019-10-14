@@ -3,11 +3,10 @@
 <head>
   <title>JaCaMo - Jason ASL files Editor</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
-  <meta charset="UTF-8" http-equiv="Cache-control" content="no-cache" name="viewport" content="width=device-width,initial-scale=1">
-  <script src="./js/agent_editor.js"></script>
+  <meta charset="UTF-8" http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
 </head>
 
-<body onload="{getCurrentAslContent();}">
+<body>
   <form action="/agents/agent_name/aslfile/aslfile_name" method="post" id="usrform" enctype="multipart/form-data">
 
     <div>
@@ -19,6 +18,11 @@
   </form>
   <script src="http://ajaxorg.github.io/ace-builds/src/ace.js"></script>
   <script src="http://ajaxorg.github.io/ace-builds/src/ext-language_tools.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="./js/agent_editor.js"></script>
+  <script>
+    getCurrentAslContent();
+  </script>
 </body>
 
 </html>

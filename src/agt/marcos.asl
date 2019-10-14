@@ -1,5 +1,5 @@
 price(banana,X) :- X = math.random * 100 + 20.
-//test8
+//test94
 !longTermSomething(1).
 
 !start.

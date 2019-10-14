@@ -9,14 +9,18 @@ function killAg() {
     const Http = new XMLHttpRequest();
     Http.onreadystatechange = function() {
       if ((Http.status == 200) || (Http.status == 204)) {
-        $('#top-alert-message').text(Http.responseText);
-        $('#top-alert').fadeTo(2000, 500).slideUp(500, function() {
-          $('#top-alert').slideUp(500);
-        });
+
       }
+      $('#top-alert-message').text(Http.responseText);
+      $('#top-alert').fadeTo(2000, 500).slideUp(500, function() {
+        $('#top-alert').slideUp(500);
+      });
+      $('#btkillag').href = './agents.html';
     };
     Http.open("DELETE", "./agents/" + selectedAgent);
     Http.send();
+  } else {
+    $('#btkillag').href = './agent.html#'+selectedAgent;
   }
 }
 
@@ -198,7 +202,7 @@ AGENT'S MIND (XML FUNCTIONS)
 
 function getInspectionDetails() {
   var selectedAgent = window.location.hash.substr(1);
-  loadAndTransform('./agents/' + selectedAgent + '/mind', './xml/agInspection.xsl', document.getElementById('inspection'));
+  loadAndTransform('/agents/' + selectedAgent + '/mind', '/xml/agInspection.xsl', document.getElementById('inspection'));
 }
 
 /* TODO: Implement show/hide agent's properties on fullstack pure JS version */
@@ -237,6 +241,7 @@ function displayResult(xmlInput, xsltSheet, elementToAddResult) {
     var proc = new XSLTProcessor();
     proc.importStylesheet(xsltSheet);
     elementToAddResult.appendChild(proc.transformToFragment(xmlInput, document));
+
   } else if (typeof xmlInput.transformNode !== 'undefined') {
     elementToAddResult.innerHTML = xmlInput.transformNode(xsltSheet);
   }
@@ -245,3 +250,19 @@ function displayResult(xmlInput, xsltSheet, elementToAddResult) {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 END OF THE FILE
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* modal window */
+var modal = document.getElementById('modalinspection');
+var btnModal = document.getElementById("btninspection");
+var span = document.getElementsByClassName("close")[0];
+btnModal.onclick = function() {
+  modal.style.display = "block";
+};
+span.onclick = function() {
+  modal.style.display = "none";
+};
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};

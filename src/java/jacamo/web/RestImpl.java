@@ -56,7 +56,7 @@ public class RestImpl extends AbstractBinder {
     {
         cc.setMaxAge(20);
     } // in seconds
-    
+
     @Override
     protected void configure() {
         bind(new RestImpl()).to(RestImpl.class);
@@ -76,14 +76,14 @@ public class RestImpl extends AbstractBinder {
             StringBuilder so = new StringBuilder();
 
             String resourceType = "html";
-            
+
             BufferedReader in = null;
-            File f = new File("src/resources/"+resourceType+"/" + resourcepathfile);
+            File f = new File("src/resources/" + resourceType + "/" + resourcepathfile);
             if (f.exists()) {
                 in = new BufferedReader(new FileReader(f));
             } else {
-                in = new BufferedReader(
-                        new InputStreamReader(RestImpl.class.getResource("/"+resourceType+"/" + resourcepathfile).openStream()));
+                in = new BufferedReader(new InputStreamReader(
+                        RestImpl.class.getResource("/" + resourceType + "/" + resourcepathfile).openStream()));
             }
             String line = in.readLine();
             while (line != null) {
@@ -128,21 +128,20 @@ public class RestImpl extends AbstractBinder {
 
         return Response.status(500).build();
     }
-  
+
+    @Path("{folder: (?:xml|js|css)}/{file}")
     @GET
-    @Path("{folder: (?:js|css|xml)}/{file}")
-    @Produces({"application/javascript", "text/css", "text/xml"})
-    public Response getResource(@PathParam("folder") String folder, @PathParam("file") String file, @Context Request request) {
+    public Response getXML(@PathParam("folder") String folder, @PathParam("file") String file,
+            @Context Request request) {
+        StringBuilder so = new StringBuilder();
         try {
-            StringBuilder so = new StringBuilder();
-            
             BufferedReader in = null;
-            File f = new File("src/resources/"+folder+"/" + file);
+            File f = new File("src/resources/" + folder + "/" + file);
             if (f.exists()) {
                 in = new BufferedReader(new FileReader(f));
             } else {
                 in = new BufferedReader(
-                        new InputStreamReader(RestImpl.class.getResource("/"+folder+"/" + file).openStream()));
+                        new InputStreamReader(RestImpl.class.getResource("/" + folder + "/" + file).openStream()));
             }
             String line = in.readLine();
             while (line != null) {
@@ -159,8 +158,14 @@ public class RestImpl extends AbstractBinder {
             if (builder != null) {
                 return builder.build();
             }
+ 
+            if (folder.equals("xml")) 
+                return Response.ok(so.toString(), "text/xml").tag(etag).cacheControl(cc).build();
+            else if (folder.equals("js")) 
+                return Response.ok(so.toString(), "application/javascript").tag(etag).cacheControl(cc).build();
+            else 
+                return Response.ok(so.toString(), "text/css").tag(etag).cacheControl(cc).build();
 
-            return Response.ok(so.toString()).tag(etag).cacheControl(cc).build();
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -191,7 +196,7 @@ public class RestImpl extends AbstractBinder {
         String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
 
         try {
-        	int MAX_LENGTH = 35;
+            int MAX_LENGTH = 35;
             StringBuilder sb = new StringBuilder();
             Set<String> allwks = new HashSet<>();
 
