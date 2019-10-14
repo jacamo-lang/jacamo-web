@@ -29,8 +29,8 @@ function updateMenu(nav, agents) {
   var selectedAgent = window.location.hash.substr(1);
   agents.forEach(function(n) {
     var lag = document.createElement('a');
-    lag.setAttribute("href", "./agent.html#" + n);
-    lag.setAttribute('onclick', '{window.location.assign("./agent.html#' + n + '");window.location.reload();}');
+    lag.setAttribute("href", "./agent.html?agent=" + n);
+    lag.setAttribute('onclick', '{window.location.assign("./agent.html?agent=' + n + '");window.location.reload();}');
     if (selectedAgent === n) {
       lag.innerHTML = "<h5><b>" + n + "</b></h5>";
     } else {
@@ -62,7 +62,7 @@ function newAg() {
   Http.send();
   Http.onreadystatechange = function() {
     if (Http.readyState == 4 && Http.status == 200) {
-      window.location.assign('/agent.html#' + document.getElementById('createAgent').value);
+      window.location.assign('/agent.html?agent=' + document.getElementById('createAgent').value);
     }
   };
 

@@ -1,8 +1,14 @@
 /* Fill text area with current agent's asl code */
 function getCurrentAslContent() {
-  var selectedASLFile = window.location.hash.substr(1);
+  /*var selectedASLFile = window.location.hash.substr(1);*/
+  var parameters = location.search.substring(1).split("&");
+  var temp = parameters[0].split("=");
+  selectedAgent = unescape(temp[1]);
+  temp = parameters[1].split("=");
+  selectedASLFile = unescape(temp[1]);
+
   const Http = new XMLHttpRequest();
-  Http.open("GET", "/agents/" + selectedASLFile.split(".")[0] + "/aslfile/" + selectedASLFile);
+  Http.open("GET", "/agents/" + selectedAgent + "/aslfile/" + selectedASLFile);
   Http.send();
   Http.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -19,7 +25,7 @@ function getCurrentAslContent() {
       document.getElementById("footer_menu").appendChild(text);
       const submit = document.createElement('button');
       submit.setAttribute("type", "submit");
-      submit.setAttribute("onclick", "window.location.replace('./agent.html#" + selectedASLFile.split(".")[0]  + "')");
+      submit.setAttribute("onclick", "window.location.replace('./agent.html?agent=" + selectedAgent  + "')");
       submit.innerHTML = "Save & Reload";
       document.getElementById("footer_menu").appendChild(submit);
       const cancel = document.createElement('button');
@@ -29,18 +35,10 @@ function getCurrentAslContent() {
       document.getElementById("footer_menu").appendChild(cancel);
 
       const form = document.getElementById("usrform");
-      /* Here there is a limitation, it is not properly ready to edit files which does not match with agent's name */
-      form.setAttribute("action", "/agents/" + selectedASLFile.split(".")[0] + "/aslfile/" + selectedASLFile);
+      form.setAttribute("action", "/agents/" + selectedAgent+ "/aslfile/" + selectedASLFile);
     }
   };
 };
-
-/*
-var editor = ace.edit("editor");
-editor.setTheme("ace/theme/textmate");
-editor.session.setMode("ace/mode/erlang");
-editor.setOptions({enableBasicAutocompletion: true});
-*/
 
 function createEditor(content) {
   /* find the textarea */

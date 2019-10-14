@@ -94,7 +94,7 @@
 										<xsl:value-of select="." />
                     <!--Allows editing asl file only if it has the same name of the agent -->
                     <xsl:if test="normalize-space(substring-before($fId, $separator)) = $agentname">
-										  &#160; <a href="./agent_editor.html#{$fId}">[edit]</a>
+										  &#160; <a href="./agent_editor.html?agent={$agentname}&amp;aslfile={$fId}">[edit]</a>
                     </xsl:if>
 									</summary>
 									<xsl:for-each select="../../plan[@file=$fId]">

@@ -56,11 +56,9 @@
 
         <!-- command box -->
         <div id="command" class="card fluid">
-          <form autocomplete="off" , action="#command">
-            <div class="autocomplete">
-              <input style="width: 100%; margin: 0px;" placeholder="Command (Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });) ..." type="text" id="inputcmd" onkeydown="if (event.keyCode == 13) {runCMD();}">
-            </div>
-          </form>
+          <div class="autocomplete">
+            <input style="width: 100%; margin: 0px;" placeholder="Command (Example: +bel; !goal; .send(bob,tell,hello); +{+!goal <- .print(ok) });) ..." type="text" id="inputcmd" onkeydown="if (event.keyCode == 13) {runCMD();}">
+          </div>
         </div>
 
         <!-- log -->
@@ -94,7 +92,7 @@
         <div id="agentfoot" class="card fluid">
           <div id="agentfootmenu" class="section">
             <a href="#modalinspection" id="btninspection">diagram</a>&#160;&#160;&#160;
-            <a href='./agents.html' onclick='delLog()'>clear log</a>&#160;&#160;&#160;
+            <a href='./agents.html' onclick='delLog()' id="btndellog">clear log</a>&#160;&#160;&#160;
             <a href='./agents.html' onclick='killAg()'>kill agent</a>&#160;&#160;&#160;
           </div>
         </div>
@@ -113,6 +111,8 @@
       getInspectionDetails();
       updateSuggestions();
       setAutoUpdateLog();
+      $("#btndellog").attr("href","agent.html?agent=" + selectedAgent);
+      document.getElementById("inputcmd").focus();
     });
   </script>
 </body>

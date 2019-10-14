@@ -3,7 +3,11 @@ KILL AN AGENT
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 function killAg() {
-  var selectedAgent = window.location.hash.substr(1);
+  /*var selectedAgent = window.location.hash.substr(1);*/
+  var parameters = location.search.substring(1).split("&");
+  var temp = parameters[0].split("=");
+  selectedAgent = unescape(temp[1]);
+
   var r = confirm("Kill agent '" + selectedAgent + "'?");
   if (r == true) {
     const Http = new XMLHttpRequest();
@@ -20,7 +24,7 @@ function killAg() {
     Http.open("DELETE", "./agents/" + selectedAgent);
     Http.send();
   } else {
-    $('#btkillag').href = './agent.html#'+selectedAgent;
+    $('#btkillag').href = './agent.html?agent='+selectedAgent;
   }
 }
 
@@ -29,11 +33,13 @@ SEND COMMANDS TO AN AGENT
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 function runCMD() {
-  var selectedAgent = window.location.hash.substr(1);
+  var parameters = location.search.substring(1).split("&");
+  var temp = parameters[0].split("=");
+  selectedAgent = unescape(temp[1]);
+
   const Http = new XMLHttpRequest();
   Http.onreadystatechange = function() {
     if (Http.readyState == 4 && Http.status == 200) {
-      window.location.assign("./agent.html#" + selectedAgent);
       document.getElementById("inputcmd").value = "";
       document.getElementById("inputcmd").focus();
 
@@ -55,12 +61,14 @@ LOG FUNCTIONS
 
 /* clear agent's log */
 function delLog() {
-  var selectedAgent = window.location.hash.substr(1);
-  console.log(selectedAgent);
+  const params = new URL(location.href).searchParams;
+  const selectedAgent = params.get('agent');
+
   const Http = new XMLHttpRequest();
   Http.onreadystatechange = function() {
     if (Http.readyState == 4 && Http.status == 200) {
-      location.reload();
+      /* Keep focus on command box */
+      document.getElementById("inputcmd").focus();
     }
   };
   Http.open("DELETE", "./agents/" + selectedAgent + "/log");
@@ -69,7 +77,10 @@ function delLog() {
 
 /* show agent's log */
 function showLog() {
-  var selectedAgent = window.location.hash.substr(1);
+  var parameters = location.search.substring(1).split("&");
+  var temp = parameters[0].split("=");
+  selectedAgent = unescape(temp[1]);
+
   const Http = new XMLHttpRequest();
   Http.onreadystatechange = function() {
     if (Http.readyState == 4 && Http.status == 200) {
@@ -94,7 +105,10 @@ GET AGENT'S GRAPH
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 function getGraph() {
-  var selectedAgent = window.location.hash.substr(1);
+  /*var selectedAgent = window.location.hash.substr(1);*/
+  var parameters = location.search.substring(1).split("&");
+  var temp = parameters[0].split("=");
+  selectedAgent = unescape(temp[1]);
   /*document.getElementById('overviewgraph').data = "./agents/" + window.location.hash.substr(1) + "/mind/img.svg";*/
   document.getElementById('overviewgraph').setAttribute('data', "./agents/" + selectedAgent + "/mind/img.svg");
 }
@@ -108,7 +122,11 @@ function updateSuggestions() {
   var suggestions = [
     ['undefined']
   ];
-  var selectedAgent = window.location.hash.substr(1);
+  /*var selectedAgent = window.location.hash.substr(1);*/
+  var parameters = location.search.substring(1).split("&");
+  var temp = parameters[0].split("=");
+  selectedAgent = unescape(temp[1]);
+
   const Http = new XMLHttpRequest();
   Http.onreadystatechange = function() {
     if (Http.readyState == 4 && Http.status == 200) {
@@ -201,7 +219,11 @@ AGENT'S MIND (XML FUNCTIONS)
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 function getInspectionDetails() {
-  var selectedAgent = window.location.hash.substr(1);
+  /*var selectedAgent = window.location.hash.substr(1);*/
+  var parameters = location.search.substring(1).split("&");
+  var temp = parameters[0].split("=");
+  selectedAgent = unescape(temp[1]);
+
   loadAndTransform('/agents/' + selectedAgent + '/mind', '/xml/agInspection.xsl', document.getElementById('inspection'));
 }
 

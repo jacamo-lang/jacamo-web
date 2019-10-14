@@ -2,13 +2,12 @@
 <html lang="en">
 
 <head>
-  <title>jacamo-web - agents</title>
+  <title>jacamo-web - environment</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta charset="UTF-8" http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
 </head>
 
 <body>
-
   <div id="root">
 
     <header class="row">
@@ -30,39 +29,32 @@
       <label for="doc-drawer-checkbox" class="button drawer-toggle col-sm" style="right: 10px; width: 50px; position: fixed;"></label>
       <input id="doc-drawer-checkbox" class="drawer" value="on" type="checkbox" />
       <nav class="col-xp-1 col-md-2" id="nav-drawer">
-        <!-- Content filled by javascript function -->
+        <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
       </nav>
     </header>
 
     <div class="row" id="doc-wrapper">
-
-      <input id="doc-drawer-checkbox" class="leftmenu" value="on" type="checkbox">
+      <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
       <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
-        <!-- Content filled by javascript function -->
+        <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
       </nav>
 
       <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
-
         <div id="getting-started" class="card fluid">
           <h4 class="section double-padded">getting started</h4>
           <div class="section">
             <p>
-              <a href="http://jason.sourceforge.net/" target="_blank">Jason</a> is an interpreter for an extended version of AgentSpeak. It implements the operational semantics of that language, and provides a platform for the development of
-              multi-agent systems, with many user-customisable features. Jason is available as <a href="https://github.com/jason-lang/jason" target="_blank">open-source</a>, and is distributed under GNU LGPL.
+              <a href="http://cartago.sourceforge.net" target="_blank">CArtAgO</a> is an <a href="https://github.com/cartago-lang/cartago" target="_blank">open-source</a> Java-based Framework for Programming Environments in Agent-oriented
+              Applications. Notice that the menu does not show empty workspaces.
             </p>
             <br />
           </div>
-
-        </div>
-        <div style="display:none">
-          <input id="inputcmd">
         </div>
       </main>
     </div>
-
   </div>
-  <script src="/js/agent_common.js"></script>
-  <script>createMenu();</script>
+  <script src="/js/workspaces.js"></script>
+  <script>getWorkspaces();</script>
 </body>
 
 </html>

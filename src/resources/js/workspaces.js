@@ -1,9 +1,9 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-RETRIEVE DATA FROM WORKSPACES
+RETRIEVE DATA ABOUT ONE WORKSPACE
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*Get Workspaces */
-function getWS() {
+function getWorkspaces() {
   var ws = [];
   const Http = new XMLHttpRequest();
   Http.open("GET", "./workspaces");
@@ -26,17 +26,30 @@ function updateMenu(nav, ws) {
   }
 
   /* Add each agent and then DF and Create Agent*/
-  var selectedWS = window.location.hash.substr(1);
+  const params = new URL(location.href).searchParams;
+  const selectedWorkspace = params.get('workspace');
+  const selectedArtifact = params.get('artifact');
+
   ws.forEach(function(n) {
     var lag = document.createElement('a');
-    lag.setAttribute("href", "./workspace.html#" + n.name);
-    lag.setAttribute('onclick', '{window.location.assign("./workspace.html#' + n + '");window.location.reload();}');
-    if (selectedWS === n.toString()) {
+    lag.setAttribute("href", "./workspace.html?workspace=" + n.name);
+    if (selectedWorkspace === n.name) {
       lag.innerHTML = "<h5><b>" + n.name + "</b></h5>";
+      document.getElementById(nav).appendChild(lag);
+      n.artifacts.forEach(function(a) {
+        var lar = document.createElement('a');
+        if (selectedArtifact === a.artifact) {
+          lar.innerHTML = "<h5><b>&#160;&#160;&#160;" + a.artifact + "</b></h5>";
+        } else {
+          lar.innerHTML = "<h5>&#160;&#160;&#160;" + a.artifact + "</h5>";
+        }
+        lar.setAttribute("href", "./artifact.html?workspace=" + n.name + "&artifact=" + a.artifact);
+        document.getElementById(nav).appendChild(lar);
+      });
     } else {
       lag.innerHTML = "<h5>" + n.name + "</h5>";
+      document.getElementById(nav).appendChild(lag);
     }
-    document.getElementById(nav).appendChild(lag);
   });
   var br = document.createElement("br");
   document.getElementById(nav).appendChild(br);
