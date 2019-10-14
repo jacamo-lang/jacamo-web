@@ -57,8 +57,13 @@ CREATE AGENT
 
 /* create agent */
 function newAg() {
-  http = new XMLHttpRequest();
-  http.open("POST", '/agents/' + document.getElementById('createAgent').value, false);
-  http.send();
-  window.location.assign('/agent.html#' + document.getElementById('createAgent').value);
+  const Http = new XMLHttpRequest();
+  Http.open("POST", '/agents/' + document.getElementById('createAgent').value);
+  Http.send();
+  Http.onreadystatechange = function() {
+    if (Http.readyState == 4 && Http.status == 200) {
+      window.location.assign('/agent.html#' + document.getElementById('createAgent').value);
+    }
+  };
+
 }

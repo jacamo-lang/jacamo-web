@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,8 +20,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.xml.bind.DatatypeConverter;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
@@ -32,7 +40,6 @@ import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.parse.Parser;
 import jaca.CAgentArch;
-import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
 import jason.infra.centralised.BaseCentralisedMAS;
@@ -45,6 +52,11 @@ import ora4mas.nopl.oe.Group;
 @Path("/")
 public class RestImpl extends AbstractBinder {
 
+    private CacheControl cc = new CacheControl();
+    {
+        cc.setMaxAge(20);
+    } // in seconds
+    
     @Override
     protected void configure() {
         bind(new RestImpl()).to(RestImpl.class);
@@ -52,23 +64,26 @@ public class RestImpl extends AbstractBinder {
 
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public Response getIndexHtml() throws ReceiverNotFoundException {
-        return getRootHtml("/index.html");
+    public Response getIndexHtml(@Context Request request) {
+        return getRootHtml("/index.html", request);
     }
-    
+
     @Path("/{resourcepathfile}")
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public Response getRootHtml(@PathParam("resourcepathfile") String resourcepathfile) throws ReceiverNotFoundException {
-        StringBuilder so = new StringBuilder();
+    public Response getRootHtml(@PathParam("resourcepathfile") String resourcepathfile, @Context Request request) {
         try {
+            StringBuilder so = new StringBuilder();
+
+            String resourceType = "html";
+            
             BufferedReader in = null;
-            File f = new File("src/resources/html/" + resourcepathfile);
+            File f = new File("src/resources/"+resourceType+"/" + resourcepathfile);
             if (f.exists()) {
                 in = new BufferedReader(new FileReader(f));
             } else {
                 in = new BufferedReader(
-                        new InputStreamReader(RestImpl.class.getResource("/html/" + resourcepathfile).openStream()));
+                        new InputStreamReader(RestImpl.class.getResource("/"+resourceType+"/" + resourcepathfile).openStream()));
             }
             String line = in.readLine();
             while (line != null) {
@@ -76,12 +91,21 @@ public class RestImpl extends AbstractBinder {
                 line = in.readLine();
             }
 
-            return Response.ok(so.toString()).cacheControl(cc).build();
-        } catch (IOException e) {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            byte[] hash = digest.digest(so.toString().getBytes(StandardCharsets.UTF_8));
+            String hex = DatatypeConverter.printHexBinary(hash);
+            EntityTag etag = new EntityTag(hex);
+
+            ResponseBuilder builder = request.evaluatePreconditions(etag);
+            if (builder != null) {
+                return builder.build();
+            }
+
+            return Response.ok(so.toString()).tag(etag).cacheControl(cc).build();
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
-        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
         return Response.status(500).build();
     }
 
@@ -95,37 +119,30 @@ public class RestImpl extends AbstractBinder {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 MutableGraph g = Parser.read(dot);
                 Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
-                
+
                 return Response.ok(out.toByteArray()).build();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
         return Response.status(500).build();
     }
-
-    protected int MAX_LENGTH = 35;
-    private CacheControl cc = new CacheControl();
-    {
-        cc.setMaxAge(20);
-    } // in seconds
-
-    @Path("/xml/{resourcepathfile}")
+  
     @GET
-    @Produces("text/xml")
-    public Response getXML(@PathParam("resourcepathfile") String resourcepathfile)
-            throws ReceiverNotFoundException {
-        StringBuilder so = new StringBuilder();
+    @Path("{folder: (?:js|css|xml)}/{file}")
+    @Produces({"application/javascript", "text/css", "text/xml"})
+    public Response getResource(@PathParam("folder") String folder, @PathParam("file") String file, @Context Request request) {
         try {
+            StringBuilder so = new StringBuilder();
+            
             BufferedReader in = null;
-            File f = new File("src/resources/xml/" + resourcepathfile);
+            File f = new File("src/resources/"+folder+"/" + file);
             if (f.exists()) {
                 in = new BufferedReader(new FileReader(f));
             } else {
                 in = new BufferedReader(
-                        new InputStreamReader(RestImpl.class.getResource("/xml/" + resourcepathfile).openStream()));
+                        new InputStreamReader(RestImpl.class.getResource("/"+folder+"/" + file).openStream()));
             }
             String line = in.readLine();
             while (line != null) {
@@ -133,72 +150,21 @@ public class RestImpl extends AbstractBinder {
                 line = in.readLine();
             }
 
-            return Response.ok(so.toString()).cacheControl(cc).build();
-        } catch (IOException e) {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            byte[] hash = digest.digest(so.toString().getBytes(StandardCharsets.UTF_8));
+            String hex = DatatypeConverter.printHexBinary(hash);
+            EntityTag etag = new EntityTag(hex);
+
+            ResponseBuilder builder = request.evaluatePreconditions(etag);
+            if (builder != null) {
+                return builder.build();
+            }
+
+            return Response.ok(so.toString()).tag(etag).cacheControl(cc).build();
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
-        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
-        return Response.status(500).build();
-    }
-
-    @Path("/css/{resourcepathfile}")
-    @GET
-    @Produces("text/css")
-    public Response getStyleCSS(@PathParam("resourcepathfile") String resourcepathfile)
-            throws ReceiverNotFoundException {
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/resources/css/" + resourcepathfile);
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f));
-            } else {
-                in = new BufferedReader(
-                        new InputStreamReader(RestImpl.class.getResource("/css/" + resourcepathfile).openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
-
-            return Response.ok(so.toString()).cacheControl(cc).build();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
-        return Response.status(500).build();
-    }
-
-    @Path("/js/{resourcepathfile}")
-    @GET
-    @Produces("application/javascript")
-    public Response getResource(@PathParam("resourcepathfile") String resourcepathfile)
-            throws ReceiverNotFoundException {
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/resources/js/" + resourcepathfile);
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f));
-            } else {
-                in = new BufferedReader(
-                        new InputStreamReader(RestImpl.class.getResource("/js/" + resourcepathfile).openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
-
-            return Response.ok(so.toString()).cacheControl(cc).build();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        /*500 Internal Server Error - https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html*/
         return Response.status(500).build();
     }
 
@@ -225,7 +191,7 @@ public class RestImpl extends AbstractBinder {
         String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
 
         try {
-
+        	int MAX_LENGTH = 35;
             StringBuilder sb = new StringBuilder();
             Set<String> allwks = new HashSet<>();
 

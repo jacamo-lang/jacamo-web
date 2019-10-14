@@ -6,14 +6,17 @@ function killAg() {
   var selectedAgent = window.location.hash.substr(1);
   var r = confirm("Kill agent '" + selectedAgent + "'?");
   if (r == true) {
-    h2 = new XMLHttpRequest();
-    h2.onreadystatechange = function() {
-      if ((h2.status == 200) || (h2.status == 204)) {
-        window.location.assign("./agents.html");
+    const Http = new XMLHttpRequest();
+    Http.onreadystatechange = function() {
+      if ((Http.status == 200) || (Http.status == 204)) {
+        $('#top-alert-message').text(Http.responseText);
+        $('#top-alert').fadeTo(2000, 500).slideUp(500, function() {
+          $('#top-alert').slideUp(500);
+        });
       }
     };
-    h2.open("DELETE", "./agents/" + selectedAgent);
-    h2.send();
+    Http.open("DELETE", "./agents/" + selectedAgent);
+    Http.send();
   }
 }
 
@@ -23,16 +26,23 @@ SEND COMMANDS TO AN AGENT
 
 function runCMD() {
   var selectedAgent = window.location.hash.substr(1);
-  h3 = new XMLHttpRequest();
-  h3.onreadystatechange = function() {
-    if (h3.readyState == 4 && h3.status == 200) {
-      location.reload();
+  const Http = new XMLHttpRequest();
+  Http.onreadystatechange = function() {
+    if (Http.readyState == 4 && Http.status == 200) {
+      window.location.assign("./agent.html#" + selectedAgent);
+      document.getElementById("inputcmd").value = "";
+      document.getElementById("inputcmd").focus();
+
+      $('#top-alert-message').text(Http.responseText);
+      $('#top-alert').fadeTo(2000, 500).slideUp(500, function() {
+        $('#top-alert').slideUp(500);
+      });
     }
   };
-  h3.open("POST", "./agents/" + selectedAgent + "/cmd", true);
-  h3.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  Http.open("POST", "./agents/" + selectedAgent + "/cmd");
+  Http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   data = "c=" + encodeURIComponent(document.getElementById("inputcmd").value);
-  h3.send(data);
+  Http.send(data);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -43,29 +53,29 @@ LOG FUNCTIONS
 function delLog() {
   var selectedAgent = window.location.hash.substr(1);
   console.log(selectedAgent);
-  h2 = new XMLHttpRequest();
-  h2.onreadystatechange = function() {
-    if (h2.readyState == 4 && h2.status == 200) {
+  const Http = new XMLHttpRequest();
+  Http.onreadystatechange = function() {
+    if (Http.readyState == 4 && Http.status == 200) {
       location.reload();
     }
   };
-  h2.open("DELETE", "./agents/" + selectedAgent + "/log");
-  h2.send();
+  Http.open("DELETE", "./agents/" + selectedAgent + "/log");
+  Http.send();
 }
 
 /* show agent's log */
 function showLog() {
   var selectedAgent = window.location.hash.substr(1);
-  http = new XMLHttpRequest();
-  http.onreadystatechange = function() {
-    if (http.readyState == 4 && http.status == 200) {
+  const Http = new XMLHttpRequest();
+  Http.onreadystatechange = function() {
+    if (Http.readyState == 4 && Http.status == 200) {
       var textarea = document.getElementById('log');
-      textarea.innerHTML = http.responseText;
+      textarea.innerHTML = Http.responseText;
       textarea.scrollTop = textarea.scrollHeight;
     }
   };
-  http.open('GET', "./agents/" + selectedAgent + "/log", true);
-  http.send();
+  Http.open('GET', "./agents/" + selectedAgent + "/log", true);
+  Http.send();
 }
 
 /* scroll log automatically */
@@ -95,17 +105,17 @@ function updateSuggestions() {
     ['undefined']
   ];
   var selectedAgent = window.location.hash.substr(1);
-  h4 = new XMLHttpRequest();
-  h4.onreadystatechange = function() {
-    if (h4.readyState == 4 && h4.status == 200) {
-      var a = h4.responseText;
+  const Http = new XMLHttpRequest();
+  Http.onreadystatechange = function() {
+    if (Http.readyState == 4 && Http.status == 200) {
+      var a = Http.responseText;
       a = a.replace(/'/g, '\"');
       suggestions = JSON.parse(a);
       autocomplete(document.getElementById("inputcmd"), suggestions);
     }
   };
-  h4.open('GET', "./agents/" + selectedAgent + "/code", true);
-  h4.send();
+  Http.open('GET', "./agents/" + selectedAgent + "/code", true);
+  Http.send();
 }
 
 /* automcomplete for cmd box */
