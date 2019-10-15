@@ -122,6 +122,8 @@ function getGraph() {
 function renderGraphvizFromAgentJson(agName, agentinfo) {
   const MAX_LENGTH = 35;
   var dot = [];
+
+  /* Beginning of the graph */
   dot.push(
     "digraph G {\n",
     "\tgraph [\n",
@@ -133,33 +135,75 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
   dot.push(
     "\tsubgraph cluster_mind {\n",
     "\t\tstyle=rounded\n");
-
-  agentinfo.forEach(function(x) {
+  agentinfo.namespaces.forEach(function(x) {
     dot.push(
       "\t\t\"" + x + "\" [ " + "\n\t\t\tlabel = \"" + x + "\"",
       "\n\t\t\tshape=\"box\" style=filled pencolor=black fillcolor=cornsilk\n",
       "\t\t]\n");
   });
   dot.push("\t}\n");
-
-  /* just to avoid put agent node into the cluster */
-  agentinfo.forEach(function(x) {
+  agentinfo.namespaces.forEach(function(x) {
     dot.push("\t\"" + agName + "\"->\"" + x + "\" [arrowhead=none constraint=false style=dotted]\n");
   });
 
   /* agent will be placed on center */
   var s1 = (agName.length <= MAX_LENGTH) ? agName : agName.substring(0, MAX_LENGTH) + " ...";
   dot.push(
-    "\t\"" + agName + "\" [ " + "\n\t\tlabel = \"" + s1 + "\"",
+    "\t\"" + agName + "\" [ " + "\n\t\tlabel = \"" + s1 + "\"\n",
     "\t\tshape = \"ellipse\" style=filled fillcolor=white\n",
-    "\t]\n");
+    "\t]\n"
+  );
+
+  /* agent roles */
+  agentinfo.roles.forEach(function(x) {
+    dot.push(
+      "\t\"" + x.group + "\" [ " + "\n\t\tlabel = \"" + x.group + "\"",
+      "\n\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n",
+      "\t]\n",
+      "\t\"" + x.group + "\"->\"" + agName + "\" [arrowtail=normal dir=back label=\"" + x.role + "\"]\n");
+  });
+
+  /* agent missions */
+  agentinfo.missions.forEach(function(x) {
+    dot.push(
+      "\t\t\"" + x.mission + "\" [ " + "\n\t\tlabel = \"" + x.mission + "\"",
+      "\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n",
+      "\t\t]\n");
+    x.responsibles.forEach(function(y) {
+      dot.push("\t\"" + y + "\"->\"" + x.mission,
+        "\" [arrowtail=normal arrowhead=open label=\"responsible for\"]\n",
+        "\t{rank=same " + y + " " + x.mission + "}\n");
+    });
+    dot.push("\t\"" + x.mission + "\"->\"" + agName, "\" [arrowtail=normal dir=back label=\"" + x.scheme + "\"]\n");
+  });
+
+  /* agent workspaces */
+  agentinfo.workspaces.forEach(function(w) {
+    dot.push("\tsubgraph cluster_" + w.workspace + " {\n",
+      "\t\tlabel=\"" + w.workspace + "\"\n",
+      "\t\tlabeljust=\"r\"\n",
+      "\t\tgraph[style=dashed]\n");
+    w.artifacts.forEach(function(a) {
+      var str1 = (a.artifact.length <= MAX_LENGTH) ? a.artifact : a.artifact.substring(0, MAX_LENGTH) + " ...";
+      /* It is possible to have same artifact name in different workspaces */
+      dot.push("\t\t\"" + w.workspace + "_" + a.artifact + "\" [ ",
+        "\n\t\t\tlabel=\"" + str1 + " :\\n");
+      str1 = (a.type.length <= MAX_LENGTH) ? a.type : a.type.substring(0, MAX_LENGTH) + " ...";
+      dot.push(str1 + "\"\n");
+      dot.push("\t\t\tshape=record style=filled fillcolor=white\n");
+      dot.push("\t\t]\n");
+    });
+    w.artifacts.forEach(function(a) {
+      dot.push("\t\"" + agName + "\"->\"" + w.workspace + "_" + a.artifact + "\" [arrowhead=odot]\n");
+    });
+    dot.push("\t}\n");
+  });
 
   dot.push("}\n");
 
-  console.log(dot.join(""));
-  /*document.getElementById('overviewgraph').setAttribute('data', "./agents/" + selectedAgent + "/mind/img.svg");*/
-  /*d3.select("#overviewgraph").graphviz().renderDot('digraph {a -> b}');*/
-  d3.select("#overviewgraph").graphviz().renderDot(dot.join(""));
+  /* Transition follows modal top down movement */
+  var t = d3.transition().duration(750).ease(d3.easeLinear);
+  d3.select("#overviewgraph").graphviz().transition(t).renderDot(dot.join(""));
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -327,6 +371,7 @@ var modal = document.getElementById('modalinspection');
 var btnModal = document.getElementById("btninspection");
 var span = document.getElementsByClassName("close")[0];
 btnModal.onclick = function() {
+  getGraph();
   modal.style.display = "block";
 };
 span.onclick = function() {

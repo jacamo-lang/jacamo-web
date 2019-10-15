@@ -26,7 +26,8 @@ function updateMenu(nav, agents) {
   }
 
   /* Add each agent and then DF and Create Agent*/
-  var selectedAgent = window.location.hash.substr(1);
+  const params = new URL(location.href).searchParams;
+  const selectedAgent = params.get('agent');
   agents.forEach(function(n) {
     var lag = document.createElement('a');
     lag.setAttribute("href", "./agent.html?agent=" + n);
@@ -42,7 +43,7 @@ function updateMenu(nav, agents) {
   document.getElementById(nav).appendChild(br);
   document.getElementById(nav).appendChild(br);
   var ldf = document.createElement('a');
-  ldf.setAttribute("href", "./df.html");
+  ldf.setAttribute("href", "./agents_df.html");
   ldf.innerHTML = "directory facilitator";
   document.getElementById(nav).appendChild(ldf);
   var lnew = document.createElement('a');

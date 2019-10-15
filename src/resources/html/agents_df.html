@@ -5,10 +5,9 @@
   <title>jacamo-web - directory facilitator</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta charset="UTF-8" http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
-  <script src="/js/df.js"></script>
 </head>
 
-<body onload="{ getDF(); }">
+<body>
   <div id="root">
 
     <header class="row">
@@ -39,7 +38,13 @@
     </header>
 
     <div class="row" id="doc-wrapper">
-      <main class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="doc-content">
+
+      <input id="doc-drawer-checkbox" class="leftmenu" value="on" type="checkbox">
+      <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
+        <!-- Content filled by javascript function -->
+      </nav>
+
+      <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
 
         <div id="directory-facilitator" class="card fluid">
           <h4 class="section double-padded">Directory Facilitator</h4>
@@ -60,6 +65,10 @@
       </main>
     </div>
   </div>
+  <script src="/js/df.js"></script>
+  <script src="/js/agent_common.js"></script>
+  <script>createMenu();</script>
+  <script>getDF();</script>
 </body>
 
 </html>

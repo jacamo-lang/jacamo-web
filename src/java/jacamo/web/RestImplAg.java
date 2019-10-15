@@ -85,26 +85,9 @@ import ora4mas.nopl.oe.Group;
 /**
  * Agent's REST implementation class
  * 
- * @author Jomi Fred Hubner Cleber Jorge Amaral
+ * @author Jomi Fred Hubner
+ * @author Cleber Jorge Amaral
  *
- *
- *         REST API:
- * GET Produces(MediaType.APPLICATION_JSON) - returns list of agent names
- * POST Path("/{agentname}") Produces(MediaType.TEXT_PLAIN) - add an agent
- * DELETE Path("/{agentname}") Produces(MediaType.TEXT_PLAIN) - delete an agent
- * GET Path("/{agentname}/status") Produces(MediaType.APPLICATION_JSON)
- * GET Path("/{agentname}/mind") Produces(MediaType.APPLICATION_XML)
- * GET Path("/{agentname}/mind/bb") Produces(MediaType.APPLICATION_JSON)
- * GET Path("/{agentname}/mind/bb") Produces(MediaType.APPLICATION_JSON)
- * GET Path("/{agentname}/plans") Produces(MediaType.TEXT_PLAIN)
- * GET Path("/{agentname}/aslfile/{aslfilename}") Produces(MediaType.TEXT_PLAIN)
- * POST Path("/{agentname}/aslfile/{aslfilename}") Consumes(MediaType.MULTIPART_FORM_DATA) Produces(MediaType.TEXT_HTML)
- * POST Path("/{agentname}/plans") Consumes(MediaType.MULTIPART_FORM_DATA) Produces(MediaType.TEXT_HTML)
- * GET Path("/{agentname}/code") Produces(MediaType.TEXT_PLAIN)
- * POST Path("/{agentname}/cmd") Consumes(MediaType.APPLICATION_FORM_URLENCODED) Produces(MediaType.TEXT_PLAIN)
- * GET Path("/{agentname}/log") Produces(MediaType.TEXT_PLAIN)
- * DELETE Path("/{agentname}/log") Produces(MediaType.TEXT_PLAIN)
- * GET Path("/{agentname}/mind/img.svg") Produces("image/svg+xml")
  */
 @Singleton
 @Path("/agents")
@@ -172,487 +155,451 @@ public class RestImplAg extends AbstractBinder {
 					FileOutputStream outputFile = new FileOutputStream(f, false);
 					StringBuilder stringBuilder = new StringBuilder();
 					stringBuilder.append("//Agent created automatically\n\n");
-                    stringBuilder.append("!start.\n\n");
-                    stringBuilder.append("+!start <- .print(\"Hi\").\n\n");
-                    stringBuilder.append("{ include(\"$jacamoJar/templates/common-cartago.asl\") }\n");
-                    stringBuilder.append("{ include(\"$jacamoJar/templates/common-moise.asl\") }\n");
-                    stringBuilder.append(
-                            "// uncomment the include below to have an agent compliant with its organisation\n");
-                    stringBuilder.append("//{ include(\"$moiseJar/asl/org-obedient.asl\") }");
-                    byte[] bytes = stringBuilder.toString().getBytes();
-                    outputFile.write(bytes);
-                    outputFile.close();
-                }
+					stringBuilder.append("!start.\n\n");
+					stringBuilder.append("+!start <- .print(\"Hi\").\n\n");
+					stringBuilder.append("{ include(\"$jacamoJar/templates/common-cartago.asl\") }\n");
+					stringBuilder.append("{ include(\"$jacamoJar/templates/common-moise.asl\") }\n");
+					stringBuilder.append(
+							"// uncomment the include below to have an agent compliant with its organisation\n");
+					stringBuilder.append("//{ include(\"$moiseJar/asl/org-obedient.asl\") }");
+					byte[] bytes = stringBuilder.toString().getBytes();
+					outputFile.write(bytes);
+					outputFile.close();
+				}
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            ag.load(new FileInputStream("src/agt/" + agName + ".asl"), agName + ".asl");
-            // ag.setASLSrc("no-inicial.asl");
-            createAgLog(agName, ag);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			ag.load(new FileInputStream("src/agt/" + agName + ".asl"), agName + ".asl");
+			// ag.setASLSrc("no-inicial.asl");
+			createAgLog(agName, ag);
 
-            return Response.ok("Agent '" + name + "' has been created!").build();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+			return Response.ok("Agent '" + name + "' has been created!").build();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        return Response.status(500).build();
-    }
+		return Response.status(500).build();
+	}
 
-    /**
-     * Kill an agent. Produces PLAIN TEXT with response for this operation.
-     * 
-     * @param agName agent's name to be killed
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     * @throws ReceiverNotFoundException
-     */
-    @DELETE
-    @Path("/{agentname}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
-        try {
-            boolean r = BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName, "web", 0);
+	/**
+	 * Kill an agent. Produces PLAIN TEXT with response for this operation.
+	 * 
+	 * @param agName agent's name to be killed
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 * @throws ReceiverNotFoundException
+	 */
+	@DELETE
+	@Path("/{agentname}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
+		try {
+			boolean r = BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(agName, "web", 0);
 
-            return Response.ok("Result of kill: " + r).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+			return Response.ok("Result of kill: " + r).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        return Response.status(500).build();
-    }
+		return Response.status(500).build();
+	}
 
-    /**
-     * Produces Agent's intentions statuses in JSON format. Example:
-     * {"idle":true,"nbIntentions":1,"intentions":[{"size":1,"finished":false,"id":161,"suspended":false}]}
-     * 
-     * @param agName agent's name
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @GET
-    @Path("/{agentname}/status")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAgentStatusJSON(@PathParam("agentname") String agName) {
-        try {
-            Agent ag = getAgent(agName);
-            Circumstance c = ag.getTS().getC();
+	/**
+	 * Produces Agent's intentions statuses in JSON format. Example:
+	 * {"idle":true,"nbIntentions":1,"intentions":[{"size":1,"finished":false,"id":161,"suspended":false}]}
+	 * 
+	 * @param agName agent's name
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@GET
+	@Path("/{agentname}/status")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAgentStatusJSON(@PathParam("agentname") String agName) {
+		try {
+			Agent ag = getAgent(agName);
+			Circumstance c = ag.getTS().getC();
 
-            Map<String, Object> props = new HashMap<>();
+			Map<String, Object> props = new HashMap<>();
 
-            props.put("idle", ag.getTS().canSleep());
+			props.put("idle", ag.getTS().canSleep());
 
-            props.put("nbIntentions", c.getNbRunningIntentions() + c.getPendingIntentions().size());
+			props.put("nbIntentions", c.getNbRunningIntentions() + c.getPendingIntentions().size());
 
-            List<Map<String, Object>> ints = new ArrayList<>();
-            Iterator<Intention> ii = c.getAllIntentions();
-            while (ii.hasNext()) {
-                Intention i = ii.next();
-                Map<String, Object> iprops = new HashMap<>();
-                iprops.put("id", i.getId());
-                iprops.put("finished", i.isFinished());
-                iprops.put("suspended", i.isSuspended());
-                if (i.isSuspended()) {
-                    iprops.put("suspendedReason", i.getSuspendedReason());
-                }
-                iprops.put("size", i.size());
-                ints.add(iprops);
-            }
-            props.put("intentions", ints);
+			List<Map<String, Object>> ints = new ArrayList<>();
+			Iterator<Intention> ii = c.getAllIntentions();
+			while (ii.hasNext()) {
+				Intention i = ii.next();
+				Map<String, Object> iprops = new HashMap<>();
+				iprops.put("id", i.getId());
+				iprops.put("finished", i.isFinished());
+				iprops.put("suspended", i.isSuspended());
+				if (i.isSuspended()) {
+					iprops.put("suspendedReason", i.getSuspendedReason());
+				}
+				iprops.put("size", i.size());
+				ints.add(iprops);
+			}
+			props.put("intentions", ints);
 
-            return Response.ok(gson.toJson(props)).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+			return Response.ok(gson.toJson(props)).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        return Response.status(500).build();
-    }
+		return Response.status(500).build();
+	}
 
-    @GET
-    @Path("/{agentname}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAgentDetails(@PathParam("agentname") String agName) {
+	@GET
+	@Path("/{agentname}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAgentDetails(@PathParam("agentname") String agName) {
 
+		Agent ag = getAgent(agName);
 
+		// get workspaces the agent are in (including organisations)
+		List<String> workspacesIn = new ArrayList<>();
+		CAgentArch cartagoAgArch = getCartagoArch(ag);
+		try {
+			for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
+				workspacesIn.add(wid.getName());
+			}
+			List<String> nameSpaces = new ArrayList<>();
+			ag.getBB().getNameSpaces().forEach(x -> {
+				nameSpaces.add(x.toString());
+			});
 
-        Agent ag = getAgent(agName);
-        
-        List<String> nameSpaces= new ArrayList<>();
-        ag.getBB().getNameSpaces().forEach(x -> {nameSpaces.add(x.toString());});
-        
-        return Response.ok(gson.toJson(nameSpaces)).build();
+			// get groups and roles this agent plays
+			List<Object> roles = new ArrayList<>();
+			for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+				if (workspacesIn.contains(gb.getOEId())) {
+					gb.getGrpState().getPlayers().forEach(p -> {
+						if (p.getAg().equals(agName)) {
+							Map<String, Object> groupRole = new HashMap<>();
+							groupRole.put("group", gb.getArtId());
+							groupRole.put("role", p.getTarget());
+							roles.add(groupRole);
+						}
+					});
 
-        /*
-        StringBuilder sb = new StringBuilder();
+				}
+			}
 
-        // get workspaces the agent are in (including organisations)
-        List<String> workspacesIn = new ArrayList<>();
-        CAgentArch cartagoAgArch = getCartagoArch(ag);
-        for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
-            workspacesIn.add(wid.getName());
-        }
-        
-        StringBuilder orglinks = new StringBuilder();
+			// get schemed this agent belongs
+			List<Object> missions = new ArrayList<>();
+			for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
+				schb.getSchState().getPlayers().forEach(p -> {
+					if (p.getAg().equals(agName)) {
+						Map<String, Object> schemeMission = new HashMap<>();
+						schemeMission.put("scheme", schb.getArtId());
+						schemeMission.put("mission", p.getTarget());
+						List<Object> responsibles = new ArrayList<>();
+						schemeMission.put("responsibles", responsibles);
+						for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
+							responsibles.add(gb.getId());
+						}
+						missions.add(schemeMission);
+					}
+				});
+			}
 
-        { // groups and roles are also placed on the left
+			// TODO: unify the list of 'system' artifacts with RestImplEnv
+			List<Object> workspaces = new ArrayList<>();
+			workspacesIn.forEach(wksName -> {
+				Map<String, Object> workspace = new HashMap<>();
+				workspace.put("workspace", wksName);
+				List<Object> artifacts = new ArrayList<>();
+				try {
+					for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
+						ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
+						info.getObservers().forEach(y -> {
+							if ((info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
+									|| (info.getId().getArtifactType().equals("ora4mas.nopl.GroupBoard"))
+									|| (info.getId().getArtifactType().equals("ora4mas.nopl.OrgBoard"))
+									|| (info.getId().getArtifactType().equals("ora4mas.nopl.SchemeBoard"))
+									|| (info.getId().getArtifactType().equals("ora4mas.nopl.NormativeBoard"))) {
+								; // do not print system artifacts
+							} else {
+								if (y.getAgentId().getAgentName().equals(agName)) {
+									// Build returning object
+									Map<String, Object> artifact = new HashMap<String, Object>();
+									artifact.put("artifact", info.getId().getName());
+									artifact.put("type", info.getId().getArtifactType());
+									artifacts.add(artifact);
+								}
+							}
+						});
+					}
+					workspace.put("artifacts", artifacts);
+					workspaces.add(workspace);
+				} catch (CartagoException e) {
+					e.printStackTrace();
+				}
+			});
 
-            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-                if (workspacesIn.contains(gb.getOEId())) {
-                    gb.getGrpState().getPlayers().forEach(p -> {
-                        if (p.getAg().equals(agName)) {
-                            // group and role (arrow)
-                            sb.append("\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
-                            sb.append("\n\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
-                            sb.append("\t];\n");
-                            // roles (arrows)
-                            orglinks.append("\t\"" + gb.getArtId() + "\"->\"" + agName
-                                    + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
-                        }
-                    });
-                }
-            }
+			Map<String, Object> agent = new HashMap<>();
+			agent.put("agent", agName);
+			agent.put("namespaces", nameSpaces);
+			agent.put("roles", roles);
+			agent.put("missions", missions);
+			agent.put("workspaces", workspaces);
 
-            for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
-                schb.getSchState().getPlayers().forEach(p -> {
-                    if (p.getAg().equals(agName)) {
-                        // scheme
-                        sb.append(
-                                "\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId() + "\"");
-                        sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
-                        sb.append("\t\t];\n");
-                        for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
-                            orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
-                                    + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
-                            sb.append("\t\t{rank=same " + gb.getId() + " " + schb.getArtId() + "};\n");
-                        }
-                        orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
-                                + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
-                    }
-                });
-            }
+			return Response.ok(gson.toJson(agent)).build();
+		} catch (CartagoException e) {
+			e.printStackTrace();
+		}
 
-            sb.append(orglinks);
-        }
+		return Response.status(500).build();
+	}
 
-        {// agent will be placed on center
-            String s1 = (agName.length() <= MAX_LENGTH) ? agName : agName.substring(0, MAX_LENGTH) + " ...";
-            sb.append("\t\"" + agName + "\" [ " + "\n\t\tlabel = \"" + s1 + "\"");
-            sb.append("\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
-            sb.append("\t];\n");
-        }
+	/**
+	 * Return XML of agent's mind content including belief base, intentions and
+	 * plans. See Jason's agInspection.xsl file for processing this data.
+	 * 
+	 * @param agName name of the agent
+	 * @return A XML Document
+	 * @deprecated Agent's mind in JSON format is provided in /{agentname}
+	 */
+	@GET
+	@Path("/{agentname}/mind")
+	@Produces(MediaType.APPLICATION_XML)
+	public Document getAgentMindXml(@PathParam("agentname") String agName) {
+		try {
+			Agent ag = getAgent(agName);
+			if (ag != null)
+				return ag.getAgState();
+			else
+				return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
-        { // workspances and artifacts the agents is focused on
-            workspacesIn.forEach(w -> {
-                String wksName = w.toString();
-                try {
-                    for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
-                        ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
-                        info.getObservers().forEach(y -> {
-                            if ((info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
-                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.GroupBoard"))
-                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.OrgBoard"))
-                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.SchemeBoard"))
-                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.NormativeBoard"))) {
-                                ; // do not print system artifacts
-                            } else {
-                                if (y.getAgentId().getAgentName().equals(agName)) {
-                                    // create a cluster for each artifact even at same wks of other artifacts?
-                                    sb.append("\tsubgraph cluster_" + wksName + " {\n");
-                                    sb.append("\t\tlabel=\"" + wksName + "\"\n");
-                                    sb.append("\t\tlabeljust=\"r\"\n");
-                                    sb.append("\t\tgraph[style=dashed]\n");
-                                    String str1 = (info.getId().getName().length() <= MAX_LENGTH)
-                                            ? info.getId().getName()
-                                            : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
-                                    // It is possible to have same artifact name in different workspaces
-                                    sb.append("\t\t\"" + wksName + "_" + info.getId().getName() + "\" [ "
-                                            + "\n\t\t\tlabel=\"" + str1 + " :\\n");
+	/**
+	 * Return agent's Belief base in JSON format.
+	 * 
+	 * @param agName
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@GET
+	@Path("/{agentname}/mind/bb")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAgentBBJSON(@PathParam("agentname") String agName) {
+		try {
+			Agent ag = getAgent(agName);
+			List<String> bbs = new ArrayList<>();
+			for (Literal l : ag.getBB()) {
+				bbs.add(l.toString());
+			}
 
-                                    str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
-                                            ? info.getId().getArtifactType()
-                                            : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
-                                    sb.append(str1 + "\"\n");
+			return Response.ok(gson.toJson(bbs)).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Response.status(500).build();
+	}
 
-                                    sb.append("\t\t\tshape=record style=filled fillcolor=white;\n");
-                                    sb.append("\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName()
-                                            + "\";\n");
+	/**
+	 * Return agent's plans in TEXT PLAIN format
+	 * 
+	 * @param agName
+	 * @param label
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@GET
+	@Path("/{agentname}/plans")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response getAgentPlansTxt(@PathParam("agentname") String agName,
+			@DefaultValue("all") @QueryParam("label") String label) {
+		StringWriter so = new StringWriter();
+		try {
+			Agent ag = getAgent(agName);
+			if (ag != null) {
+				PlanLibrary pl = ag.getPL();
+				if (label.equals("all"))
+					so.append(pl.getAsTxt(false));
+				else
+					so.append(pl.get(label).toASString());
+			}
 
-                                    sb.append("\t\t\tlabeltooltip=\"teste teste\";\n");
-                                    sb.append("\t\t\theadlabel=\"teste2\";\n");
+			return Response.ok(so.toString()).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-                                    sb.append("\t\t\ttarget=\"mainframe\";\n");
-                                    sb.append("\t\t];\n");
+		return Response
+				.status(500, "Internal Server Error! Agent '" + agName + "' does not exist or cannot be observed.")
+				.build();
+	}
 
-                                    sb.append("\t};\n");
+	/**
+	 * Returns PLAIN TEXT of the context of an Jason agent code file (.asl). Besides
+	 * the asl filename it wants the agent's name for agent's refreshing commands.
+	 * 
+	 * @param agName      name of the agent
+	 * @param aslFileName name of the file (including .asl extension)
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@GET
+	@Path("/{agentname}/aslfile/{aslfilename}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response getLoadASLfileForm(@PathParam("agentname") String agName,
+			@PathParam("aslfilename") String aslFileName) {
 
-                                    sb.append("\t\"" + agName + "\"->\"" + wksName + "_" + info.getId().getName()
-                                            + "\" [arrowhead=odot]\n");
-                                }
-                            }
-                        });
-                    }
-                } catch (CartagoException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
+		StringBuilder so = new StringBuilder();
+		try {
+			BufferedReader in = null;
+			File f = new File("src/agt/" + aslFileName);
+			if (f.exists()) {
+				in = new BufferedReader(new FileReader(f));
+			} else {
+				in = new BufferedReader(
+						new InputStreamReader(RestImpl.class.getResource("../src/agt/" + aslFileName).openStream()));
+			}
+			String line = in.readLine();
+			while (line != null) {
+				so.append(line + "\n");
+				line = in.readLine();
+			}
+			return Response.ok(so.toString()).build();
 
-        sb.append("}\n");
-        graph = sb.toString();
-    
-        */
-        
-    }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-    /**
-     * Return XML of agent's mind content including belief base, intentions and
-     * plans. See Jason's agInspection.xsl file for processing this data.
-     * 
-     * @param agName name of the agent
-     * @return A XML Document
-     * @deprecated Agent's mind in JSON format is provided in /{agentname}
-     */
-    @GET
-    @Path("/{agentname}/mind")
-    @Produces(MediaType.APPLICATION_XML)
-    public Document getAgentMindXml(@PathParam("agentname") String agName) {
-        try {
-            Agent ag = getAgent(agName);
-            if (ag != null)
-                return ag.getAgState();
-            else
-                return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+		return Response.status(500).build();
+	}
 
-    /**
-     * Return agent's Belief base in JSON format.
-     * 
-     * @param agName
-     * @deprecated Agent's mind in JSON format is provided in /{agentname}
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @GET
-    @Path("/{agentname}/mind/bb")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAgentBBJSON(@PathParam("agentname") String agName) {
-        try {
-            Agent ag = getAgent(agName);
-            List<String> bbs = new ArrayList<>();
-            for (Literal l : ag.getBB()) {
-                bbs.add(l.toString());
-            }
+	// TODO: Test again this function because there are open issues on updating
+	// agent's code regarding rules, KQML default plans, etc.
+	/**
+	 * Updates an Jason agent code file (.asl) refreshing given agent's execution
+	 * plans immediately. Current intentions are kept running with old code.
+	 * 
+	 * @param agName              name of the agent
+	 * @param aslFileName         name of the file (including .asl extension)
+	 * @param uploadedInputStream new content for the given asl file name
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@POST
+	@Path("/{agentname}/aslfile/{aslfilename}")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.TEXT_HTML)
+	public Response loadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName,
+			@FormDataParam("aslfile") InputStream uploadedInputStream) {
+		try {
+			Agent ag = getAgent(agName);
+			if (ag != null) {
+				System.out.println("agName: " + agName);
+				System.out.println("restAPI://" + aslFileName);
+				System.out.println("uis: " + uploadedInputStream);
 
-            return Response.ok(gson.toJson(bbs)).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Response.status(500).build();
-    }
+				StringBuilder stringBuilder = new StringBuilder();
+				String line = null;
 
-    /**
-     * Return agent's plans in TEXT PLAIN format
-     * 
-     * @param agName
-     * @param label
-     * @deprecated Agent's mind in JSON format is provided in /{agentname}
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @GET
-    @Path("/{agentname}/plans")
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response getAgentPlansTxt(@PathParam("agentname") String agName,
-            @DefaultValue("all") @QueryParam("label") String label) {
-        StringWriter so = new StringWriter();
-        try {
-            Agent ag = getAgent(agName);
-            if (ag != null) {
-                PlanLibrary pl = ag.getPL();
-                if (label.equals("all"))
-                    so.append(pl.getAsTxt(false));
-                else
-                    so.append(pl.get(label).toASString());
-            }
+				FileOutputStream outputFile = new FileOutputStream("src/agt/" + aslFileName, false);
+				BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
 
-            return Response.ok(so.toString()).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+				while ((line = out.readLine()) != null) {
+					stringBuilder.append(line + "\n");
+				}
 
-        return Response
-                .status(500, "Internal Server Error! Agent '" + agName + "' does not exist or cannot be observed.")
-                .build();
-    }
+				byte[] bytes = stringBuilder.toString().getBytes();
+				outputFile.write(bytes);
+				outputFile.close();
 
-    /**
-     * Returns PLAIN TEXT of the context of an Jason agent code file (.asl). Besides
-     * the asl filename it wants the agent's name for agent's refreshing commands.
-     * 
-     * @param agName      name of the agent
-     * @param aslFileName name of the file (including .asl extension)
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @GET
-    @Path("/{agentname}/aslfile/{aslfilename}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response getLoadASLfileForm(@PathParam("agentname") String agName,
-            @PathParam("aslfilename") String aslFileName) {
+				ag.getPL().clear();
+				// for (Plan p: new ArrayList<>(ag.getPL().getPlans())) {
+				// if (p.getSource().equals(aslFileName)) {
+				// ag.getPL().remove(p.getLabel());
+				// }
+				// }
 
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/agt/" + aslFileName);
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f));
-            } else {
-                in = new BufferedReader(
-                        new InputStreamReader(RestImpl.class.getResource("../src/agt/" + aslFileName).openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line + "\n");
-                line = in.readLine();
-            }
-            return Response.ok(so.toString()).build();
+				ag.parseAS(new FileInputStream("src/agt/" + aslFileName), aslFileName);
+				if (ag.getPL().hasMetaEventPlans())
+					ag.getTS().addGoalListener(new GoalListenerForMetaEvents(ag.getTS()));
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+				// ag.fixAgInIAandFunctions(ag); // used to fix agent reference in functions
+				// used inside includes
+				ag.loadKqmlPlans();
 
-        return Response.status(500).build();
-    }
+				return Response.ok("Agent reloaded with updated file. Old intentions were not affected.").build();
+			}
 
-    // TODO: Test again this function because there are open issues on updating
-    // agent's code regarding rules, KQML default plans, etc.
-    /**
-     * Updates an Jason agent code file (.asl) refreshing given agent's execution
-     * plans immediately. Current intentions are kept running with old code.
-     * 
-     * @param agName              name of the agent
-     * @param aslFileName         name of the file (including .asl extension)
-     * @param uploadedInputStream new content for the given asl file name
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @POST
-    @Path("/{agentname}/aslfile/{aslfilename}")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.TEXT_HTML)
-    public Response loadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName,
-            @FormDataParam("aslfile") InputStream uploadedInputStream) {
-        try {
-            Agent ag = getAgent(agName);
-            if (ag != null) {
-                System.out.println("agName: " + agName);
-                System.out.println("restAPI://" + aslFileName);
-                System.out.println("uis: " + uploadedInputStream);
+			return Response.status(500, "Internal Server Error! Agent'" + agName + " Does not exists!").build();
 
-                StringBuilder stringBuilder = new StringBuilder();
-                String line = null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-                FileOutputStream outputFile = new FileOutputStream("src/agt/" + aslFileName, false);
-                BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
+		return Response.status(500).build();
+	}
 
-                while ((line = out.readLine()) != null) {
-                    stringBuilder.append(line + "\n");
-                }
+	/**
+	 * Upload new plans to an agent. Plan maintained only in memory.
+	 * 
+	 * @param agName              name of the agent
+	 * @param plans               plans to be uploaded
+	 * @param uploadedInputStream <need revision>
+	 * @param fileDetail          <need revision>
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@POST
+	@Path("/{agentname}/plans")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.TEXT_HTML)
+	public Response loadPlans(@PathParam("agentname") String agName,
+			@DefaultValue("") @FormDataParam("plans") String plans,
+			@FormDataParam("file") InputStream uploadedInputStream,
+			@FormDataParam("file") FormDataContentDisposition fileDetail) {
+		try {
+			Agent ag = getAgent(agName);
+			if (ag != null) {
+				ag.parseAS(new StringReader(plans), "RrestAPI");
 
-                byte[] bytes = stringBuilder.toString().getBytes();
-                outputFile.write(bytes);
-                outputFile.close();
+				System.out.println("agName: " + agName);
+				System.out.println("plans: " + plans);
+				System.out.println("restAPI://" + fileDetail.getFileName());
+				System.out.println("uis: " + uploadedInputStream);
 
-                ag.getPL().clear();
-                // for (Plan p: new ArrayList<>(ag.getPL().getPlans())) {
-                // if (p.getSource().equals(aslFileName)) {
-                // ag.getPL().remove(p.getLabel());
-                // }
-                // }
+				ag.load(uploadedInputStream, "restAPI://" + fileDetail.getFileName());
+			}
 
-                ag.parseAS(new FileInputStream("src/agt/" + aslFileName), aslFileName);
-                if (ag.getPL().hasMetaEventPlans())
-                    ag.getTS().addGoalListener(new GoalListenerForMetaEvents(ag.getTS()));
+			return Response.ok("ok, code uploaded for agent '" + agName + "'!").build();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-                // ag.fixAgInIAandFunctions(ag); // used to fix agent reference in functions
-                // used inside includes
-                ag.loadKqmlPlans();
+		return Response.status(500).build();
+	}
 
-                return Response.ok("Agent reloaded with updated file. Old intentions were not affected.").build();
-            }
+	/**
+	 * Get list of internal actions for an agent
+	 * 
+	 * @return List of internal actions
+	 */
+	public List<Command> getIAlist() {
+		List<Command> l = new ArrayList<>();
+		try {
+			ClassPath classPath = ClassPath.from(print.class.getClassLoader());
+			Set<ClassInfo> allClasses = classPath.getTopLevelClassesRecursive("jason.stdlib");
 
-            return Response.status(500, "Internal Server Error! Agent'" + agName + " Does not exists!").build();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Response.status(500).build();
-    }
-
-    /**
-     * Upload new plans to an agent. Plan maintained only in memory.
-     * 
-     * @param agName              name of the agent
-     * @param plans               plans to be uploaded
-     * @param uploadedInputStream <need revision>
-     * @param fileDetail          <need revision>
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @POST
-    @Path("/{agentname}/plans")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.TEXT_HTML)
-    public Response loadPlans(@PathParam("agentname") String agName,
-            @DefaultValue("") @FormDataParam("plans") String plans,
-            @FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetail) {
-        try {
-            Agent ag = getAgent(agName);
-            if (ag != null) {
-                ag.parseAS(new StringReader(plans), "RrestAPI");
-
-                System.out.println("agName: " + agName);
-                System.out.println("plans: " + plans);
-                System.out.println("restAPI://" + fileDetail.getFileName());
-                System.out.println("uis: " + uploadedInputStream);
-
-                ag.load(uploadedInputStream, "restAPI://" + fileDetail.getFileName());
-            }
-
-            return Response.ok("ok, code uploaded for agent '" + agName + "'!").build();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Response.status(500).build();
-    }
-
-    /**
-     * Get list of internal actions for an agent
-     * 
-     * @return List of internal actions
-     */
-    public List<Command> getIAlist() {
-        List<Command> l = new ArrayList<>();
-        try {
-            ClassPath classPath = ClassPath.from(print.class.getClassLoader());
-            Set<ClassInfo> allClasses = classPath.getTopLevelClassesRecursive("jason.stdlib");
-
-            allClasses.forEach(a -> {
-                try {
-                    Class<?> c = a.load();
-                    if (c.isAnnotationPresent(jason.stdlib.Manual.class)) {
-                        // add full predicate provided by @Manual
-                        jason.stdlib.Manual annotation = (jason.stdlib.Manual) c
-                                .getAnnotation(jason.stdlib.Manual.class);
-                        Command cmd = new Command("'" + annotation.literal() + "'",
-                                "'" + annotation.hint().replaceAll("\"", "`").replaceAll("'", "`") + "'");
+			allClasses.forEach(a -> {
+				try {
+					Class<?> c = a.load();
+					if (c.isAnnotationPresent(jason.stdlib.Manual.class)) {
+						// add full predicate provided by @Manual
+						jason.stdlib.Manual annotation = (jason.stdlib.Manual) c
+								.getAnnotation(jason.stdlib.Manual.class);
+						Command cmd = new Command("'" + annotation.literal() + "'",
+								"'" + annotation.hint().replaceAll("\"", "`").replaceAll("'", "`") + "'");
 						l.add(cmd);
 						// l.add(annotation.literal());
 
@@ -1012,13 +959,12 @@ public class RestImplAg extends AbstractBinder {
 		return Response.status(500).build();
 	}
 
-	// TODO: change path to /{agentname}/img.svg
 	/**
 	 * Returns agent's diagram
 	 * 
 	 * @param agName agent name
 	 * @deprecated This is interface dependent, client should get agent's info
-	 *             drawing and rendering it by itself.
+	 *             drawing and rendering this data by itself.
 	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
 	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
 	 */
@@ -1099,7 +1045,7 @@ public class RestImplAg extends AbstractBinder {
 								sb.append("\t];\n");
 								// roles (arrows)
 								orglinks.append("\t\"" + gb.getArtId() + "\"->\"" + agName
-                                        + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
+										+ "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
 							}
 						});
 					}
@@ -1115,11 +1061,11 @@ public class RestImplAg extends AbstractBinder {
 							sb.append("\t\t];\n");
 							for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
 								orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
-                                        + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
+										+ "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
 								sb.append("\t\t{rank=same " + gb.getId() + " " + schb.getArtId() + "};\n");
 							}
 							orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
-                                    + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
+									+ "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
 						}
 					});
 				}
@@ -1161,14 +1107,14 @@ public class RestImplAg extends AbstractBinder {
 										sb.append("\t\t\"" + wksName + "_" + info.getId().getName() + "\" [ "
 												+ "\n\t\t\tlabel=\"" + str1 + " :\\n");
 
-                                        str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
-                                                ? info.getId().getArtifactType()
-                                                : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
-                                        sb.append(str1 + "\"\n");
+										str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
+												? info.getId().getArtifactType()
+												: info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
+										sb.append(str1 + "\"\n");
 
 										sb.append("\t\t\tshape=record style=filled fillcolor=white;\n");
 										sb.append("\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName()
-                                                + "\";\n");
+												+ "\";\n");
 
 										sb.append("\t\t\tlabeltooltip=\"teste teste\";\n");
 										sb.append("\t\t\theadlabel=\"teste2\";\n");
@@ -1179,7 +1125,7 @@ public class RestImplAg extends AbstractBinder {
 										sb.append("\t};\n");
 
 										sb.append("\t\"" + agName + "\"->\"" + wksName + "_" + info.getId().getName()
-                                                + "\" [arrowhead=odot]\n");
+												+ "\" [arrowhead=odot]\n");
 									}
 								}
 							});
