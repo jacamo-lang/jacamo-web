@@ -24,7 +24,7 @@ function killAg() {
     Http.open("DELETE", "./agents/" + selectedAgent);
     Http.send();
   } else {
-    $('#btkillag').href = './agent.html?agent='+selectedAgent;
+    $('#btkillag').href = './agent.html?agent=' + selectedAgent;
   }
 }
 
@@ -105,12 +105,61 @@ GET AGENT'S GRAPH
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 function getGraph() {
-  /*var selectedAgent = window.location.hash.substr(1);*/
-  var parameters = location.search.substring(1).split("&");
-  var temp = parameters[0].split("=");
-  selectedAgent = unescape(temp[1]);
-  /*document.getElementById('overviewgraph').data = "./agents/" + window.location.hash.substr(1) + "/mind/img.svg";*/
-  document.getElementById('overviewgraph').setAttribute('data', "./agents/" + selectedAgent + "/mind/img.svg");
+  const params = new URL(location.href).searchParams;
+  const selectedAgent = params.get('agent');
+
+  const Http = new XMLHttpRequest();
+  Http.onreadystatechange = function() {
+    if (Http.readyState == 4 && Http.status == 200) {
+      renderGraphvizFromAgentJson(selectedAgent, JSON.parse(Http.responseText));
+      console.log(Http.responseText);
+    }
+  };
+  Http.open('GET', "./agents/" + selectedAgent);
+  Http.send();
+}
+
+function renderGraphvizFromAgentJson(agName, agentinfo) {
+  const MAX_LENGTH = 35;
+  var dot = [];
+  dot.push(
+    "digraph G {\n",
+    "\tgraph [\n",
+    "\t\trankdir=\"LR\"\n",
+    "\t\tbgcolor=\"transparent\"\n",
+    "\t]\n");
+
+  /* beliefs will be placed on the left */
+  dot.push(
+    "\tsubgraph cluster_mind {\n",
+    "\t\tstyle=rounded\n");
+
+  agentinfo.forEach(function(x) {
+    dot.push(
+      "\t\t\"" + x + "\" [ " + "\n\t\t\tlabel = \"" + x + "\"",
+      "\n\t\t\tshape=\"box\" style=filled pencolor=black fillcolor=cornsilk\n",
+      "\t\t]\n");
+  });
+  dot.push("\t}\n");
+
+  /* just to avoid put agent node into the cluster */
+  agentinfo.forEach(function(x) {
+    dot.push("\t\"" + agName + "\"->\"" + x + "\" [arrowhead=none constraint=false style=dotted]\n");
+  });
+
+  /* agent will be placed on center */
+  var s1 = (agName.length <= MAX_LENGTH) ? agName : agName.substring(0, MAX_LENGTH) + " ...";
+  dot.push(
+    "\t\"" + agName + "\" [ " + "\n\t\tlabel = \"" + s1 + "\"",
+    "\t\tshape = \"ellipse\" style=filled fillcolor=white\n",
+    "\t]\n");
+
+  dot.push("}\n");
+
+  console.log(dot.join(""));
+  /*document.getElementById('overviewgraph').setAttribute('data', "./agents/" + selectedAgent + "/mind/img.svg");*/
+  /*d3.select("#overviewgraph").graphviz().renderDot('digraph {a -> b}');*/
+  d3.select("#overviewgraph").graphviz().renderDot(dot.join(""));
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -270,7 +319,7 @@ function displayResult(xmlInput, xsltSheet, elementToAddResult) {
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-END OF THE FILE
+MODAL WINDOW
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* modal window */
@@ -288,3 +337,7 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 };
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+END OF THE FILE
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

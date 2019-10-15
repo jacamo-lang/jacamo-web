@@ -85,76 +85,93 @@ import ora4mas.nopl.oe.Group;
 /**
  * Agent's REST implementation class
  * 
- * @author  Jomi Fred Hubner
- *          Cleber Jorge Amaral
+ * @author Jomi Fred Hubner Cleber Jorge Amaral
  *
+ *
+ *         REST API:
+ * GET Produces(MediaType.APPLICATION_JSON) - returns list of agent names
+ * POST Path("/{agentname}") Produces(MediaType.TEXT_PLAIN) - add an agent
+ * DELETE Path("/{agentname}") Produces(MediaType.TEXT_PLAIN) - delete an agent
+ * GET Path("/{agentname}/status") Produces(MediaType.APPLICATION_JSON)
+ * GET Path("/{agentname}/mind") Produces(MediaType.APPLICATION_XML)
+ * GET Path("/{agentname}/mind/bb") Produces(MediaType.APPLICATION_JSON)
+ * GET Path("/{agentname}/mind/bb") Produces(MediaType.APPLICATION_JSON)
+ * GET Path("/{agentname}/plans") Produces(MediaType.TEXT_PLAIN)
+ * GET Path("/{agentname}/aslfile/{aslfilename}") Produces(MediaType.TEXT_PLAIN)
+ * POST Path("/{agentname}/aslfile/{aslfilename}") Consumes(MediaType.MULTIPART_FORM_DATA) Produces(MediaType.TEXT_HTML)
+ * POST Path("/{agentname}/plans") Consumes(MediaType.MULTIPART_FORM_DATA) Produces(MediaType.TEXT_HTML)
+ * GET Path("/{agentname}/code") Produces(MediaType.TEXT_PLAIN)
+ * POST Path("/{agentname}/cmd") Consumes(MediaType.APPLICATION_FORM_URLENCODED) Produces(MediaType.TEXT_PLAIN)
+ * GET Path("/{agentname}/log") Produces(MediaType.TEXT_PLAIN)
+ * DELETE Path("/{agentname}/log") Produces(MediaType.TEXT_PLAIN)
+ * GET Path("/{agentname}/mind/img.svg") Produces("image/svg+xml")
  */
 @Singleton
 @Path("/agents")
 public class RestImplAg extends AbstractBinder {
 
-    Map<String, StringBuilder> agLog = new HashMap<>();
-    Gson gson = new Gson();
+	Map<String, StringBuilder> agLog = new HashMap<>();
+	Gson gson = new Gson();
 
-    @Override
-    protected void configure() {
-        bind(new RestImplAg()).to(RestImplAg.class);
-    }
+	@Override
+	protected void configure() {
+		bind(new RestImplAg()).to(RestImplAg.class);
+	}
 
-    /**
-     * Produces JSON containing the list of existing agents Example: ["ag1","ag2"]
-     * 
-     * @return HTTP 200 Response (ok status)
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAgentsJSON() {
-        return Response.ok().entity(gson.toJson(BaseCentralisedMAS.getRunner().getAgs().keySet()))
-                .header("Access-Control-Allow-Origin", "*").build();
-    }
+	/**
+	 * Produces JSON containing the list of existing agents Example: ["ag1","ag2"]
+	 * 
+	 * @return HTTP 200 Response (ok status)
+	 */
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAgentsJSON() {
+		return Response.ok().entity(gson.toJson(BaseCentralisedMAS.getRunner().getAgs().keySet()))
+				.header("Access-Control-Allow-Origin", "*").build();
+	}
 
-    /**
-     * Return agent object by agent's name
-     * 
-     * @param agName name of the agent
-     * @return Agent object
-     */
-    private Agent getAgent(String agName) {
-        CentralisedAgArch cag = BaseCentralisedMAS.getRunner().getAg(agName);
-        if (cag != null)
-            return cag.getTS().getAg();
-        else
-            return null;
-    }
+	/**
+	 * Return agent object by agent's name
+	 * 
+	 * @param agName name of the agent
+	 * @return Agent object
+	 */
+	private Agent getAgent(String agName) {
+		CentralisedAgArch cag = BaseCentralisedMAS.getRunner().getAg(agName);
+		if (cag != null)
+			return cag.getTS().getAg();
+		else
+			return null;
+	}
 
-    /**
-     * Create an Agent. Produces PLAIN TEXT with HTTP response for this operation If
-     * an ASL file with the given name exists, it will launch an agent with existing
-     * code. Otherwise, creates an agent that will start say 'Hi'.
-     * 
-     * @param agName name of the agent to be created
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @Path("/{agentname}")
-    @POST
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response createNewAgent(@PathParam("agentname") String agName) {
-        try {
-            String name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent(agName, null, null, null,
-                    null, null, null);
-            BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
-            // set some source for the agent
-            Agent ag = getAgent(name);
+	/**
+	 * Create an Agent. Produces PLAIN TEXT with HTTP response for this operation If
+	 * an ASL file with the given name exists, it will launch an agent with existing
+	 * code. Otherwise, creates an agent that will start say 'Hi'.
+	 * 
+	 * @param agName name of the agent to be created
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@POST
+	@Path("/{agentname}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response createNewAgent(@PathParam("agentname") String agName) {
+		try {
+			String name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent(agName, null, null, null,
+					null, null, null);
+			BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
+			// set some source for the agent
+			Agent ag = getAgent(name);
 
-            try {
+			try {
 
-                File f = new File("src/agt/" + agName + ".asl");
-                if (!f.exists()) {
-                    f.createNewFile();
-                    FileOutputStream outputFile = new FileOutputStream(f, false);
-                    StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.append("//Agent created automatically\n\n");
+				File f = new File("src/agt/" + agName + ".asl");
+				if (!f.exists()) {
+					f.createNewFile();
+					FileOutputStream outputFile = new FileOutputStream(f, false);
+					StringBuilder stringBuilder = new StringBuilder();
+					stringBuilder.append("//Agent created automatically\n\n");
                     stringBuilder.append("!start.\n\n");
                     stringBuilder.append("+!start <- .print(\"Hi\").\n\n");
                     stringBuilder.append("{ include(\"$jacamoJar/templates/common-cartago.asl\") }\n");
@@ -190,8 +207,8 @@ public class RestImplAg extends AbstractBinder {
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      * @throws ReceiverNotFoundException
      */
-    @Path("/{agentname}")
     @DELETE
+    @Path("/{agentname}")
     @Produces(MediaType.TEXT_PLAIN)
     public Response killAgent(@PathParam("agentname") String agName) throws ReceiverNotFoundException {
         try {
@@ -213,8 +230,8 @@ public class RestImplAg extends AbstractBinder {
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
-    @Path("/{agentname}/status")
     @GET
+    @Path("/{agentname}/status")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAgentStatusJSON(@PathParam("agentname") String agName) {
         try {
@@ -251,16 +268,152 @@ public class RestImplAg extends AbstractBinder {
         return Response.status(500).build();
     }
 
-    // TODO: change path to /{agentname}
+    @GET
+    @Path("/{agentname}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAgentDetails(@PathParam("agentname") String agName) {
+
+
+
+        Agent ag = getAgent(agName);
+        
+        List<String> nameSpaces= new ArrayList<>();
+        ag.getBB().getNameSpaces().forEach(x -> {nameSpaces.add(x.toString());});
+        
+        return Response.ok(gson.toJson(nameSpaces)).build();
+
+        /*
+        StringBuilder sb = new StringBuilder();
+
+        // get workspaces the agent are in (including organisations)
+        List<String> workspacesIn = new ArrayList<>();
+        CAgentArch cartagoAgArch = getCartagoArch(ag);
+        for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
+            workspacesIn.add(wid.getName());
+        }
+        
+        StringBuilder orglinks = new StringBuilder();
+
+        { // groups and roles are also placed on the left
+
+            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
+                if (workspacesIn.contains(gb.getOEId())) {
+                    gb.getGrpState().getPlayers().forEach(p -> {
+                        if (p.getAg().equals(agName)) {
+                            // group and role (arrow)
+                            sb.append("\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
+                            sb.append("\n\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
+                            sb.append("\t];\n");
+                            // roles (arrows)
+                            orglinks.append("\t\"" + gb.getArtId() + "\"->\"" + agName
+                                    + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
+                        }
+                    });
+                }
+            }
+
+            for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
+                schb.getSchState().getPlayers().forEach(p -> {
+                    if (p.getAg().equals(agName)) {
+                        // scheme
+                        sb.append(
+                                "\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId() + "\"");
+                        sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
+                        sb.append("\t\t];\n");
+                        for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
+                            orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
+                                    + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
+                            sb.append("\t\t{rank=same " + gb.getId() + " " + schb.getArtId() + "};\n");
+                        }
+                        orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
+                                + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
+                    }
+                });
+            }
+
+            sb.append(orglinks);
+        }
+
+        {// agent will be placed on center
+            String s1 = (agName.length() <= MAX_LENGTH) ? agName : agName.substring(0, MAX_LENGTH) + " ...";
+            sb.append("\t\"" + agName + "\" [ " + "\n\t\tlabel = \"" + s1 + "\"");
+            sb.append("\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
+            sb.append("\t];\n");
+        }
+
+        { // workspances and artifacts the agents is focused on
+            workspacesIn.forEach(w -> {
+                String wksName = w.toString();
+                try {
+                    for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
+                        ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
+                        info.getObservers().forEach(y -> {
+                            if ((info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
+                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.GroupBoard"))
+                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.OrgBoard"))
+                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.SchemeBoard"))
+                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.NormativeBoard"))) {
+                                ; // do not print system artifacts
+                            } else {
+                                if (y.getAgentId().getAgentName().equals(agName)) {
+                                    // create a cluster for each artifact even at same wks of other artifacts?
+                                    sb.append("\tsubgraph cluster_" + wksName + " {\n");
+                                    sb.append("\t\tlabel=\"" + wksName + "\"\n");
+                                    sb.append("\t\tlabeljust=\"r\"\n");
+                                    sb.append("\t\tgraph[style=dashed]\n");
+                                    String str1 = (info.getId().getName().length() <= MAX_LENGTH)
+                                            ? info.getId().getName()
+                                            : info.getId().getName().substring(0, MAX_LENGTH) + " ...";
+                                    // It is possible to have same artifact name in different workspaces
+                                    sb.append("\t\t\"" + wksName + "_" + info.getId().getName() + "\" [ "
+                                            + "\n\t\t\tlabel=\"" + str1 + " :\\n");
+
+                                    str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
+                                            ? info.getId().getArtifactType()
+                                            : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
+                                    sb.append(str1 + "\"\n");
+
+                                    sb.append("\t\t\tshape=record style=filled fillcolor=white;\n");
+                                    sb.append("\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName()
+                                            + "\";\n");
+
+                                    sb.append("\t\t\tlabeltooltip=\"teste teste\";\n");
+                                    sb.append("\t\t\theadlabel=\"teste2\";\n");
+
+                                    sb.append("\t\t\ttarget=\"mainframe\";\n");
+                                    sb.append("\t\t];\n");
+
+                                    sb.append("\t};\n");
+
+                                    sb.append("\t\"" + agName + "\"->\"" + wksName + "_" + info.getId().getName()
+                                            + "\" [arrowhead=odot]\n");
+                                }
+                            }
+                        });
+                    }
+                } catch (CartagoException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        sb.append("}\n");
+        graph = sb.toString();
+    
+        */
+        
+    }
+
     /**
      * Return XML of agent's mind content including belief base, intentions and
      * plans. See Jason's agInspection.xsl file for processing this data.
      * 
      * @param agName name of the agent
      * @return A XML Document
+     * @deprecated Agent's mind in JSON format is provided in /{agentname}
      */
-    @Path("/{agentname}/mind")
     @GET
+    @Path("/{agentname}/mind")
     @Produces(MediaType.APPLICATION_XML)
     public Document getAgentMindXml(@PathParam("agentname") String agName) {
         try {
@@ -275,16 +428,16 @@ public class RestImplAg extends AbstractBinder {
         }
     }
 
-    // TODO: change path to /{agentname}/bb
     /**
      * Return agent's Belief base in JSON format.
      * 
      * @param agName
+     * @deprecated Agent's mind in JSON format is provided in /{agentname}
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
-    @Path("/{agentname}/mind/bb")
     @GET
+    @Path("/{agentname}/mind/bb")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAgentBBJSON(@PathParam("agentname") String agName) {
         try {
@@ -306,11 +459,12 @@ public class RestImplAg extends AbstractBinder {
      * 
      * @param agName
      * @param label
+     * @deprecated Agent's mind in JSON format is provided in /{agentname}
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
-    @Path("/{agentname}/plans")
     @GET
+    @Path("/{agentname}/plans")
     @Produces(MediaType.TEXT_PLAIN)
     public Response getAgentPlansTxt(@PathParam("agentname") String agName,
             @DefaultValue("all") @QueryParam("label") String label) {
@@ -344,8 +498,8 @@ public class RestImplAg extends AbstractBinder {
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
-    @Path("/{agentname}/aslfile/{aslfilename}")
     @GET
+    @Path("/{agentname}/aslfile/{aslfilename}")
     @Produces(MediaType.TEXT_PLAIN)
     public Response getLoadASLfileForm(@PathParam("agentname") String agName,
             @PathParam("aslfilename") String aslFileName) {
@@ -386,8 +540,8 @@ public class RestImplAg extends AbstractBinder {
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
-    @Path("/{agentname}/aslfile/{aslfilename}")
     @POST
+    @Path("/{agentname}/aslfile/{aslfilename}")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
     public Response loadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName,
@@ -450,8 +604,8 @@ public class RestImplAg extends AbstractBinder {
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
-    @Path("/{agentname}/plans")
     @POST
+    @Path("/{agentname}/plans")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
     public Response loadPlans(@PathParam("agentname") String agName,
@@ -536,8 +690,8 @@ public class RestImplAg extends AbstractBinder {
 	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
 	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
 	 */
-	@Path("/{agentname}/code")
 	@GET
+	@Path("/{agentname}/code")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getCodeCompletionSuggestions(@PathParam("agentname") String agName) {
 		List<Command> commands = new ArrayList<>();
@@ -699,8 +853,8 @@ public class RestImplAg extends AbstractBinder {
 	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
 	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
 	 */
-	@Path("/{agentname}/cmd")
 	@POST
+	@Path("/{agentname}/cmd")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response runCmdPost(@FormParam("c") String cmd, @PathParam("agentname") String agName) {
@@ -716,7 +870,7 @@ public class RestImplAg extends AbstractBinder {
 		return Response.status(500).build();
 	}
 
-	//TODO: Implement websockets to avoid pooling
+	// TODO: Implement websockets to avoid pooling
 	/**
 	 * Get agent full log in a TEXT PLAIN format
 	 * 
@@ -724,8 +878,8 @@ public class RestImplAg extends AbstractBinder {
 	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
 	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
 	 */
-	@Path("/{agentname}/log")
 	@GET
+	@Path("/{agentname}/log")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getLogOutput(@PathParam("agentname") String agName) {
 		try {
@@ -748,8 +902,8 @@ public class RestImplAg extends AbstractBinder {
 	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
 	 * 
 	 */
-	@Path("/{agentname}/log")
 	@DELETE
+	@Path("/{agentname}/log")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response delLogOutput(@PathParam("agentname") String agName) {
 		try {
@@ -838,8 +992,8 @@ public class RestImplAg extends AbstractBinder {
 	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
 	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
 	 */
-	@Path("/{agentname}/mb")
 	@POST
+	@Path("/{agentname}/mb")
 	@Consumes(MediaType.APPLICATION_XML)
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response addAgMsg(Message m, @PathParam("agentname") String agName) {
@@ -858,16 +1012,18 @@ public class RestImplAg extends AbstractBinder {
 		return Response.status(500).build();
 	}
 
-	//TODO: change path to /{agentname}/img.svg
+	// TODO: change path to /{agentname}/img.svg
 	/**
 	 * Returns agent's diagram
 	 * 
 	 * @param agName agent name
+	 * @deprecated This is interface dependent, client should get agent's info
+	 *             drawing and rendering it by itself.
 	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
 	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
 	 */
-	@Path("/{agentname}/mind/img.svg")
 	@GET
+	@Path("/{agentname}/mind/img.svg")
 	@Produces("image/svg+xml")
 	public Response getAgentImg(@PathParam("agentname") String agName) {
 		try {
@@ -876,7 +1032,7 @@ public class RestImplAg extends AbstractBinder {
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				MutableGraph g = Parser.read(dot);
 				Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
-				
+
 				return Response.ok(out.toByteArray()).build();
 			}
 		} catch (Exception e) {
@@ -888,6 +1044,7 @@ public class RestImplAg extends AbstractBinder {
 	/**
 	 * Generates agent diagram
 	 * 
+	 * @deprecated Only used to render graphviz which is a deprecated method
 	 * @param agName agent name
 	 * @return Dot representation
 	 */
