@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-RETRIEVE DATA ABOUT ONE WORKSPACE
+RETRIEVE DATA ABOUT ALL WORKSPACES
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 function getWorkspaces() {
@@ -56,14 +56,25 @@ function updateMenu(nav, ws, ar) {
       document.getElementById(nav).appendChild(lag);
       if (ar !== undefined) {
         Object.keys(ar.artifacts).forEach(function(a) {
-          var lar = document.createElement('a');
-          if (selectedArtifact === a) {
-            lar.innerHTML = "<h5><b>&#160;&#160;&#160;" + a + "</b></h5>";
-          } else {
-            lar.innerHTML = "<h5>&#160;&#160;&#160;" + a + "</h5>";
+
+          /* Do not print system artifacts */
+          const hidenArts = ["node", "console", "blackboard", "workspace", "manrepo"];
+          const isHidden = (hidenArts.indexOf(a) >= 0);
+          const isBody = a.endsWith("-body");
+          const isOrgArtifact = (ar.artifacts[a].type.endsWith(".OrgBoard") || ar.artifacts[a].type.endsWith(".SchemeBoard") ||
+            ar.artifacts[a].type.endsWith(".NormativeBoard") || ar.artifacts[a].type.endsWith(".GroupBoard"));
+
+          if (!isHidden && !isBody && !isOrgArtifact) {
+            /* Add artifacts on menu */
+            var lar = document.createElement('a');
+            if (selectedArtifact === a) {
+              lar.innerHTML = "<h5><b>&#160;&#160;&#160;" + a + "</b></h5>";
+            } else {
+              lar.innerHTML = "<h5>&#160;&#160;&#160;" + a + "</h5>";
+            }
+            lar.setAttribute("href", "./artifact.html?workspace=" + n + "&artifact=" + a);
+            document.getElementById(nav).appendChild(lar);
           }
-          lar.setAttribute("href", "./artifact.html?workspace=" + n + "&artifact=" + a);
-          document.getElementById(nav).appendChild(lar);
         });
       }
     } else {
@@ -79,3 +90,7 @@ function updateMenu(nav, ws, ar) {
   lnew.innerHTML = "create artifact";
   document.getElementById(nav).appendChild(lnew);
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+END OF FILE
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

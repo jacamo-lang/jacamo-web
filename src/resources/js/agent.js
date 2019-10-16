@@ -104,6 +104,23 @@ function setAutoUpdateLog() {
 GET AGENT'S GRAPH
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* modal window */
+var modal = document.getElementById('modalinspection');
+var btnModal = document.getElementById("btninspection");
+var span = document.getElementsByClassName("close")[0];
+btnModal.onclick = function() {
+  getGraph();
+  modal.style.display = "block";
+};
+span.onclick = function() {
+  modal.style.display = "none";
+};
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};
+
 function getGraph() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
@@ -112,7 +129,6 @@ function getGraph() {
   Http.onreadystatechange = function() {
     if (Http.readyState == 4 && Http.status == 200) {
       renderGraphvizFromAgentJson(selectedAgent, JSON.parse(Http.responseText));
-      console.log(Http.responseText);
     }
   };
   Http.open('GET', "./agents/" + selectedAgent);
@@ -361,27 +377,6 @@ function displayResult(xmlInput, xsltSheet, elementToAddResult) {
     elementToAddResult.innerHTML = xmlInput.transformNode(xsltSheet);
   }
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-MODAL WINDOW
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/* modal window */
-var modal = document.getElementById('modalinspection');
-var btnModal = document.getElementById("btninspection");
-var span = document.getElementsByClassName("close")[0];
-btnModal.onclick = function() {
-  getGraph();
-  modal.style.display = "block";
-};
-span.onclick = function() {
-  modal.style.display = "none";
-};
-window.onclick = function(event) {
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
-};
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 END OF THE FILE

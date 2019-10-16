@@ -25,7 +25,7 @@ function updateMenu(nav, agents) {
     menu.removeChild(menu.firstChild);
   }
 
-  /* Add each agent and then DF and Create Agent*/
+  /* Add each agent, DF link and Create Agent link */
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
   agents.forEach(function(n) {

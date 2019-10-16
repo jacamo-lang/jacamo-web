@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,9 +51,6 @@ public class RestImplEnv extends AbstractBinder {
     }
 
     int MAX_LENGTH = 30; // max length of strings when printed in graphs
-
-    static Set<String> hidenArts = new HashSet<>(
-            Arrays.asList(new String[] { "node", "console", "blackboard", "workspace", "manrepo", }));
 
     /**
      * Get list of workspaces.
@@ -102,15 +98,6 @@ public class RestImplEnv extends AbstractBinder {
             try {
                 Map<String,Object> artifacts = new HashMap<>();
                 for (ArtifactId aid : CartagoService.getController(wrksName).getCurrentArtifacts()) {
-                    // Skip system's artifacts
-                    if (hidenArts.contains(aid.getName()))
-                        continue;
-                    if (aid.getName().endsWith("-body") || aid.getArtifactType().endsWith(".OrgBoard")
-                            || aid.getArtifactType().endsWith(".SchemeBoard")
-                            || aid.getArtifactType().endsWith(".NormativeBoard")
-                            || aid.getArtifactType().endsWith(".GroupBoard"))
-                        continue;
-
                     ArtifactInfo info = CartagoService.getController(wrksName).getArtifactInfo(aid.getName());
 
                     // Get artifact's properties
