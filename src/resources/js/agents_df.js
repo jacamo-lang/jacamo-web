@@ -18,15 +18,13 @@ function getDF() {
 
 function updateDFTable(df) {
   var table = document.getElementById("dftable");
-
-  for (var i = 0; i < df.length; i++) {
-    for (var j = 0; j < df[i].services.length; j++) {
+  Object.keys(df).forEach(function(a) {
+    df[a].services.sort().forEach(function(s) {
       var tr = table.insertRow(-1);
       var cellAgent = tr.insertCell(-1);
       var cellService = tr.insertCell(-1);
-      cellAgent.innerHTML = df[i].agent;
-      cellService.innerHTML = df[i].services[j];
-    }
-  }
-
+      cellAgent.innerHTML = df[a].agent;
+      cellService.innerHTML = s;
+    });
+  });
 }

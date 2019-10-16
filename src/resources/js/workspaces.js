@@ -47,6 +47,7 @@ function updateMenu(nav, ws, ar) {
   const selectedWorkspace = params.get('workspace');
   const selectedArtifact = params.get('artifact');
 
+  ws.sort();
   ws.forEach(function(n) {
     var lag = document.createElement('a');
     lag.setAttribute("href", "./workspace.html?workspace=" + n);
@@ -54,14 +55,14 @@ function updateMenu(nav, ws, ar) {
       lag.innerHTML = "<h5><b>" + n + "</b></h5>";
       document.getElementById(nav).appendChild(lag);
       if (ar !== undefined) {
-        ar.artifacts.forEach(function(a) {
+        Object.keys(ar.artifacts).forEach(function(a) {
           var lar = document.createElement('a');
-          if (selectedArtifact === a.artifact) {
-            lar.innerHTML = "<h5><b>&#160;&#160;&#160;" + a.artifact + "</b></h5>";
+          if (selectedArtifact === a) {
+            lar.innerHTML = "<h5><b>&#160;&#160;&#160;" + a + "</b></h5>";
           } else {
-            lar.innerHTML = "<h5>&#160;&#160;&#160;" + a.artifact + "</h5>";
+            lar.innerHTML = "<h5>&#160;&#160;&#160;" + a + "</h5>";
           }
-          lar.setAttribute("href", "./artifact.html?workspace=" + n + "&artifact=" + a.artifact);
+          lar.setAttribute("href", "./artifact.html?workspace=" + n + "&artifact=" + a);
           document.getElementById(nav).appendChild(lar);
         });
       }

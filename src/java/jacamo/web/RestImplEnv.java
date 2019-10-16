@@ -9,14 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -90,10 +86,10 @@ public class RestImplEnv extends AbstractBinder {
      * @param wrksName name of the workspace
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     *         Sample: {"workspace":"testwks","artifacts":[{"artifact":"a","operations":["observeProperty","inc"],
+     *         Sample: {"workspace":"testwks","artifacts":{"a":{"artifact":"a","operations":["observeProperty","inc"],
      *         "linkedArtifacts":["b"],"type":"tools.Counter","properties":[{"count":10}],"observers":["marcos"]},
-     *         {"artifact":"b","operations":["observeProperty","inc"],"linkedArtifacts":[],"type":"tools.Counter",
-     *         "properties":[{"count":2}],"observers":["marcos"]}]}
+     *         "b":{"artifact":"b","operations":["observeProperty","inc"],"linkedArtifacts":[],"type":"tools.Counter",
+     *         "properties":[{"count":2}],"observers":["marcos"]}}}
      */
     @Path("/{wrksname}")
     @GET
@@ -104,7 +100,7 @@ public class RestImplEnv extends AbstractBinder {
 
             Map<String, Object> workspace = new HashMap<String, Object>();
             try {
-                Set<Object> artifacts = new HashSet<Object>();
+                Map<String,Object> artifacts = new HashMap<>();
                 for (ArtifactId aid : CartagoService.getController(wrksName).getCurrentArtifacts()) {
                     // Skip system's artifacts
                     if (hidenArts.contains(aid.getName()))
@@ -157,7 +153,7 @@ public class RestImplEnv extends AbstractBinder {
                     artifact.put("operations", operations);
                     artifact.put("observers", observers);
                     artifact.put("linkedArtifacts", linkedArtifacts);
-                    artifacts.add(artifact);
+                    artifacts.put(aid.getName(),artifact);
                 }
 
                 workspace.put("workspace", wrksName);

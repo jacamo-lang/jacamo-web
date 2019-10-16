@@ -39,7 +39,7 @@ public class RestImplDF extends AbstractBinder {
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      *         when ok JSON of the DF Sample output (jsonifiedDF):
-     *         [{"agent":"ag1","services":["s1","s2"]},{"agent":"ag2","services":["s2","s3"]}]
+     *         {"marcos":{"agent":"marcos","services":["vender(banana)","iamhere"]}}
      *         Testing platform: http://json.parser.online.fr/
      */
     @GET
@@ -68,18 +68,16 @@ public class RestImplDF extends AbstractBinder {
                     }
                 }
             }
-            // Sorting commonDF alphabetically
-            Map<String, Set<String>> sortedCommonDF = new TreeMap<>(commonDF);
 
             // Json of the DF
-            List<Object> jsonifiedDF = new ArrayList<Object>();
-            for (String s : sortedCommonDF.keySet()) {
+            Map<String,Object> jsonifiedDF = new HashMap<>();
+            for (String s : commonDF.keySet()) {
                 Map<String, Object> agent = new HashMap<String, Object>();
                 agent.put("agent", s);
                 Set<String> services = new HashSet<>();
-                services.addAll(sortedCommonDF.get(s));
+                services.addAll(commonDF.get(s));
                 agent.put("services", services);
-                jsonifiedDF.add(agent);
+                jsonifiedDF.put(s,agent);
             }
 
             return Response.ok().entity(gson.toJson(jsonifiedDF)).header("Access-Control-Allow-Origin", "*").build();
