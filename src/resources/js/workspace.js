@@ -23,6 +23,7 @@ function updateWksTable(wks) {
   var table = document.getElementById("wkstable");
   Object.keys(wks).forEach(function(p) {
 
+/*TODO: it is not really working*/
     var tr = table.insertRow(-1);
     if (wks[p] === "workspace") {
       tr = table.createTHead();
@@ -79,7 +80,7 @@ function getWksGraph() {
   const Http = new XMLHttpRequest();
   Http.onreadystatechange = function() {
     if (Http.readyState == 4 && Http.status == 200) {
-      renderGraphvizFromAgentJson(selectedWorkspace, JSON.parse(Http.responseText));
+      renderGraphvizFromWorkspaceJson(selectedWorkspace, JSON.parse(Http.responseText));
     }
   };
   Http.open('GET', "./workspaces/" + selectedWorkspace);
@@ -87,7 +88,7 @@ function getWksGraph() {
 }
 
 
-function renderGraphvizFromAgentJson(wksName, wks) {
+function renderGraphvizFromWorkspaceJson(wksName, wks) {
   const MAX_LENGTH = 35;
   var dot = [];
   var validContent = 0;
