@@ -39,7 +39,6 @@ function createEditor(content) {
 
   /* create ace editor */
   var editor = ace.edit();
-  editor.container.style.height = "300px";
   editor.session.setValue(content);
   editor.setTheme("ace/theme/textmate");
   editor.session.setMode("ace/mode/java");

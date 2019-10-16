@@ -7,21 +7,60 @@
 </head>
 
 <body>
-  <form action="/agents/agent_name/aslfile/aslfile_name" method="post" id="usrform" enctype="multipart/form-data">
+  <div id="root" style="height: 100%">
+    <header class="row">
+      <a class="logo col-xp-2 col-sm-2 col-md" href="./">JaCaMo</a>
+      <a class="button col-xp-1 col-sm-2 col-md" href="./agents.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="height: 20px; vertical-align: text-top;">
+          <circle cx="12" cy="12" r="11" /></svg><span>&nbsp;Agents</span>
+      </a>
+      <a class="button col-xp-1 col-sm-2 col-md" href="./workspaces.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="height: 20px; vertical-align: text-top;">
+          <polygon points="0 1, 24 1, 24 8, 0 8, 0 16, 24 16, 24 23, 0 23, 0 1, 24 1, 24 23, 0 23"></polygon>
+        </svg><span>&nbsp;Environment</span>
+      </a>
+      <a class="button col-xp-1 col-sm-2 col-md" href="./oe.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="height: 20px; vertical-align: text-top;">
+          <polygon points="0 1, 10 1, 10 6, 24 6, 24 23, 0 23, 0 6, 10 6, 0 6, 0 1"></polygon>
+        </svg><span>&nbsp;Organisation</span>
+      </a>
+      <label for="doc-drawer-checkbox" class="button drawer-toggle col-sm" style="right: 10px; width: 50px; position: fixed;"></label>
+      <input id="doc-drawer-checkbox" class="drawer" value="on" type="checkbox" />
+      <nav class="col-xp-1 col-md-2" id="nav-drawer">
+        <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
+      </nav>
+    </header>
+    <div class="row" id="doc-wrapper" style="height: 90%">
+      <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
+      <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
+        <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
+      </nav>
 
-    <div>
-      <textarea name="aslfile" form="usrform"></textarea>
+      <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content" style="height: 100%">
+
+        <div class="card fluid" style="height: 97%">
+          <div class="section">
+            <form action="/workspaces/workspace_name/javafile/javafilename" method="post" id="usrform" enctype="multipart/form-data">
+              <div>
+                <textarea name="aslfile" form="usrform"></textarea>
+              </div>
+              <div class="editor_footer" id="footer_menu" style="height: 3%">
+                <!-- Content filled by javascript function -->
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
     </div>
-    <div class="editor_footer" id="footer_menu">
-      <!-- Content filled by javascript function -->
-    </div>
-  </form>
+  </div>
   <script src="http://ajaxorg.github.io/ace-builds/src/ace.js"></script>
   <script src="http://ajaxorg.github.io/ace-builds/src/ext-language_tools.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="./js/agent_editor.js"></script>
+  <script src="./js/agent_common.js"></script>  
   <script>
     getCurrentAslContent();
+    createMenu();
   </script>
 </body>
 

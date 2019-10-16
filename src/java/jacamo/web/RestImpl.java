@@ -62,28 +62,39 @@ public class RestImpl extends AbstractBinder {
         bind(new RestImpl()).to(RestImpl.class);
     }
 
+    /**
+     * Get root content, returning index.html from resources/html folder using chache control and etags
+     * 
+     * @param request used to create etags
+     * @return index.html content
+     */
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Response getIndexHtml(@Context Request request) {
-        return getRootHtml("/index.html", request);
+        return getHtml("/index.html", request);
     }
 
-    @Path("/{resourcepathfile}")
+    /**
+     * Get html from resources/html folder using chache control and etags
+     * 
+     * @param file to be retrieved
+     * @param request used to create etags
+     * @return html content
+     */
+    @Path("/{file}")
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public Response getRootHtml(@PathParam("resourcepathfile") String resourcepathfile, @Context Request request) {
+    public Response getHtml(@PathParam("file") String file, @Context Request request) {
         try {
             StringBuilder so = new StringBuilder();
 
-            String resourceType = "html";
-
             BufferedReader in = null;
-            File f = new File("src/resources/" + resourceType + "/" + resourcepathfile);
+            File f = new File("src/resources/html/" + file);
             if (f.exists()) {
                 in = new BufferedReader(new FileReader(f));
             } else {
                 in = new BufferedReader(new InputStreamReader(
-                        RestImpl.class.getResource("/" + resourceType + "/" + resourcepathfile).openStream()));
+                        RestImpl.class.getResource("/html/" + file).openStream()));
             }
             String line = in.readLine();
             while (line != null) {
@@ -109,6 +120,12 @@ public class RestImpl extends AbstractBinder {
         return Response.status(500).build();
     }
 
+    /**
+     * Get graph of the whole Multi-Agent System
+     * 
+     * @deprecated this is a client stuff
+     * @return rendered svg
+     */
     @Path("/img.svg")
     @GET
     @Produces("image/svg+xml")
@@ -129,9 +146,18 @@ public class RestImpl extends AbstractBinder {
         return Response.status(500).build();
     }
 
+    /**
+     * Get XML, JS and CSS resources from corresponding folders /resources/xml,...
+     * uses chache control and etags
+     * 
+     * @param folder xml, js or css
+     * @param file name of the file to be retrieved
+     * @param request used to create etags
+     * @return file content marking the media type according to the given folder
+     */
     @Path("{folder: (?:xml|js|css)}/{file}")
     @GET
-    public Response getXML(@PathParam("folder") String folder, @PathParam("file") String file,
+    public Response getWebResource(@PathParam("folder") String folder, @PathParam("file") String file,
             @Context Request request) {
         StringBuilder so = new StringBuilder();
         try {
@@ -173,6 +199,12 @@ public class RestImpl extends AbstractBinder {
         return Response.status(500).build();
     }
 
+    /**
+     * Get agent object from a given name
+     * 
+     * @param agName agent name
+     * @return Agent object
+     */
     private Agent getAgent(String agName) {
         CentralisedAgArch cag = BaseCentralisedMAS.getRunner().getAg(agName);
         if (cag != null)
@@ -181,6 +213,12 @@ public class RestImpl extends AbstractBinder {
             return null;
     }
 
+    /**
+     * Get agent's CArtAgO architecture
+     * 
+     * @param ag Agent object
+     * @return agent's CArtAgO architecture
+     */
     protected CAgentArch getCartagoArch(Agent ag) {
         AgArch arch = ag.getTS().getUserAgArch().getFirstAgArch();
         while (arch != null) {
@@ -192,6 +230,12 @@ public class RestImpl extends AbstractBinder {
         return null;
     }
 
+    /**
+     * Generates a dot for the whole MAS
+     * 
+     * @deprecated it is a client stuff
+     * @return dot representation
+     */
     protected String getMASAsDot() {
         String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
 
