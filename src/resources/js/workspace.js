@@ -23,17 +23,10 @@ function updateWksTable(wks) {
   var table = document.getElementById("wkstable");
   Object.keys(wks).forEach(function(p) {
 
-/*TODO: it is not really working*/
-    var tr = table.insertRow(-1);
-    if (wks[p] === "workspace") {
-      tr = table.createTHead();
-    } else {
-      tr = table.insertRow(-1);
-    }
-
-    var tr = table.insertRow(-1);
-    var cellProperty = tr.insertCell(-1);
-    var cellDetail = tr.insertCell(-1);
+    var tr, cellProperty, cellDetail;
+    tr = table.insertRow(-1);
+    cellProperty = tr.insertCell(-1);
+    cellDetail = tr.insertCell(-1);
     cellProperty.innerHTML = p;
     if (typeof(wks[p]) === "string") {
       cellDetail.innerHTML = wks[p];

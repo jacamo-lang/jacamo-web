@@ -25,17 +25,9 @@ function updateArtifactTable(art) {
   Object.keys(art).forEach(function(p) {
 
     var tr, cellProperty, cellDetail;
-    if (p === "artifact") {
-      var header = table.createTHead();
-      tr = header.insertRow(0);
-      cellDetail = tr.insertCell(0);
-      cellProperty = tr.insertCell(0);
-    } else {
-      tr = table.insertRow(-1);
-      cellProperty = tr.insertCell(-1);
-      cellDetail = tr.insertCell(-1);
-    }
-
+    tr = table.insertRow(-1);
+    cellProperty = tr.insertCell(-1);
+    cellDetail = tr.insertCell(-1);
     cellProperty.innerHTML = p;
     if (typeof(art[p]) === "string") {
       cellDetail.innerHTML = art[p];
@@ -58,7 +50,7 @@ var modal = document.getElementById('modalartgraph');
 var btnModal = document.getElementById("btnartdiagram");
 var span = document.getElementsByClassName("close")[0];
 btnModal.onclick = function() {
-  /*getArtGraph();*/
+  getArtGraph();
   modal.style.display = "block";
 };
 span.onclick = function() {
@@ -88,48 +80,62 @@ function getArtGraph() {
 function renderGraphvizFromArtifactJson(artName, art) {
   const MAX_LENGTH = 35;
   var dot = [];
-  var validContent = 0;
   dot.push("digraph G {\n");
   dot.push("\tgraph [\n");
   dot.push("\t\trankdir = \"LR\"\n");
   dot.push("\t\tbgcolor=\"transparent\"\n");
   dot.push("\t]\n");
 
+  /* Artifact name and type */
+  var s1 = (art.artifact.length <= MAX_LENGTH) ? art.artifact : art.artifact.substring(0, MAX_LENGTH) + " ...";
+  dot.push("\t\"" + art.artifact + "\" [ " + "\n\t\tlabel = \"" + s1 + ":\\n");
+  s1 = (art.type.length <= MAX_LENGTH) ? art.type :
+    art.type.substring(0, MAX_LENGTH) + " ...";
+  dot.push(s1 + "|");
 
-console.log("test");
-  console.log(art);
+  /* observable properties */
+  Object.keys(art.properties).forEach(function(y) {
+    var ss = Object.keys(art.properties[y])[0] + "(" + Object.values(art.properties[y])[0].toString() + ")";
+    var s2 = (ss.length <= MAX_LENGTH) ? ss : ss.substring(0, MAX_LENGTH) + " ...";
+    dot.push(s2 + "|");
+  });
 
-    var s1 = (artName.length <= MAX_LENGTH) ? artName : artName.substring(0, MAX_LENGTH) + " ...";
-    dot.push("\t\"" + artName + "\" [ " + "\n\t\tlabel = \"" + s1 + ":\n");
-    s1 = (art.type.length <= MAX_LENGTH) ? art.type.length : art.type.length.substring(0, MAX_LENGTH) + " ...";
-    dot.push(s1 + "|");
-
-    /* observable properties */
-    Object.keys(art.properties).forEach(function(y) {
-      var s2 = (y.length <= MAX_LENGTH) ? y : y.substring(0, MAX_LENGTH) + " ...";
-      dot.push("\t" + s2);
-    });
-    dot.push("\t|");
-
-    /* operations */
-    art.operations.forEach(function(y) {
-      var s2 = (y.length <= MAX_LENGTH) ? y : y.substring(0, MAX_LENGTH) + " ...";
-      dot.push("\t" + s2 );
-    });
-    dot.push("\n");
-
+  /* operations */
+  art.operations.forEach(function(y) {
+    var s2 = (y.length <= MAX_LENGTH) ? y : y.substring(0, MAX_LENGTH) + " ...";
+    dot.push(s2 + "\\n");
+  });
+  dot.push("\"\n");
   dot.push("\t\tshape=record style=filled fillcolor=white\n");
-  dot.push("\t];\n");
+  dot.push("\t\t];\n");
+
+  /* Linked Artifacts */
+  art.linkedArtifacts.forEach(function(y) {
+    var str1 = (y.length <= MAX_LENGTH) ? y :
+      y.substring(0, MAX_LENGTH) + " ...";
+    dot.push("\t\t\"" + y + "\" [ label=\"" + str1 + "\"");
+    dot.push("\t\tshape=record style=filled fillcolor=white\n");
+    dot.push("\t]\n");
+    dot.push("\t\"" + art.artifact + "\" -> \"" + y + "\" [arrowhead=\"onormal\"]");
+  });
+
+  /* observers */
+  art.observers.forEach(function(y) {
+    if (art.type !== "cartago.AgentBodyArtifact") {
+      var s2 = (y.length <= MAX_LENGTH) ? y : y.substring(0, MAX_LENGTH) + "...";
+      dot.push("\t\"" + y + "\" [ " + "\n\t\tlabel = \"" + s2 + "\"\n");
+      dot.push("\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
+      dot.push("\t];\n");
+      dot.push("\t\"" + y + "\" -> \"" + art.artifact + "\" [arrowhead=\"odot\"];\n");
+    }
+  });
 
   dot.push("}\n");
-
-console.log(dot.join(""));
 
   /* Transition follows modal top down movement */
   var t = d3.transition().duration(750).ease(d3.easeLinear);
   d3.select("#artifactgraph").graphviz().transition(t).renderDot(dot.join(""));
 }
-
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 END OF FILE

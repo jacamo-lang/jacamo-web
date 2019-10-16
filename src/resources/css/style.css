@@ -2100,13 +2100,11 @@ table thead, table tbody {
 }
 
 table thead {
-  z-index: 999;
   border-radius: var(--universal-border-radius) var(--universal-border-radius) 0 0;
   border-bottom: 0.0625rem solid var(--table-border-separator-color);
 }
 
 table tbody {
-  border-top: 0;
   margin-top: calc(0 - var(--universal-margin));
   border-radius: 0 0 var(--universal-border-radius) var(--universal-border-radius);
 }
@@ -2241,8 +2239,8 @@ table.horizontal thead tr:first-child th:last-child {
     height: 1px;
     width: 1px;
     margin: -1px;
-    overflow: hidden;
     padding: 0;
+    overflow: hidden;
     position: absolute;
     clip: rect(0 0 0 0);
     -webkit-clip-path: inset(100%);
