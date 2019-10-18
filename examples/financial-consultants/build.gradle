@@ -57,7 +57,7 @@ dependencies {
 	//Log4j is used by camel
 	compile group: 'org.springframework', name: 'spring-context', version: '5.0.10.RELEASE'
 	//compile group: 'org.jacamo', name: 'jacamo-web', version: '0.1-SNAPSHOT', changing: true, transitive: true
-	compile files ('../../build/libs/jacamo-web-0.1-SNAPSHOT.jar')
+	compile files ('../../build/libs/jacamo-web-0.2-SNAPSHOT.jar')
 	//Java compiler
 	compile group: 'net.openhft', name: 'compiler', version: '2.3.1'
 

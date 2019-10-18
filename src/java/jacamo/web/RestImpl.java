@@ -65,8 +65,7 @@ public class RestImpl extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Response getIndexHtml(@Context Request request) {
-        System.out.println("tst");
-        return getHtml("/index.html", request);
+        return getHtml("index.html", request);
     }
 
     /**
@@ -97,7 +96,6 @@ public class RestImpl extends AbstractBinder {
                 so.append(line);
                 line = in.readLine();
             }
-
             MessageDigest digest = MessageDigest.getInstance("MD5");
             byte[] hash = digest.digest(so.toString().getBytes(StandardCharsets.UTF_8));
             String hex = DatatypeConverter.printHexBinary(hash);
@@ -200,7 +198,6 @@ public class RestImpl extends AbstractBinder {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOverviewJSON() {
-        System.out.println("#");
         Gson gson = new Gson();
         Map<String, Object> overview = new HashMap<>();
 
