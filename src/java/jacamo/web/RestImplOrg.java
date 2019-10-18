@@ -153,7 +153,7 @@ public class RestImplOrg extends AbstractBinder {
      */
     @Path("/{oename}/group/{groupname}/debug")
     @GET
-    @Produces(MediaType.TEXT_HTML)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response getGroupDebug(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
         try {
             StringBuilder out = new StringBuilder();

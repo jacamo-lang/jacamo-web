@@ -46,8 +46,6 @@ public class RestImplEnv extends AbstractBinder {
         bind(new RestImplEnv()).to(RestImplEnv.class);
     }
 
-    int MAX_LENGTH = 30; // max length of strings when printed in graphs
-
     /**
      * Get list of workspaces in JSON format.
      * 
@@ -287,7 +285,8 @@ public class RestImplEnv extends AbstractBinder {
         return Response.status(500).build();
     }
 
-    // TODO: add the {artifactname}
+    //TODO: add the {artifactname}
+    //TODO: BUG! It is creating a nul javafile in the /src/env folder
     /**
      * Create/Update an artifact template by adding/replacing a file content in the
      * server
