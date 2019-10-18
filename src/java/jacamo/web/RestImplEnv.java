@@ -286,7 +286,6 @@ public class RestImplEnv extends AbstractBinder {
     }
 
     //TODO: add the {artifactname}
-    //TODO: BUG! It is creating a nul javafile in the /src/env folder
     /**
      * Create/Update an artifact template by adding/replacing a file content in the
      * server
