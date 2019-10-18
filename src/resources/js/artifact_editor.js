@@ -1,6 +1,6 @@
 /* Fill text area with current artifact's java code */
 function getCurrentJavaContent() {
-  var selectedJAVAFile = window.location.hash.substr(1);
+  var selectedJAVAFile = new URL(location.href).searchParams.get('javafile');
   const Http = new XMLHttpRequest();
   Http.open("GET", "/workspaces/temp/javafile/" + selectedJAVAFile);
   Http.send();

@@ -1,18 +1,14 @@
-<!--
-  // TODO: The current method used window.open on the js, which is not showing the html to feedback the user after the post.
-  // Maybe a solution is changing it to a form using submit function
--->
 <!DOCTYPE html>
-<html lang="en" target="mainframe">
+<html lang="en">
 
 <head>
-  <title>New Role</title>
+  <title>jacamo-web - organisation</title>
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta charset="UTF-8" http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
-  <script src="/js/root.js"></script>
 </head>
 
 <body>
+
   <div id="root">
 
     <header class="row">
@@ -34,28 +30,32 @@
       <label for="doc-drawer-checkbox" class="button drawer-toggle col-sm" style="right: 10px; width: 50px; position: fixed;"></label>
       <input id="doc-drawer-checkbox" class="drawer" value="on" type="checkbox" />
       <nav class="col-xp-1 col-md-2" id="nav-drawer">
-        <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
+        <!-- Content filled by javascript function -->
       </nav>
     </header>
 
     <div class="row" id="doc-wrapper">
-      <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
+
+      <input id="doc-drawer-checkbox" class="leftmenu" value="on" type="checkbox">
       <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
-        <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
+        <!-- Content filled by javascript function -->
       </nav>
 
       <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
-        <div id="create-role" class="card fluid">
-          <h4 class="section double-padded">Create role</h4>
+
+        <div id="getting-started" class="card fluid">
+          <h4 class="section double-padded">Organisation</h4>
           <div class="section">
             <p>
-              <input style="width: 100%; margin: 0px;" placeholder="enter organisation.group.role's name ..." type="text" id="orgGrRole" onkeydown="if (event.keyCode == 13) {newRole();}">
+              <a href="http://moise.sf.net" target="_blank">Moise</a> is an <a href="https://github.com/moise-lang/moise" target="_blank">open-source</a> organisational platform for MultiAgent Systems
+              based on notions like roles, groups, and missions. It enables an MAS to have an explicit specification of its organisation.
             </p>
             <br />
           </div>
         </div>
       </main>
     </div>
+
   </div>
   <script src="/js/oe_common.js"></script>
   <script>

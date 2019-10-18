@@ -2,7 +2,6 @@
 RETRIEVE DATA ABOUT ONE WORKSPACE
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*Get DF */
 function getWorkspaceDetails() {
   var wks = [];
   const params = new URL(location.href).searchParams;

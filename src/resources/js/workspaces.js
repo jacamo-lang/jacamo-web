@@ -15,7 +15,7 @@ function getWorkspaces() {
   Http.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       ws = JSON.parse(Http.responseText);
-      /* Get Artifacts of the selected workspaces*/
+      /* Get Artifacts of the selected workspace */
       if (selectedWorkspace !== null) {
         const Http = new XMLHttpRequest();
         Http.open("GET", "./workspaces/" + selectedWorkspace);
@@ -36,13 +36,12 @@ function getWorkspaces() {
 };
 
 function updateMenu(nav, ws, ar) {
-  /* Remove all existing children from the menu*/
+  /* Remove all existing children from the menu */
   var menu = document.getElementById(nav);
   while (menu.firstChild) {
     menu.removeChild(menu.firstChild);
   }
 
-  /* Add each agent and then DF and Create Agent*/
   const params = new URL(location.href).searchParams;
   const selectedWorkspace = params.get('workspace');
   const selectedArtifact = params.get('artifact');

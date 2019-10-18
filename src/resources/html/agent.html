@@ -46,7 +46,7 @@
         <!-- Autohiding dialog -->
         <div role="dialog" aria-labelledby="dialog-title" id="top-alert">
           <div class="card fluid">
-            <label for="modal-control" class="modal-close" id="top-alert-message">Message</label>
+            <label for="modal-control" class="modal-close" id="top-alert-message"></label>
           </div>
         </div>
 
@@ -90,7 +90,7 @@
           <div id="agentfootmenu" class="section">
             <a href="#modalinspection" id="btninspection">diagram</a>&#160;&#160;&#160;
             <a href='./agents.html' onclick='delLog()' id="btndellog">clear log</a>&#160;&#160;&#160;
-            <a href='./agents.html' onclick='killAg()'>kill agent</a>&#160;&#160;&#160;
+            <a onclick='killAg()' id='btkillag'>kill agent</a>&#160;&#160;&#160;
           </div>
         </div>
 
@@ -101,8 +101,8 @@
   <script src="//d3js.org/d3.v4.min.js"></script>
   <script src="https://unpkg.com/viz.js@1.8.1/viz.js" type="javascript/worker"></script>
   <script src="https://unpkg.com/d3-graphviz@2.6.1/build/d3-graphviz.js"></script>
-  <script src="./js/agent.js"></script>
-  <script src="./js/agent_common.js"></script>
+  <script src="/js/agent.js"></script>
+  <script src="/js/agent_common.js"></script>
   <script>
     $(document).ready(function() {
       $('#top-alert').hide();
@@ -110,7 +110,7 @@
       getInspectionDetails();
       updateSuggestions();
       setAutoUpdateLog();
-      $("#btndellog").attr("href","agent.html?agent=" + selectedAgent);
+      setDelLogButton();
       document.getElementById("inputcmd").focus();
     });
   </script>

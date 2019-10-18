@@ -1,7 +1,6 @@
 package jacamo.web;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -53,10 +52,6 @@ import cartago.ArtifactInfo;
 import cartago.CartagoException;
 import cartago.CartagoService;
 import cartago.WorkspaceId;
-import guru.nidi.graphviz.engine.Format;
-import guru.nidi.graphviz.engine.Graphviz;
-import guru.nidi.graphviz.model.MutableGraph;
-import guru.nidi.graphviz.parse.Parser;
 import jaca.CAgentArch;
 import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
@@ -78,9 +73,6 @@ import jason.asSyntax.Trigger.TEType;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
 import jason.stdlib.print;
-import ora4mas.nopl.GroupBoard;
-import ora4mas.nopl.SchemeBoard;
-import ora4mas.nopl.oe.Group;
 
 /**
  * Agent's REST implementation class
@@ -94,6 +86,7 @@ import ora4mas.nopl.oe.Group;
 public class RestImplAg extends AbstractBinder {
 
     Map<String, StringBuilder> agLog = new HashMap<>();
+    TranslAg tAg = new TranslAg();
     Gson gson = new Gson();
 
     @Override
@@ -109,8 +102,8 @@ public class RestImplAg extends AbstractBinder {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAgentsJSON() {
-        return Response.ok().entity(gson.toJson(BaseCentralisedMAS.getRunner().getAgs().keySet()))
-                .header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok().entity(gson.toJson(tAg.getAgents())).header("Access-Control-Allow-Origin", "*")
+                .build();
     }
 
     /**
@@ -251,102 +244,22 @@ public class RestImplAg extends AbstractBinder {
         return Response.status(500).build();
     }
 
+    /**
+     * Get agent information (namespaces, roles, missions and workspaces) in JSON
+     * format
+     * 
+     * @param agName name of the agent
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     * 
+     */
     @Path("/{agentname}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAgentDetails(@PathParam("agentname") String agName) {
-
-        Agent ag = getAgent(agName);
-
-        // get workspaces the agent are in (including organisations)
-        List<String> workspacesIn = new ArrayList<>();
-        CAgentArch cartagoAgArch = getCartagoArch(ag);
+    public Response getAgentDetailsJSON(@PathParam("agentname") String agName) {
         try {
-            for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
-                workspacesIn.add(wid.getName());
-            }
-            List<String> nameSpaces = new ArrayList<>();
-            ag.getBB().getNameSpaces().forEach(x -> {
-                nameSpaces.add(x.toString());
-            });
-
-            // get groups and roles this agent plays
-            List<Object> roles = new ArrayList<>();
-            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-                if (workspacesIn.contains(gb.getOEId())) {
-                    gb.getGrpState().getPlayers().forEach(p -> {
-                        if (p.getAg().equals(agName)) {
-                            Map<String, Object> groupRole = new HashMap<>();
-                            groupRole.put("group", gb.getArtId());
-                            groupRole.put("role", p.getTarget());
-                            roles.add(groupRole);
-                        }
-                    });
-
-                }
-            }
-
-            // get schemed this agent belongs
-            List<Object> missions = new ArrayList<>();
-            for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
-                schb.getSchState().getPlayers().forEach(p -> {
-                    if (p.getAg().equals(agName)) {
-                        Map<String, Object> schemeMission = new HashMap<>();
-                        schemeMission.put("scheme", schb.getArtId());
-                        schemeMission.put("mission", p.getTarget());
-                        List<Object> responsibles = new ArrayList<>();
-                        schemeMission.put("responsibles", responsibles);
-                        for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
-                            responsibles.add(gb.getId());
-                        }
-                        missions.add(schemeMission);
-                    }
-                });
-            }
-
-            // TODO: unify the list of 'system' artifacts with RestImplEnv
-            List<Object> workspaces = new ArrayList<>();
-            workspacesIn.forEach(wksName -> {
-                Map<String, Object> workspace = new HashMap<>();
-                workspace.put("workspace", wksName);
-                List<Object> artifacts = new ArrayList<>();
-                try {
-                    for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
-                        ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
-                        info.getObservers().forEach(y -> {
-                            if ((info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
-                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.GroupBoard"))
-                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.OrgBoard"))
-                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.SchemeBoard"))
-                                    || (info.getId().getArtifactType().equals("ora4mas.nopl.NormativeBoard"))) {
-                                ; // do not print system artifacts
-                            } else {
-                                if (y.getAgentId().getAgentName().equals(agName)) {
-                                    // Build returning object
-                                    Map<String, Object> artifact = new HashMap<String, Object>();
-                                    artifact.put("artifact", info.getId().getName());
-                                    artifact.put("type", info.getId().getArtifactType());
-                                    artifacts.add(artifact);
-                                }
-                            }
-                        });
-                    }
-                    workspace.put("artifacts", artifacts);
-                    workspaces.add(workspace);
-                } catch (CartagoException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            Map<String, Object> agent = new HashMap<>();
-            agent.put("agent", agName);
-            agent.put("namespaces", nameSpaces);
-            agent.put("roles", roles);
-            agent.put("missions", missions);
-            agent.put("workspaces", workspaces);
-
-            return Response.ok(gson.toJson(agent)).build();
-        } catch (CartagoException e) {
+            return Response.ok(gson.toJson(tAg.getAgentDetails(agName))).build();
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -515,18 +428,11 @@ public class RestImplAg extends AbstractBinder {
                 outputFile.close();
 
                 ag.getPL().clear();
-                // for (Plan p: new ArrayList<>(ag.getPL().getPlans())) {
-                // if (p.getSource().equals(aslFileName)) {
-                // ag.getPL().remove(p.getLabel());
-                // }
-                // }
 
                 ag.parseAS(new FileInputStream("src/agt/" + aslFileName), aslFileName);
                 if (ag.getPL().hasMetaEventPlans())
                     ag.getTS().addGoalListener(new GoalListenerForMetaEvents(ag.getTS()));
 
-                // ag.fixAgInIAandFunctions(ag); // used to fix agent reference in functions
-                // used inside includes
                 ag.loadKqmlPlans();
 
                 return Response.ok("Agent reloaded with updated file. Old intentions were not affected.").build();
@@ -601,15 +507,6 @@ public class RestImplAg extends AbstractBinder {
                         Command cmd = new Command("'" + annotation.literal() + "'",
                                 "'" + annotation.hint().replaceAll("\"", "`").replaceAll("'", "`") + "'");
 						l.add(cmd);
-						// l.add(annotation.literal());
-
-						// System.out.printf("%nforma :%s", annotation.literal());
-						// System.out.printf("%nhint :%s", annotation.hint());
-						// Literal iaLiteral = ASSyntax.parseLiteral(annotation.literal());
-						// for (int i=0; i<iaLiteral.getArity(); i++) {
-						// System.out.println(" " + iaLiteral.getTerm(i) + ": " +
-						// annotation.argsHint()[i] + " " + annotation.argsType()[i]);
-						// }
 					} else {
 						// add just the functor of the internal action
 						Command cmd = new Command("'." + a.getSimpleName() + "'", "''");
@@ -628,6 +525,7 @@ public class RestImplAg extends AbstractBinder {
 	}
 
 	// TODO: Use JSON format
+	// TODO: BUGGED!!! NOT WORKING OF FRONT SIDE!
 	/**
 	 * Return a TEXT PLAIN of available internal action, external actions and
 	 * commands for the given agent Example:
@@ -957,192 +855,6 @@ public class RestImplAg extends AbstractBinder {
 		}
 
 		return Response.status(500).build();
-	}
-
-	/**
-	 * Returns agent's diagram
-	 * 
-	 * @param agName agent name
-	 * @deprecated This is interface dependent, client should get agent's info
-	 *             drawing and rendering this data by itself.
-	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-	 */
-	@Path("/{agentname}/mind/img.svg")
-	@GET
-	@Produces("image/svg+xml")
-	public Response getAgentImg(@PathParam("agentname") String agName) {
-		try {
-			String dot = getAgAsDot(agName);
-			if (dot != null && !dot.isEmpty()) {
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
-				MutableGraph g = Parser.read(dot);
-				Graphviz.fromGraph(g).render(Format.SVG).toOutputStream(out);
-
-				return Response.ok(out.toByteArray()).build();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return Response.status(500).build();
-	}
-
-	/**
-	 * Generates agent diagram
-	 * 
-	 * @deprecated Only used to render graphviz which is a deprecated method
-	 * @param agName agent name
-	 * @return Dot representation
-	 */
-	protected String getAgAsDot(String agName) {
-		int MAX_LENGTH = 35;
-		String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
-
-		try {
-
-			StringBuilder sb = new StringBuilder();
-
-			// get workspaces the agent are in (including organisations)
-			List<String> workspacesIn = new ArrayList<>();
-			Agent ag = getAgent(agName);
-			CAgentArch cartagoAgArch = getCartagoArch(ag);
-			for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
-				workspacesIn.add(wid.getName());
-			}
-
-			sb.append("digraph G {\n");
-			sb.append("\tgraph [\n");
-			sb.append("\t\trankdir=\"LR\"\n");
-			sb.append("\t\tbgcolor=\"transparent\"\n");
-			sb.append("\t]\n");
-
-			{// beliefs will be placed on the left
-				sb.append("\tsubgraph cluster_mind {\n");
-				sb.append("\t\tstyle=rounded\n");
-				ag.getBB().getNameSpaces().forEach(x -> {
-					sb.append("\t\t\"" + x + "\" [ " + "\n\t\t\tlabel = \"" + x + "\"");
-					sb.append("\n\t\t\tshape=\"cylinder\" style=filled pencolor=black fillcolor=cornsilk\n");
-					sb.append("\t\t];\n");
-				});
-				sb.append("\t};\n");
-				// just to avoid put agent node into the cluster
-				ag.getBB().getNameSpaces().forEach(x -> {
-					sb.append("\t\"" + agName + "\"->\"" + x + "\" [arrowhead=none constraint=false style=dotted]\n");
-				});
-			}
-
-			StringBuilder orglinks = new StringBuilder();
-
-			{ // groups and roles are also placed on the left
-
-				for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-					if (workspacesIn.contains(gb.getOEId())) {
-						gb.getGrpState().getPlayers().forEach(p -> {
-							if (p.getAg().equals(agName)) {
-								// group and role (arrow)
-								sb.append("\t\"" + gb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + gb.getArtId() + "\"");
-								sb.append("\n\t\tshape=tab style=filled pencolor=black fillcolor=lightgrey\n");
-								sb.append("\t];\n");
-								// roles (arrows)
-								orglinks.append("\t\"" + gb.getArtId() + "\"->\"" + agName
-                                        + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
-							}
-						});
-					}
-				}
-
-				for (SchemeBoard schb : SchemeBoard.getSchemeBoards()) {
-					schb.getSchState().getPlayers().forEach(p -> {
-						if (p.getAg().equals(agName)) {
-							// scheme
-							sb.append(
-									"\t\t\"" + schb.getArtId() + "\" [ " + "\n\t\tlabel = \"" + schb.getArtId() + "\"");
-							sb.append("\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n");
-							sb.append("\t\t];\n");
-							for (Group gb : schb.getSchState().getGroupsResponsibleFor()) {
-								orglinks.append("\t\"" + gb.getId() + "\"->\"" + schb.getArtId()
-                                        + "\" [arrowtail=normal arrowhead=open label=\"responsible\nfor\"]\n");
-								sb.append("\t\t{rank=same " + gb.getId() + " " + schb.getArtId() + "};\n");
-							}
-							orglinks.append("\t\"" + schb.getArtId() + "\"->\"" + p.getAg()
-                                    + "\" [arrowtail=normal dir=back label=\"" + p.getTarget() + "\"]\n");
-						}
-					});
-				}
-
-				sb.append(orglinks);
-			}
-
-			{// agent will be placed on center
-				String s1 = (agName.length() <= MAX_LENGTH) ? agName : agName.substring(0, MAX_LENGTH) + " ...";
-				sb.append("\t\"" + agName + "\" [ " + "\n\t\tlabel = \"" + s1 + "\"");
-				sb.append("\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
-				sb.append("\t];\n");
-			}
-
-			{ // workspances and artifacts the agents is focused on
-				workspacesIn.forEach(w -> {
-					String wksName = w.toString();
-					try {
-						for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
-							ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
-							info.getObservers().forEach(y -> {
-								if ((info.getId().getArtifactType().equals("cartago.AgentBodyArtifact"))
-										|| (info.getId().getArtifactType().equals("ora4mas.nopl.GroupBoard"))
-										|| (info.getId().getArtifactType().equals("ora4mas.nopl.OrgBoard"))
-										|| (info.getId().getArtifactType().equals("ora4mas.nopl.SchemeBoard"))
-										|| (info.getId().getArtifactType().equals("ora4mas.nopl.NormativeBoard"))) {
-									; // do not print system artifacts
-								} else {
-									if (y.getAgentId().getAgentName().equals(agName)) {
-										// create a cluster for each artifact even at same wks of other artifacts?
-										sb.append("\tsubgraph cluster_" + wksName + " {\n");
-										sb.append("\t\tlabel=\"" + wksName + "\"\n");
-										sb.append("\t\tlabeljust=\"r\"\n");
-										sb.append("\t\tgraph[style=dashed]\n");
-										String str1 = (info.getId().getName().length() <= MAX_LENGTH)
-												? info.getId().getName()
-												: info.getId().getName().substring(0, MAX_LENGTH) + " ...";
-										// It is possible to have same artifact name in different workspaces
-										sb.append("\t\t\"" + wksName + "_" + info.getId().getName() + "\" [ "
-												+ "\n\t\t\tlabel=\"" + str1 + " :\\n");
-
-                                        str1 = (info.getId().getArtifactType().length() <= MAX_LENGTH)
-                                                ? info.getId().getArtifactType()
-                                                : info.getId().getArtifactType().substring(0, MAX_LENGTH) + " ...";
-                                        sb.append(str1 + "\"\n");
-
-										sb.append("\t\t\tshape=record style=filled fillcolor=white;\n");
-										sb.append("\t\t\tURL=\"/workspaces/" + wksName + "/" + info.getId().getName()
-                                                + "\";\n");
-
-										sb.append("\t\t\tlabeltooltip=\"teste teste\";\n");
-										sb.append("\t\t\theadlabel=\"teste2\";\n");
-
-										sb.append("\t\t\ttarget=\"mainframe\";\n");
-										sb.append("\t\t];\n");
-
-										sb.append("\t};\n");
-
-										sb.append("\t\"" + agName + "\"->\"" + wksName + "_" + info.getId().getName()
-                                                + "\" [arrowhead=odot]\n");
-									}
-								}
-							});
-						}
-					} catch (CartagoException e) {
-						e.printStackTrace();
-					}
-				});
-			}
-
-			sb.append("}\n");
-			graph = sb.toString();
-
-		} catch (Exception ex) {
-		}
-
-		return graph;
 	}
 
 	/**

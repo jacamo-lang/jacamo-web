@@ -2,7 +2,6 @@
 RETRIEVE DATA ABOUT ONE WORKSPACE
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*Get DF */
 function getArtifactDetails() {
   var art = [];
   const params = new URL(location.href).searchParams;
@@ -135,6 +134,19 @@ function renderGraphvizFromArtifactJson(artName, art) {
   /* Transition follows modal top down movement */
   var t = d3.transition().duration(750).ease(d3.easeLinear);
   d3.select("#artifactgraph").graphviz().transition(t).renderDot(dot.join(""));
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+EDIT ARTIFACT
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Setupt button clean log */
+function setEditButton() {
+  document.getElementById('btndeleditartifact').setAttribute(
+    "href", "artifact_editor.html?workspace=" + (new URL(location.href).searchParams.get('workspace')) +
+    "&amp;artifact=" + (new URL(location.href).searchParams.get('artifact')) +
+    "&amp;javafile=" + (new URL(location.href).searchParams.get('artifact'))
+  );
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -366,8 +366,9 @@ a {
   text-decoration: none;
 }
 
-a:link {
+a:link, a:not([onclick^=""]) {
   color: var(--a-link-color);
+  cursor: pointer;
 }
 
 a:visited {

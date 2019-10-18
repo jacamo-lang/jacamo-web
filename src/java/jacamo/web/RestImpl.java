@@ -10,7 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -229,7 +231,37 @@ public class RestImpl extends AbstractBinder {
         }
         return null;
     }
+    
+    // TODO: redundant code, it should be taken from each implementation, actually
+    // maybe it is better to put the data process in a layer making the
+    // implementations only interfaces
+    /**
+     * Generates whole MAS overview.
+     * 
+     * @return JSON of whole MAS
+     */
+    @Path("/overview")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    protected Response getOverviewJSON() {
+        Map<String, Object> overview = new HashMap<>();
+        
+        TranslOrg tOrg = new TranslOrg();
+        TranslAg tAg = new TranslAg();
+        TranslEnv tEnv = new TranslEnv();
+        
+        //tOrg.getSpecification(oeName)
 
+        
+        
+        
+        
+        
+        
+        
+        return Response.ok(overview).build();
+    }    
+    
     /**
      * Generates a dot for the whole MAS
      * 

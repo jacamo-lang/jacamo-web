@@ -1,15 +1,5 @@
 package jacamo.web;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -18,388 +8,166 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 
-import cartago.CartagoException;
-import guru.nidi.graphviz.engine.Format;
-import guru.nidi.graphviz.engine.Graphviz;
-import guru.nidi.graphviz.parse.Parser;
-import moise.os.OS;
-import moise.os.fs.Goal;
-import moise.os.fs.Mission;
-import moise.os.ns.Norm;
+import com.google.gson.Gson;
+
 import moise.os.ss.Role;
-import moise.os.ns.NS.OpTypes;
 import ora4mas.nopl.GroupBoard;
 import ora4mas.nopl.OrgArt;
-import ora4mas.nopl.OrgBoard;
-import ora4mas.nopl.SchemeBoard;
-import ora4mas.nopl.oe.Player;
 
 @Singleton
 @Path("/oe")
 public class RestImplOrg extends AbstractBinder {
 
-    int MAX_LENGTH = 30; // max length of strings when printed in graphs
-
+    TranslOrg tOrg = new TranslOrg();
+    
     @Override
     protected void configure() {
         bind(new RestImplOrg()).to(RestImplOrg.class);
     }
 
-    public String designPage(String title, String selectedItem, String mainContent) {
-        StringWriter so = new StringWriter();
-        so.append("<!DOCTYPE html><html lang=\"en\" target=\"mainframe\">\n");
-        so.append("	<head>\n");
-        so.append("		<title>" + title + "</title>\n");
-        so.append("     <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\">\n");
-        so.append("     <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-        so.append("	</head>\n");
-        so.append("	<body>\n");
-        so.append("		<div id=\"root\">\n");
-        so.append("			<div class=\"row\" id=\"doc-wrapper\">\n");
-        so.append(              getOrganisationMenu(selectedItem));
-        so.append("				<main class=\"col-xs-12 col-sm-12 col-md-10 col-lg-10\" id=\"doc-content\">\n");
-        so.append(                  mainContent);
-        so.append("				</main>\n");
-        so.append("			</div>\n");
-        so.append("		</div>\n");
-        so.append("	</body>\n");
-        // copy to 'menucontent' the menu to show on drop down main page menu
-        so.append("	<script>\n");
-        so.append("		var buttonClose = \"<label for='doc-drawer-checkbox' class='button drawer-close'></label>\";\n");
-        so.append("		var pageContent = document.getElementById(\"nav-drawer-frame\").innerHTML;\n");
-        so.append("		var fullMenu = `${buttonClose} ${pageContent}`;\n");
-        so.append("		sessionStorage.setItem(\"menucontent\", fullMenu);\n");
-        so.append("	</script>\n");
-        so.append("</html>\n");
-        return so.toString();
-    }
-
+    /**
+     * Get list of running organisations in JSON format.
+     * 
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     *         Sample: ["testOrg","wkstest"]
+     */
     @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getOrgHtml() throws CartagoException {
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getOrganisationsJSON() {
 
-         StringWriter mainContent = new StringWriter();
-         mainContent.append("<div id=\"getting-started\" class=\"card fluid\">\n"); 
-         mainContent.append("	<h4 class=\"section double-padded\">getting started</h4>\n"); 
-         mainContent.append("	<div class=\"section\">\n"); 
-         mainContent.append("		<p>\n");
-         mainContent.append("			<a href=\"http://moise.sf.net\" target=\"_blank\">Moise</a> is an <a href=\"https://github.com/moise-lang/moise\" target=\"_blank\">open-source</a> organisational platform for MultiAgent Systems");
-         mainContent.append(" 			based on notions like roles, groups, and missions. It enables an MAS to have an explicit specification of its organisation. ");     
-         mainContent.append("		</p> ");
-         mainContent.append("		<br/>\n");
-         mainContent.append("	</div>\n");
-         mainContent.append("</div>\n");
-         
-        return designPage("jacamo-web - organisation","",mainContent.toString());
-    }
-
-    private String getOrganisationMenu(String selectedOrganisation) {
-
-        StringWriter so = new StringWriter();
-
-        so.append("<input id=\"doc-drawer-checkbox-frame\" class=\"leftmenu\" value=\"on\" type=\"checkbox\">\n");
-        so.append("<nav class=\"col-xp-1 col-md-2\" id=\"nav-drawer-frame\">\n");
-        so.append("	</br>\n");
-
-        for (OrgBoard ob : OrgBoard.getOrbBoards()) {
-            if (ob.getOEId().equals(selectedOrganisation)) {
-                so.append("	<a href=\"/oe/" + ob.getOEId() + "/os#specification\"><h5><b>" + ob.getOEId() + "</b></h5></a>\n");
-            } else {
-                so.append("	<a href=\"/oe/" + ob.getOEId() + "/os#specification\"><h5>" + ob.getOEId() + "</h5></a>\n");
-            }
-        }
-
-        so.append("<br/>");
-        so.append("<br/>");
-        so.append("<a href=\"/new_role.html\" target='mainframe'>create role</a>\n"); 
-        
-        so.append("</nav>\n");
-
-        return so.toString();
-    }
-
-    @Path("/{oename}/os")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getSpecificationHtml(@PathParam("oename") String oeName) {
+        Gson gson = new Gson();
         try {
-            StringBuilder mainContent = new StringBuilder();
-            mainContent.append("<div id=\"groups\" class=\"card fluid\">\n");
-
-            // add groups sub section
-            for (GroupBoard gb : GroupBoard.getGroupBoards()) {
-                if (gb.getOEId().equals(oeName)) {
-                    if (((OrgArt) gb).getStyleSheet() != null) {
-                        mainContent.append("    <div class=\"section\">\n");
-                        StringWriter so = new StringWriter();
-                        // TODO: links that comes from xsl specification are wrong!!!
-                        mainContent.append("        <center><object data=\"/oe/" + oeName + "/os/img.svg\" type=\"image/svg+xml\" style=\"max-width:100%;\"></object></center><br/>");
-                        if (show.get("groups")) 
-                            mainContent.append("<a href='hide?groups'>hide groups</a>&#160;&#160;&#160;");
-                        else
-                            mainContent.append("<a href='show?groups'>show groups</a>&#160;&#160;&#160;");
-                        
-                        if (show.get("schemes")) 
-                            mainContent.append("<a href='hide?schemes'>hide schemes</a>&#160;&#160;&#160;");
-                        else
-                            mainContent.append("<a href='show?schemes'>show schemes</a>&#160;&#160;&#160;");
-                        
-                        if (show.get("norms")) 
-                            mainContent.append("<a href='hide?norms'>hide norms</a>");
-                        else
-                            mainContent.append("<a href='show?norms'>show norms</a>");
-
-                        mainContent.append("    </div>\n");
-                        mainContent.append(so.toString());
-                    }
-                }
-            }
-            mainContent.append("</div>\n");
-
-            return designPage("jacamo-web - organisation: " + oeName, oeName, mainContent.toString());
-        } catch (Exception | TransformerFactoryConfigurationError e) {
+            return Response.ok(gson.toJson(tOrg.getOrganisations())).header("Access-Control-Allow-Origin", "*").build();
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return "error"; // TODO: set response properly
+
+        return Response.status(500).build();
     }
-    
+
+    /**
+     * Get details of one organisation in JSON format, including groups, schemes and
+     * norms.
+     * 
+     * @param oeName name of the organisation
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     *         Sample:
+     *         {"norms":[{"mission":"scheme1.mission1","role":"role1","type":"obligation","norm":"norm2"},
+     *         {"mission":"scheme1.mission2","role":"role2","type":"obligation","norm":"norm1"}],
+     *         "organisation":"testOrg","groups":[{"roles":[{"role":"role1","cardinality":"1..1","superRoles":["soc"]},
+     *         {"role":"soc","cardinality":"0..*","superRoles":[]},{"role":"role2","cardinality":"0..1","superRoles":["soc"]},
+     *         {"role":"role3","cardinality":"0..*","superRoles":["role2"]}],"isWellFormed":true,"subGroups":[],"group":"group1"}],
+     *         "schemes":[{"scheme":"scheme1","missions":[{"mission":"mission1","missionGoals":["goal2","goal4"]},
+     *         {"mission":"mission2","missionGoals":["goal3"]}],"players":["marcos (
+	 *         mission1 )"],"isWellFormed":true, "goals":["goal2 \u003c-
+	 *         goal1","goal3 \u003c- goal1","goal4 \u003c- goal1"]}]}
+     */
+    @Path("/{oename}/os")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getSpecificationJSON(@PathParam("oename") String oeName) {
+        try {
+            Gson gson = new Gson();
+            return Response.ok(gson.toJson(tOrg.getSpecification(oeName))).header("Access-Control-Allow-Origin", "*").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Response.status(500).build();
+    }
+
+    /**
+     * Add a new role into an organisation/group
+     * 
+     * @param oeName name of the organisation
+     * @param groupName name of the group
+     * @param role name of the new role
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
     @Path("/{oename}/group/{groupname}")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_HTML)
-    public String createNewRole(@PathParam("oename") String oeName, @PathParam("groupname") String groupName,
+    public Response createNewRole(@PathParam("oename") String oeName, @PathParam("groupname") String groupName,
             @FormParam("role") String role) {
         try {
-            String r = "nok";
-            
-            System.out.println("#1");
-                
             for (GroupBoard gb : GroupBoard.getGroupBoards()) {
                 if (gb.getOEId().equals(oeName)) {
                     Role newRole = new Role(role, gb.getSpec().getSS());
                     newRole.addSuperRole("soc");
-                    gb.getSpec().getSS().addRoleDef(newRole,true);
+                    gb.getSpec().getSS().addRoleDef(newRole, true);
                     gb.getSpec().addRole(role);
-                    System.out.println("#2");
                 }
             }
 
-            r = "<br/><center>Role created!<br/>Redirecting...</center>";
-            System.out.println("#3");
-            
-            return "<head><meta http-equiv=\"refresh\" content=\"1; URL='/oe/" + oeName + "/group/" + groupName +
-                  "'\"/><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\"></head>"+r;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "error " + e.getMessage();
-        }
-    }
-    
-
-
-    Map<String,Boolean> show = new HashMap<>();
-    {
-        // by default show only groups
-        show.put("groups", true);
-        show.put("schemes", false);
-        show.put("norms", false);
-    }
-    
-    @Path("/{oename}/hide")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String setHide(@PathParam("oename") String oeName,
-            @QueryParam("groups") String groups,
-            @QueryParam("schemes") String schemes,
-            @QueryParam("norms") String norms) {
-        if (groups != null) show.put("groups",false);
-        if (schemes != null) show.put("schemes",false);
-        if (norms != null) show.put("norms",false);
-        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/oe/"+oeName+"/os'\" /></head>ok";
-    }
-
-    @Path("/{oename}/show")
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String setShow(@PathParam("oename") String oeName,
-            @QueryParam("groups") String groups,
-            @QueryParam("schemes") String schemes,
-            @QueryParam("norms") String norms) {
-        if (groups != null) show.put("groups",true);
-        if (schemes != null) show.put("schemes",true);
-        if (norms != null) show.put("norms",true);
-        return "<head><meta http-equiv=\"refresh\" content=\"0; URL='/oe/"+oeName+"/os'\" /></head>ok";
-    }
-    
-    
-    @Path("/{oename}/os/img.svg")
-    @GET
-    @Produces("image/svg+xml")
-    public Response getOSImg(@PathParam("oename") String oeName) {
-        try {
-            String dot = getOSAsDot(oeName, show.get("groups"), show.get("schemes"), show.get("norms"));
-            if (dot != null && !dot.isEmpty()) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                Graphviz
-                    .fromGraph(Parser.read(dot))
-                    .render(Format.SVG)
-                    .toOutputStream(out);
-                return Response.ok(out.toByteArray()).build();
-            }
+            return Response.ok("Role created!").build();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return Response.noContent().build(); // TODO: set response properly
+        return Response.status(500).build();
     }
 
+    /**
+     * Get group specifications in plain text format.
+     * 
+     * @param oeName name of the organization
+     * @param groupName name of the group
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
     @Path("/{oename}/group/{groupname}/{groupname}.npl")
     @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getGroupNpl(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response getGroupNpl(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
         try {
+            StringBuilder out = new StringBuilder();
             for (GroupBoard gb : GroupBoard.getGroupBoards()) {
                 if (gb.getOEId().equals(oeName) && gb.getArtId().equals(groupName)) {
-                    StringBuilder out = new StringBuilder();
-                    out.append("<html target=\"mainframe\"><head><title>debug: " + groupName + "</title></head><body>");
-                    out.append("<pre>");
                     out.append(((OrgArt) gb).getNPLSrc());
-                    out.append("</pre>");
-                    out.append("</body></html>");
-                    return out.toString();
                 }
             }
+            
+            return Response.ok(out.toString()).build();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "error"; // TODO: set response properly
+        
+        return Response.status(500).build();
     }
 
+    /**
+     * Get group instance information in plain text format
+     * 
+     * @param oeName name of the organization
+     * @param groupName name of the group
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
     @Path("/{oename}/group/{groupname}/debug")
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public String getGroupDebug(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
+    public Response getGroupDebug(@PathParam("oename") String oeName, @PathParam("groupname") String groupName) {
         try {
+            StringBuilder out = new StringBuilder();
             for (GroupBoard gb : GroupBoard.getGroupBoards()) {
                 if (gb.getOEId().equals(oeName) && gb.getArtId().equals(groupName)) {
-                    // TODO: develop debug function
-                    StringBuilder out = new StringBuilder();
-                    out.append("<html target=\"mainframe\"><head><title>debug: " + groupName + "</title></head><body>");
-                    out.append("<pre>");
                     out.append(((OrgArt) gb).getDebugText());
-                    out.append("</pre>");
-                    out.append("</body></html>");
-                    return out.toString();
                 }
             }
+            
+            return Response.ok(out.toString()).build();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "error"; // TODO: set response properly
-    }
-
-    protected String getOSAsDot(String oeName, boolean showSS, boolean showFS, boolean showNS) {
-        String graph = "digraph G {\n" + "   error -> creating;\n" + "   creating -> GraphImage;\n" + "}";
-
-        try {
-            os2dot t = new os2dot();
-            
-            StringWriter so = new StringWriter();
-            so.append("digraph "+oeName+" {\n");
-            so.append("    rankdir=BT;\n");
-            so.append("    compound=true;\n\n");
-            so.append("    bgcolor=transparent;\n");
-
-            OS os = null;
-            // groups
-            if (showSS) {
-                for (GroupBoard gb: GroupBoard.getGroupBoards()) {
-                    if (gb.getOEId().equals(oeName)) {
-                        os = gb.getSpec().getSS().getOS();
-
-                        so.append( t.transformRolesDef(gb.getSpec().getSS()));
-                        so.append( t.transform(gb.getSpec(), gb) );
-                    }
-                }
-            }
-            
-            Set<String> done = new HashSet<>();
-
-            // schemes
-            if (showFS) {
-                for (SchemeBoard sb: SchemeBoard.getSchemeBoards()) {
-                    if (sb.getOEId().equals(oeName)) {
-                        os = sb.getSpec().getFS().getOS();
-
-                        so.append("        "+sb.getArtId()+ t.getSchemeInstanceStyle(sb.getArtId(), sb.isWellFormed())+";\n");
-                        so.append( t.transform( sb.getSpec().getRoot(), 0, sb));    
-                        //so.append("        "+sb.getArtId()+ " -> "+sb.getSpec().getRoot()+" [arrowhead=open];\n");
-                        
-                        // missions
-                        for (Mission m: sb.getSpec().getMissions()) {
-                            so.append( t.transform(m, sb));
-                            for (Goal g: m.getGoals()) {
-                                so.append("        "+m.getId()+" -> "+g.getId()+" [arrowsize=0.5];\n");
-                            }
-                        }
-                        for (Player p: sb.getSchState().getPlayers()) {
-                            so.append("        "+p.getAg()+ "["+t.getAgStyle()+"];\n");
-                            so.append("        "+p.getAg()+" -> "+p.getTarget()+" [arrowsize=0.5];\n");
-                        }                    
-                    }                
-                }
-            }
-            
-            if (showNS) {
-                if (os == null) {
-                    for (OrgBoard ob : OrgBoard.getOrbBoards())
-                        if (ob.getOEId().equals(oeName))
-                            os = OS.loadOSFromURI(ob.getOSFile());                  
-                }
-                for (Norm n: os.getNS().getNorms()) {
-                    String e = n.getRole().toString()+n.getMission();
-                    if (!done.contains(e)) {
-                        done.add(e);
-
-                        String s = "bold";
-                        if (n.getType() == OpTypes.permission)
-                            s = "filled";
-                        String cond = "";
-
-                        if (!showSS)
-                            so.append( t.transform(n.getRole()));
-                        if (!showFS)
-                            so.append( t.transform(n.getMission()));
-
-                        so.append("        "+n.getRole()+" -> "+n.getMission().getId()+" [arrowhead=inv,style="+s+",label=\""+cond+"\"];\n"); // decorate=true,
-                    }
-                }
-            }
-
-            so.append("}\n");                   
-            
-            graph = so.toString();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        // debug
-        try (FileWriter fw = new FileWriter("graph.gv", false);
-                BufferedWriter bw = new BufferedWriter(fw);
-                PrintWriter printout = new PrintWriter(bw)) {
-            printout.print(graph);
-            printout.flush();
-            printout.close();
-        } catch (Exception ex) {
-        }
-        return graph;
+        return Response.status(500).build();
     }
 
 }
-

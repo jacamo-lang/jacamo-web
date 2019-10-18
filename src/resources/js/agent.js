@@ -12,19 +12,15 @@ function killAg() {
   if (r == true) {
     const Http = new XMLHttpRequest();
     Http.onreadystatechange = function() {
-      if ((Http.status == 200) || (Http.status == 204)) {
-
-      }
-      $('#top-alert-message').text(Http.responseText);
-      $('#top-alert').fadeTo(2000, 500).slideUp(500, function() {
-        $('#top-alert').slideUp(500);
-      });
-      $('#btkillag').href = './agents.html';
+      window.location.assign("./agents.html");
     };
     Http.open("DELETE", "./agents/" + selectedAgent);
     Http.send();
   } else {
-    $('#btkillag').href = './agent.html?agent=' + selectedAgent;
+    $('#top-alert-message').text("Don't worry, agent '" + selectedAgent + "' is still here.");
+    $('#top-alert').fadeTo(2000, 500).slideUp(500, function() {
+      $('#top-alert').slideUp(500);
+    });
   }
 }
 
@@ -98,6 +94,13 @@ function setAutoUpdateLog() {
   setInterval(function() {
     showLog();
   }, 1000);
+}
+
+/* Setupt button clean log */
+function setDelLogButton() {
+  document.getElementById('btndellog').setAttribute(
+    "href", "agent.html?agent=" + (new URL(location.href).searchParams.get('agent'))
+  );
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
