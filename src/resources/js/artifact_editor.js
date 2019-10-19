@@ -1,13 +1,12 @@
 /* Fill text area with current artifact's java code */
 function getCurrentJavaContent() {
   var selectedJAVAFile = new URL(location.href).searchParams.get('javafile');
+
   const Http = new XMLHttpRequest();
   Http.open("GET", "/workspaces/temp/javafile/" + selectedJAVAFile);
   Http.send();
   Http.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      createEditor(Http.responseText);
-
       /* Remove all existing children */
       const menu = document.getElementById("footer_menu");
       while (menu.firstChild) {
@@ -19,6 +18,7 @@ function getCurrentJavaContent() {
       document.getElementById("footer_menu").appendChild(text);
       const submit = document.createElement('button');
       submit.setAttribute("type", "submit");
+      submit.setAttribute("onclick", "window.location.replace('./workspaces.html')");
       submit.innerHTML = "Save & Reload";
       document.getElementById("footer_menu").appendChild(submit);
       const cancel = document.createElement('button');
@@ -28,10 +28,23 @@ function getCurrentJavaContent() {
       document.getElementById("footer_menu").appendChild(cancel);
 
       const form = document.getElementById("usrform");
-      form.setAttribute("action", "/workspaces/temp/javafile/" + selectedJAVAFile);
+      createEditor(Http.responseText);
+      console.log("oi");
     }
   };
 };
+
+function saveFile(formData) {
+  const Http = new XMLHttpRequest();
+  Http.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      alert(Http.responseText);
+    }
+  };
+  var selectedJAVAFile = new URL(location.href).searchParams.get('javafile');
+  Http.open("post", "/workspaces/temp/javafile/" + selectedJAVAFile);
+  Http.send(formData);
+}
 
 function createEditor(content) {
   /* find the textarea */
@@ -52,8 +65,10 @@ function createEditor(content) {
   /* find the parent form and add submit event listener */
   var form = textarea;
   while (form && form.localName != "form") form = form.parentNode;
-  form.addEventListener("submit", function() {
-    /* update value of textarea to match value in ace */
+  form.addEventListener("submit", function(e) {
     textarea.value = editor.getValue();
+    const formData = new FormData(e.target);
+    saveFile(formData);
+    e.preventDefault();
   }, true);
 }

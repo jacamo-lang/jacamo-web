@@ -303,11 +303,6 @@ public class RestImplEnv extends AbstractBinder {
             @PathParam("javafilename") String javaFileName,
             @FormDataParam("javafile") InputStream uploadedInputStream) {
         try {
-            String r = "nok";
-            System.out.println("wrksName: " + wrksName);
-            System.out.println("restAPI://" + javaFileName);
-            System.out.println("uis: " + uploadedInputStream);
-
             FileOutputStream outputFile;
             File f = new File("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
             if (f.exists()) {
@@ -331,18 +326,11 @@ public class RestImplEnv extends AbstractBinder {
             outputFile.write(bytes);
             outputFile.close();
 
-            r = "<html><head><meta http-equiv=\"refresh\" content=\"1; URL='/workspaces.html'\"/></head><body>"
-                    + "<br/><center>Artifact saved! Next instances will use this new file!<br/>Redirecting...</center></body></html>";
-
-            return Response.ok(r).build();
+            return Response.ok("Artifact saved! Next instances will use this new file!").build();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        /*
-         * 500 Internal Server Error -
-         * https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-         */
         return Response.status(500).build();
     }
 }

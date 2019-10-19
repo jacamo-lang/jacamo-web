@@ -1,19 +1,13 @@
 /* Fill text area with current agent's asl code */
 function getCurrentAslContent() {
-  /*var selectedASLFile = window.location.hash.substr(1);*/
-  var parameters = location.search.substring(1).split("&");
-  var temp = parameters[0].split("=");
-  selectedAgent = unescape(temp[1]);
-  temp = parameters[1].split("=");
-  selectedASLFile = unescape(temp[1]);
+  var selectedAgent = new URL(location.href).searchParams.get('agent');
+  var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
 
   const Http = new XMLHttpRequest();
   Http.open("GET", "/agents/" + selectedAgent + "/aslfile/" + selectedASLFile);
   Http.send();
   Http.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      createEditor(Http.responseText);
-
       /* Remove all existing children */
       const menu = document.getElementById("footer_menu");
       while (menu.firstChild) {
@@ -25,7 +19,7 @@ function getCurrentAslContent() {
       document.getElementById("footer_menu").appendChild(text);
       const submit = document.createElement('button');
       submit.setAttribute("type", "submit");
-      submit.setAttribute("onclick", "window.location.replace('./agent.html?agent=" + selectedAgent  + "')");
+      submit.setAttribute("onclick", "window.location.replace('./agent.html?agent=" + selectedAgent + "')");
       submit.innerHTML = "Save & Reload";
       document.getElementById("footer_menu").appendChild(submit);
       const cancel = document.createElement('button');
@@ -35,10 +29,24 @@ function getCurrentAslContent() {
       document.getElementById("footer_menu").appendChild(cancel);
 
       const form = document.getElementById("usrform");
-      form.setAttribute("action", "/agents/" + selectedAgent+ "/aslfile/" + selectedASLFile);
+      form.setAttribute("action", "/agents/" + selectedAgent + "/aslfile/" + selectedASLFile);
+      createEditor(Http.responseText);
     }
   };
 };
+
+function saveFile(formData) {
+  const Http = new XMLHttpRequest();
+  Http.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      alert(Http.responseText);
+    }
+  };
+  var selectedAgent = new URL(location.href).searchParams.get('agent');
+  var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
+  Http.open("post", "/agents/" + selectedAgent + "/aslfile/" + selectedASLFile);
+  Http.send(formData);
+}
 
 function createEditor(content) {
   /* find the textarea */
@@ -59,8 +67,10 @@ function createEditor(content) {
   /* find the parent form and add submit event listener */
   var form = textarea;
   while (form && form.localName != "form") form = form.parentNode;
-  form.addEventListener("submit", function() {
-    /* update value of textarea to match value in ace */
+  form.addEventListener("submit", function(e) {
     textarea.value = editor.getValue();
+    const formData = new FormData(e.target);
+    saveFile(formData);
+    e.preventDefault();
   }, true);
 }
