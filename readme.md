@@ -1,5 +1,30 @@
 
-Jacamo-web (formerly jacamo-rest) is an interactive programming IDE based on JaCaMo (Jason + CArtAgO + Moise) Multi-Agent Oriented Programming platform.
+Jacamo-web is an interactive programming IDE based on [JaCaMo](http://jacamo.sourceforge.net/), a Multi-Agent Oriented Programming platform. The [interactive development](
+https://cgi.csc.liv.ac.uk/~lad/emas2019/accepted/EMAS2019_paper_8.pdf) allows making changes on instances of agents, artefacts and organisations, which means that the system can be updated while it is running.
+
+# running jacamo-web
+
+To run:
+* `gradle marcos` runs agent marcos and the REST platform
+* `gradle bob` runs agents bob and alice. Bob sends a message to marcos using its rest API
+* see http://yourIP:8080 for a web interface (see the console for the right IP:port)
+* /examples has more examples and information about how to run them
+
+With docker:
+* `docker build  -t jomifred/jacamo-runrest .` to build a docker image
+* `docker network create jcm_net`
+* `docker run -ti --rm --net jcm_net  --name host1 -v "$(pwd)":/app jomifred/jacamo-runrest gradle marcos` to run marcos.jcm
+* `docker run -ti --rm --net jcm_net  --name host2 -v "$(pwd)":/app jomifred/jacamo-runrest gradle bob_d` to run bob.jcm
+
+# REST API
+
+REST API [Documentation](https://app.swaggerhub.com/apis/sma-das/jacamo-rest/1.0.0)
+
+# More about jacamo-web
+
+It uses [jacamo-rest](https://github.com/jacamo-lang/jacamo-rest) on the back-end and provides a web front-end developed in plain javascript, the [API jacamo-rest 0.3](https://app.swaggerhub.com/apis/sma-das/jacamo-rest/0.3) bind these parts. 
+
+In short, jacao-web provides an interface to develop Multi-Agent Systems interactively allow to send beliefs and plans to agents, inspect, create and destroy them. It is also supported dynamic compiling of CArtAgO artefacts and Moise organisations. The following diagram shows the main functionalities of the interface:
 
 ![Alt text](https://g.gravizo.com/source/programmingconcept?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-web%2Fmaster%2Freadme.md)
 <details> 
@@ -52,28 +77,3 @@ digraph G {
 }
 programmingconcept
 </details>
-
-To run:
-* `gradle marcos` runs agent marcos and the REST platform
-* `gradle bob` runs agents bob and alice. Bob sends a message to marcos using its rest API.
-* see http://yourIP:8080 for a web interface (see the console for the right IP)
-
-With docker:
-* `docker build  -t jomifred/jacamo-runrest .` to build a docker image
-* `docker network create jcm_net`
-* `docker run -ti --rm --net jcm_net  --name host1 -v "$(pwd)":/app jomifred/jacamo-runrest gradle marcos` to run marcos.jcm
-* `docker run -ti --rm --net jcm_net  --name host2 -v "$(pwd)":/app jomifred/jacamo-runrest gradle bob_d` to run bob.jcm
-
-Notes:
-* Each agent has a REST API to receive message and be inspected
-* ZooKeeper is used for name service. Bob can send a message to `marcos` using its name. ZooKeeper maps the name to a URL.
-* DF service is provided also by ZooKeeper
-* Java JAX-RS is used for the API
-
-See ClientTest.java for an example of Java client. It can be run with `gradle test1`.
-
-# REST API
-
-REST API [Documentation](https://app.swaggerhub.com/apis/sma-das/jacamo-rest/1.0.0)
-
-
