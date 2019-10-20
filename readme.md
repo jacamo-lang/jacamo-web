@@ -1,20 +1,21 @@
 
-Jacamo-web is an interactive programming IDE based on [JaCaMo](http://jacamo.sourceforge.net/), a Multi-Agent Oriented Programming platform. The [interactive development](
+Jacamo-web is an interactive programming IDE based on [JaCaMo](http://jacamo.sourceforge.net/), a Multi-Agent System (MAS) Oriented Programming platform. The [interactive development](
 https://cgi.csc.liv.ac.uk/~lad/emas2019/accepted/EMAS2019_paper_8.pdf) allows making changes on instances of agents, artefacts and organisations, which means that the system can be updated while it is running.
 
-# running jacamo-web
+# Running jacamo-web
 
-To run:
-* `gradle marcos` runs agent marcos and the REST platform
-* `gradle bob` runs agents bob and alice. Bob sends a message to marcos using its rest API
+After clonning this repository, go to the root folder of this project and type:
+* `gradle marcos`: to run the sample MAS marcos.jcm
+* `gradle bob`: to run the example bob.jcm
+* go to `/examples` for more sample projects and information about how to run them
 * see http://yourIP:8080 for a web interface (see the console for the right IP:port)
-* /examples has more examples and information about how to run them
+
 
 With docker:
-* `docker build  -t jomifred/jacamo-runrest .` to build a docker image
-* `docker network create jcm_net`
-* `docker run -ti --rm --net jcm_net  --name host1 -v "$(pwd)":/app jomifred/jacamo-runrest gradle marcos` to run marcos.jcm
-* `docker run -ti --rm --net jcm_net  --name host2 -v "$(pwd)":/app jomifred/jacamo-runrest gradle bob_d` to run bob.jcm
+* `sudo docker build  -t jacamo-runrest .` to build a docker image
+* `sudo docker network create jcm_net`
+* `sudo docker run -ti --rm --net jcm_net  --name host1 -v "$(pwd)":/app jacamo-runrest gradle marcos` to run marcos.jcm
+* `sudo docker run -ti --rm --net jcm_net  --name host2 -v "$(pwd)":/app jacamo-runrest gradle bob_d` to run bob.jcm
 
 # More about jacamo-web
 
