@@ -16,10 +16,6 @@ With docker:
 * `docker run -ti --rm --net jcm_net  --name host1 -v "$(pwd)":/app jomifred/jacamo-runrest gradle marcos` to run marcos.jcm
 * `docker run -ti --rm --net jcm_net  --name host2 -v "$(pwd)":/app jomifred/jacamo-runrest gradle bob_d` to run bob.jcm
 
-# REST API
-
-REST API [Documentation](https://app.swaggerhub.com/apis/sma-das/jacamo-rest/1.0.0)
-
 # More about jacamo-web
 
 It uses [jacamo-rest](https://github.com/jacamo-lang/jacamo-rest) on the back-end and provides a web front-end developed in plain javascript, the [API jacamo-rest 0.3](https://app.swaggerhub.com/apis/sma-das/jacamo-rest/0.3) bind these parts. 
