@@ -17,12 +17,32 @@ function killAg() {
     Http.open("DELETE", "./agents/" + selectedAgent);
     Http.send();
   } else {
-    $('#top-alert-message').text("Don't worry, agent '" + selectedAgent + "' is still here.");
-    $('#top-alert').fadeTo(2000, 500).slideUp(500, function() {
+    instantMessage("Don't worry, agent '" + selectedAgent + "' is still here.");
+  }
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+INSTANT MESSAGE
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+const instantMessage = (msg) => {
+  if (msg != null) {
+    $('#top-alert-message').text(msg);
+    $('#top-alert').fadeTo(2000+(msg.length*10), 500).slideUp(500, function() {
       $('#top-alert').slideUp(500);
     });
   }
-}
+};
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+SHOW MESSAGE IN THE BUFFER IF EXISTS
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+const showBuffer = () => {
+  var buffer = localStorage.getItem("agentBuffer");
+  instantMessage(buffer);
+  localStorage.removeItem("agentBuffer");
+};
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 SEND COMMANDS TO AN AGENT
@@ -38,11 +58,7 @@ function runCMD() {
     if (Http.readyState == 4 && Http.status == 200) {
       document.getElementById("inputcmd").value = "";
       document.getElementById("inputcmd").focus();
-
-      $('#top-alert-message').text(Http.responseText);
-      $('#top-alert').fadeTo(2000, 500).slideUp(500, function() {
-        $('#top-alert').slideUp(500);
-      });
+      instantMessage(Http.responseText);
     }
   };
   Http.open("POST", "./agents/" + selectedAgent + "/cmd");
@@ -65,6 +81,8 @@ function delLog() {
     if (Http.readyState == 4 && Http.status == 200) {
       /* Keep focus on command box */
       document.getElementById("inputcmd").focus();
+      instantMessage('Log is empty.');
+
     }
   };
   Http.open("DELETE", "./agents/" + selectedAgent + "/log");
@@ -94,13 +112,6 @@ function setAutoUpdateLog() {
   setInterval(function() {
     showLog();
   }, 1000);
-}
-
-/* Setupt button clean log */
-function setDelLogButton() {
-  document.getElementById('btndellog').setAttribute(
-    "href", "agent.html?agent=" + (new URL(location.href).searchParams.get('agent'))
-  );
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -242,9 +253,7 @@ function updateSuggestions() {
   const Http = new XMLHttpRequest();
   Http.onreadystatechange = function() {
     if (Http.readyState == 4 && Http.status == 200) {
-      var a = Http.responseText;
-      a = a.replace(/'/g, '\"');
-      suggestions = JSON.parse(a);
+      suggestions = JSON.parse(Http.responseText);
       autocomplete(document.getElementById("inputcmd"), suggestions);
     }
   };
@@ -255,6 +264,7 @@ function updateSuggestions() {
 /* automcomplete for cmd box */
 function autocomplete(inp, arr) {
   var currentFocus;
+
   inp.addEventListener("input", function(e) {
     var a, b, c, i, val = this.value;
     closeAllLists();
@@ -267,12 +277,12 @@ function autocomplete(inp, arr) {
     a.setAttribute("class", "autocomplete-items");
 
     this.parentNode.appendChild(a);
-    for (i = 0; i < arr.length; i++) {
-      if (arr[i][0].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+    for (i = 0; i < Object.keys(arr).length; i++) {
+      if (Object.keys(arr)[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
         b = document.createElement("DIV");
-        b.innerHTML = "<strong>" + arr[i][0].substr(0, val.length) + "</strong>";
-        b.innerHTML += arr[i][0].substr(val.length);
-        b.innerHTML += "<input type='hidden' value='" + arr[i][0] + "'>";
+        b.innerHTML = "<strong>" + Object.keys(arr)[i].substr(0, val.length) + "</strong>";
+        b.innerHTML += Object.keys(arr)[i].substr(val.length);
+        b.innerHTML += "<input type='hidden' value='" + Object.keys(arr)[i] + "'>";
         b.addEventListener("click", function(e) {
           inp.value = this.getElementsByTagName("input")[0].value;
           closeAllLists();
@@ -281,7 +291,7 @@ function autocomplete(inp, arr) {
         c = document.createElement("SPAN");
         c.setAttribute("class", "autocomplete-items-comments");
         /* print hint about this command */
-        if (arr[i][1]) c.innerHTML = "//" + arr[i][1];
+        if (Object.values(arr)[i]) c.innerHTML = "//" + Object.values(arr)[i];
         b.appendChild(c);
       }
     }

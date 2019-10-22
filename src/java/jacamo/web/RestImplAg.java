@@ -12,14 +12,13 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
@@ -492,8 +491,7 @@ public class RestImplAg extends AbstractBinder {
      * 
      * @return List of internal actions
      */
-    public List<Command> getIAlist() {
-        List<Command> l = new ArrayList<>();
+    public void getIASuggestions(Map<String,String> cmds) {
         try {
             ClassPath classPath = ClassPath.from(print.class.getClassLoader());
             Set<ClassInfo> allClasses = classPath.getTopLevelClassesRecursive("jason.stdlib");
@@ -505,13 +503,10 @@ public class RestImplAg extends AbstractBinder {
                         // add full predicate provided by @Manual
                         jason.stdlib.Manual annotation = (jason.stdlib.Manual) c
                                 .getAnnotation(jason.stdlib.Manual.class);
-                        Command cmd = new Command("'" + annotation.literal() + "'",
-                                "'" + annotation.hint().replaceAll("\"", "`").replaceAll("'", "`") + "'");
-						l.add(cmd);
+                        cmds.put(annotation.literal(), annotation.hint().replaceAll("\"", "`").replaceAll("'", "`"));
 					} else {
 						// add just the functor of the internal action
-						Command cmd = new Command("'." + a.getSimpleName() + "'", "''");
-						l.add(cmd);
+						cmds.put("." + a.getSimpleName(), "");
 					}
 
 				} catch (Exception e) {
@@ -522,7 +517,6 @@ public class RestImplAg extends AbstractBinder {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return l;
 	}
 
 	// TODO: Use JSON format
@@ -538,341 +532,300 @@ public class RestImplAg extends AbstractBinder {
 	 */
 	@Path("/{agentname}/code")
 	@GET
-	@Produces(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCodeCompletionSuggestions(@PathParam("agentname") String agName) {
-		List<Command> commands = new ArrayList<>();
+		Map<String,String> commands = new HashMap<>();
+		try {
+            // get internal actions
+			getPlansSuggestions(agName, commands);
+            // get internal actions
+            getIASuggestions(commands);
+            // get external actions
+            getEASuggestions(agName, commands);
+
+            Gson json = new Gson();
+            Map<String,String> sortedCmds = new TreeMap<>(commands);
+            return Response.ok(json.toJson(sortedCmds)).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Response.status(500, "Server Internal Error! Could not get code completion suggestions.").build();
+    }
+
+	private void getPlansSuggestions(String agName, Map<String, String> commands) {
 		try {
 			// get agent's plans
-			Agent ag = getAgent(agName);
-			if (ag != null) {
-				PlanLibrary pl = ag.getPL();
-				for (Plan plan : pl.getPlans()) {
+            Agent ag = getAgent(agName);
+            if (ag != null) {
+                PlanLibrary pl = ag.getPL();
+                for (Plan plan : pl.getPlans()) {
 
-					// do not add plans that comes from jar files (usually system's plans)
-					if (plan.getSource().startsWith("jar:file"))
-						continue;
+                    // do not add plans that comes from jar files (usually system's plans)
+                    if (plan.getSource().startsWith("jar:file"))
+                        continue;
 
-					// add namespace when it is not default
-					String ns = "";
-					if (!plan.getNS().equals(Literal.DefaultNS)) {
-						ns = plan.getNS().toString() + "::";
-					}
+                    // add namespace when it is not default
+                    String ns = "";
+                    if (!plan.getNS().equals(Literal.DefaultNS)) {
+                        ns = plan.getNS().toString() + "::";
+                    }
 
-					String terms = "";
-					if (plan.getTrigger().getLiteral().getArity() > 0) {
-						for (int i = 0; i < plan.getTrigger().getLiteral().getArity(); i++) {
-							if (i == 0)
-								terms = "(";
-							terms += plan.getTrigger().getLiteral().getTerm(i).toString();
-							if (i < plan.getTrigger().getLiteral().getArity() - 1)
-								terms += ", ";
-							else
-								terms += ")";
-						}
-					}
+                    String terms = "";
+                    if (plan.getTrigger().getLiteral().getArity() > 0) {
+                        for (int i = 0; i < plan.getTrigger().getLiteral().getArity(); i++) {
+                            if (i == 0)
+                                terms = "(";
+                            terms += plan.getTrigger().getLiteral().getTerm(i).toString();
+                            if (i < plan.getTrigger().getLiteral().getArity() - 1)
+                                terms += ", ";
+                            else
+                                terms += ")";
+                        }
+                    }
 
-					// when it is a goal or test goal, do not add operator
-					if ((plan.getTrigger().getType() == TEType.achieve)
-							|| (plan.getTrigger().getType() == TEType.test)) {
+                    // when it is a goal or test goal, do not add operator
+                    if ((plan.getTrigger().getType() == TEType.achieve)
+                            || (plan.getTrigger().getType() == TEType.test)) {
 
-						Command cmd = new Command("'" + ns + plan.getTrigger().getType().toString()
-								+ plan.getTrigger().getLiteral().getFunctor() + terms + "'", "''");
-						if (!commands.contains(cmd))
-							commands.add(cmd);
-					}
-					// when it is belief, do not add type which is anyway empty
-					else if (plan.getTrigger().getType() == TEType.belief) {
-						Command cmd = new Command("'" + ns + plan.getTrigger().getOperator().toString()
-								+ plan.getTrigger().getLiteral().getFunctor() + terms + "'", "''");
-						if (!commands.contains(cmd))
-							commands.add(cmd);
-					}
-				}
-			}
 
-			// get internal actions
-			commands.addAll(getIAlist());
+                        commands.put(ns + plan.getTrigger().getType().toString()
+                        + plan.getTrigger().getLiteral().getFunctor() + terms, "");
 
-			// get external actions (from focused artifacts)
-			List<String> workspacesIn = new ArrayList<>();
-			CAgentArch cartagoAgArch = getCartagoArch(ag);
-			for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces())
-				workspacesIn.add(wid.getName());
+                    }
+                    // when it is belief, do not add type which is anyway empty
+                    else if (plan.getTrigger().getType() == TEType.belief) {
+                        commands.put(ns + plan.getTrigger().getOperator().toString()
+                                + plan.getTrigger().getLiteral().getFunctor() + terms, "");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-			workspacesIn.forEach(w -> {
-				String wksName = w.toString();
-				try {
-					for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
+    private void getEASuggestions(String agName, Map<String, String> commands) throws CartagoException {
 
-						// operations
-						ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
+        try {
+            Agent ag = getAgent(agName);
+            // get external actions (from focused artifacts)
+            CAgentArch cartagoAgArch = getCartagoArch(ag);
+            for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
+                String wksName = wid.getName();
+                for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
 
-						info.getObservers().forEach(y -> {
-							if (y.getAgentId().getAgentName().equals(agName)) {
-								info.getOperations().forEach(z -> {
-									String params = "";
-									for (int i = 0; i < z.getOp().getNumParameters(); i++) {
-										if (i == 0)
-											params = "(";
-										params += "arg" + i;
-										if (i == z.getOp().getNumParameters() - 1)
-											params += ")";
-										else
-											params += ", ";
-									}
+                    // operations
+                    ArtifactInfo info = CartagoService.getController(wksName).getArtifactInfo(aid.getName());
 
-									Command cmd = new Command("'" + z.getOp().getName() + params + "'", "''");
-									if (!commands.contains(cmd))
-										commands.add(cmd);
-								});
-							}
-						});
+                    info.getObservers().forEach(y -> {
+                        if (y.getAgentId().getAgentName().equals(agName)) {
+                            info.getOperations().forEach(z -> {
+                                String params = "";
+                                for (int i = 0; i < z.getOp().getNumParameters(); i++) {
+                                    if (i == 0) params = "(";
+                                    params += "arg" + i;
+                                    if (i == z.getOp().getNumParameters() - 1)
+                                        params += ")";
+                                    else
+                                        params += ", ";
+                                }
 
-					}
-				} catch (CartagoException e) {
-					e.printStackTrace();
-				}
-			});
+                                commands.put(z.getOp().getName() + params, "");
+                            });
+                        }
+                    });
 
-			Collections.sort(commands, new SortByCommandName());
-			Response.ok(commands.toString()).build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			Command cmd = new Command("No code completion suggestions for " + agName, "");
-			commands.add(cmd);
-		}
+                }
+            }
+        } catch (CartagoException e) {
+            e.printStackTrace();
+        }
+    }
 
-		return Response.status(500, "Server Internal Error! Could not finish process for code completion suggestions: "
-				+ commands.toString()).build();
-	}
+    /**
+     * Send a command to an agent. Produces a TEXT PLAIN output containing a status
+     * message
+     * 
+     * @param cmd    command expression
+     * @param agName agent name
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    @Path("/{agentname}/cmd")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response runCmdPost(@FormParam("c") String cmd, @PathParam("agentname") String agName) {
+        String r;
+        try {
+            r = execCmd(agName, cmd.trim());
+            addAgLog(agName, "Command " + cmd + ": " + r);
 
-	/**
-	 * Command is something and agent can do. It essentially has an name and
-	 * instruction about its functionality.
-	 * 
-	 * @author cleber
-	 */
-	class Command {
-		String name;
-		String comment;
+            return Response.ok(r).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.status(500).build();
+    }
 
-		Command(String name, String comment) {
-			this.name = name;
-			this.comment = comment;
-		}
+    // TODO: Implement websockets to avoid pooling
+    /**
+     * Get agent full log in a TEXT PLAIN format
+     * 
+     * @param agName agent name
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    @Path("/{agentname}/log")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response getLogOutput(@PathParam("agentname") String agName) {
+        try {
+            StringBuilder o = agLog.get(agName);
+            if (o != null) {
+                return Response.ok(o.toString()).build();
+            }
+            return Response.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.status(500).build();
+    }
 
-		public String getName() {
-			return this.name;
-		}
+    /**
+     * Delete agent's log.
+     * 
+     * @param agName
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     * 
+     */
+    @Path("/{agentname}/log")
+    @DELETE
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response delLogOutput(@PathParam("agentname") String agName) {
+        try {
+            agLog.put(agName, new StringBuilder());
 
-		public String getComment() {
-			return this.comment;
-		}
+            return Response.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Response.status(500).build();
+    }
 
-		public String toString() {
-			List<String> command = new ArrayList<>();
-			command.add(name);
-			command.add(comment);
-			return command.toString();
-		}
+    /**
+     * Send a command to an agent
+     * 
+     * @param agName name of the agent
+     * @param sCmd   command to be executed
+     * @return Status message
+     */
+    String execCmd(String agName, String sCmd) {
+        try {
+            if (sCmd.endsWith("."))
+                sCmd = sCmd.substring(0, sCmd.length() - 1);
+            PlanBody lCmd = ASSyntax.parsePlanBody(sCmd);
+            Trigger te = ASSyntax.parseTrigger("+!run_repl_expr");
+            Intention i = new Intention();
+            i.push(new IntendedMeans(new Option(new Plan(null, te, null, lCmd), new Unifier()), te));
 
-		@Override
-		public boolean equals(Object o) {
-			return this.name.equals(((Command) o).getName());
+            Agent ag = getAgent(agName);
+            if (ag != null) {
+                TransitionSystem ts = ag.getTS();
+                ts.getC().addRunningIntention(i);
+                ts.getUserAgArch().wake();
+                createAgLog(agName, ag);
+                return "included for execution";
+            } else {
+                return "not implemented";
+            }
+        } catch (Exception e) {
+            return ("Error parsing " + sCmd + "\n" + e);
+        }
+    }
 
-		}
-	}
+    /**
+     * Creates a log area for an agent
+     * 
+     * @param agName agent name
+     * @param ag     agent object
+     */
+    protected void createAgLog(String agName, Agent ag) {
+        // adds a log for the agent
+        if (agLog.get(agName) == null) {
+            agLog.put(agName, new StringBuilder());
+            ag.getTS().getLogger().addHandler(new StreamHandler() {
+                @Override
+                public void publish(LogRecord l) {
+                    addAgLog(agName, l.getMessage());
+                }
+            });
+        }
+    }
 
-	class SortByCommandName implements Comparator<Command> {
-		@Override
-		public int compare(Command arg0, Command arg1) {
-			return arg0.getName().compareTo(arg1.getName());
-		}
-	}
+    /**
+     * Add a message to the agent log.
+     * 
+     * @param agName agent name
+     * @param msg    message to be added
+     */
+    protected void addAgLog(String agName, String msg) {
+        StringBuilder o = agLog.get(agName);
+        if (o == null) {
+            o = new StringBuilder();
+            agLog.put(agName, o);
+        } else {
+            o.append("\n");
+        }
+        String dt = new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date());
+        o.append("[" + dt + "] " + msg);
+    }
 
-	/**
-	 * Send a command to an agent. Produces a TEXT PLAIN output containing a status
-	 * message
-	 * 
-	 * @param cmd    command expression
-	 * @param agName agent name
-	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-	 */
-	@Path("/{agentname}/cmd")
-	@POST
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response runCmdPost(@FormParam("c") String cmd, @PathParam("agentname") String agName) {
-		String r;
-		try {
-			r = execCmd(agName, cmd.trim());
-			addAgLog(agName, "Command " + cmd + ": " + r);
+    // TODO: implement a function on front to use this method
+    /**
+     * Send a message to an agent. Consumes an XML containing the message.
+     * 
+     * @param m      Message
+     * @param agName Agent name
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    @Path("/{agentname}/mb")
+    @POST
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response addAgMsg(Message m, @PathParam("agentname") String agName) {
+        try {
+            CentralisedAgArch a = BaseCentralisedMAS.getRunner().getAg(agName);
+            if (a != null) {
+                a.receiveMsg(m.getAsJasonMsg());
+                return Response.ok().build();
+            } else {
+                return Response.status(500, "Internal Server Error! Receiver '" + agName + "' not found").build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-			return Response.ok(r).build();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return Response.status(500).build();
-	}
+        return Response.status(500).build();
+    }
 
-	// TODO: Implement websockets to avoid pooling
-	/**
-	 * Get agent full log in a TEXT PLAIN format
-	 * 
-	 * @param agName agent name
-	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-	 */
-	@Path("/{agentname}/log")
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response getLogOutput(@PathParam("agentname") String agName) {
-		try {
-			StringBuilder o = agLog.get(agName);
-			if (o != null) {
-				return Response.ok(o.toString()).build();
-			}
-			return Response.ok().build();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return Response.status(500).build();
-	}
-
-	/**
-	 * Delete agent's log.
-	 * 
-	 * @param agName
-	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-	 * 
-	 */
-	@Path("/{agentname}/log")
-	@DELETE
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response delLogOutput(@PathParam("agentname") String agName) {
-		try {
-			agLog.put(agName, new StringBuilder());
-
-			Response.ok().build();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return Response.status(500).build();
-	}
-
-	/**
-	 * Send a command to an agent
-	 * 
-	 * @param agName name of the agent
-	 * @param sCmd   command to be executed
-	 * @return Status message
-	 */
-	String execCmd(String agName, String sCmd) {
-		try {
-			if (sCmd.endsWith("."))
-				sCmd = sCmd.substring(0, sCmd.length() - 1);
-			PlanBody lCmd = ASSyntax.parsePlanBody(sCmd);
-			Trigger te = ASSyntax.parseTrigger("+!run_repl_expr");
-			Intention i = new Intention();
-			i.push(new IntendedMeans(new Option(new Plan(null, te, null, lCmd), new Unifier()), te));
-
-			Agent ag = getAgent(agName);
-			if (ag != null) {
-				TransitionSystem ts = ag.getTS();
-				ts.getC().addRunningIntention(i);
-				ts.getUserAgArch().wake();
-				createAgLog(agName, ag);
-				return "included for execution";
-			} else {
-				return "not implemented";
-			}
-		} catch (Exception e) {
-			return ("Error parsing " + sCmd + "\n" + e);
-		}
-	}
-
-	/**
-	 * Creates a log area for an agent
-	 * 
-	 * @param agName agent name
-	 * @param ag     agent object
-	 */
-	protected void createAgLog(String agName, Agent ag) {
-		// adds a log for the agent
-		if (agLog.get(agName) == null) {
-			agLog.put(agName, new StringBuilder());
-			ag.getTS().getLogger().addHandler(new StreamHandler() {
-				@Override
-				public void publish(LogRecord l) {
-					addAgLog(agName, l.getMessage());
-				}
-			});
-		}
-	}
-
-	/**
-	 * Add a message to the agent log.
-	 * 
-	 * @param agName agent name
-	 * @param msg    message to be added
-	 */
-	protected void addAgLog(String agName, String msg) {
-		StringBuilder o = agLog.get(agName);
-		if (o == null) {
-			o = new StringBuilder();
-			agLog.put(agName, o);
-		} else {
-			o.append("\n");
-		}
-		String dt = new SimpleDateFormat("dd-MM-yy HH:mm:ss").format(new Date());
-		o.append("[" + dt + "] " + msg);
-	}
-
-	// TODO: implement a function on front to use this method
-	/**
-	 * Send a message to an agent. Consumes an XML containing the message.
-	 * 
-	 * @param m      Message
-	 * @param agName Agent name
-	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-	 */
-	@Path("/{agentname}/mb")
-	@POST
-	@Consumes(MediaType.APPLICATION_XML)
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response addAgMsg(Message m, @PathParam("agentname") String agName) {
-		try {
-			CentralisedAgArch a = BaseCentralisedMAS.getRunner().getAg(agName);
-			if (a != null) {
-				a.receiveMsg(m.getAsJasonMsg());
-				return Response.ok().build();
-			} else {
-				return Response.status(500, "Internal Server Error! Receiver '" + agName + "' not found").build();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return Response.status(500).build();
-	}
-
-	/**
-	 * Get agent's CArtAgO architecture
-	 * 
-	 * @param ag Agent object
-	 * @return agent's CArtAgO architecture
-	 */
-	protected CAgentArch getCartagoArch(Agent ag) {
-		AgArch arch = ag.getTS().getUserAgArch().getFirstAgArch();
-		while (arch != null) {
-			if (arch instanceof CAgentArch) {
-				return (CAgentArch) arch;
-			}
-			arch = arch.getNextAgArch();
-		}
-		return null;
-	}
+    /**
+     * Get agent's CArtAgO architecture
+     * 
+     * @param ag Agent object
+     * @return agent's CArtAgO architecture
+     */
+    protected CAgentArch getCartagoArch(Agent ag) {
+        AgArch arch = ag.getTS().getUserAgArch().getFirstAgArch();
+        while (arch != null) {
+            if (arch instanceof CAgentArch) {
+                return (CAgentArch) arch;
+            }
+            arch = arch.getNextAgArch();
+        }
+        return null;
+    }
 }

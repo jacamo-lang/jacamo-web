@@ -16,12 +16,12 @@ function getCurrentAslContent() {
 
       const submit = document.createElement('button');
       submit.setAttribute("type", "submit");
-      submit.setAttribute("onclick", "window.location.replace('./agent.html?agent=" + selectedAgent + "')");
+      /*submit.setAttribute("onclick", "window.location.replace('./agent.html?agent=" + selectedAgent + "')");*/
       submit.innerHTML = "Save & Reload";
       document.getElementById("footer_menu").appendChild(submit);
       const cancel = document.createElement('button');
       cancel.setAttribute("type", "button");
-      cancel.setAttribute("onclick", "window.history.back();");
+      cancel.setAttribute("onclick", "localStorage.setItem('agentBuffer', 'No changes made.'); window.history.back();");
       cancel.innerHTML = "Discard changes";
       document.getElementById("footer_menu").appendChild(cancel);
       const text = document.createElement('i');
@@ -40,7 +40,8 @@ function saveFile(formData) {
   const Http = new XMLHttpRequest();
   Http.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      alert(Http.responseText);
+      localStorage.setItem("agentBuffer", Http.responseText);
+      window.location.replace("./agent.html?agent=" + selectedAgent);
     }
   };
   var selectedAgent = new URL(location.href).searchParams.get('agent');
