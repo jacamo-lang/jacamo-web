@@ -14,9 +14,6 @@ function getCurrentAslContent() {
         menu.removeChild(menu.firstChild);
       }
 
-      const text = document.createElement('b');
-      text.innerHTML = "Editing: " + selectedASLFile;
-      document.getElementById("footer_menu").appendChild(text);
       const submit = document.createElement('button');
       submit.setAttribute("type", "submit");
       submit.setAttribute("onclick", "window.location.replace('./agent.html?agent=" + selectedAgent + "')");
@@ -27,6 +24,10 @@ function getCurrentAslContent() {
       cancel.setAttribute("onclick", "window.history.back();");
       cancel.innerHTML = "Discard changes";
       document.getElementById("footer_menu").appendChild(cancel);
+      const text = document.createElement('i');
+      text.style.fontSize = "12px";
+      text.innerHTML = "Editing: <b>" + selectedASLFile + "</b>";
+      document.getElementById("footer_menu").appendChild(text);
 
       const form = document.getElementById("usrform");
       form.setAttribute("action", "/agents/" + selectedAgent + "/aslfile/" + selectedASLFile);

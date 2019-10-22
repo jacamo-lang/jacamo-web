@@ -8,8 +8,8 @@
 </head>
 
 <body>
-  <div id="root" style="height: 95%">
-    
+  <div id="root" style="height: calc(100% - 50px)">
+
     <header class="row">
       <a class="logo col-xp-2 col-sm-2 col-md" href="./index.html">JaCaMo</a>
       <a class="button col-xp-1 col-sm-2 col-md" href="./agents.html">
@@ -32,7 +32,7 @@
         <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
       </nav>
     </header>
-    <div class="row" id="doc-wrapper" style="height: 92%">
+    <div class="row" id="doc-wrapper" style="height: calc(100% - 50px)">
       <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
       <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
         <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
@@ -40,13 +40,13 @@
 
       <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
 
-        <div class="card fluid" style="height: 92%">
+        <div class="card fluid" style="height: calc(100% - 20px)">
           <div class="section">
-            <form action="/workspaces/workspace_name/javafile/javafilename" method="post" id="usrform" enctype="multipart/form-data">
+            <form method="post" id="usrform" enctype="multipart/form-data">
               <div>
                 <textarea name="javafile" form="usrform"></textarea>
               </div>
-              <div class="editor_footer" id="footer_menu" style="height: 4%">
+              <div class="editor_footer" id="footer_menu" style="height: 20px; padding: 0px 0px 30px 0px;">
                 <!-- Content filled by javascript function -->
               </div>
             </form>

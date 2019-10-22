@@ -144,8 +144,8 @@ EDIT ARTIFACT
 function setEditButton() {
   document.getElementById('btndeleditartifact').setAttribute(
     "href", "artifact_editor.html?workspace=" + (new URL(location.href).searchParams.get('workspace')) +
-    "&amp;artifact=" + (new URL(location.href).searchParams.get('artifact')) +
-    "&amp;javafile=" + (new URL(location.href).searchParams.get('artifact'))
+    "&artifact=" + (new URL(location.href).searchParams.get('artifact')) +
+    "&javafile=" + (new URL(location.href).searchParams.get('javafile'))
   );
 }
 

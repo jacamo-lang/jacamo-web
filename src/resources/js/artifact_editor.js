@@ -13,12 +13,9 @@ function getCurrentJavaContent() {
         menu.removeChild(menu.firstChild);
       }
 
-      const text = document.createElement('b');
-      text.innerHTML = "Editing: " + selectedJAVAFile;
-      document.getElementById("footer_menu").appendChild(text);
       const submit = document.createElement('button');
       submit.setAttribute("type", "submit");
-      submit.setAttribute("onclick", "window.location.replace('./workspaces.html')");
+      /*submit.setAttribute("onclick", "window.location.replace('./workspaces.html')");*/
       submit.innerHTML = "Save & Reload";
       document.getElementById("footer_menu").appendChild(submit);
       const cancel = document.createElement('button');
@@ -26,10 +23,13 @@ function getCurrentJavaContent() {
       cancel.setAttribute("onclick", "location.href='./workspaces.html'");
       cancel.innerHTML = "Discard changes";
       document.getElementById("footer_menu").appendChild(cancel);
+      const text = document.createElement('i');
+      text.style.fontSize = "12px";
+      text.innerHTML = "Editing: <b>" + selectedJAVAFile + "</b>";
+      document.getElementById("footer_menu").appendChild(text);
 
       const form = document.getElementById("usrform");
       createEditor(Http.responseText);
-      console.log("oi");
     }
   };
 };
@@ -37,8 +37,9 @@ function getCurrentJavaContent() {
 function saveFile(formData) {
   const Http = new XMLHttpRequest();
   Http.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
+    if (this.readyState == 4 || this.readyState == 200) {
       alert(Http.responseText);
+      window.location.replace('./workspaces.html');
     }
   };
   var selectedJAVAFile = new URL(location.href).searchParams.get('javafile');
@@ -66,9 +67,9 @@ function createEditor(content) {
   var form = textarea;
   while (form && form.localName != "form") form = form.parentNode;
   form.addEventListener("submit", function(e) {
+    e.preventDefault();
     textarea.value = editor.getValue();
     const formData = new FormData(e.target);
     saveFile(formData);
-    e.preventDefault();
   }, true);
 }

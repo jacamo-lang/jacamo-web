@@ -241,11 +241,16 @@ public class RestImplEnv extends AbstractBinder {
         StringBuilder so = new StringBuilder();
         try {
             BufferedReader in = null;
-            File f = new File("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
+            String packageClass;
+            if (javaFileName.endsWith(".java")) 
+                packageClass = javaFileName.substring(0,javaFileName.length()-5);
+            else
+                packageClass = javaFileName;
+            File f = new File("src/env/" + packageClass.replaceAll("\\.", "/") + ".java");
             if (f.exists()) {
                 in = new BufferedReader(new FileReader(f));
             } else {
-                URL u = RestImpl.class.getResource("../src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
+                URL u = RestImpl.class.getResource("../src/env/" + packageClass.replaceAll("\\.", "/") + ".java");
                 if (u != null) {
                     in = new BufferedReader(new InputStreamReader(u.openStream()));
                 } else {
@@ -255,13 +260,13 @@ public class RestImplEnv extends AbstractBinder {
                     // Check whether there is a package
                     if (javaFileName.lastIndexOf(".") > 0) {
                         stringBuilder.append(
-                                "package " + javaFileName.substring(0, javaFileName.lastIndexOf(".")) + ";\n\n");
+                                "package " + packageClass.substring(0, packageClass.lastIndexOf(".")) + ";\n\n");
                     }
 
                     stringBuilder.append("import cartago.*;\n\n");
                     stringBuilder.append("@ARTIFACT_INFO(outports = { @OUTPORT(name = \"out-1\") })\n\n");
                     stringBuilder.append("public class "
-                            + javaFileName.substring(javaFileName.lastIndexOf(".") + 1, javaFileName.length())
+                            + packageClass.substring(packageClass.lastIndexOf(".") + 1, packageClass.length())
                             + " extends Artifact {\n");
                     stringBuilder.append("\tvoid init(int initialValue) {\n");
                     stringBuilder.append("\t}\n");
@@ -304,9 +309,14 @@ public class RestImplEnv extends AbstractBinder {
             @FormDataParam("javafile") InputStream uploadedInputStream) {
         try {
             FileOutputStream outputFile;
-            File f = new File("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java");
+            String packageClass;
+            if (javaFileName.endsWith(".java")) 
+                packageClass = javaFileName.substring(0,javaFileName.length()-5);
+            else
+                packageClass = javaFileName;
+            File f = new File("src/env/" + packageClass.replaceAll("\\.", "/") + ".java");
             if (f.exists()) {
-                outputFile = new FileOutputStream("src/env/" + javaFileName.replaceAll("\\.", "/") + ".java", false);
+                outputFile = new FileOutputStream("src/env/" + packageClass.replaceAll("\\.", "/") + ".java", false);
             } else {
                 f.getParentFile().mkdirs();
                 f.createNewFile();
@@ -326,7 +336,11 @@ public class RestImplEnv extends AbstractBinder {
             outputFile.write(bytes);
             outputFile.close();
 
-            return Response.ok("Artifact saved! Next instances will use this new file!").build();
+            if (packageClass.substring(0, packageClass.indexOf(".")).equals("dynamic")) {
+                return Response.ok("Saved! Next instances will use this new '" + javaFileName + "' template.").build();
+            } else {
+                return Response.ok("Saved! However, only templates in 'dynamic' package can be dynamically compiled.").build();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

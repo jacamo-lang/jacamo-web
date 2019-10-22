@@ -71,7 +71,8 @@ function updateMenu(nav, ws, ar) {
             } else {
               lar.innerHTML = "<h5>&#160;&#160;&#160;" + a + "</h5>";
             }
-            lar.setAttribute("href", "./artifact.html?workspace=" + n + "&artifact=" + a);
+            lar.setAttribute("href", "./artifact.html?workspace=" + n + "&artifact=" + a +
+              "&javafile=" + ar.artifacts[a].type + ".java");
             document.getElementById(nav).appendChild(lar);
           }
         });
