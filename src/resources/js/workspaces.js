@@ -41,6 +41,14 @@ function updateMenu(nav, ws, ar) {
   while (menu.firstChild) {
     menu.removeChild(menu.firstChild);
   }
+  
+  const closeButton = document.createElement('label');
+  closeButton.setAttribute("for","doc-drawer-checkbox");
+  closeButton.setAttribute("class","button drawer-close");
+  document.getElementById(nav).appendChild(closeButton);
+  var h3 = document.createElement("h3");
+  h3.innerHTML = "&#160";
+  document.getElementById(nav).appendChild(h3);
 
   const params = new URL(location.href).searchParams;
   const selectedWorkspace = params.get('workspace');
