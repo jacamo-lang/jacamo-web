@@ -224,8 +224,7 @@ public class RestImplEnv extends AbstractBinder {
         return Response.status(500).build();
     }
 
-    // TODO: Add {artifactname} to allow to update the instance
-    /**
+   /**
      * Get java file content of a file
      * 
      * @param wrksName     name of the workspace it belongs
@@ -286,11 +285,9 @@ public class RestImplEnv extends AbstractBinder {
             e.printStackTrace();
         }
 
-        /* Error codes: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html */
         return Response.status(500).build();
     }
 
-    //TODO: add the {artifactname}
     /**
      * Create/Update an artifact template by adding/replacing a file content in the
      * server

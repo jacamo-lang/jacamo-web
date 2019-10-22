@@ -23,32 +23,28 @@ function getWorkspaces() {
         Http.onreadystatechange = function() {
           if (this.readyState == 4 && this.status == 200) {
             ar = JSON.parse(Http.responseText);
-            updateMenu("nav-drawer", ws, ar);
-            updateMenu("nav-drawer-frame", ws, ar);
+            updateMenu("nav-drawer", ws, ar, true);
+            updateMenu("nav-drawer-frame", ws, ar, false);
           }
         };
       } else {
-        updateMenu("nav-drawer", ws, undefined);
-        updateMenu("nav-drawer-frame", ws, undefined);
+        updateMenu("nav-drawer", ws, undefined, true);
+        updateMenu("nav-drawer-frame", ws, undefined, false);
       }
     };
   };
 };
 
-function updateMenu(nav, ws, ar) {
-  /* Remove all existing children from the menu */
-  var menu = document.getElementById(nav);
-  while (menu.firstChild) {
-    menu.removeChild(menu.firstChild);
+function updateMenu(nav, ws, ar, addCloseButton) {
+  if (addCloseButton) {
+    const closeButton = document.createElement('label');
+    closeButton.setAttribute("for","doc-drawer-checkbox");
+    closeButton.setAttribute("class","button drawer-close");
+    document.getElementById(nav).appendChild(closeButton);
+    var h3 = document.createElement("h3");
+    h3.innerHTML = "&#160";
+    document.getElementById(nav).appendChild(h3);
   }
-  
-  const closeButton = document.createElement('label');
-  closeButton.setAttribute("for","doc-drawer-checkbox");
-  closeButton.setAttribute("class","button drawer-close");
-  document.getElementById(nav).appendChild(closeButton);
-  var h3 = document.createElement("h3");
-  h3.innerHTML = "&#160";
-  document.getElementById(nav).appendChild(h3);
 
   const params = new URL(location.href).searchParams;
   const selectedWorkspace = params.get('workspace');

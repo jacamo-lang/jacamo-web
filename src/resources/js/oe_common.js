@@ -11,20 +11,22 @@ function getOE() {
   Http.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       set = JSON.parse(Http.responseText);
-      updateMenu("nav-drawer", set);
-      updateMenu("nav-drawer-frame", set);
+      updateMenu("nav-drawer", set, true);
+      updateMenu("nav-drawer-frame", set, false);
     };
   };
 };
 
-function updateMenu(nav, set) {
-  const closeButton = document.createElement('label');
-  closeButton.setAttribute("for","doc-drawer-checkbox");
-  closeButton.setAttribute("class","button drawer-close");
-  document.getElementById(nav).appendChild(closeButton);
-  var h3 = document.createElement("h3");
-  h3.innerHTML = "&#160";
-  document.getElementById(nav).appendChild(h3);
+function updateMenu(nav, set, addCloseButton) {
+  if (addCloseButton) {
+    const closeButton = document.createElement('label');
+    closeButton.setAttribute("for","doc-drawer-checkbox");
+    closeButton.setAttribute("class","button drawer-close");
+    document.getElementById(nav).appendChild(closeButton);
+    var h3 = document.createElement("h3");
+    h3.innerHTML = "&#160";
+    document.getElementById(nav).appendChild(h3);
+  }
 
   const selectedItem = new URL(location.href).searchParams.get('organisation');
   set.sort();

@@ -386,9 +386,6 @@ public class RestImplAg extends AbstractBinder {
         return Response.status(500).build();
     }
 
-    // TODO: Test again this function because there are open issues on updating
-    // agent's code regarding rules, KQML default plans, etc.
-    // TODO: Front: Save agent is not returning to agent's page
     /**
      * Updates an Jason agent code file (.asl) refreshing given agent's execution
      * plans immediately. Current intentions are kept running with old code.
@@ -446,7 +443,6 @@ public class RestImplAg extends AbstractBinder {
         return Response.status(500).build();
     }
 
-    // TODO: implement on the front a way to send plans (memory only)
     /**
      * Upload new plans to an agent. Plan maintained only in memory.
      * 
@@ -519,8 +515,6 @@ public class RestImplAg extends AbstractBinder {
 		}
 	}
 
-	// TODO: Use JSON format
-	// TODO: BUG! Code is not working on front sie
 	/**
 	 * Return a TEXT PLAIN of available internal action, external actions and
 	 * commands for the given agent Example:
@@ -669,7 +663,6 @@ public class RestImplAg extends AbstractBinder {
         return Response.status(500).build();
     }
 
-    // TODO: Implement websockets to avoid pooling
     /**
      * Get agent full log in a TEXT PLAIN format
      * 
@@ -783,7 +776,6 @@ public class RestImplAg extends AbstractBinder {
         o.append("[" + dt + "] " + msg);
     }
 
-    // TODO: implement a function on front to use this method
     /**
      * Send a message to an agent. Consumes an XML containing the message.
      * 

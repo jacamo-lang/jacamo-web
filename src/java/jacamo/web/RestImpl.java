@@ -36,11 +36,6 @@ import jaca.CAgentArch;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
 
-//TODO: Front: use same pattern for all tables (sample is df)
-//TODO: Front: Recreate graphical representation for organisations
-//TODO: Put on Transl classes all code regarding connection with JaCaMo
-//TODO: Unify projects jacamo-web and jacamo-rest
-
 @Singleton
 @Path("/")
 public class RestImpl extends AbstractBinder {
@@ -185,9 +180,6 @@ public class RestImpl extends AbstractBinder {
         return null;
     }
 
-    // TODO: redundant code, it should be taken from each implementation, actually
-    // maybe it is better to put the data process in a layer making the
-    // implementations only interfaces
     /**
      * Generates whole MAS overview in JSON format.
      * 
