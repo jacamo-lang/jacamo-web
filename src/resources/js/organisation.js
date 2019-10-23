@@ -17,26 +17,12 @@ function getDetails() {
   };
 };
 
-function addTwoCellsInARow(table, p, v) {
-  var tr, cellProperty, cellDetail;
-  tr = table.insertRow(-1);
-  cellProperty = tr.insertCell(-1);
-  cellDetail = tr.insertCell(-1);
-  cellProperty.innerHTML = p;
-  cellDetail.innerHTML = v;
-}
-
-let createTable = (section) => {
-  t = document.createElement('table');
-  t.setAttribute("class", 'striped');
-  t.style.maxHeight = "100%";
-  let s = document.getElementById(section);
-  s.appendChild(t);
-  return t;
-};
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+UPDATE ORGANISATION TABLE WITH GROUPS, SCHEMES AND NORMS
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 function updateTable(selectedItem, item) {
-
+  /* GROUPS */
   Object.keys(item.groups).forEach(function(g) {
     var table = createTable("groupssection");
     addTwoCellsInARow(table, "group", item.groups[g].group +
@@ -61,7 +47,7 @@ function updateTable(selectedItem, item) {
     let s = document.getElementById("groupssection");
     s.appendChild(p);
   }
-
+  /* SCHEMES */
   Object.keys(item.schemes).forEach(function(s) {
     var table = createTable("schemessection");
     addTwoCellsInARow(table, "scheme", item.schemes[s].scheme);
@@ -81,8 +67,7 @@ function updateTable(selectedItem, item) {
     let s = document.getElementById("schemessection");
     s.appendChild(p);
   }
-
-
+  /* NORMS */
   if (Object.keys(item.norms).length <= 0) {
     p = document.createElement('p');
     p.innerText = "nothing to show";
@@ -96,7 +81,6 @@ function updateTable(selectedItem, item) {
     });
   }
 }
-
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 END OF FILE

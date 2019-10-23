@@ -56,15 +56,6 @@ NEW ORGANIZATIONAL ROLE
 
 /* create role: POST in "/{oename}/group/{groupname}" */
 function newRole(org, gr) {
-  /*
-  TODO: The current method used window.open on the js, which is not showing the html to feedback the user after the post. Maybe a solution is changing it to a form using submit function
-  var f = document.getElementById('TheForm');
-  f.something.value = something;
-  f.more.value = additional;
-  f.other.value = misc;
-  window.open('', 'TheWindow');
-  f.submit();*/
-
   http = new XMLHttpRequest();
   var input = document.getElementById('orgGrRole').value;
   var lastDot = input.lastIndexOf('.');

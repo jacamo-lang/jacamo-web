@@ -214,17 +214,21 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
       "\t\tlabeljust=\"r\"\n",
       "\t\tgraph[style=dashed]\n");
     w.artifacts.forEach(function(a) {
-      var str1 = (a.artifact.length <= MAX_LENGTH) ? a.artifact : a.artifact.substring(0, MAX_LENGTH) + " ...";
-      /* It is possible to have same artifact name in different workspaces */
-      dot.push("\t\t\"" + w.workspace + "_" + a.artifact + "\" [ ",
-        "\n\t\t\tlabel=\"" + str1 + " :\\n");
-      str1 = (a.type.length <= MAX_LENGTH) ? a.type : a.type.substring(0, MAX_LENGTH) + " ...";
-      dot.push(str1 + "\"\n");
-      dot.push("\t\t\tshape=record style=filled fillcolor=white\n");
-      dot.push("\t\t]\n");
+      if (HIDDEN_ARTS.indexOf(a.type) < 0) {
+        var str1 = (a.artifact.length <= MAX_LENGTH) ? a.artifact : a.artifact.substring(0, MAX_LENGTH) + " ...";
+        /* It is possible to have same artifact name in different workspaces */
+        dot.push("\t\t\"" + w.workspace + "_" + a.artifact + "\" [ ",
+          "\n\t\t\tlabel=\"" + str1 + " :\\n");
+        str1 = (a.type.length <= MAX_LENGTH) ? a.type : a.type.substring(0, MAX_LENGTH) + " ...";
+        dot.push(str1 + "\"\n");
+        dot.push("\t\t\tshape=record style=filled fillcolor=white\n");
+        dot.push("\t\t]\n");
+      }
     });
     w.artifacts.forEach(function(a) {
-      dot.push("\t\"" + agName + "\"->\"" + w.workspace + "_" + a.artifact + "\" [arrowhead=odot]\n");
+      if (HIDDEN_ARTS.indexOf(a.type) < 0) {
+        dot.push("\t\"" + agName + "\"->\"" + w.workspace + "_" + a.artifact + "\" [arrowhead=odot]\n");
+      }
     });
     dot.push("\t}\n");
   });

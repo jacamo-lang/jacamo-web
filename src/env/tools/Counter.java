@@ -1,4 +1,4 @@
-// CArtAgO artifact code for project jcmrest
+// CArtAgO artifact code for project jcmrest3
 
 package tools;
 
