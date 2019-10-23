@@ -1,10 +1,14 @@
 package jacamo.web;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -73,35 +78,45 @@ public class RestImpl extends AbstractBinder {
      */
     @Path("/{file}")
     @GET
-    @Produces(MediaType.TEXT_HTML)
     public Response getHtml(@PathParam("file") String file, @Context Request request) {
         try {
-            StringBuilder so = new StringBuilder();
-
-            BufferedReader in = null;
-            File f = new File("src/resources/html/" + file);
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f));
+            /* Only images as png format is being supported */
+            if (file.endsWith(".png")) {
+                URL urlToResource = getClass().getResource("/html/" + file);
+                BufferedImage image = ImageIO.read(urlToResource);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(image, "png", baos);
+                byte[] imageData = baos.toByteArray();
+                  
+                return Response.ok(new ByteArrayInputStream(imageData),"image/png").cacheControl(cc).build();
             } else {
-                in = new BufferedReader(
-                        new InputStreamReader(RestImpl.class.getResource("/html/" + file).openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
-            MessageDigest digest = MessageDigest.getInstance("MD5");
-            byte[] hash = digest.digest(so.toString().getBytes(StandardCharsets.UTF_8));
-            String hex = DatatypeConverter.printHexBinary(hash);
-            EntityTag etag = new EntityTag(hex);
+                StringBuilder so = new StringBuilder();
 
-            ResponseBuilder builder = request.evaluatePreconditions(etag);
-            if (builder != null) {
-                return builder.build();
-            }
+                BufferedReader in = null;
+                File f = new File("src/resources/html/" + file);
+                if (f.exists()) {
+                    in = new BufferedReader(new FileReader(f));
+                } else {
+                    in = new BufferedReader(
+                            new InputStreamReader(RestImpl.class.getResource("/html/" + file).openStream()));
+                }
+                String line = in.readLine();
+                while (line != null) {
+                    so.append(line);
+                    line = in.readLine();
+                }
+                MessageDigest digest = MessageDigest.getInstance("MD5");
+                byte[] hash = digest.digest(so.toString().getBytes(StandardCharsets.UTF_8));
+                String hex = DatatypeConverter.printHexBinary(hash);
+                EntityTag etag = new EntityTag(hex);
+                
+                ResponseBuilder builder = request.evaluatePreconditions(etag);
+                if (builder != null) {
+                    return builder.build();
+                }
 
-            return Response.ok(so.toString()).tag(etag).cacheControl(cc).build();
+                return Response.ok(so.toString(), MediaType.TEXT_HTML).tag(etag).cacheControl(cc).build();
+            } 
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

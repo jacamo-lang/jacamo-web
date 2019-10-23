@@ -230,7 +230,6 @@ function getMASAsDot() {
   get('./overview').then(function(mas) {
     let overview = JSON.parse(mas);
 
-    console.log(overview);
     dot.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\"]\n");
 
     /* Organisation dimension */
