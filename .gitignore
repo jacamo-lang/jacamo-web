@@ -30,3 +30,12 @@ hs_err_pid*
 /.gradle/
 /build/
 /bin/
+
+build
+.gradle
+.idea
+out
+*.iml
+*.ipr
+*.iws
+.DS_Store

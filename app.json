@@ -1,0 +1,5 @@
+{
+  "name": "jacamo-web",
+  "description": "Jacamo-web is an interactive programming IDE based on JaCaMo.",
+  "image": "heroku/gradle"
+}

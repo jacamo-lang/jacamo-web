@@ -2,29 +2,62 @@
 Jacamo-web is an interactive programming IDE based on [JaCaMo](http://jacamo.sourceforge.net/), a Multi-Agent System (MAS) Oriented Programming platform. The [interactive development](
 https://cgi.csc.liv.ac.uk/~lad/emas2019/accepted/EMAS2019_paper_8.pdf) allows making changes on instances of agents, artefacts and organisations, which means that the system can be updated while it is running.
 
-# Running jacamo-web
+## Straightforward deploying to Heroku
 
-After clonning this repository, go to the root folder of this project and type:
-* `gradle marcos`: to run the sample MAS marcos.jcm
-* `gradle bob`: to run the example bob.jcm
-* go to `/examples` for more sample projects and information about how to run them
-* see http://yourIP:8080 for a web interface (see the console for the right IP:port)
+1. Fork this repository
+1. Go to heroku website, create an app giving any name to it
+1. On Deploy -> Deployment method choose github
+1. find your fork of 'jacamo-web'
+1. 'Deploy branch'
 
+## Running locally
 
-With docker:
-* `sudo docker build  -t jacamo-runrest .` to build a docker image
-* `sudo docker network create jcm_net`
-* `sudo docker run -ti --rm --net jcm_net  --name host1 -v "$(pwd)":/app jacamo-runrest gradle marcos` to run marcos.jcm
-* `sudo docker run -ti --rm --net jcm_net  --name host2 -v "$(pwd)":/app jacamo-runrest gradle bob_d` to run bob.jcm
+### Using a local gradle
+
+```sh
+$ git clone https://github.com/jacamo-lang/jacamo-web.git
+$ cd jacamo-web
+$ ./gradlew run
+```
+See http://yourIP:8080 for a web interface (see the console for the right IP:port). You can also try `gradle marcos`, `gradle bob`, and go to `/examples` for more sample projects and information about how to run them.
+
+### Using a local docker
+
+```sh
+$ docker build  -t jacamo-runrest .
+$ docker network create jcm_net
+$ docker run -ti --rm --net jcm_net  --name host1 -v "$(pwd)":/app jacamo-runrest gradle marcos
+$ docker run -ti --rm --net jcm_net  --name host2 -v "$(pwd)":/app jacamo-runrest gradle bob_d
+```
+
+These commands build a docker image and launch marcos and bob projects. Usually super user privileges are necessary.
+
+### Deploying from local repository to Heroku
+
+After installing the [Heroku Toolbelt](https://toolbelt.heroku.com/) you can test the app locally using heroku CLI:
+
+```sh
+$ ./gradlew stage
+$ heroku local web
+```
+Your app should now be running on [localhost:5000](http://localhost:5000/).
+
+### Deploying from local repository
+
+```sh
+$ heroku create
+$ git push heroku master
+$ heroku open
+```
 
 # More about jacamo-web
 
-It uses [jacamo-rest](https://github.com/jacamo-lang/jacamo-rest) on the back-end and provides a web front-end developed in plain javascript, the [API jacamo-rest 0.3](https://app.swaggerhub.com/apis/sma-das/jacamo-rest/0.3) bind these parts. 
+It uses [jacamo-rest](https://github.com/jacamo-lang/jacamo-rest) on the back-end and provides a web front-end developed in plain javascript, the [API jacamo-rest 0.3](https://app.swaggerhub.com/apis/sma-das/jacamo-rest/0.3) bind these parts.
 
 In short, jacao-web provides an interface to develop Multi-Agent Systems interactively allow to send beliefs and plans to agents, inspect, create and destroy them. It is also supported dynamic compiling of CArtAgO artefacts and Moise organisations. The following diagram shows the main functionalities of the interface:
 
 ![Alt text](https://g.gravizo.com/source/programmingconcept?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-web%2Fmaster%2Freadme.md)
-<details> 
+<details>
 <summary>Interactive programming concept with jacamo-web</summary>
 programmingconcept
 digraph G {

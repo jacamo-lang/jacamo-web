@@ -1,8 +1,34 @@
-/*
-    simply runs the platform with no agent
-*/
+mas main {
+    agent bob {
+        join:  wks
+               org
+        focus: wks.counterA
+               wks.counterB
+        roles: role1 in org.group1
+    }
 
-mas plat {
+    agent alice {
+        join:  wks
+               org
+        focus: wks.counterA
+        roles: role2 in org.group1
+    }
+
+    workspace wks {
+        artifact counterA: tools.Counter(10)
+        artifact counterB: tools.Counter(02)
+        agents: bob, alice
+    }
+
+    organisation org : org.xml {
+        scheme scheme1 : scheme1
+        group group1: group1 {
+            owner: alice
+            players: bob role1
+                     alice role2
+            responsible-for: scheme1
+        }
+    }
 
     platform: jacamo.web.JCMRest("--main 2181") // starts platform on port 2181
 

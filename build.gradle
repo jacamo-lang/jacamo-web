@@ -11,52 +11,48 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version '0.2-SNAPSHOT'
 group   'org.jacamo'
-
+version '0.2-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
-
     maven { url "http://jacamo.sourceforge.net/maven2" }
     maven { url "https://jade.tilab.com/maven/" }
-
     flatDir {
        dirs 'lib'
     }
 }
 
 dependencies {
-	implementation group: 'org.jacamo' , name: 'jacamo'   , version: '0.8-SNAPSHOT'  , changing: true , transitive: true
+	compile 'org.jacamo:jacamo:0.8-SNAPSHOT'
+	compile 'javax.xml.bind:jaxb-api:+'
+	compile 'com.sun.xml.bind:jaxb-core:+'
+	compile 'com.sun.xml.bind:jaxb-impl:+'
+	compile 'javax.ws.rs:javax.ws.rs-api:2.1.1'
 
-	implementation 'javax.xml.bind:jaxb-api:+'
-	implementation 'com.sun.xml.bind:jaxb-core:+'
-	implementation 'com.sun.xml.bind:jaxb-impl:+'
+	compile 'org.glassfish.jersey.containers:jersey-container-servlet:2.29.1'
+	compile 'org.glassfish.jersey.containers:jersey-container-servlet-core:2.29.1'
+	compile 'org.glassfish.jersey.inject:jersey-hk2:2.29.1'
+	compile group: 'org.glassfish.jersey', name: 'jersey-bom', version: '2.29.1', ext: 'pom'
 
-	implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.27'
-	implementation 'org.glassfish.jersey.inject:jersey-hk2:2.27'
-	implementation 'org.glassfish.jersey:jersey-bom:2.27'
-
-	implementation 'org.glassfish.jersey.core:jersey-client:+'
-	implementation 'org.glassfish.jersey.media:jersey-media-multipart:2.27'
+	compile 'org.glassfish.jersey.core:jersey-server:2.29.1'
+	compile 'org.glassfish.jersey.core:jersey-client:2.29.1'
+	compile 'org.glassfish.jersey.media:jersey-media-multipart:2.29.1'
 
 	// containers:
-	implementation 'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.27'
+	compile 'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.29.1'
+	compile 'org.glassfish.grizzly:grizzly-http-server:2.4.4'
 
-	implementation 'org.apache.zookeeper:zookeeper:3.5.4-beta'
-	implementation 'org.apache.curator:curator-framework:4.0.1'
-	implementation 'org.apache.curator:curator-x-async:4.0.1'
-	
-	//SVG render
-	implementation group: 'guru.nidi', name: 'graphviz-java', version: '0.7.0'
-	implementation group: 'com.google.guava', name: 'guava', version: '11.0.2'
-	
-	//Java compiler
-	implementation group: 'net.openhft', name: 'compiler', version: '2.3.1'
+	compile 'org.apache.zookeeper:zookeeper:3.5.4-beta'
+	compile 'org.apache.curator:curator-framework:4.0.1'
+	compile 'org.apache.curator:curator-x-async:4.0.1'
+
 	//Json serialization and parsing
-    implementation 'com.google.code.gson:gson:2.8.5'
+	compile 'com.google.code.gson:gson:2.8.5'
+
+	testCompile 'org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-bundle:+'
 }
 
 sourceSets {
@@ -71,6 +67,17 @@ sourceSets {
             srcDir 'src/resources'
         }
     }
+}
+
+clean {
+    delete 'bin'
+    delete 'build'
+    delete 'log'
+}
+
+task copyToLib(type: Copy) {
+    into "$buildDir/libs"
+    from(configurations.compile)
 }
 
 task run (type: JavaExec, dependsOn: 'classes') {
@@ -143,17 +150,23 @@ task fixTab {
     //ant.fixcrlf(tab: 'remove', tablength: '4', javafiles: 'true', includes: '**/*.java,**/*.xml,**/*.asl,**/*.jcm,**/*.txt', srcdir: 'doc')
 }
 
-
-clean {
-    delete 'bin'
-    delete 'build'
-    delete 'log'
-}
-
-
 jar {
     baseName 'jacamo-web'
+    manifest {
+      attributes(
+        'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+        'Main-Class': 'jacamo.infra.JaCaMoLauncher',
+        'args': 'src/jcm/main.jcm'
+      )
+    }
 }
+
+task stage(dependsOn: ['jar', 'copyToLib', 'clean']) {
+	copyToLib.mustRunAfter clean
+	jar.mustRunAfter copyToLib
+}
+
+stage.dependsOn(copyToLib)
 
 // the following lines is used to avoid errors while generating javadoc
 if (JavaVersion.current().isJava8Compatible()) {
@@ -176,14 +189,12 @@ task sourceJar (type : Jar) {
     from sourceSets.main.allSource
 }
 
-
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
             artifact sourceJar
             artifact javadocJar
-
             artifactId 'jacamo-web'
         }
     }
@@ -207,4 +218,8 @@ task publishMavenSF(dependsOn: [ 'build', 'publishToMavenLocal']) {
         workingDir wdir
     }
   }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }

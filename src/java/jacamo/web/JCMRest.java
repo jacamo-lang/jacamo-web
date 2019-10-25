@@ -56,16 +56,7 @@ public class JCMRest extends DefaultPlatformImpl {
     
     @Override
     public void init(String[] args) throws Exception {
-        
-        // adds RestAgArch in the configuration of all agents in the project
-        /*List<AgentParameters> lags = new ArrayList<>();
-        for (AgentParameters ap: project.getAgents()) {
-            if (ap.getNbInstances() > 0) {
-                lags.add(ap);
-                ap.insertArchClass(new ClassParameters(RestAgArch.class.getName()));
-            }
-        }*/
-        
+            
         // adds RestAgArch as default ag arch when using this platform
         BaseCentralisedMAS.getRunner().getRuntimeServices().registerDefaultAgArch(RestAgArch.class.getName());
         
@@ -73,6 +64,15 @@ public class JCMRest extends DefaultPlatformImpl {
         int zkPort   = 2181;
         boolean useZK = false;
         
+        // Used when deploying on heroku
+        String webPort = System.getenv("PORT");
+        if (webPort == null || webPort.isEmpty()) {
+            restPort = 8080;
+        } else {
+            restPort = Integer.parseInt(webPort);
+        }
+        
+        // If the given project is specifying a port, overwrite it 
         if (args.length > 0) {
             String la = "";
             for (String a: args[0].split(" ")) {
@@ -160,23 +160,17 @@ public class JCMRest extends DefaultPlatformImpl {
     }
     
     public HttpServer startRestServer(int port) {
-        //ResourceConfig config = new RestAppConfig(); //RestAgArch.class);
-        //config.registerInstances(new RestImpl());
-        //config.addProperties(new HashMap<String,Object>() {{ put("jersey.config.server.provider.classnames", "org.glassfish.jersey.media.multipart.MultiPartFeature"); }} );
         try {
             restServerURI = UriBuilder.fromUri("http://"+InetAddress.getLocalHost().getHostAddress()+"/").port(port).build();
             
-            // gzip compression configuration
+            // registering resources
             RestAppConfig rc = new RestAppConfig();
-            rc.registerClasses(EncodingFilter.class, GZipEncoder.class, DeflateEncoder.class);
             
             // get a server from factory
             HttpServer s = GrizzlyHttpServerFactory.createHttpServer(restServerURI, rc);
             
             // other possiblecontainers:
-            //JettyHttpContainerFactory.createServer(baseUri, config);
-            //JdkHttpServerFactory.createHttpServer(baseUri, config);
-            System.out.println("JaCaMo Rest API is running on "+restServerURI);
+            System.out.println("jacamo-web Rest API is running on "+restServerURI);
             return s;
         } catch (javax.ws.rs.ProcessingException e) {  
             System.out.println("trying next port for web server "+(port+1)+". e="+e);
