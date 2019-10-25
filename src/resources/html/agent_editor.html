@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -8,6 +9,7 @@
 
 <body>
   <div id="root" style="height: calc(100% - 50px)">
+
     <header class="row">
       <a class="logo col-xp-2 col-sm-2 col-md" href="./index.html">JaCaMo</a>
       <a class="button col-xp-1 col-sm-2 col-md" href="./agents.html">
@@ -27,20 +29,20 @@
       <label for="doc-drawer-checkbox" class="button drawer-toggle col-sm" style="right: 10px; width: 50px; position: fixed;"></label>
       <input id="doc-drawer-checkbox" class="drawer" value="on" type="checkbox" />
       <nav class="col-xp-1 col-md-2" id="nav-drawer">
-        <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
+        <!-- Content filled by javascript function -->
       </nav>
     </header>
     <div class="row" id="doc-wrapper" style="height: calc(100% - 50px)">
-      <input id="doc-drawer-checkbox-frame" class="leftmenu" value="on" type="checkbox">
+      <input id="doc-drawer-checkbox" class="leftmenu" value="on" type="checkbox">
       <nav class="col-xp-1 col-md-2" id="nav-drawer-frame">
-        <!-- It is being removed by javascript <label for="doc-drawer-checkbox" class="button drawer-close"></label> -->
+        <!-- Content filled by javascript function -->
       </nav>
 
       <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
 
         <div class="card fluid" style="height: calc(100% - 20px)">
           <div class="section">
-            <form action="/workspaces/workspace_name/javafile/javafilename" method="post" id="usrform" enctype="multipart/form-data">
+            <form method="post" id="usrform" enctype="multipart/form-data">
               <div>
                 <textarea name="aslfile" form="usrform"></textarea>
               </div>
@@ -52,6 +54,7 @@
         </div>
       </main>
     </div>
+
   </div>
   <script src="https://ajaxorg.github.io/ace-builds/src/ace.js"></script>
   <script src="https://ajaxorg.github.io/ace-builds/src/ext-language_tools.js"></script>
