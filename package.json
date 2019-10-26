@@ -1,0 +1,11 @@
+{
+  "name": "jacamo-web",
+  "description": "Jacamo-web is an interactive programming IDE based on JaCaMo.",
+  "image": "heroku/gradle",
+  "dependencies": {
+    "d3-graphviz": "^2.6.1",
+    "jquery": "^3.4.1",
+    "mini.css": "^3.0.1",
+    "phaser": "^3.20.1"
+  }
+}
