@@ -246,8 +246,8 @@ function getMASAsDot() {
         orglinks.push("\t\"" + m.scheme + "\"->\"" + a.agent + "\" [arrowtail=normal dir=back label=\"" + m.mission + "\"]\n");
         m.responsibles.forEach(function(r) {
           orglinks.push("\t\"" + r + "\"->\"" + m.scheme +
-            "\" [arrowtail=normal arrowhead=open label=\"responsible\"]\n");
-          dot.push("\t\t{rank=same " + r + " " + m.scheme + "};\n");
+            "\" [arrowtail=normal arrowhead=open label=\"responsible\\nfor\"]\n");
+          dot.push("\t\t{rank=same \"" + r + "\" \"" + m.scheme + "\"};\n");
         });
       });
     });
@@ -263,7 +263,7 @@ function getMASAsDot() {
       var s1 = (x.agent.length <= MAX_LENGTH) ? x.agent : x.agent.substring(0, MAX_LENGTH) + " ...";
       dot.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
     });
-    dot.push("\t\t{rank=same " + ags.join(" ") + "};\n");
+    if (ags.length > 0) dot.push("\t\t{rank=same \"" + ags.join("\" \"") + "\"};\n");
     dot.push("\t};\n");
 
     /* Environment dimension */
@@ -291,7 +291,7 @@ function getMASAsDot() {
             }
           });
 
-          dot.push("\t\t\t{rank=same " + wksartifacts.join(" ") + "};\n");
+          if (wksartifacts.length > 0) dot.push("\t\t\t{rank=same \"" + wksartifacts.join("\" \"") + "\"};\n");
           dot.push("\t\t};\n");
           dot.push(envlinks.join(" "));
         });
@@ -300,6 +300,8 @@ function getMASAsDot() {
     dot.push("\t};\n");
 
     dot.push("}\n");
+
+    console.log(dot.join(""));
     /* Transition follows modal top down movement */
     var t = d3.transition().duration(750).ease(d3.easeLinear);
     d3.select("#overviewgraph").graphviz().transition(t).renderDot(dot.join(""));

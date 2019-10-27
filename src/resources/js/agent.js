@@ -202,7 +202,7 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
     x.responsibles.forEach(function(y) {
       dot.push("\t\"" + y + "\"->\"" + x.mission,
         "\" [arrowtail=normal arrowhead=open label=\"responsible for\"]\n",
-        "\t{rank=same " + y + " " + x.mission + "}\n");
+        "\t{rank=same \"" + y + "\" \"" + x.mission + "\"}\n");
     });
     dot.push("\t\"" + x.mission + "\"->\"" + agName, "\" [arrowtail=normal dir=back label=\"" + x.scheme + "\"]\n");
   });
