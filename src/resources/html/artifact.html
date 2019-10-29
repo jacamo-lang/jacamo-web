@@ -42,12 +42,12 @@
       <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
 
         <div id="workspace" class="card fluid">
-          <div class="section">
-            <table class="striped" id="arttable">
+          <div class="section" id="artsection">
+            <!--<table class="striped" id="arttable">-->
               <!-- Content filled by javascript function -->
               <!--Sample <thead><tr><th>Agent</th><th>Service</th></tr></thead>
               <tbody><tr><td>agent1</td><td>service1<br /></td></tr></tbody>-->
-            </table>
+            <!--</table>-->
           </div>
         </div>
 
@@ -71,7 +71,7 @@
         <div id="workspacefoot" class="card fluid">
           <div id="workspacefootmenu" class="section">
             <a href="#" id="btnartdiagram">diagram</a>&#160;&#160;&#160;
-            <a href="./artifact_editor.html?workspace={$workspace}&amp;artifact={$artifact}&amp;javafile={$file}" id="btndeleditartifact">edit template</a>&#160;&#160;&#160;
+            <a href="./artifact_editor.html?workspace={$workspace}&amp;artifact={$artifact}&amp;javafile={$file}" id="btneditartifact">edit template</a>&#160;&#160;&#160;
           </div>
         </div>
 
@@ -83,7 +83,7 @@
   <script src="https://unpkg.com/viz.js@1.8.1/viz.js" type="javascript/worker"></script>
   <script src="https://unpkg.com/d3-graphviz@2.6.1/build/d3-graphviz.js"></script>
   <script src="/js/workspaces.js"></script>
-  <script src="/js/artifact.js"></script>
+  <script src="/js/root.js"></script>
   <script>
     getWorkspaces();
     getArtifactDetails();

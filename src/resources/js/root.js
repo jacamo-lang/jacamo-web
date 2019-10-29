@@ -1,6 +1,6 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-GLOBAL CONSTANTS AND VARIABLES
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
+ * GLOBAL CONSTANTS AND VARIABLES
+ */
 
 const MAX_LENGTH = 35;
 const HIDDEN_ARTS = ["cartago.WorkspaceArtifact", "cartago.tools.Console", "cartago.ManRepoArtifact",
@@ -8,9 +8,9 @@ const HIDDEN_ARTS = ["cartago.WorkspaceArtifact", "cartago.tools.Console", "cart
   "ora4mas.nopl.SchemeBoard", "ora4mas.nopl.NormativeBoard", "cartago.AgentBodyArtifact"
 ];
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-USEFULL FUNCTIONS
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
+ * USEFULL FUNCTIONS
+ */
 
 /* GET A GIVEN URL CONTENT */
 function get(url) {
@@ -69,9 +69,9 @@ function addTwoCellsInARow(table, p, v) {
   cellDetail.innerHTML = v;
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-DF FUNCTIONS
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
+ * DF FUNCTIONS
+ */
 
 /* RETRIEVE DATA FROM DIRECTORY FACILITATOR */
 function getDF() {
@@ -81,7 +81,7 @@ function getDF() {
       var table = createTable("dfsection");
       Object.keys(df).forEach(function(a) {
         df[a].services.sort().forEach(function(s) {
-          addTwoCellsInARow(table,df[a].agent,s);
+          addTwoCellsInARow(table, df[a].agent, s);
         });
       });
     } else {
@@ -93,9 +93,9 @@ function getDF() {
   });
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-AGENT EDITOR FUNCTIONS
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
+ * AGENT EDITOR FUNCTIONS
+ */
 
 /* Fill text area with current agent's asl code */
 function getCurrentAslContent() {
@@ -155,9 +155,9 @@ function createAlsEditor(content) {
   }, true);
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-ARTIFACT EDITOR FUNCTIONS
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
+ * ARTIFACT EDITOR FUNCTIONS
+ */
 
 /* Fill text area with current artifact's java code */
 function getCurrentJavaContent() {
@@ -215,13 +215,9 @@ function createJavaEditor(content) {
   }, true);
 }
 
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-OVERVIEW FUNCTIONS
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/*const distinct = (v, i, s) => s.indexOf(v) === v;*/
+/**
+ * OVERVIEW FUNCTIONS
+ */
 
 /* WHOLE SYSTEM AS DOT */
 function getMASAsDot() {
@@ -308,6 +304,143 @@ function getMASAsDot() {
   });
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-END OF FILE
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
+ * ARTIFACT FUNCTIONS
+ */
+
+/* RETRIEVE DATA FROM DIRECTORY FACILITATOR */
+function getArtifactDetails() {
+  const params = new URL(location.href).searchParams;
+  const selectedWorkspace = params.get('workspace');
+  const selectedArtifact = params.get('artifact');
+  get("./workspaces/" + selectedWorkspace + "/" + selectedArtifact).then(function(artstr) {
+    art = JSON.parse(artstr);
+    if (Object.keys(art).length > 0) {
+      var table = createTable("artsection");
+      Object.keys(art).forEach(function(p) {
+        if (typeof(art[p]) === "string") {
+          addTwoCellsInARow(table, p, art[p]);
+        } else {
+          let content = "";
+          Object.keys(art[p]).forEach(function(a) {
+            if (p === "properties") {
+              let subcontent = "";
+              Object.keys(art[p][a]).forEach(function(b) {
+                subcontent += b + "(" + art[p][a][b] + ")<br />";
+              });
+              addTwoCellsInARow(table, p, subcontent);
+            } else {
+              content += art[p][a] + "<br />"
+            }
+          });
+          addTwoCellsInARow(table, p, content);
+        }
+      });
+    } else {
+      p = document.createElement('p');
+      p.innerText = "nothing to show";
+      let s = document.getElementById("artsection");
+      s.appendChild(p);
+    }
+  });
+}
+
+/* Setup edit artifact button */
+function setEditButton() {
+  document.getElementById('btneditartifact').setAttribute(
+    "href", "artifact_editor.html?workspace=" + (new URL(location.href).searchParams.get('workspace')) +
+    "&artifact=" + (new URL(location.href).searchParams.get('artifact')) +
+    "&javafile=" + (new URL(location.href).searchParams.get('javafile'))
+  );
+}
+
+/* Get artifact information and render diagram */
+function getArtGraph() {
+  const params = new URL(location.href).searchParams;
+  const selectedWorkspace = params.get('workspace');
+  const selectedArtifact = params.get('artifact');
+
+  get("./workspaces/" + selectedWorkspace + "/" + selectedArtifact).then(function(serialArt) {
+    const MAX_LENGTH = 35;
+    let dot = [];
+    let art = JSON.parse(serialArt);
+
+
+    dot.push("digraph G {\n");
+    dot.push("\tgraph [\n");
+    dot.push("\t\trankdir = \"LR\"\n");
+    dot.push("\t\tbgcolor=\"transparent\"\n");
+    dot.push("\t]\n");
+
+    /* Artifact name and type */
+    var s1 = (art.artifact.length <= MAX_LENGTH) ? art.artifact : art.artifact.substring(0, MAX_LENGTH) + " ...";
+    dot.push("\t\"" + art.artifact + "\" [ " + "\n\t\tlabel = \"" + s1 + ":\\n");
+    s1 = (art.type.length <= MAX_LENGTH) ? art.type :
+      art.type.substring(0, MAX_LENGTH) + " ...";
+    dot.push(s1 + "|");
+
+    /* observable properties */
+    Object.keys(art.properties).forEach(function(y) {
+      var ss = Object.keys(art.properties[y])[0] + "(" + Object.values(art.properties[y])[0].toString() + ")";
+      var s2 = (ss.length <= MAX_LENGTH) ? ss : ss.substring(0, MAX_LENGTH) + " ...";
+      dot.push(s2 + "|");
+    });
+
+    /* operations */
+    art.operations.forEach(function(y) {
+      var s2 = (y.length <= MAX_LENGTH) ? y : y.substring(0, MAX_LENGTH) + " ...";
+      dot.push(s2 + "\\n");
+    });
+    dot.push("\"\n");
+    dot.push("\t\tshape=record style=filled fillcolor=white\n");
+    dot.push("\t\t];\n");
+
+    /* Linked Artifacts */
+    art.linkedArtifacts.forEach(function(y) {
+      var str1 = (y.length <= MAX_LENGTH) ? y :
+        y.substring(0, MAX_LENGTH) + " ...";
+      dot.push("\t\t\"" + y + "\" [ label=\"" + str1 + "\"");
+      dot.push("\t\tshape=record style=filled fillcolor=white\n");
+      dot.push("\t]\n");
+      dot.push("\t\"" + art.artifact + "\" -> \"" + y + "\" [arrowhead=\"onormal\"]");
+    });
+
+    /* observers */
+    art.observers.forEach(function(y) {
+      if (art.type !== "cartago.AgentBodyArtifact") {
+        var s2 = (y.length <= MAX_LENGTH) ? y : y.substring(0, MAX_LENGTH) + "...";
+        dot.push("\t\"" + y + "\" [ " + "\n\t\tlabel = \"" + s2 + "\"\n");
+        dot.push("\t\tshape = \"ellipse\" style=filled fillcolor=white\n");
+        dot.push("\t];\n");
+        dot.push("\t\"" + y + "\" -> \"" + art.artifact + "\" [arrowhead=\"odot\"];\n");
+      }
+    });
+
+    dot.push("}\n");
+
+    /* Transition follows modal top down movement */
+    var t = d3.transition().duration(750).ease(d3.easeLinear);
+    d3.select("#artifactgraph").graphviz().transition(t).renderDot(dot.join(""));
+  });
+}
+
+/* modal window */
+var modal = document.getElementById('modalartgraph');
+var btnModal = document.getElementById("btnartdiagram");
+var span = document.getElementsByClassName("close")[0];
+btnModal.onclick = function() {
+  getArtGraph();
+  modal.style.display = "block";
+};
+span.onclick = function() {
+  modal.style.display = "none";
+};
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};
+
+/**
+ * END OF FILE
+ */
