@@ -321,6 +321,7 @@ function getArtifactDetails() {
   const params = new URL(location.href).searchParams;
   const selectedWorkspace = params.get('workspace');
   const selectedArtifact = params.get('artifact');
+
   get("./workspaces/" + selectedWorkspace + "/" + selectedArtifact).then(function(artstr) {
     art = JSON.parse(artstr);
     if (Object.keys(art).length > 0) {
@@ -372,7 +373,6 @@ function getArtGraph() {
     const MAX_LENGTH = 35;
     let dot = [];
     let art = JSON.parse(serialArt);
-
 
     dot.push("digraph G {\n");
     dot.push("\tgraph [\n");
@@ -454,6 +454,84 @@ function setArtifactModalWindow() {
 /**
  * WORKSPACE FUNCTIONS
  */
+
+function getWorkspaces() {
+  const params = new URL(location.href).searchParams;
+  const selectedWorkspace = params.get('workspace');
+
+  get("./workspaces").then(function(resp) {
+    let ws = JSON.parse(resp);
+    updateWorkspaceMenu("nav-drawer", ws, undefined, true);
+    updateWorkspaceMenu("nav-drawer-frame", ws, undefined, false);
+  });
+};
+
+function updateWorkspaceMenu(nav, ws, ar, addCloseButton) {
+  if (addCloseButton) {
+    const closeButton = document.createElement('label');
+    closeButton.setAttribute("for", "doc-drawer-checkbox");
+    closeButton.setAttribute("class", "button drawer-close");
+    document.getElementById(nav).appendChild(closeButton);
+    var h3 = document.createElement("h3");
+    h3.innerHTML = "&#160";
+    document.getElementById(nav).appendChild(h3);
+  }
+
+  const params = new URL(location.href).searchParams;
+  const selectedWorkspace = params.get('workspace');
+  const selectedArtifact = params.get('artifact');
+
+  ws.sort().forEach(function(n) {
+    get("./workspaces/" + n).then(function(r) {
+      let ar = JSON.parse(r);
+      let validContent = 0;
+      Object.keys(ar.artifacts).sort().forEach(function(a) {
+        if (HIDDEN_ARTS.indexOf(ar.artifacts[a].type) < 0) {
+          validContent++;
+          /* if printing the first artifact, also print the workspace */
+          if (selectedWorkspace === n) {
+            if (validContent === 1) {
+              var lag = document.createElement('a');
+              lag.setAttribute("href", "./workspace.html?workspace=" + n);
+              lag.innerHTML = "<h5><b>" + n + "</b></h5>";
+              document.getElementById(nav).appendChild(lag);
+            }
+            /* Add artifacts on menu */
+            var lar = document.createElement('a');
+            if (selectedArtifact === a) {
+              lar.innerHTML = "<h5><b>&#160;&#160;&#160;" + a + "</b></h5>";
+            } else {
+              lar.innerHTML = "<h5>&#160;&#160;&#160;" + a + "</h5>";
+            }
+            lar.setAttribute("href", "./artifact.html?workspace=" + n + "&artifact=" + a +
+              "&javafile=" + ar.artifacts[a].type + ".java");
+            document.getElementById(nav).appendChild(lar);
+          } else {
+            /* if would print at least one artifact, also print the workspace */
+            if (validContent === 1) {
+              var lag = document.createElement('a');
+              lag.setAttribute("href", "./workspace.html?workspace=" + n);
+              lag.innerHTML = "<h5>" + n + "</h5>";
+              document.getElementById(nav).appendChild(lag);
+            }
+          }
+        }
+      });
+      /* Bypass for promisses challenge. Did I just printed the last element content? */
+      if (ws.sort()[ws.length-1] === n) {
+        var br = document.createElement("br");
+        document.getElementById(nav).appendChild(br);
+        document.getElementById(nav).appendChild(br);
+        var lnew = document.createElement('a');
+        lnew.setAttribute("href", "./artifact_new.html");
+        lnew.innerHTML = "create template";
+        document.getElementById(nav).appendChild(lnew);
+      }
+    });
+  });
+}
+
+
 
 function getWorkspaceDetails() {
   const params = new URL(location.href).searchParams;
