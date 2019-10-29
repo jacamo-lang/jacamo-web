@@ -91,7 +91,7 @@ function updateMenu(nav, ws, ar, addCloseButton) {
   document.getElementById(nav).appendChild(br);
   var lnew = document.createElement('a');
   lnew.setAttribute("href", "./artifact_new.html");
-  lnew.innerHTML = "create artifact";
+  lnew.innerHTML = "create template";
   document.getElementById(nav).appendChild(lnew);
 }
 
