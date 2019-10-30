@@ -554,9 +554,9 @@ public class RestImplAg extends AbstractBinder {
             if (ag != null) {
                 PlanLibrary pl = ag.getPL();
                 for (Plan plan : pl.getPlans()) {
-
+                    
                     // do not add plans that comes from jar files (usually system's plans)
-                    if (plan.getSource().startsWith("jar:file"))
+                    if (plan.getSource().startsWith("jar:file") || plan.getSource().equals("kqmlPlans.asl"))
                         continue;
 
                     // add namespace when it is not default
