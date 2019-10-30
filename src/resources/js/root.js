@@ -703,6 +703,156 @@ function setWorkspaceModalWindow() {
    window.location.assign('/oe.html');
  }
 
+ function getOrganisationDetails() {
+   var itemDetails = "";
+   const selectedItem = new URL(location.href).searchParams.get('organisation');
+
+   const Http = new XMLHttpRequest();
+   Http.open("GET", "./oe/" + selectedItem + "/os/");
+   Http.send();
+   Http.onreadystatechange = function() {
+     if (this.readyState == 4 && this.status == 200) {
+       itemDetails = JSON.parse(Http.responseText);
+       updateTable(selectedItem, itemDetails);
+     }
+   };
+ };
+
+
+ function getOrganisationDetails() {
+   const selectedItem = new URL(location.href).searchParams.get('organisation');
+   get("./oe/" + selectedItem + "/os/").then(function(r){
+     item = JSON.parse(r);
+     /* GROUPS */
+     Object.keys(item.groups).forEach(function(g) {
+       var table = createTable("groupssection");
+       addTwoCellsInARow(table, "group", item.groups[g].group +
+         "&#160;&#160;&#160;<a href='/oe/" + selectedItem + "/group/" + item.groups[g].group + "/" +
+         item.groups[g].group + ".npl'>[specification]</a>&#160;<a href='/oe/" + selectedItem +
+         "/group/" + item.groups[g].group + "/debug'>[instance]</a>"
+       );
+       addTwoCellsInARow(table, "well formed", item.groups[g].isWellFormed);
+       var roles = "";
+       Object.keys(item.groups[g].roles).forEach(function(r) {
+         roles += item.groups[g].roles[r].role + " ( " +
+           item.groups[g].roles[r].cardinality + " )";
+         if (item.groups[g].roles[r].superRoles.length > 0) roles += " <- " +
+           item.groups[g].roles[r].superRoles.join(', ');
+         roles += " <br />"
+       });
+       addTwoCellsInARow(table, "roles", roles);
+     });
+     if (Object.keys(item.groups).length <= 0) {
+       p = document.createElement('p');
+       p.innerText = "nothing to show";
+       let s = document.getElementById("groupssection");
+       s.appendChild(p);
+     }
+     /* SCHEMES */
+     Object.keys(item.schemes).forEach(function(s) {
+       var table = createTable("schemessection");
+       addTwoCellsInARow(table, "scheme", item.schemes[s].scheme);
+       addTwoCellsInARow(table, "well formed", item.schemes[s].isWellFormed);
+       addTwoCellsInARow(table, "goals", item.schemes[s].goals.join('<br />'));
+       var missions = "";
+       Object.keys(item.schemes[s].missions).forEach(function(m) {
+         missions += item.schemes[s].missions[m].mission + " ( " +
+           item.schemes[s].missions[m].missionGoals.join(', ') + " ) <br />"
+       });
+       addTwoCellsInARow(table, "missions", missions);
+       addTwoCellsInARow(table, "players", item.schemes[s].players.join('<br />'));
+     });
+     if (Object.keys(item.schemes).length <= 0) {
+       p = document.createElement('p');
+       p.innerText = "nothing to show";
+       let s = document.getElementById("schemessection");
+       s.appendChild(p);
+     }
+     /* NORMS */
+     if (Object.keys(item.norms).length <= 0) {
+       p = document.createElement('p');
+       p.innerText = "nothing to show";
+       let s = document.getElementById("normssection");
+       s.appendChild(p);
+     } else {
+       var table = createTable("normssection");
+       Object.keys(item.norms).forEach(function(n) {
+         addTwoCellsInARow(table, "norm", item.norms[n].norm + ": " +
+           item.norms[n].role + " -> " + item.norms[n].type + " -> " + item.norms[n].mission);
+       });
+     }
+   });
+ }
+
+/**
+ * AGENTS FUNCTIONS
+ */
+
+ /*Get list of agent from backend*/
+ function getAgents() {
+   get("./agents").then(function(resp){
+     updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
+     updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
+   });
+ };
+
+ function updateAgentsMenu(nav, agents, addCloseButton) {
+   /* Remove all existing children from the menu*/
+   var menu = document.getElementById(nav);
+   while (menu.firstChild) {
+     menu.removeChild(menu.firstChild);
+   }
+
+   if (addCloseButton) {
+     const closeButton = document.createElement('label');
+     closeButton.setAttribute("for","doc-drawer-checkbox");
+     closeButton.setAttribute("class","button drawer-close");
+     document.getElementById(nav).appendChild(closeButton);
+     var h3 = document.createElement("h3");
+     h3.innerHTML = "&#160";
+     document.getElementById(nav).appendChild(h3);
+   }
+
+   const params = new URL(location.href).searchParams;
+   const selectedAgent = params.get('agent');
+   agents.forEach(function(n) {
+     var lag = document.createElement('a');
+     lag.setAttribute("href", "./agent.html?agent=" + n);
+     lag.setAttribute('onclick', '{window.location.assign("./agent.html?agent=' + n + '");window.location.reload();}');
+     if (selectedAgent === n) {
+       lag.innerHTML = "<h5><b>" + n + "</b></h5>";
+     } else {
+       lag.innerHTML = "<h5>" + n + "</h5>";
+     }
+     document.getElementById(nav).appendChild(lag);
+   });
+   var br = document.createElement("br");
+   document.getElementById(nav).appendChild(br);
+   document.getElementById(nav).appendChild(br);
+   var ldf = document.createElement('a');
+   ldf.setAttribute("href", "./agents_df.html");
+   ldf.innerHTML = "directory facilitator";
+   document.getElementById(nav).appendChild(ldf);
+   var lnew = document.createElement('a');
+   lnew.setAttribute("href", "./agent_new.html");
+   lnew.innerHTML = "create agent";
+   document.getElementById(nav).appendChild(lnew);
+ }
+
+ /* create agent */
+ function newAg() {
+   const Http = new XMLHttpRequest();
+   Http.open("POST", '/agents/' + document.getElementById('createAgent').value);
+   Http.send();
+   Http.onreadystatechange = function() {
+     if (Http.readyState == 4 && Http.status == 200) {
+       window.location.assign('/agent.html?agent=' + document.getElementById('createAgent').value);
+     }
+   };
+
+ }
+
+
 /**
  * END OF FILE
  */
