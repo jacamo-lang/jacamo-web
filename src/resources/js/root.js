@@ -95,7 +95,7 @@ function getDF() {
 }
 
 /**
- * AGENT EDITOR FUNCTIONS
+ * AGENT FUNCTIONS
  */
 
 /* Fill text area with current agent's asl code */
@@ -155,6 +155,65 @@ function createAlsEditor(content) {
     e.preventDefault();
   }, true);
 }
+
+
+ /*Get list of agent from backend*/
+ function getAgents() {
+   get("./agents").then(function(resp){
+     updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
+     updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
+   });
+ };
+
+ function updateAgentsMenu(nav, agents, addCloseButton) {
+   /* Remove all existing children from the menu*/
+   var menu = document.getElementById(nav);
+   while (menu.firstChild) {
+     menu.removeChild(menu.firstChild);
+   }
+
+   if (addCloseButton) {
+     const closeButton = document.createElement('label');
+     closeButton.setAttribute("for","doc-drawer-checkbox");
+     closeButton.setAttribute("class","button drawer-close");
+     document.getElementById(nav).appendChild(closeButton);
+     var h3 = document.createElement("h3");
+     h3.innerHTML = "&#160";
+     document.getElementById(nav).appendChild(h3);
+   }
+
+   const params = new URL(location.href).searchParams;
+   const selectedAgent = params.get('agent');
+   agents.forEach(function(n) {
+     var lag = document.createElement('a');
+     lag.setAttribute("href", "./agent.html?agent=" + n);
+     lag.setAttribute('onclick', '{window.location.assign("./agent.html?agent=' + n + '");window.location.reload();}');
+     if (selectedAgent === n) {
+       lag.innerHTML = "<h5><b>" + n + "</b></h5>";
+     } else {
+       lag.innerHTML = "<h5>" + n + "</h5>";
+     }
+     document.getElementById(nav).appendChild(lag);
+   });
+   var br = document.createElement("br");
+   document.getElementById(nav).appendChild(br);
+   document.getElementById(nav).appendChild(br);
+   var ldf = document.createElement('a');
+   ldf.setAttribute("href", "./agents_df.html");
+   ldf.innerHTML = "directory facilitator";
+   document.getElementById(nav).appendChild(ldf);
+   var lnew = document.createElement('a');
+   lnew.setAttribute("href", "./agent_new.html");
+   lnew.innerHTML = "create agent";
+   document.getElementById(nav).appendChild(lnew);
+ }
+
+ /* create agent */
+ function newAg() {
+   post('/agents/' + document.getElementById('createAgent').value).then(function(r) {
+     window.location.assign('/agent.html?agent=' + document.getElementById('createAgent').value);
+   });
+ }
 
 /**
  * ARTIFACT EDITOR FUNCTIONS
@@ -718,7 +777,6 @@ function setWorkspaceModalWindow() {
    };
  };
 
-
  function getOrganisationDetails() {
    const selectedItem = new URL(location.href).searchParams.get('organisation');
    get("./oe/" + selectedItem + "/os/").then(function(r){
@@ -783,75 +841,6 @@ function setWorkspaceModalWindow() {
      }
    });
  }
-
-/**
- * AGENTS FUNCTIONS
- */
-
- /*Get list of agent from backend*/
- function getAgents() {
-   get("./agents").then(function(resp){
-     updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
-     updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
-   });
- };
-
- function updateAgentsMenu(nav, agents, addCloseButton) {
-   /* Remove all existing children from the menu*/
-   var menu = document.getElementById(nav);
-   while (menu.firstChild) {
-     menu.removeChild(menu.firstChild);
-   }
-
-   if (addCloseButton) {
-     const closeButton = document.createElement('label');
-     closeButton.setAttribute("for","doc-drawer-checkbox");
-     closeButton.setAttribute("class","button drawer-close");
-     document.getElementById(nav).appendChild(closeButton);
-     var h3 = document.createElement("h3");
-     h3.innerHTML = "&#160";
-     document.getElementById(nav).appendChild(h3);
-   }
-
-   const params = new URL(location.href).searchParams;
-   const selectedAgent = params.get('agent');
-   agents.forEach(function(n) {
-     var lag = document.createElement('a');
-     lag.setAttribute("href", "./agent.html?agent=" + n);
-     lag.setAttribute('onclick', '{window.location.assign("./agent.html?agent=' + n + '");window.location.reload();}');
-     if (selectedAgent === n) {
-       lag.innerHTML = "<h5><b>" + n + "</b></h5>";
-     } else {
-       lag.innerHTML = "<h5>" + n + "</h5>";
-     }
-     document.getElementById(nav).appendChild(lag);
-   });
-   var br = document.createElement("br");
-   document.getElementById(nav).appendChild(br);
-   document.getElementById(nav).appendChild(br);
-   var ldf = document.createElement('a');
-   ldf.setAttribute("href", "./agents_df.html");
-   ldf.innerHTML = "directory facilitator";
-   document.getElementById(nav).appendChild(ldf);
-   var lnew = document.createElement('a');
-   lnew.setAttribute("href", "./agent_new.html");
-   lnew.innerHTML = "create agent";
-   document.getElementById(nav).appendChild(lnew);
- }
-
- /* create agent */
- function newAg() {
-   const Http = new XMLHttpRequest();
-   Http.open("POST", '/agents/' + document.getElementById('createAgent').value);
-   Http.send();
-   Http.onreadystatechange = function() {
-     if (Http.readyState == 4 && Http.status == 200) {
-       window.location.assign('/agent.html?agent=' + document.getElementById('createAgent').value);
-     }
-   };
-
- }
-
 
 /**
  * END OF FILE
