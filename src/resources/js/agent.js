@@ -237,7 +237,7 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
 
   /* Transition follows modal top down movement */
   var t = d3.transition().duration(750).ease(d3.easeLinear);
-  d3.select("#overviewgraph").graphviz().transition(t).renderDot(dot.join(""));
+  d3.select("#agentdiagram").graphviz().transition(t).renderDot(dot.join(""));
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

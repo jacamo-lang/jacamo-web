@@ -9,6 +9,8 @@ import moise.os.OS;
 import moise.os.fs.Goal;
 import moise.os.fs.Mission;
 import moise.os.ns.Norm;
+import moise.os.ss.Compatibility;
+import moise.os.ss.Link;
 import moise.os.ss.Role;
 import ora4mas.nopl.GroupBoard;
 import ora4mas.nopl.OrgBoard;
@@ -73,6 +75,48 @@ public class TranslOrg {
                         subGroups.add(sgi.getId());
                     }
                 }
+                List<Object> links = new ArrayList<>();
+                group.put("links", links);
+                for (Link l : gb.getSpec().getLinks()) {
+                    Map<String, Object> link = new HashMap<>();
+                    link.put("type", l.getTypeStr());
+                    link.put("isBiDir", l.isBiDir());
+                    link.put("scope", l.getScope());
+                    link.put("source", l.getSource().getId());
+                    link.put("target", l.getTarget().getId());
+                    links.add(link);
+                }
+                List<Object> compatibilities = new ArrayList<>();
+                group.put("compatibilities", compatibilities);
+                for (Compatibility c : gb.getSpec().getCompatibilities()) {
+                    Map<String, Object> compatibility = new HashMap<>();
+                    compatibility.put("isBiDir", c.isBiDir());
+                    compatibility.put("scope", c.getScope());
+                    compatibility.put("source", c.getSource().getId());
+                    compatibility.put("target", c.getTarget().getId());
+                    compatibilities.add(compatibility);
+                }
+                List<Object> players = new ArrayList<>();
+                group.put("players", players);
+                for (Player p : gb.getGrpState().getPlayers()) {
+                    Map<String, Object> player = new HashMap<>();
+                    player.put("agent", p.getAg());
+                    player.put("role", p.getTarget());
+                    players.add(player);
+                }
+                List<Object> responsibleFor = new ArrayList<>();
+                group.put("responsibleFor", responsibleFor);
+                for (String s : gb.getGrpState().getSchemesResponsibleFor()) {
+                    Map<String, Object> schemeRF = new HashMap<>();
+                    boolean wf = false;
+                    SchemeBoard sb = findSchemeBoard(s);
+                    if (sb != null)
+                        wf = sb.isWellFormed();
+                    schemeRF.put("isWellFormed", wf);
+                    schemeRF.put("scheme", s);
+                    responsibleFor.add(schemeRF);
+                }
+
             }
         }
 
@@ -130,6 +174,14 @@ public class TranslOrg {
 
         return org;
 
+    }
+
+    private SchemeBoard findSchemeBoard(String id) {
+        for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
+            if (sb.getArtId().equals(id))
+                return sb;
+        }
+        return null;
     }
 
     /**
