@@ -157,63 +157,63 @@ function createAlsEditor(content) {
 }
 
 
- /*Get list of agent from backend*/
- function getAgents() {
-   get("./agents").then(function(resp){
-     updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
-     updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
-   });
- };
+/*Get list of agent from backend*/
+function getAgents() {
+  get("./agents").then(function(resp) {
+    updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
+    updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
+  });
+};
 
- function updateAgentsMenu(nav, agents, addCloseButton) {
-   /* Remove all existing children from the menu*/
-   var menu = document.getElementById(nav);
-   while (menu.firstChild) {
-     menu.removeChild(menu.firstChild);
-   }
+function updateAgentsMenu(nav, agents, addCloseButton) {
+  /* Remove all existing children from the menu*/
+  var menu = document.getElementById(nav);
+  while (menu.firstChild) {
+    menu.removeChild(menu.firstChild);
+  }
 
-   if (addCloseButton) {
-     const closeButton = document.createElement('label');
-     closeButton.setAttribute("for","doc-drawer-checkbox");
-     closeButton.setAttribute("class","button drawer-close");
-     document.getElementById(nav).appendChild(closeButton);
-     var h3 = document.createElement("h3");
-     h3.innerHTML = "&#160";
-     document.getElementById(nav).appendChild(h3);
-   }
+  if (addCloseButton) {
+    const closeButton = document.createElement('label');
+    closeButton.setAttribute("for", "doc-drawer-checkbox");
+    closeButton.setAttribute("class", "button drawer-close");
+    document.getElementById(nav).appendChild(closeButton);
+    var h3 = document.createElement("h3");
+    h3.innerHTML = "&#160";
+    document.getElementById(nav).appendChild(h3);
+  }
 
-   const params = new URL(location.href).searchParams;
-   const selectedAgent = params.get('agent');
-   agents.forEach(function(n) {
-     var lag = document.createElement('a');
-     lag.setAttribute("href", "./agent.html?agent=" + n);
-     lag.setAttribute('onclick', '{window.location.assign("./agent.html?agent=' + n + '");window.location.reload();}');
-     if (selectedAgent === n) {
-       lag.innerHTML = "<h5><b>" + n + "</b></h5>";
-     } else {
-       lag.innerHTML = "<h5>" + n + "</h5>";
-     }
-     document.getElementById(nav).appendChild(lag);
-   });
-   var br = document.createElement("br");
-   document.getElementById(nav).appendChild(br);
-   document.getElementById(nav).appendChild(br);
-   var ldf = document.createElement('a');
-   ldf.setAttribute("href", "./agents_df.html");
-   ldf.innerHTML = "directory facilitator";
-   document.getElementById(nav).appendChild(ldf);
-   var lnew = document.createElement('a');
-   lnew.setAttribute("href", "./agent_new.html");
-   lnew.innerHTML = "create agent";
-   document.getElementById(nav).appendChild(lnew);
- }
+  const params = new URL(location.href).searchParams;
+  const selectedAgent = params.get('agent');
+  agents.forEach(function(n) {
+    var lag = document.createElement('a');
+    lag.setAttribute("href", "./agent.html?agent=" + n);
+    lag.setAttribute('onclick', '{window.location.assign("./agent.html?agent=' + n + '");window.location.reload();}');
+    if (selectedAgent === n) {
+      lag.innerHTML = "<h5><b>" + n + "</b></h5>";
+    } else {
+      lag.innerHTML = "<h5>" + n + "</h5>";
+    }
+    document.getElementById(nav).appendChild(lag);
+  });
+  var br = document.createElement("br");
+  document.getElementById(nav).appendChild(br);
+  document.getElementById(nav).appendChild(br);
+  var ldf = document.createElement('a');
+  ldf.setAttribute("href", "./agents_df.html");
+  ldf.innerHTML = "directory facilitator";
+  document.getElementById(nav).appendChild(ldf);
+  var lnew = document.createElement('a');
+  lnew.setAttribute("href", "./agent_new.html");
+  lnew.innerHTML = "create agent";
+  document.getElementById(nav).appendChild(lnew);
+}
 
- /* create agent */
- function newAg() {
-   post('/agents/' + document.getElementById('createAgent').value).then(function(r) {
-     window.location.assign('/agent.html?agent=' + document.getElementById('createAgent').value);
-   });
- }
+/* create agent */
+function newAg() {
+  post('/agents/' + document.getElementById('createAgent').value).then(function(r) {
+    window.location.assign('/agent.html?agent=' + document.getElementById('createAgent').value);
+  });
+}
 
 /**
  * ARTIFACT EDITOR FUNCTIONS
@@ -577,7 +577,7 @@ function updateWorkspaceMenu(nav, ws, ar, addCloseButton) {
         }
       });
       /* Bypass for promisses challenge. Did I just printed the last element content? */
-      if (ws.sort()[ws.length-1] === n) {
+      if (ws.sort()[ws.length - 1] === n) {
         var br = document.createElement("br");
         document.getElementById(nav).appendChild(br);
         document.getElementById(nav).appendChild(br);
@@ -703,144 +703,306 @@ function setWorkspaceModalWindow() {
  * ORGANISATION FUNCTIONS
  */
 
- /*Get Organisations */
- function getOE() {
-   get("./oe").then(function(resp){
-     updateOrganisationMenu("nav-drawer", JSON.parse(resp), true);
-     updateOrganisationMenu("nav-drawer-frame", JSON.parse(resp), false);
-   });
- };
+/*Get Organisations */
+function getOE() {
+  get("./oe").then(function(resp) {
+    updateOrganisationMenu("nav-drawer", JSON.parse(resp), true);
+    updateOrganisationMenu("nav-drawer-frame", JSON.parse(resp), false);
+  });
+};
 
- function updateOrganisationMenu(nav, set, addCloseButton) {
-   if (addCloseButton) {
-     const closeButton = document.createElement('label');
-     closeButton.setAttribute("for","doc-drawer-checkbox");
-     closeButton.setAttribute("class","button drawer-close");
-     document.getElementById(nav).appendChild(closeButton);
-     var h3 = document.createElement("h3");
-     h3.innerHTML = "&#160";
-     document.getElementById(nav).appendChild(h3);
-   }
+function updateOrganisationMenu(nav, set, addCloseButton) {
+  if (addCloseButton) {
+    const closeButton = document.createElement('label');
+    closeButton.setAttribute("for", "doc-drawer-checkbox");
+    closeButton.setAttribute("class", "button drawer-close");
+    document.getElementById(nav).appendChild(closeButton);
+    var h3 = document.createElement("h3");
+    h3.innerHTML = "&#160";
+    document.getElementById(nav).appendChild(h3);
+  }
 
-   const selectedItem = new URL(location.href).searchParams.get('organisation');
-   set.sort();
-   set.forEach(function(n) {
-     var lag = document.createElement('a');
-     lag.setAttribute("href", "./organisation.html?organisation=" + n);
-     if (selectedItem === n) {
-       lag.innerHTML = "<h5><b>" + n + "</b></h5>";
-       document.getElementById(nav).appendChild(lag);
-     } else {
-       lag.innerHTML = "<h5>" + n + "</h5>";
-       document.getElementById(nav).appendChild(lag);
-     }
-   });
-   var br = document.createElement("br");
-   document.getElementById(nav).appendChild(br);
-   document.getElementById(nav).appendChild(br);
-   var lnew = document.createElement('a');
-   lnew.setAttribute("href", "./oe_role_new.html");
-   lnew.innerHTML = "create role";
-   document.getElementById(nav).appendChild(lnew);
- }
+  const selectedItem = new URL(location.href).searchParams.get('organisation');
+  set.sort();
+  set.forEach(function(n) {
+    var lag = document.createElement('a');
+    lag.setAttribute("href", "./organisation.html?organisation=" + n);
+    if (selectedItem === n) {
+      lag.innerHTML = "<h5><b>" + n + "</b></h5>";
+      document.getElementById(nav).appendChild(lag);
+    } else {
+      lag.innerHTML = "<h5>" + n + "</h5>";
+      document.getElementById(nav).appendChild(lag);
+    }
+  });
+  var br = document.createElement("br");
+  document.getElementById(nav).appendChild(br);
+  document.getElementById(nav).appendChild(br);
+  var lnew = document.createElement('a');
+  lnew.setAttribute("href", "./oe_role_new.html");
+  lnew.innerHTML = "create role";
+  document.getElementById(nav).appendChild(lnew);
+}
 
- /* create role: POST in "/{oename}/group/{groupname}" */
- function newRole(org, gr) {
-   http = new XMLHttpRequest();
-   var input = document.getElementById('orgGrRole').value;
-   var lastDot = input.lastIndexOf('.');
-   var firstPart = input.substring(0, lastDot);
-   var role = input.substring(lastDot + 1);
-   var firstDot = firstPart.indexOf('.');
-   var org = firstPart.substring(0, firstDot);
-   var group = firstPart.substring(firstDot + 1);
+/* create role: POST in "/{oename}/group/{groupname}" */
+function newRole(org, gr) {
+  http = new XMLHttpRequest();
+  var input = document.getElementById('orgGrRole').value;
+  var lastDot = input.lastIndexOf('.');
+  var firstPart = input.substring(0, lastDot);
+  var role = input.substring(lastDot + 1);
+  var firstDot = firstPart.indexOf('.');
+  var org = firstPart.substring(0, firstDot);
+  var group = firstPart.substring(firstDot + 1);
 
-   http.open("POST", '/oe/' + org + '/group/' + group, false);
-   http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-   var data = "role=" + encodeURIComponent(role);
-   http.send(data);
-   window.location.assign('/oe.html');
- }
+  http.open("POST", '/oe/' + org + '/group/' + group, false);
+  http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  var data = "role=" + encodeURIComponent(role);
+  http.send(data);
+  window.location.assign('/oe.html');
+}
 
- function getOrganisationDetails() {
-   var itemDetails = "";
-   const selectedItem = new URL(location.href).searchParams.get('organisation');
+function getOrganisationDetails() {
+  var itemDetails = "";
+  const selectedItem = new URL(location.href).searchParams.get('organisation');
 
-   const Http = new XMLHttpRequest();
-   Http.open("GET", "./oe/" + selectedItem + "/os/");
-   Http.send();
-   Http.onreadystatechange = function() {
-     if (this.readyState == 4 && this.status == 200) {
-       itemDetails = JSON.parse(Http.responseText);
-       updateTable(selectedItem, itemDetails);
-     }
-   };
- };
+  const Http = new XMLHttpRequest();
+  Http.open("GET", "./oe/" + selectedItem + "/os/");
+  Http.send();
+  Http.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      itemDetails = JSON.parse(Http.responseText);
+      updateTable(selectedItem, itemDetails);
+    }
+  };
+};
 
- function getOrganisationDetails() {
-   const selectedItem = new URL(location.href).searchParams.get('organisation');
-   get("./oe/" + selectedItem + "/os/").then(function(r){
-     item = JSON.parse(r);
-     /* GROUPS */
-     Object.keys(item.groups).forEach(function(g) {
-       var table = createTable("groupssection");
-       addTwoCellsInARow(table, "group", item.groups[g].group +
-         "&#160;&#160;&#160;<a href='/oe/" + selectedItem + "/group/" + item.groups[g].group + "/" +
-         item.groups[g].group + ".npl'>[specification]</a>&#160;<a href='/oe/" + selectedItem +
-         "/group/" + item.groups[g].group + "/debug'>[instance]</a>"
-       );
-       addTwoCellsInARow(table, "well formed", item.groups[g].isWellFormed);
-       var roles = "";
-       Object.keys(item.groups[g].roles).forEach(function(r) {
-         roles += item.groups[g].roles[r].role + " ( " +
-           item.groups[g].roles[r].cardinality + " )";
-         if (item.groups[g].roles[r].superRoles.length > 0) roles += " <- " +
-           item.groups[g].roles[r].superRoles.join(', ');
-         roles += " <br />"
-       });
-       addTwoCellsInARow(table, "roles", roles);
-     });
-     if (Object.keys(item.groups).length <= 0) {
-       p = document.createElement('p');
-       p.innerText = "nothing to show";
-       let s = document.getElementById("groupssection");
-       s.appendChild(p);
-     }
-     /* SCHEMES */
-     Object.keys(item.schemes).forEach(function(s) {
-       var table = createTable("schemessection");
-       addTwoCellsInARow(table, "scheme", item.schemes[s].scheme);
-       addTwoCellsInARow(table, "well formed", item.schemes[s].isWellFormed);
-       addTwoCellsInARow(table, "goals", item.schemes[s].goals.join('<br />'));
-       var missions = "";
-       Object.keys(item.schemes[s].missions).forEach(function(m) {
-         missions += item.schemes[s].missions[m].mission + " ( " +
-           item.schemes[s].missions[m].missionGoals.join(', ') + " ) <br />"
-       });
-       addTwoCellsInARow(table, "missions", missions);
-       addTwoCellsInARow(table, "players", item.schemes[s].players.join('<br />'));
-     });
-     if (Object.keys(item.schemes).length <= 0) {
-       p = document.createElement('p');
-       p.innerText = "nothing to show";
-       let s = document.getElementById("schemessection");
-       s.appendChild(p);
-     }
-     /* NORMS */
-     if (Object.keys(item.norms).length <= 0) {
-       p = document.createElement('p');
-       p.innerText = "nothing to show";
-       let s = document.getElementById("normssection");
-       s.appendChild(p);
-     } else {
-       var table = createTable("normssection");
-       Object.keys(item.norms).forEach(function(n) {
-         addTwoCellsInARow(table, "norm", item.norms[n].norm + ": " +
-           item.norms[n].role + " -> " + item.norms[n].type + " -> " + item.norms[n].mission);
-       });
-     }
-   });
- }
+function getOrganisationDetails() {
+  const selectedItem = new URL(location.href).searchParams.get('organisation');
+  get("./oe/" + selectedItem + "/os/").then(function(r) {
+    item = JSON.parse(r);
+    /* GROUPS */
+    Object.keys(item.groups).forEach(function(g) {
+      var table = createTable("groupssection");
+      addTwoCellsInARow(table, "group", item.groups[g].group +
+        "&#160;&#160;&#160;<a href='/oe/" + selectedItem + "/group/" + item.groups[g].group + "/" +
+        item.groups[g].group + ".npl'>[specification]</a>&#160;<a href='/oe/" + selectedItem +
+        "/group/" + item.groups[g].group + "/debug'>[instance]</a>"
+      );
+      addTwoCellsInARow(table, "well formed", item.groups[g].isWellFormed);
+      var roles = "";
+      Object.keys(item.groups[g].roles).forEach(function(r) {
+        roles += item.groups[g].roles[r].role + " ( " +
+          item.groups[g].roles[r].cardinality + " )";
+        if (item.groups[g].roles[r].superRoles.length > 0) roles += " <- " +
+          item.groups[g].roles[r].superRoles.join(', ');
+        roles += " <br />"
+      });
+      addTwoCellsInARow(table, "roles", roles);
+    });
+    if (Object.keys(item.groups).length <= 0) {
+      p = document.createElement('p');
+      p.innerText = "nothing to show";
+      let s = document.getElementById("groupssection");
+      s.appendChild(p);
+    }
+    /* SCHEMES */
+    Object.keys(item.schemes).forEach(function(s) {
+      var table = createTable("schemessection");
+      addTwoCellsInARow(table, "scheme", item.schemes[s].scheme);
+      addTwoCellsInARow(table, "well formed", item.schemes[s].isWellFormed);
+      addTwoCellsInARow(table, "goals", item.schemes[s].goals.join('<br />'));
+      var missions = "";
+      Object.keys(item.schemes[s].missions).forEach(function(m) {
+        missions += item.schemes[s].missions[m].mission + " ( " +
+          item.schemes[s].missions[m].missionGoals.join(', ') + " ) <br />"
+      });
+      addTwoCellsInARow(table, "missions", missions);
+      addTwoCellsInARow(table, "players", item.schemes[s].players.join('<br />'));
+    });
+    if (Object.keys(item.schemes).length <= 0) {
+      p = document.createElement('p');
+      p.innerText = "nothing to show";
+      let s = document.getElementById("schemessection");
+      s.appendChild(p);
+    }
+    /* NORMS */
+    if (Object.keys(item.norms).length <= 0) {
+      p = document.createElement('p');
+      p.innerText = "nothing to show";
+      let s = document.getElementById("normssection");
+      s.appendChild(p);
+    } else {
+      var table = createTable("normssection");
+      Object.keys(item.norms).forEach(function(n) {
+        addTwoCellsInARow(table, "norm", item.norms[n].norm + ": " +
+          item.norms[n].role + " -> " + item.norms[n].type + " -> " + item.norms[n].mission);
+      });
+    }
+  });
+}
+
+/* modal window */
+function setOrganisationModalWindow() {
+  var modal = document.getElementById('modalorggraph');
+  var span = document.getElementsByClassName("close")[0];
+  document.getElementById("btngroupdiagram").onclick = function() {
+    getOrgGroupGraph();
+    modal.style.display = "block";
+  };
+  document.getElementById("btnschemediagram").onclick = function() {
+    getOrgSchemeGraph();
+    modal.style.display = "block";
+  };
+  document.getElementById("btnnormdiagram").onclick = function() {
+    getOrgNormGraph();
+    modal.style.display = "block";
+  };
+  span.onclick = function() {
+    modal.style.display = "none";
+  };
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+}
+
+function getOrgGroupGraph() {
+  const params = new URL(location.href).searchParams;
+  const selectedOrganisation = params.get('organisation');
+
+  get("./oe/" + selectedOrganisation + "/os").then(function(serialOrg) {
+    const MAX_LENGTH = 35;
+    let dot = [];
+    let org = JSON.parse(serialOrg);
+
+    dot.push("digraph G {graph [rankdir=BT bgcolor=transparent; compound=true;]\n");
+    dot.push("\tsubgraph cluster_SS { \n");
+    dot.push("\t\tpencolor=transparent fontcolor=transparent\n");
+
+    let orglinks = [];
+    org.groups.forEach(function(g) {
+      g.roles.forEach(function(r) {
+        r.superRoles.forEach(function(s) {
+          if (s !== "soc") {
+            dot.push("\t\t\"" + r.role + "\" -> \"" + s + "\" [arrowhead=onormal,arrowsize=1.5];\n");
+          }
+        });
+      });
+    });
+    org.groups.forEach(function(g) {
+      if (g.isWellFormed === true) {
+        dot.push("\t\t\"" + g.group + "\" [label=\"" + g.group + "\",shape=tab, fontname=\"Courier\",style=filled,fillcolor=gold];\n");
+      } else {
+        dot.push("\t\t\"" + g.group + "\" [label=\"" + g.group + "\",shape=tab, fontname=\"Courier\",style=filled,fillcolor=lightgrey];\n");
+      }
+      g.roles.forEach(function(r) {
+        if (r.role !== "soc") {
+          dot.push("\t\t\"" + r.role + "\" [fontname=\"Arial\",shape=box,style=rounded];\n");
+          dot.push("\t\t\"" + g.group + "\" -> \"" + r.role + "\"  [arrowtail=odiamond, arrowhead=none, dir=both, label=\"" + r.cardinality + "\",fontname=\"Times\",arrowsize=1.5];\n");
+        }
+      });
+      g.subGroups.forEach(function(s) {
+        dot.push("\t\t\"" + g.group + "\" -> \"" + s + "\"  [arrowtail=odiamond, arrowhead=none, dir=both, label=\"" + r.cardinality + "\",fontname=\"Times\",arrowsize=1.5];\n");
+      });
+      g.links.forEach(function(l) {
+        let type = "normal";
+        if (l.type === "communication") type = "dot";
+        else if (l.type === "acquaintance") type = "vee";
+        let dir = "";
+        if (l.isBiDir) dir += ",arrowtail=" + type;
+        let shape = "";
+        if (l.scope === "IntraGroup") shape = ",style=dotted";
+        dot.push("\t\t\"" + l.source + "\" -> \"" + l.target + "\" [arrowhead=" + type + dir + shape + "];\n");
+      });
+      g.compatibilities.forEach(function(c) {
+        let dir = "arrowhead=diamond";
+        if (c.isBiDir) dir += ",arrowtail=diamond";
+        let shape = "";
+        if (c.scope === "IntraGroup") shape = ",style=dotted";
+        dot.push("\t\t\"" + c.source + "\" -> \"" + c.target + "\"  [" + dir + shape + "];\n");
+      });
+      g.players.forEach(function(p) {
+        dot.push("\t\t\"" + p.agent + "\" [shape=ellipse];\n");
+        dot.push("\t\t\"" + p.agent + "\" -> \"" + p.role + "\" [arrowsize=0.5];\n");
+      });
+      g.responsibleFor.forEach(function(r) {
+        let fillcolor = "lightgrey";
+        if (r.isWellFormed) fillcolor = "gold";
+        dot.push("\t\t\"" + r.scheme + "\" [shape=hexagon, style=filled, fontname=\"Courier\", fillcolor=" + fillcolor + "];\n");
+        dot.push("\t\t\"" + g.group + "\" -> \"" + r.scheme + "\" [arrowsize=0.5];\n");
+      });
+    });
+    dot.push("}\n");
+    dot.push("\t}\n");
+    dot.push(orglinks.join(" "));
+
+    dot.push("}\n");
+
+    /* Transition follows modal top down movement */
+    var t = d3.transition().duration(750).ease(d3.easeLinear);
+    d3.select("#orgdiagram").graphviz().transition(t).renderDot(dot.join(""));
+  });
+}
+
+function getOrgSchemeGraph() {
+  const params = new URL(location.href).searchParams;
+  const selectedOrganisation = params.get('organisation');
+
+  get("./oe/" + selectedOrganisation + "/os").then(function(serialOrg) {
+    const MAX_LENGTH = 35;
+    let dot = [];
+    let org = JSON.parse(serialOrg);
+
+    dot.push("digraph G {graph [rankdir=BT bgcolor=transparent; compound=true;]\n");
+    dot.push("\tsubgraph cluster_SS { \n");
+    dot.push("\t\tpencolor=transparent fontcolor=transparent\n");
+
+    org.schemes.forEach(function(s) {
+      s.missions.forEach(function(m) {
+        dot.push("\t\t\"" + m.mission + "\" [ " + "label = \"" + m.mission + "\" shape=tab style=filled pencolor=black fillcolor=lightgrey]\n");
+      });
+    });
+    dot.push("}\n");
+    dot.push("\t}\n");
+
+    dot.push("}\n");
+
+    console.log(dot.join(""));
+
+    /* Transition follows modal top down movement */
+    var t = d3.transition().duration(750).ease(d3.easeLinear);
+    d3.select("#orgdiagram").graphviz().transition(t).renderDot(dot.join(""));
+  });
+}
+
+function getOrgNormGraph() {
+  const params = new URL(location.href).searchParams;
+  const selectedOrganisation = params.get('organisation');
+
+  get("./oe/" + selectedOrganisation + "/os").then(function(serialOrg) {
+    const MAX_LENGTH = 35;
+    let dot = [];
+    let org = JSON.parse(serialOrg);
+
+    dot.push("digraph G {graph [rankdir=BT bgcolor=transparent; compound=true;]\n");
+    dot.push("\tsubgraph cluster_SS { \n");
+    dot.push("\t\tpencolor=transparent fontcolor=transparent\n");
+    dot.push("UnderConstruction\n");
+
+    dot.push("}\n");
+    dot.push("\t}\n");
+
+    dot.push("}\n");
+
+    console.log(dot.join(""));
+
+    /* Transition follows modal top down movement */
+    var t = d3.transition().duration(750).ease(d3.easeLinear);
+    d3.select("#orgdiagram").graphviz().transition(t).renderDot(dot.join(""));
+  });
+}
 
 /**
  * END OF FILE
