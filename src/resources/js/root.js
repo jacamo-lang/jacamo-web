@@ -811,14 +811,22 @@ function getOrganisationDetails() {
       var table = createTable("schemessection");
       addTwoCellsInARow(table, "scheme", item.schemes[s].scheme);
       addTwoCellsInARow(table, "well formed", item.schemes[s].isWellFormed);
-      addTwoCellsInARow(table, "goals", item.schemes[s].goals.join('<br />'));
+      var goals = "";
+      Object.keys(item.schemes[s].goals).forEach(function(g) {
+        goals += item.schemes[s].goals[g].goal + "<br />";
+      });
+      addTwoCellsInARow(table, "goals", goals);
       var missions = "";
       Object.keys(item.schemes[s].missions).forEach(function(m) {
         missions += item.schemes[s].missions[m].mission + " ( " +
           item.schemes[s].missions[m].missionGoals.join(', ') + " ) <br />"
       });
       addTwoCellsInARow(table, "missions", missions);
-      addTwoCellsInARow(table, "players", item.schemes[s].players.join('<br />'));
+      var players = "";
+      Object.keys(item.schemes[s].players).forEach(function(p) {
+        players += item.schemes[s].players[p].agent + '<br />';
+      });
+      addTwoCellsInARow(table, "players", players);
     });
     if (Object.keys(item.schemes).length <= 0) {
       p = document.createElement('p');
@@ -958,25 +966,64 @@ function getOrgSchemeGraph() {
     dot.push("digraph G {graph [rankdir=BT bgcolor=transparent; compound=true;]\n");
     dot.push("\tsubgraph cluster_SS { \n");
     dot.push("\t\tpencolor=transparent fontcolor=transparent\n");
-
     org.schemes.forEach(function(s) {
+      s.goals.forEach(function(g) {
+        var color = "black";
+        if (g.isSatisfied) {
+          color = "blue";
+        } else if (s.isWellFormed && g.enabled) {
+          color = "green";
+        }
+        var shape = "plaintext";
+        var peri = "0";
+        if (g.operation !== "") {
+          if (g.operation === "choice") {
+            shape = "underline";
+            peri = "1";
+          } else if (g.operation === "parallel") {
+            shape = "underline";
+            peri = "2";
+          }
+        }
+        dot.push("\t\t" + g.goal + " [label=\"" + g.goal + "\", shape=" + shape + ",peripheries=" + peri + ",fontname=\"fantasy\",fontcolor=" + color + "];\n");
+        if (g.operation !== "") {
+          var previous = null;
+          var ppos = 0;
+          if (g.operation === "sequence")
+            ppos = 1;
+          s.goals.forEach(function(sg) {
+            if (sg.parent === g.goal) {
+              dot.push("\t\t" + sg.goal + " -> " + g.goal + " [samehead=true arrowhead=none];\n");
+              if (ppos > 0) {
+                ppos++;
+                if (previous != null)
+                  dot.push("\t\t" + previous.goal + " -> " + sg.goal + " [style=dotted, constraint=false, arrowhead=empty,arrowsize=0.5,color=grey];\n");
+                previous = sg;
+              }
+            }
+          });
+        }
+      });
       s.missions.forEach(function(m) {
-        dot.push("\t\t\"" + m.mission + "\" [ " + "label = \"" + m.mission + "\" shape=tab style=filled pencolor=black fillcolor=lightgrey]\n");
+        dot.push("\t\t\"" + s.scheme + "." + m.mission + "\" [ label = \"" + m.mission + "\" fontname=\"Arial\", shape=plaintext, style=rounded];\n");
+        m.missionGoals.forEach(function(mg) {
+          dot.push("\t\t\"" + s.scheme + "." + m.mission + "\" -> \"" + mg + "\" [fontname=times,label=\""+m.cardinality+"\",arrowsize=0.5];\n");
+        });
+      });
+      s.players.forEach(function(p) {
+        dot.push("\t\t\"" + p.agent + "\" [ label = \"" + p.agent + "\" fontname=\"Arial\", shape=plaintext, style=rounded];\n");
+        dot.push("\t\t\"" + p.agent + "\" -> \"" + s.scheme + "." + p.mission  + "\" [fontname=times,arrowsize=0.5];\n");
       });
     });
     dot.push("}\n");
     dot.push("\t}\n");
-
     dot.push("}\n");
-
-    console.log(dot.join(""));
 
     /* Transition follows modal top down movement */
     var t = d3.transition().duration(750).ease(d3.easeLinear);
     d3.select("#orgdiagram").graphviz().transition(t).renderDot(dot.join(""));
   });
 }
-
 function getOrgNormGraph() {
   const params = new URL(location.href).searchParams;
   const selectedOrganisation = params.get('organisation');
@@ -989,8 +1036,14 @@ function getOrgNormGraph() {
     dot.push("digraph G {graph [rankdir=BT bgcolor=transparent; compound=true;]\n");
     dot.push("\tsubgraph cluster_SS { \n");
     dot.push("\t\tpencolor=transparent fontcolor=transparent\n");
-    dot.push("UnderConstruction\n");
-
+    org.norms.forEach(function(n) {
+      var s = "bold";
+      if (n.type === "permission")
+        s = "filled";
+      dot.push("\t\t\"" + n.role + "\" [fontname=\"Arial\",shape=box,style=rounded];\n");
+      dot.push("\t\t\"" + n.mission + "\" [fontname=\"Arial\", shape=plaintext, style=rounded];\n");
+      dot.push("\t\t\"" + n.role + "\" -> \"" + n.mission + "\" [arrowhead=inv,style=" + s + "];\n");
+    });
     dot.push("}\n");
     dot.push("\t}\n");
 
