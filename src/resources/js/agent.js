@@ -1,29 +1,20 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-KILL AN AGENT
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* KILL AN AGENT */
 
 function killAg() {
-  /*var selectedAgent = window.location.hash.substr(1);*/
-  var parameters = location.search.substring(1).split("&");
-  var temp = parameters[0].split("=");
-  selectedAgent = unescape(temp[1]);
+  const params = new URL(location.href).searchParams;
+  const selectedAgent = params.get('agent');
 
   var r = confirm("Kill agent '" + selectedAgent + "'?");
   if (r == true) {
-    const Http = new XMLHttpRequest();
-    Http.onreadystatechange = function() {
+    deleteResource("./agents/" + selectedAgent).then(function(resp){
       window.location.assign("./agents.html");
-    };
-    Http.open("DELETE", "./agents/" + selectedAgent);
-    Http.send();
+    });
   } else {
     instantMessage("Don't worry, agent '" + selectedAgent + "' is still here.");
   }
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-INSTANT MESSAGE
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* INSTANT MESSAGE */
 
 const instantMessage = (msg) => {
   if (msg != null) {
@@ -34,9 +25,7 @@ const instantMessage = (msg) => {
   }
 };
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-SHOW MESSAGE IN THE BUFFER IF EXISTS
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* SHOW MESSAGE IN THE BUFFER IF EXISTS */
 
 const showBuffer = () => {
   var buffer = localStorage.getItem("agentBuffer");
@@ -44,67 +33,43 @@ const showBuffer = () => {
   localStorage.removeItem("agentBuffer");
 };
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-SEND COMMANDS TO AN AGENT
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* SEND COMMANDS TO AN AGENT */
 
 function runCMD() {
-  var parameters = location.search.substring(1).split("&");
-  var temp = parameters[0].split("=");
-  selectedAgent = unescape(temp[1]);
+  const params = new URL(location.href).searchParams;
+  const selectedAgent = params.get('agent');
 
-  const Http = new XMLHttpRequest();
-  Http.onreadystatechange = function() {
-    if (Http.readyState == 4 && Http.status == 200) {
-      document.getElementById("inputcmd").value = "";
-      document.getElementById("inputcmd").focus();
-      instantMessage(Http.responseText);
-    }
-  };
-  Http.open("POST", "./agents/" + selectedAgent + "/cmd");
-  Http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   data = "c=" + encodeURIComponent(document.getElementById("inputcmd").value);
-  Http.send(data);
+  post("./agents/" + selectedAgent + "/cmd",data,"application/x-www-form-urlencoded")
+  .then(function(resp){
+    document.getElementById("inputcmd").value = "";
+    document.getElementById("inputcmd").focus();
+    instantMessage(Http.responseText);
+  });
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-LOG FUNCTIONS
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* clear agent's log */
 function delLog() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
 
-  const Http = new XMLHttpRequest();
-  Http.onreadystatechange = function() {
-    if (Http.readyState == 4 && Http.status == 200) {
-      /* Keep focus on command box */
-      document.getElementById("inputcmd").focus();
-      instantMessage('Log is empty.');
-
-    }
-  };
-  Http.open("DELETE", "./agents/" + selectedAgent + "/log");
-  Http.send();
+  deleteResource("./agents/" + selectedAgent + "/log").then(function(resp) {
+    /* Keep focus on command box */
+    document.getElementById("inputcmd").focus();
+    instantMessage('Log is empty.');
+  });
 }
 
 /* show agent's log */
 function showLog() {
-  var parameters = location.search.substring(1).split("&");
-  var temp = parameters[0].split("=");
-  selectedAgent = unescape(temp[1]);
+  const params = new URL(location.href).searchParams;
+  const selectedAgent = params.get('agent');
 
-  const Http = new XMLHttpRequest();
-  Http.onreadystatechange = function() {
-    if (Http.readyState == 4 && Http.status == 200) {
-      var textarea = document.getElementById('log');
-      textarea.innerHTML = Http.responseText;
-      textarea.scrollTop = textarea.scrollHeight;
-    }
-  };
-  Http.open('GET', "./agents/" + selectedAgent + "/log", true);
-  Http.send();
+  get("./agents/" + selectedAgent + "/log").then(function(resp) {
+    var textarea = document.getElementById('log');
+    textarea.innerHTML = resp;
+    textarea.scrollTop = textarea.scrollHeight;
+  });
 }
 
 /* scroll log automatically */
@@ -114,9 +79,7 @@ function setAutoUpdateLog() {
   }, 1000);
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-GET AGENT'S GRAPH
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* GET AGENT'S GRAPH */
 
 /* modal window */
 var modal = document.getElementById('modalinspection');
@@ -139,14 +102,9 @@ function getGraph() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
 
-  const Http = new XMLHttpRequest();
-  Http.onreadystatechange = function() {
-    if (Http.readyState == 4 && Http.status == 200) {
-      renderGraphvizFromAgentJson(selectedAgent, JSON.parse(Http.responseText));
-    }
-  };
-  Http.open('GET', "./agents/" + selectedAgent);
-  Http.send();
+  get("./agents/" + selectedAgent).then(function(resp){
+    renderGraphvizFromAgentJson(selectedAgent, JSON.parse(resp));
+  });
 }
 
 function renderGraphvizFromAgentJson(agName, agentinfo) {
@@ -240,9 +198,7 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
   d3.select("#agentdiagram").graphviz().transition(t).renderDot(dot.join(""));
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-CODE COMPLETION FUNCTIONS
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* CODE COMPLETION FUNCTIONS */
 
 /* get sugestions for the selected agent */
 function updateSuggestions() {
@@ -254,15 +210,9 @@ function updateSuggestions() {
   var temp = parameters[0].split("=");
   selectedAgent = unescape(temp[1]);
 
-  const Http = new XMLHttpRequest();
-  Http.onreadystatechange = function() {
-    if (Http.readyState == 4 && Http.status == 200) {
-      suggestions = JSON.parse(Http.responseText);
-      autocomplete(document.getElementById("inputcmd"), suggestions);
-    }
-  };
-  Http.open('GET', "./agents/" + selectedAgent + "/code", true);
-  Http.send();
+  get("./agents/" + selectedAgent + "/code").then(function(resp) {
+    autocomplete(document.getElementById("inputcmd"), JSON.parse(resp));
+  });
 }
 
 /* automcomplete for cmd box */
@@ -340,9 +290,7 @@ function autocomplete(inp, arr) {
   });
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-AGENT'S MIND (XML FUNCTIONS)
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* AGENT'S MIND (XML FUNCTIONS) */
 
 function getInspectionDetails() {
   /*var selectedAgent = window.location.hash.substr(1);*/
@@ -395,6 +343,6 @@ function displayResult(xmlInput, xsltSheet, elementToAddResult) {
   }
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-END OF THE FILE
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
+ * END OF THE FILE
+ */

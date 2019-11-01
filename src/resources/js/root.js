@@ -33,10 +33,11 @@ function get(url) {
 }
 
 /* POST ON A GIVEN URL, RETURN SERIALISED CONTENT */
-function post(url, data) {
+function post(url, data, type) {
   return new Promise(function(resolve, reject) {
     var req = new XMLHttpRequest();
     req.open('POST', url);
+    if (type != undefined) req.setRequestHeader("Content-type", type);
     req.onload = function() {
       if (req.status == 200) {
         resolve(req.response);
@@ -49,7 +50,26 @@ function post(url, data) {
     };
     req.send(data);
   });
-}
+};
+
+/* SEND A DELETE COMMAND TO A GIVEN RESOURCE */
+let deleteResource = (url) => {
+  return new Promise(function(resolve, reject) {
+    var req = new XMLHttpRequest();
+    req.open('DELETE', url);
+    req.onload = function() {
+      if (req.status == 200) {
+        resolve(req.response);
+      } else {
+        reject(Error(req.statusText));
+      }
+    };
+    req.onerror = function() {
+      reject(Error("Network Error"));
+    };
+    req.send();
+  });
+};
 
 /* TABLE FUNCTIONS: CREATE TABLE IN A SECTION, ADD A ROW IN A TABLE */
 let createTable = (section) => {
@@ -1048,8 +1068,6 @@ function getOrgNormGraph() {
     dot.push("\t}\n");
 
     dot.push("}\n");
-
-    console.log(dot.join(""));
 
     /* Transition follows modal top down movement */
     var t = d3.transition().duration(750).ease(d3.easeLinear);
