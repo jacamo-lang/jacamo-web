@@ -38,212 +38,259 @@ import com.google.gson.Gson;
 
 import cartago.CartagoException;
 import jaca.CAgentArch;
+import jacamo.infra.JaCaMoLauncher;
+import jacamo.project.JaCaMoProject;
+import jacamo.project.parser.ParseException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
+import jason.infra.centralised.BaseCentralisedMAS;
 
 @Singleton
 @Path("/")
 public class RestImpl extends AbstractBinder {
 
-    private CacheControl cc = new CacheControl();
-    {
-        cc.setMaxAge(20);
-    } // in seconds
+	private CacheControl cc = new CacheControl();
+	{
+		cc.setMaxAge(20);
+	} // in seconds
 
-    @Override
-    protected void configure() {
-        bind(new RestImpl()).to(RestImpl.class);
-    }
+	@Override
+	protected void configure() {
+		bind(new RestImpl()).to(RestImpl.class);
+	}
 
-    /**
-     * Get root content, returning index.html from resources/html folder using
-     * chache control and etags
-     * 
-     * @param request used to create etags
-     * @return index.html content
-     */
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public Response getIndexHtml(@Context Request request) {
-        return getHtml("index.html", request);
-    }
+	/**
+	 * Get root content, returning index.html from resources/html folder using
+	 * chache control and etags
+	 * 
+	 * @param request used to create etags
+	 * @return index.html content
+	 */
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	public Response getIndexHtml(@Context Request request) {
+		return getHtml("index.html", request);
+	}
 
-    /**
-     * Get html from resources/html folder using chache control and etags
-     * 
-     * @param file    to be retrieved
-     * @param request used to create etags
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @Path("/{file}")
-    @GET
-    public Response getHtml(@PathParam("file") String file, @Context Request request) {
-        try {
-            /* Only images as png format is being supported */
-            if (file.endsWith(".png")) {
-                URL urlToResource = getClass().getResource("/html/" + file);
-                BufferedImage image = ImageIO.read(urlToResource);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write(image, "png", baos);
-                byte[] imageData = baos.toByteArray();
-                  
-                return Response.ok(new ByteArrayInputStream(imageData),"image/png").cacheControl(cc).build();
-            } else {
-                StringBuilder so = new StringBuilder();
+	/**
+	 * Get html from resources/html folder using chache control and etags
+	 * 
+	 * @param file    to be retrieved
+	 * @param request used to create etags
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@Path("/{file}")
+	@GET
+	public Response getHtml(@PathParam("file") String file, @Context Request request) {
+		try {
+			/* Only images as png format is being supported */
+			if (file.endsWith(".png")) {
+				URL urlToResource = getClass().getResource("/html/" + file);
+				BufferedImage image = ImageIO.read(urlToResource);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ImageIO.write(image, "png", baos);
+				byte[] imageData = baos.toByteArray();
 
-                BufferedReader in = null;
-                File f = new File("src/resources/html/" + file);
-                if (f.exists()) {
-                    in = new BufferedReader(new FileReader(f));
-                } else {
-                    in = new BufferedReader(
-                            new InputStreamReader(RestImpl.class.getResource("/html/" + file).openStream()));
-                }
-                String line = in.readLine();
-                while (line != null) {
-                    so.append(line);
-                    line = in.readLine();
-                }
-                MessageDigest digest = MessageDigest.getInstance("MD5");
-                byte[] hash = digest.digest(so.toString().getBytes(StandardCharsets.UTF_8));
-                String hex = DatatypeConverter.printHexBinary(hash);
-                EntityTag etag = new EntityTag(hex);
-                
-                ResponseBuilder builder = request.evaluatePreconditions(etag);
-                if (builder != null) {
-                    return builder.build();
-                }
+				return Response.ok(new ByteArrayInputStream(imageData), "image/png").cacheControl(cc).build();
+			} else {
+				StringBuilder so = new StringBuilder();
 
-                return Response.ok(so.toString(), MediaType.TEXT_HTML).tag(etag).cacheControl(cc).build();
-            } 
-        } catch (IOException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+				BufferedReader in = null;
+				File f = new File("src/resources/html/" + file);
+				if (f.exists()) {
+					in = new BufferedReader(new FileReader(f));
+				} else {
+					in = new BufferedReader(
+							new InputStreamReader(RestImpl.class.getResource("/html/" + file).openStream()));
+				}
+				String line = in.readLine();
+				while (line != null) {
+					so.append(line);
+					line = in.readLine();
+				}
+				MessageDigest digest = MessageDigest.getInstance("MD5");
+				byte[] hash = digest.digest(so.toString().getBytes(StandardCharsets.UTF_8));
+				String hex = DatatypeConverter.printHexBinary(hash);
+				EntityTag etag = new EntityTag(hex);
 
-        return Response.status(500).build();
-    }
+				ResponseBuilder builder = request.evaluatePreconditions(etag);
+				if (builder != null) {
+					return builder.build();
+				}
 
-    /**
-     * Get XML, JS and CSS resources from corresponding folders /resources/xml,...
-     * uses cache control and etags
-     * 
-     * @param folder  xml, js or css
-     * @param file    name of the file to be retrieved
-     * @param request used to create etags
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @Path("{folder: (?:xml|js|css)}/{file}")
-    @GET
-    public Response getWebResource(@PathParam("folder") String folder, @PathParam("file") String file,
-            @Context Request request) {
-        StringBuilder so = new StringBuilder();
-        try {
-            BufferedReader in = null;
-            File f = new File("src/resources/" + folder + "/" + file);
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f));
-            } else {
-                in = new BufferedReader(
-                        new InputStreamReader(RestImpl.class.getResource("/" + folder + "/" + file).openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line);
-                line = in.readLine();
-            }
+				return Response.ok(so.toString(), MediaType.TEXT_HTML).tag(etag).cacheControl(cc).build();
+			}
+		} catch (IOException | NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
 
-            MessageDigest digest = MessageDigest.getInstance("MD5");
-            byte[] hash = digest.digest(so.toString().getBytes(StandardCharsets.UTF_8));
-            String hex = DatatypeConverter.printHexBinary(hash);
-            EntityTag etag = new EntityTag(hex);
+		return Response.status(500).build();
+	}
 
-            ResponseBuilder builder = request.evaluatePreconditions(etag);
-            if (builder != null) {
-                return builder.build();
-            }
+	/**
+	 * Get XML, JS and CSS resources from corresponding folders /resources/xml,...
+	 * uses cache control and etags
+	 * 
+	 * @param folder  xml, js or css
+	 * @param file    name of the file to be retrieved
+	 * @param request used to create etags
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@Path("{folder: (?:xml|js|css)}/{file}")
+	@GET
+	public Response getWebResource(@PathParam("folder") String folder, @PathParam("file") String file,
+			@Context Request request) {
+		StringBuilder so = new StringBuilder();
+		try {
+			BufferedReader in = null;
+			File f = new File("src/resources/" + folder + "/" + file);
+			if (f.exists()) {
+				in = new BufferedReader(new FileReader(f));
+			} else {
+				in = new BufferedReader(
+						new InputStreamReader(RestImpl.class.getResource("/" + folder + "/" + file).openStream()));
+			}
+			String line = in.readLine();
+			while (line != null) {
+				so.append(line);
+				line = in.readLine();
+			}
 
-            if (folder.equals("xml"))
-                return Response.ok(so.toString(), "text/xml").tag(etag).cacheControl(cc).build();
-            else if (folder.equals("js"))
-                return Response.ok(so.toString(), "application/javascript").tag(etag).cacheControl(cc).build();
-            else
-                return Response.ok(so.toString(), "text/css").tag(etag).cacheControl(cc).build();
+			MessageDigest digest = MessageDigest.getInstance("MD5");
+			byte[] hash = digest.digest(so.toString().getBytes(StandardCharsets.UTF_8));
+			String hex = DatatypeConverter.printHexBinary(hash);
+			EntityTag etag = new EntityTag(hex);
 
-        } catch (IOException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+			ResponseBuilder builder = request.evaluatePreconditions(etag);
+			if (builder != null) {
+				return builder.build();
+			}
 
-        return Response.status(500).build();
-    }
+			if (folder.equals("xml"))
+				return Response.ok(so.toString(), "text/xml").tag(etag).cacheControl(cc).build();
+			else if (folder.equals("js"))
+				return Response.ok(so.toString(), "application/javascript").tag(etag).cacheControl(cc).build();
+			else
+				return Response.ok(so.toString(), "text/css").tag(etag).cacheControl(cc).build();
 
-    /**
-     * Get agent's CArtAgO architecture
-     * 
-     * @param ag Agent object
-     * @return agent's CArtAgO architecture
-     */
-    protected CAgentArch getCartagoArch(Agent ag) {
-        AgArch arch = ag.getTS().getUserAgArch().getFirstAgArch();
-        while (arch != null) {
-            if (arch instanceof CAgentArch) {
-                return (CAgentArch) arch;
-            }
-            arch = arch.getNextAgArch();
-        }
-        return null;
-    }
+		} catch (IOException | NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
 
-    /**
-     * Generates whole MAS overview in JSON format.
-     * 
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @Path("/overview")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getOverviewJSON() {
-        Gson gson = new Gson();
-        Map<String, Object> overview = new HashMap<>();
+		return Response.status(500).build();
+	}
 
-        try {
-            TranslOrg tOrg = new TranslOrg();
-            TranslAg tAg = new TranslAg();
-            TranslEnv tEnv = new TranslEnv();
+	/**
+	 * Get agent's CArtAgO architecture
+	 * 
+	 * @param ag Agent object
+	 * @return agent's CArtAgO architecture
+	 */
+	protected CAgentArch getCartagoArch(Agent ag) {
+		AgArch arch = ag.getTS().getUserAgArch().getFirstAgArch();
+		while (arch != null) {
+			if (arch instanceof CAgentArch) {
+				return (CAgentArch) arch;
+			}
+			arch = arch.getNextAgArch();
+		}
+		return null;
+	}
 
-            List<Object> organisations = new ArrayList<>();
-            overview.put("organisations", organisations);
-            tOrg.getOrganisations().forEach(o -> {
-                organisations.add(tOrg.getSpecification(o));
-            });
+	/**
+	 * Generates whole MAS overview in JSON format.
+	 * 
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@Path("/overview")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getOverviewJSON() {
+		Gson gson = new Gson();
+		Map<String, Object> overview = new HashMap<>();
 
-            List<Object> agents = new ArrayList<>();
-            overview.put("agents", agents);
-            tAg.getAgents().forEach(a -> {
-                try {
-                    agents.add(tAg.getAgentDetails(a));
-                } catch (CartagoException e) {
-                    e.printStackTrace();
-                }
-            });
-            
-            List<Object> workspaces = new ArrayList<>();
-            overview.put("workspaces", workspaces);
-            tEnv.getWorkspaces().forEach(w -> {
-                try {
-                    workspaces.add(tEnv.getWorkspace(w));
-                } catch (CartagoException e) {
-                    e.printStackTrace();
-                }
-            }); 
-            
-            return Response.ok(gson.toJson(overview)).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+		try {
+			TranslOrg tOrg = new TranslOrg();
+			TranslAg tAg = new TranslAg();
+			TranslEnv tEnv = new TranslEnv();
 
-        return Response.status(500).build();
-    }
+			List<Object> organisations = new ArrayList<>();
+			overview.put("organisations", organisations);
+			tOrg.getOrganisations().forEach(o -> {
+				organisations.add(tOrg.getSpecification(o));
+			});
+
+			List<Object> agents = new ArrayList<>();
+			overview.put("agents", agents);
+			tAg.getAgents().forEach(a -> {
+				try {
+					agents.add(tAg.getAgentDetails(a));
+				} catch (CartagoException e) {
+					e.printStackTrace();
+				}
+			});
+
+			List<Object> workspaces = new ArrayList<>();
+			overview.put("workspaces", workspaces);
+			tEnv.getWorkspaces().forEach(w -> {
+				try {
+					workspaces.add(tEnv.getWorkspace(w));
+				} catch (CartagoException e) {
+					e.printStackTrace();
+				}
+			});
+
+			return Response.ok(gson.toJson(overview)).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return Response.status(500).build();
+	}
+
+	/**
+	 * Get list of jcm files available to be launched in JSON format.
+	 * 
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@Path("/projects/")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getProjectsJSON() {
+		return null;
+
+	}
+
+	/**
+	 * Launch a JCM project.
+	 * 
+	 * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+	 *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+	 */
+	@Path("/projects/{projectname}")
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response getProjectJSON(@PathParam("projectname") String projectName) {
+		try {
+			((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().getAgentsNames().forEach(a -> {
+				((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(a, a, 0);
+			});
+			File f = new File("src/jcm/bob.jcm");
+			if (f.exists()) {
+				JaCaMoProject proj = new JaCaMoProject();
+
+				proj.importProject("/src/jcm", f);
+
+				((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).setProject(proj);
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 }

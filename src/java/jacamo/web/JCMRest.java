@@ -21,9 +21,6 @@ import org.apache.zookeeper.server.ServerCnxnFactory;
 import org.apache.zookeeper.server.ZooKeeperServer;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
-import org.glassfish.jersey.message.DeflateEncoder;
-import org.glassfish.jersey.message.GZipEncoder;
-import org.glassfish.jersey.server.filter.EncodingFilter;
 
 import jacamo.platform.DefaultPlatformImpl;
 import jason.infra.centralised.BaseCentralisedMAS;
@@ -111,7 +108,6 @@ public class JCMRest extends DefaultPlatformImpl {
                 System.out.println("Platform (zookeeper) running on "+zkHost);
             }
         }
-        
     }
     
     @Override

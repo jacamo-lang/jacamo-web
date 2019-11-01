@@ -5,10 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jason.asSyntax.ASSyntax;
+import jason.asSyntax.Atom;
+import jason.asSyntax.Term;
+import moise.os.Cardinality;
 import moise.os.OS;
 import moise.os.fs.Goal;
 import moise.os.fs.Mission;
 import moise.os.ns.Norm;
+import moise.os.ss.Compatibility;
+import moise.os.ss.Link;
 import moise.os.ss.Role;
 import ora4mas.nopl.GroupBoard;
 import ora4mas.nopl.OrgBoard;
@@ -73,6 +79,48 @@ public class TranslOrg {
                         subGroups.add(sgi.getId());
                     }
                 }
+                List<Object> links = new ArrayList<>();
+                group.put("links", links);
+                for (Link l : gb.getSpec().getLinks()) {
+                    Map<String, Object> link = new HashMap<>();
+                    link.put("type", l.getTypeStr());
+                    link.put("isBiDir", l.isBiDir());
+                    link.put("scope", l.getScope());
+                    link.put("source", l.getSource().getId());
+                    link.put("target", l.getTarget().getId());
+                    links.add(link);
+                }
+                List<Object> compatibilities = new ArrayList<>();
+                group.put("compatibilities", compatibilities);
+                for (Compatibility c : gb.getSpec().getCompatibilities()) {
+                    Map<String, Object> compatibility = new HashMap<>();
+                    compatibility.put("isBiDir", c.isBiDir());
+                    compatibility.put("scope", c.getScope());
+                    compatibility.put("source", c.getSource().getId());
+                    compatibility.put("target", c.getTarget().getId());
+                    compatibilities.add(compatibility);
+                }
+                List<Object> players = new ArrayList<>();
+                group.put("players", players);
+                for (Player p : gb.getGrpState().getPlayers()) {
+                    Map<String, Object> player = new HashMap<>();
+                    player.put("agent", p.getAg());
+                    player.put("role", p.getTarget());
+                    players.add(player);
+                }
+                List<Object> responsibleFor = new ArrayList<>();
+                group.put("responsibleFor", responsibleFor);
+                for (String s : gb.getGrpState().getSchemesResponsibleFor()) {
+                    Map<String, Object> schemeRF = new HashMap<>();
+                    boolean wf = false;
+                    SchemeBoard sb = findSchemeBoard(s);
+                    if (sb != null)
+                        wf = sb.isWellFormed();
+                    schemeRF.put("isWellFormed", wf);
+                    schemeRF.put("scheme", s);
+                    responsibleFor.add(schemeRF);
+                }
+
             }
         }
 
@@ -84,8 +132,8 @@ public class TranslOrg {
 
                 Map<String, Object> scheme = new HashMap<>();
                 schemes.add(scheme);
-                List<String> goals = new ArrayList<>();
-                addGoalsAInList(sb.getSpec().getRoot(), goals);
+                List<Object> goals = new ArrayList<>();
+                addGoalsAInList(sb, sb.getSpec().getRoot(), null, goals);
                 scheme.put("scheme", sb.getArtId());
                 scheme.put("isWellFormed", sb.isWellFormed());
                 scheme.put("goals", goals);
@@ -101,13 +149,21 @@ public class TranslOrg {
                     for (Goal g : m.getGoals()) {
                         missionGoals.add(g.getId());
                     }
+                    String card = "";
+                    if (! sb.getSpec().getMissionCardinality(m).equals(Cardinality.defaultValue)) {
+                        card = sb.getSpec().getMissionCardinality(m).toStringFormat2();
+                    }
+                    mission.put("cardinality", card);
                     missions.add(mission);
                 }
 
-                List<String> players = new ArrayList<>();
+                List<Object> players = new ArrayList<>();
                 scheme.put("players", players);
                 for (Player p : sb.getSchState().getPlayers()) {
-                    players.add(p.getAg() + " ( " + p.getTarget() + " )");
+                    Map<String, Object> player = new HashMap<>();
+                    player.put("agent", p.getAg());
+                    player.put("mission", p.getTarget());
+                    players.add(player);
                 }
             }
         }
@@ -132,18 +188,42 @@ public class TranslOrg {
 
     }
 
+    private SchemeBoard findSchemeBoard(String id) {
+        for (SchemeBoard sb : SchemeBoard.getSchemeBoards()) {
+            if (sb.getArtId().equals(id))
+                return sb;
+        }
+        return null;
+    }
+
     /**
      * Add goals recursively in a list of string in a format sub-goal <- parent-goal
      * 
-     * @param g    first goal (usually the root goal)
+     * @param sb   scheme board where goals are assigned
+     * @param g    usually the first given is the root goal
+     * @param p    the parent of the given goal (null for root)
      * @param list a list to be recursively updated
      * @return list of strings
      */
-    public List<String> addGoalsAInList(Goal g, List<String> list) {
+    public List<Object> addGoalsAInList(SchemeBoard sb, Goal g, Goal p, List<Object> list) {
+        Map<String, Object> goal = new HashMap<>();
+        goal.put("goal", g.getId());
+        if (p != null)
+            goal.put("parent", p.getId());
+        else
+            goal.put("parent", "");
+        if (g.hasPlan())
+            goal.put("operation", g.getPlan().getOp());
+        else
+            goal.put("operation", "");
+        goal.put("isSatisfied", sb.getSchState().isSatisfied(g));
+        Term tSch = ASSyntax.createString(sb.getSchState().getId());
+        Atom aGoal = new Atom(g.getId());
+        goal.put("enabled", sb.getNormativeEngine().holds(ASSyntax.createLiteral("enabled", tSch, aGoal)));
+        list.add(goal);
         if (g.hasPlan()) {
             for (Goal sg : g.getPlan().getSubGoals()) {
-                list.add(sg.getId() + " <- " + g.getId());
-                addGoalsAInList(sg, list);
+                addGoalsAInList(sb, sg, g, list);
             }
         }
         return list;

@@ -11,21 +11,25 @@
     <structural-specification>
 
         <role-definitions>
+            <role id="role0" />
             <role id="role1" />
             <role id="role2" />
         </role-definitions>
 
         <group-specification id="group1">
             <roles>
+                <role id="role0" min="1" max="1" />
                 <role id="role1" min="1" max="1" />
-                <role id="role2" min="0" max="1" />
+                <role id="role2" min="1" max="1" />
             </roles>
 
             <links>
-                <link from="role1" to="role2" type="authority"
+                <link from="role0" to="role1" type="authority"
+                  scope="intra-group" bi-dir="false" />
+                <link from="role0" to="role2" type="authority"
                     scope="intra-group" bi-dir="false" />
-                <link from="role2" to="role1" type="communication"
-                    scope="intra-group" bi-dir="false" />
+                <link from="role1" to="role2" type="communication"
+                    scope="intra-group" bi-dir="true" />
             </links>
             <formation-constraints>
                 <compatibility from="role1" to="role2" />
@@ -37,14 +41,17 @@
 
     <functional-specification>
         <scheme id="scheme1">
-            <goal id="start">
+            <goal id="goal0">
                 <plan operator="sequence">
                     <goal id="goal1" />
                     <goal id="goal2" />
                 </plan>
             </goal>
 
-            <mission id="mission1" min="1" max="1">
+            <mission id="mission0" min="0" max="1">
+                <goal id="goal0" />
+            </mission>
+            <mission id="mission1" min="0" max="1">
                 <goal id="goal1" />
             </mission>
             <mission id="mission2" min="0" max="1">
@@ -54,10 +61,15 @@
     </functional-specification>
 
     <normative-specification>
-        <norm id="norm1" type="obligation" role="role2"
-            mission="mission2" />
-        <norm id="norm2" type="obligation" role="role1"
+      <properties>
+    <property id="default_management"  value="ignore" />
+</properties>
+      <norm id="norm0" type="obligation" role="role0"
+          mission="mission0" />
+        <norm id="norm1" type="obligation" role="role1"
             mission="mission1" />
+        <norm id="norm2" type="obligation" role="role2"
+            mission="mission2" />
     </normative-specification>
 
 </organisational-specification>
