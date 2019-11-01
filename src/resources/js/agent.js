@@ -44,7 +44,8 @@ function runCMD() {
   .then(function(resp){
     document.getElementById("inputcmd").value = "";
     document.getElementById("inputcmd").focus();
-    instantMessage(Http.responseText);
+    instantMessage(resp);
+    window.location.reload();
   });
 }
 
