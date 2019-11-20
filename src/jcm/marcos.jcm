@@ -30,6 +30,6 @@ mas marcos {
     //}
 
     //platform: jacamo.web.JCMRest("--connect localhost:2181") // connects to platform at 2181
-    platform: jacamo.web.JCMRest("--main 2181 --restPort 8080") // connects to platform at 2181
+    platform: jacamo.web.JCMWeb("--main 2181 --restPort 8080") // connects to platform at 2181
 
 }

@@ -2,11 +2,11 @@ package jacamo.web;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -43,7 +43,6 @@ import org.w3c.dom.Document;
 
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
-
 import com.google.gson.Gson;
 
 import cartago.ArtifactId;
@@ -52,11 +51,12 @@ import cartago.CartagoException;
 import cartago.CartagoService;
 import cartago.WorkspaceId;
 import jaca.CAgentArch;
+import jacamo.rest.Message;
 import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
-import jason.asSemantics.GoalListenerForMetaEvents;
 import jason.asSemantics.Circumstance;
+import jason.asSemantics.GoalListenerForMetaEvents;
 import jason.asSemantics.IntendedMeans;
 import jason.asSemantics.Intention;
 import jason.asSemantics.Option;
@@ -82,7 +82,7 @@ import jason.stdlib.print;
  */
 @Singleton
 @Path("/agents")
-public class RestImplAg extends AbstractBinder {
+public class WebImplAg extends AbstractBinder { // TODO: replace by extends RestImplAg and move some code to jacamo-rest
 
     Map<String, StringBuilder> agLog = new HashMap<>();
     TranslAg tAg = new TranslAg();
@@ -90,7 +90,7 @@ public class RestImplAg extends AbstractBinder {
 
     @Override
     protected void configure() {
-        bind(new RestImplAg()).to(RestImplAg.class);
+        bind(new WebImplAg()).to(WebImplAg.class);
     }
 
     /**

@@ -9,11 +9,13 @@ import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.EncodingFilter;
 
+import jacamo.rest.RestImplDF;
+
 @ApplicationPath("/")
-public class RestAppConfig extends ResourceConfig {
-    public RestAppConfig() {
+public class WebAppConfig extends ResourceConfig {
+    public WebAppConfig() {
         // Registering resource classes
-        registerClasses(RestImpl.class, RestImplAg.class, RestImplDF.class, RestImplEnv.class, RestImplOrg.class);
+        registerClasses(RestImpl.class, WebImplAg.class, RestImplDF.class, RestImplEnv.class, RestImplOrg.class);
         
         // gzip compression
         registerClasses(EncodingFilter.class, GZipEncoder.class, DeflateEncoder.class);
