@@ -12,10 +12,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.inject.Singleton;
@@ -32,22 +28,18 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.DatatypeConverter;
 
-import org.glassfish.jersey.internal.inject.AbstractBinder;
-
-import com.google.gson.Gson;
-
-import cartago.CartagoException;
 import jaca.CAgentArch;
 import jacamo.infra.JaCaMoLauncher;
 import jacamo.project.JaCaMoProject;
 import jacamo.project.parser.ParseException;
+import jacamo.rest.RestImpl;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
 import jason.infra.centralised.BaseCentralisedMAS;
 
 @Singleton
 @Path("/")
-public class RestImpl extends AbstractBinder {
+public class WebImpl extends RestImpl {
 
     private CacheControl cc = new CacheControl();
     {
@@ -56,7 +48,7 @@ public class RestImpl extends AbstractBinder {
 
     @Override
     protected void configure() {
-        bind(new RestImpl()).to(RestImpl.class);
+        bind(new WebImpl()).to(WebImpl.class);
     }
 
     /**
@@ -102,7 +94,7 @@ public class RestImpl extends AbstractBinder {
                     in = new BufferedReader(new FileReader(f));
                 } else {
                     in = new BufferedReader(
-                            new InputStreamReader(RestImpl.class.getResource("/html/" + file).openStream()));
+                            new InputStreamReader(WebImpl.class.getResource("/html/" + file).openStream()));
                 }
                 String line = in.readLine();
                 while (line != null) {
@@ -150,7 +142,7 @@ public class RestImpl extends AbstractBinder {
                 in = new BufferedReader(new FileReader(f));
             } else {
                 in = new BufferedReader(
-                        new InputStreamReader(RestImpl.class.getResource("/" + folder + "/" + file).openStream()));
+                        new InputStreamReader(WebImpl.class.getResource("/" + folder + "/" + file).openStream()));
             }
             String line = in.readLine();
             while (line != null) {
@@ -198,59 +190,6 @@ public class RestImpl extends AbstractBinder {
         }
         return null;
     }
-
-    /**
-     * Generates whole MAS overview in JSON format.
-     * 
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @Path("/overview")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getOverviewJSON() {
-        Gson gson = new Gson();
-        Map<String, Object> overview = new HashMap<>();
-
-        try {
-            TranslOrg tOrg = new TranslOrg();
-            TranslAg tAg = new TranslAg();
-            TranslEnv tEnv = new TranslEnv();
-
-            List<Object> organisations = new ArrayList<>();
-            overview.put("organisations", organisations);
-            tOrg.getOrganisations().forEach(o -> {
-                organisations.add(tOrg.getSpecification(o));
-            });
-
-            List<Object> agents = new ArrayList<>();
-            overview.put("agents", agents);
-            tAg.getAgents().forEach(a -> {
-                try {
-                    agents.add(tAg.getAgentDetails(a));
-                } catch (CartagoException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            List<Object> workspaces = new ArrayList<>();
-            overview.put("workspaces", workspaces);
-            tEnv.getWorkspaces().forEach(w -> {
-                try {
-                    workspaces.add(tEnv.getWorkspace(w));
-                } catch (CartagoException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            return Response.ok(gson.toJson(overview)).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Response.status(500).build();
-    }
-
     /**
      * Get list of jcm files available to be launched in JSON format.
      * 

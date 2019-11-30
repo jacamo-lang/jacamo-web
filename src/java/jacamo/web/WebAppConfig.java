@@ -16,7 +16,7 @@ import jacamo.rest.RestImplJCM;
 public class WebAppConfig extends ResourceConfig {
     public WebAppConfig() {
         // Registering resource classes
-        registerClasses(RestImpl.class, WebImplAg.class, RestImplDF.class, RestImplEnv.class, RestImplOrg.class, RestImplJCM.class);
+        registerClasses(WebImpl.class, WebImplAg.class, RestImplDF.class, WebImplEnv.class, WebImplOrg.class, RestImplJCM.class);
         
         // gzip compression
         registerClasses(EncodingFilter.class, GZipEncoder.class, DeflateEncoder.class);
