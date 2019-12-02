@@ -190,46 +190,5 @@ public class WebImpl extends RestImpl {
         }
         return null;
     }
-    /**
-     * Get list of jcm files available to be launched in JSON format.
-     * 
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @Path("/projects/")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getProjectsJSON() {
-        return null;
-
-    }
-
-    /**
-     * Launch a JCM project.
-     * 
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @Path("/projects/{projectname}")
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response getProjectJSON(@PathParam("projectname") String projectName) {
-        try {
-            ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().getAgentsNames().forEach(a -> {
-                ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(a, a, 0);
-            });
-            File f = new File("src/jcm/bob.jcm");
-            if (f.exists()) {
-                JaCaMoProject proj = new JaCaMoProject();
-
-                proj.importProject("/src/jcm", f);
-
-                ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).setProject(proj);
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
+    
 }

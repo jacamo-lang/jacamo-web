@@ -307,6 +307,45 @@ function newArt() {
  * OVERVIEW FUNCTIONS
  */
 
+
+ /*Get list of agent from backend*/
+ function getMASs() {
+   get("./jcm").then(function(resp) {
+     updateMASMenu("nav-drawer", JSON.parse(resp), true);
+   });
+ };
+
+ function updateMASMenu(nav, jcms, addCloseButton) {
+
+   if (addCloseButton) {
+     const closeButton = document.createElement('label');
+     closeButton.setAttribute("for", "doc-drawer-checkbox");
+     closeButton.setAttribute("class", "button drawer-x-close");
+     document.getElementById(nav).appendChild(closeButton);
+     var h3 = document.createElement("h3");
+     h3.innerHTML = "&#160";
+     document.getElementById(nav).appendChild(h3);
+   }
+
+   jcms.forEach(function(n) {
+     var lag = document.createElement('a');
+     lag.setAttribute("href", "./index.html");
+     /*lag.setAttribute('onclick', '(function(){getaMAS(' + n + ');})()');*/
+     lag.onclick = function() {
+        getaMAS(n);
+     };
+     lag.innerHTML = "<h5>" + n.substr(0,n.length-4) + "</h5>";
+     document.getElementById(nav).appendChild(lag);
+   });
+ }
+
+ function getaMAS(mas) {
+   get("./jcm/" + mas).then(function(resp) {
+     window.location.assign("./index.html");
+     window.location.reload();
+   });
+ };
+
 /* WHOLE SYSTEM AS DOT */
 function getMASAsDot() {
   let dot = [];

@@ -1562,7 +1562,7 @@ footer.sticky {
 }
 
 /* drawer button to close menu*/
-[type="checkbox"].drawer + * .drawer-close {
+[type="checkbox"].drawer + * .drawer-close, [type="checkbox"].drawer + * .drawer-x-close {
   position: absolute;
   top: var(--universal-margin);
   right: var(--universal-margin);
@@ -1575,7 +1575,7 @@ footer.sticky {
   transition: background 0.3s;
 }
 
-[type="checkbox"].drawer + * .drawer-close:before {
+[type="checkbox"].drawer + * .drawer-close:before, [type="checkbox"].drawer + * .drawer-x-close:before {
   display: block;
   content: '\00D7';
   color: var(--drawer-close-color);
@@ -1586,7 +1586,8 @@ footer.sticky {
   text-align: center;
 }
 
-[type="checkbox"].drawer + * .drawer-close:hover, [type="checkbox"].drawer + * .drawer-close:focus {
+[type="checkbox"].drawer + * .drawer-close:hover, [type="checkbox"].drawer + * .drawer-close:focus,
+[type="checkbox"].drawer + * .drawer-x-close:hover, [type="checkbox"].drawer + * .drawer-x-close:focus {
   background: var(--drawer-hover-back-color);
 }
 
