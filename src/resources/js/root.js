@@ -451,11 +451,9 @@ function getArtifactDetails() {
           let content = "";
           Object.keys(art[p]).forEach(function(a) {
             if (p === "properties") {
-              let subcontent = "";
               Object.keys(art[p][a]).forEach(function(b) {
-                subcontent += b + "(" + art[p][a][b] + ")<br />";
+                content += b + "(" + art[p][a][b] + ")<br />";
               });
-              addTwoCellsInARow(table, p, subcontent);
             } else {
               content += art[p][a] + "<br />"
             }

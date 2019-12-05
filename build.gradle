@@ -139,6 +139,17 @@ task marcos (type: JavaExec, dependsOn: 'classes') {
     classpath sourceSets.main.runtimeClasspath
 }
 
+task beehive (type: JavaExec, dependsOn: 'classes') {
+    group      ' JaCaMo'
+    description 'runs agent beehive'
+    doFirst {
+        mkdir 'log'
+    }
+    main 'jacamo.infra.JaCaMoLauncher'
+    args 'src/jcm/beehive.jcm'
+    classpath sourceSets.main.runtimeClasspath
+}
+
 task fixTab {
     ant.fixcrlf(eol: 'lf',  includes: '**/*.txt,**/*.bat, **/*.adoc', srcdir: '.')
     ant.fixcrlf(tab: 'remove', tablength: '4', javafiles: 'true', includes: '**/*.java,**/*.xml', srcdir: 'src')
