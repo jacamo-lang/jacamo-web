@@ -14,17 +14,6 @@ function killAg() {
   }
 }
 
-/* INSTANT MESSAGE */
-
-const instantMessage = (msg) => {
-  if (msg != null) {
-    $('#top-alert-message').text(msg);
-    $('#top-alert').fadeTo(2000+(msg.length*10), 500).slideUp(500, function() {
-      $('#top-alert').slideUp(500);
-    });
-  }
-};
-
 /* SHOW MESSAGE IN THE BUFFER IF EXISTS */
 
 const showBuffer = () => {

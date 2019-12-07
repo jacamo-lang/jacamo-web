@@ -90,6 +90,17 @@ function addTwoCellsInARow(table, p, v) {
   cellDetail.innerHTML = v;
 }
 
+/* INSTANT MESSAGE - HTML must have a top-alert DIV with a top-alert-message LABEL */
+const instantMessage = (msg) => {
+  if (msg != null) {
+    $('#top-alert-message').text(msg);
+    $('#top-alert').fadeTo(2000+(msg.length*10), 500).slideUp(500, function() {
+      $('#top-alert').slideUp(500);
+    });
+  }
+};
+
+
 /**
  * DF FUNCTIONS
  */
@@ -186,12 +197,6 @@ function getAgents() {
 };
 
 function updateAgentsMenu(nav, agents, addCloseButton) {
-  /* Remove all existing children from the menu*/
-  var menu = document.getElementById(nav);
-  while (menu.firstChild) {
-    menu.removeChild(menu.firstChild);
-  }
-
   if (addCloseButton) {
     const closeButton = document.createElement('label');
     closeButton.setAttribute("for", "doc-drawer-checkbox");
@@ -330,13 +335,53 @@ function newArt() {
    jcms.forEach(function(n) {
      var lag = document.createElement('a');
      lag.setAttribute("href", "./index.html");
-     /*lag.setAttribute('onclick', '(function(){getaMAS(' + n + ');})()');*/
-     lag.onclick = function() {
-        getaMAS(n);
-     };
+     lag.onclick = function() { getaMAS(n); };
      lag.innerHTML = "<h5>" + n.substr(0,n.length-4) + "</h5>";
      document.getElementById(nav).appendChild(lag);
    });
+
+   var br = document.createElement("br");
+   document.getElementById(nav).appendChild(br);
+   document.getElementById(nav).appendChild(br);
+   var ldag = document.createElement('a');
+   ldag.onclick = function() {
+     if (confirm("Kill all agents?") === true) {
+       deleteResource("./agents").then(function(r){
+         instantMessage("Agents killed!");
+         setTimeout(window.location.reload(),1000);
+       });
+     } else {
+       instantMessage("Operation cancelled!")
+     };
+   };
+   ldag.innerHTML = "kill all agents";
+   document.getElementById(nav).appendChild(ldag);
+   var ldar = document.createElement('a');
+   ldar.onclick = function() {
+     if (confirm("dispose all artifacts?") === true) {
+       deleteResource("./workspaces").then(function(r){
+         instantMessage("Artifacts disposed!");
+         setTimeout(window.location.reload(),1000);
+       });
+     } else {
+       instantMessage("Operation cancelled!")
+     };
+   };
+   ldar.innerHTML = "dispose all artifacts";
+   document.getElementById(nav).appendChild(ldar);
+   var ldor = document.createElement('a');
+   ldor.onclick = function() {
+     if (confirm("disband all organisations?") === true) {
+       deleteResource("./oe").then(function(r){
+         instantMessage("Organisations disbanded!");
+         setTimeout(window.location.reload(),1000);
+       });
+     } else {
+       instantMessage("Operation cancelled!")
+     };
+   };
+   ldor.innerHTML = "disband all organisations";
+   document.getElementById(nav).appendChild(ldor);
  }
 
  function getaMAS(mas) {
@@ -634,15 +679,17 @@ function updateWorkspaceMenu(nav, ws, ar, addCloseButton) {
         }
       });
       /* Bypass for promisses challenge. Did I just printed the last element content? */
-      if (ws.sort()[ws.length - 1] === n) {
-        var br = document.createElement("br");
-        document.getElementById(nav).appendChild(br);
-        document.getElementById(nav).appendChild(br);
-        var lnew = document.createElement('a');
-        lnew.setAttribute("href", "./artifact_new.html");
-        lnew.innerHTML = "create template";
-        document.getElementById(nav).appendChild(lnew);
-      }
+      setTimeout(function(f) {
+        if (ws[ws.length -1] === n) {
+          var br = document.createElement("br");
+          document.getElementById(nav).appendChild(br);
+          document.getElementById(nav).appendChild(br);
+          var lnew = document.createElement('a');
+          lnew.setAttribute("href", "./artifact_new.html");
+          lnew.innerHTML = "create template";
+          document.getElementById(nav).appendChild(lnew);
+        }
+      },500);
     });
   });
 }

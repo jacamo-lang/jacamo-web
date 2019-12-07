@@ -29,13 +29,9 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.DatatypeConverter;
 
 import jaca.CAgentArch;
-import jacamo.infra.JaCaMoLauncher;
-import jacamo.project.JaCaMoProject;
-import jacamo.project.parser.ParseException;
 import jacamo.rest.RestImpl;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
-import jason.infra.centralised.BaseCentralisedMAS;
 
 @Singleton
 @Path("/")

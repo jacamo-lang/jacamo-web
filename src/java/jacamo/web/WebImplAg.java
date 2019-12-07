@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -23,7 +24,12 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.google.gson.Gson;
 
+import cartago.ArtifactId;
+import cartago.CartagoException;
+import cartago.CartagoService;
+import jacamo.infra.JaCaMoLauncher;
 import jacamo.rest.RestImplAg;
+import jacamo.rest.TranslEnv;
 import jason.asSemantics.Agent;
 import jason.asSemantics.GoalListenerForMetaEvents;
 import jason.infra.centralised.BaseCentralisedMAS;
@@ -154,6 +160,43 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             e.printStackTrace();
         }
 
+        return Response.status(500).build();
+    }
+    
+    /**
+     * Kill all agents.
+     * 
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    @DELETE
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response killAllAgents() {
+        try {
+            ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().getAgentsNames().forEach(a -> {
+                ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(a, a, 0);
+
+                // make sure you only answer after the agent was completely deleted
+                while (((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getAg(a) != null)
+                    ;
+
+                // make sure agent's body was disposed
+                TranslEnv tEnv = new TranslEnv();
+                for (String wrksName : tEnv.getWorkspaces()) {
+                    try {
+                        for (ArtifactId aid : CartagoService.getController(wrksName).getCurrentArtifacts()) {
+                            if (aid.getName().equals(a + "-body"))
+                                CartagoService.getController(wrksName).removeArtifact(aid.getName());
+                        }
+                    } catch (CartagoException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return Response.ok().entity("Agents deleted!").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return Response.status(500).build();
     }
 }

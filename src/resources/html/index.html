@@ -10,6 +10,13 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="manifest" href="/site.webmanifest">
+  <style>
+  #overviewgraph svg {
+    height: 100%;
+    max-width: 100%;
+    width: auto;
+  }
+</style>
 </head>
 
 <body>
@@ -40,11 +47,18 @@
 
     <div class="second-row" id="full-content">
 
+      <!-- Autohiding dialog -->
+      <div role="dialog" aria-labelledby="dialog-title" id="top-alert">
+        <div class="card fluid">
+          <label for="modal-control" class="modal-close" id="top-alert-message"></label>
+        </div>
+      </div>
+
       <div id="root">
         <div class="row" id="doc-wrapper">
           <main class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="doc-content">
             <center>
-              <object id="overviewgraph"></object>
+              <div id="overviewgraph" style="height: 100%;"></div>
             </center>
           </main>
         </div>
@@ -52,11 +66,13 @@
     </div>
 
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="//d3js.org/d3.v4.min.js"></script>
   <script src="https://unpkg.com/viz.js@1.8.1/viz.js" type="javascript/worker"></script>
   <script src="https://unpkg.com/d3-graphviz@2.6.1/build/d3-graphviz.js"></script>
   <script src="/js/root.js"></script>
   <script>
+    $('#top-alert').hide();
     getMASs();
     getMASAsDot();
   </script>

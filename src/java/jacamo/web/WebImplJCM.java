@@ -23,10 +23,8 @@ import org.glassfish.jersey.internal.inject.AbstractBinder;
 
 import com.google.gson.Gson;
 
-import jacamo.infra.JaCaMoLauncher;
 import jacamo.project.JaCaMoProject;
 import jacamo.project.parser.JaCaMoProjectParser;
-import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.RunCentralisedMAS;
 import jason.mas2j.AgentParameters;
 import jason.runtime.RuntimeServices;
@@ -124,9 +122,6 @@ public class WebImplJCM extends AbstractBinder {
     @Produces(MediaType.TEXT_PLAIN)
     public Response getProjectJSON(@PathParam("projectname") String projectName) {
         try {
-            ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().getAgentsNames().forEach(a -> {
-                ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(a, a, 0);
-            });
             File f = new File("src/jcm/" + projectName);
             if (f.exists()) {
                 BufferedReader in = new BufferedReader(new FileReader(f));
@@ -144,11 +139,12 @@ public class WebImplJCM extends AbstractBinder {
                 }
                 
                 // TODO: create workspaces, orgs, ...
+                return Response.ok().entity("Project " + projectName + " lanched!").build();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return Response.status(500).build();
     }
 
 }
