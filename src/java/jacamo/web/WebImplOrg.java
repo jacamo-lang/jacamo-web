@@ -51,7 +51,7 @@ public class WebImplOrg extends RestImplOrg {
                 os.getNS().removeNorms(n.getRole());
             }
 
-        	/*
+            /*
             List<String> organisationalArtifacts = Arrays.asList("ora4mas.nopl.GroupBoard", "ora4mas.nopl.OrgBoard",
                   "ora4mas.nopl.SchemeBoard", "ora4mas.nopl.NormativeBoard", "ora4mas.light.LightOrgBoard",
                   "ora4mas.light.LightNormativeBoard", "ora4mas.light.LightGroupBoard",
@@ -68,7 +68,7 @@ public class WebImplOrg extends RestImplOrg {
                     }
                 }
             }
-			*/
+            */
             
             return Response.ok().entity("Organisations disbanded!").build();
         } catch (Exception e) {
