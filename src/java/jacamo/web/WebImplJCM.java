@@ -41,8 +41,10 @@ import jaca.CAgentArch;
 import jaca.CartagoEnvironment;
 import jaca.JavaLibrary;
 import jaca.NameSpaceOp;
+import jacamo.infra.JaCaMoLauncher;
 import jacamo.platform.Cartago;
 import jacamo.platform.Moise;
+import jacamo.platform.Platform;
 import jacamo.project.JaCaMoGroupParameters;
 import jacamo.project.JaCaMoOrgParameters;
 import jacamo.project.JaCaMoProject;
@@ -170,61 +172,15 @@ public class WebImplJCM extends AbstractBinder {
 
                 JaCaMoProjectParser parser = new JaCaMoProjectParser(in);
                 JaCaMoProject project = new JaCaMoProject();
-
                 project = parser.parse("src/jcm/" + projectName);
 
-                // TODO: create organisations
-                for (JaCaMoOrgParameters op : project.getOrgs()) {
-                    System.out.println("o1: " + op.toString());
-                    System.out.println("o2: " + op.getName());
-                    if (!CartagoService.getNode().getWorkspaces().contains(op.getName()))
-                        CartagoService.createWorkspace(op.getName());
-                    
-                    WorkspaceId wid = ctx.joinWorkspace(op.getName());
-                    op.addParameter("source", project.getOrgPaths().fixPath(op.getParameter("source")));
-                    System.out.println("o3: " + op.toString());
-                    ArtifactId org = ctx.makeArtifact(wid, op.getName(), OrgBoard.class.getName(), new Object[] { op.getParameter("source") });
-
-                    // schemes
-                    for (JaCaMoSchemeParameters s: op.getSchemes()) {
-                        OpFeedbackParam<ArtifactId> fb = new OpFeedbackParam<>();
-                        ctx.doAction(org, new Op("createScheme", new Object[] { s.getName(), s.getType(), fb} ));
-                        //TODO: owner...
-                    }
-
-                    // groups
-                    for (JaCaMoGroupParameters g: op.getGroups()) {
-                        OpFeedbackParam<ArtifactId> fb = new OpFeedbackParam<>();
-                        ctx.doAction(org, new Op("createGroup", new Object[] { g.getName(), g.getType(), fb} ));
-                        //TODO: subgroups, responsible...
-                    }
-                }                
-                               
-                //TODO: agents must focus when it is set
-                // create agents
-                RuntimeServices rt = RunCentralisedMAS.getRunner().getRuntimeServices();
-                for (AgentParameters ap : project.getAgents()) {
-                    for (int i = 0; i < ap.getNbInstances(); i++) {
-                        rt.createAgent(ap.getAgName(), ap.asSource.toString(), ap.agClass.getClassName(),
-                                ap.getAgArchClasses(), ap.getBBClass(), ap.getAsSetts(false, false), null);
-                        rt.startAgent(ap.getAgName());
-                    }
-                }
-
-                // create workspaces and artifacts (if not exist)
-                for (JaCaMoWorkspaceParameters wp : project.getWorkspaces()) {
-                    if (!CartagoService.getNode().getWorkspaces().contains(wp.getName()))
-                        CartagoService.createWorkspace(wp.getName());
-
-                    WorkspaceId wid = ctx.joinWorkspace(wp.getName());
-                    for (String aName : wp.getArtifacts().keySet()) {
-                        if (!artifactExists(wp.getName(), aName)) {
-                            ctx.makeArtifact(wid, aName, wp.getArtifacts().get(aName).getClassName());
-                        }
-                    }
-
-                }
-
+                createEnvironment(project);
+                TimeUnit.SECONDS.sleep(1);               
+                createOrganisation(project);
+                TimeUnit.SECONDS.sleep(1);                      
+                createAgs(project);
+                TimeUnit.SECONDS.sleep(1);                      
+                startAgs(project);
             }
 
             return Response.ok().entity("Project " + projectName + " lanched!").build();
@@ -232,6 +188,64 @@ public class WebImplJCM extends AbstractBinder {
             e.printStackTrace();
         }
         return Response.status(500).build();
+    }
+
+    private void startAgs(JaCaMoProject project) {
+        RuntimeServices rt = RunCentralisedMAS.getRunner().getRuntimeServices();
+        for (AgentParameters ap : project.getAgents()) {
+            for (int i = 0; i < ap.getNbInstances(); i++) 
+                rt.startAgent(ap.getAgName());
+        }
+        //TODO: agents must focus when it is set
+    }
+
+    private void createAgs(JaCaMoProject project) throws Exception {
+        RuntimeServices rt = RunCentralisedMAS.getRunner().getRuntimeServices();
+        for (AgentParameters ap : project.getAgents()) {
+            for (int i = 0; i < ap.getNbInstances(); i++)
+                rt.createAgent(ap.getAgName(), ap.asSource.toString(), ap.agClass.getClassName(),
+                        ap.getAgArchClasses(), ap.getBBClass(), ap.getAsSetts(false, false), null);
+        }
+    }
+
+    private void createOrganisation(JaCaMoProject project) throws CartagoException {
+        Moise m = null;
+        for (Platform p : ((JaCaMoLauncher)JaCaMoLauncher.getJaCaMoRunner()).getPlatforms()) 
+            if (p instanceof Moise) 
+                m = (Moise) p;
+        if (m == null) {
+            m = new Moise();
+            m.init(new String[] {});
+        }
+        m.setJcmProject(project);
+        m.start();
+    }
+
+    private void createEnvironment(JaCaMoProject project) throws InterruptedException {
+        
+/*        // create workspaces and artifacts (if not exist)
+        for (JaCaMoWorkspaceParameters wp : project.getWorkspaces()) {
+            if (!CartagoService.getNode().getWorkspaces().contains(wp.getName()))
+                CartagoService.createWorkspace(wp.getName());
+
+            WorkspaceId wid = ctx.joinWorkspace(wp.getName());
+            for (String aName : wp.getArtifacts().keySet()) {
+                if (!artifactExists(wp.getName(), aName)) {
+                    ctx.makeArtifact(wid, aName, wp.getArtifacts().get(aName).getClassName());
+                }
+            }
+
+        }
+*/
+        for (Platform p : ((JaCaMoLauncher)JaCaMoLauncher.getJaCaMoRunner()).getPlatforms()) {
+            if (p instanceof Cartago) {
+                Cartago c = (Cartago) p;
+                c.setJcmProject(project);
+                c.start();
+
+                TimeUnit.SECONDS.sleep(1);               
+            }
+        }
     }
     
     public boolean artifactExists(String wksName, String artName) throws CartagoException {

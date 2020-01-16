@@ -35,6 +35,9 @@ public class WebImplOrg extends RestImplOrg {
     @Produces(MediaType.TEXT_PLAIN)
     public Response disbandAllOrganisations() {
         try {
+            //precisa ter um agente dando comando
+            //destruir atraves do orgboard, nao dos grupos...
+            
             Optional<OrgBoard> ob = OrgBoard.getOrbBoards().stream().findFirst();
             OS os = OS.loadOSFromURI(ob.get().getOSFile());
             

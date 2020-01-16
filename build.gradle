@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.jacamo' , name: 'jacamo'   , version: '0.8'  , changing: true , transitive: true
+//    compile group: 'org.jacamo' , name: 'jacamo'   , version: 'jacamo-0.9-SNAPSHOT'  , changing: true , transitive: true
 //	compile 'org.jacamo:jacamo:0.8'
 	compile 'org.jacamo:jacamo-rest:0.3-SNAPSHOT'
 	
@@ -65,7 +65,10 @@ dependencies {
 	compile 'org.glassfish.tyrus:tyrus-container-grizzly:1.1'
 	
 	  // https://mvnrepository.com/artifact/net.openhft/compiler
-  compile group: 'net.openhft', name: 'compiler', version: '2.3.1'
+  	compile group: 'net.openhft', name: 'compiler', version: '2.3.1'
+  	//compile files('lib/jaca-2.4.jar')
+  	compile files('lib/jacamo-0.9-SNAPSHOT.jar')
+	//compile files('lib/jacamo-rest-0.3-SNAPSHOT.jar')
 	//testCompile 'org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-bundle:+'
 }
 
