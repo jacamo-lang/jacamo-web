@@ -40,13 +40,10 @@ function runCMD() {
   const selectedAgent = params.get('agent');
 
   data = "c=" + encodeURIComponent(document.getElementById("inputcmd").value);
-  post("./agents/" + selectedAgent + "/cmd",data,"application/x-www-form-urlencoded")
-  .then(function(resp){
-    document.getElementById("inputcmd").value = "";
-    document.getElementById("inputcmd").focus();
-    instantMessage(resp);
-    window.location.reload();
-  });
+  post("./agents/" + selectedAgent + "/cmd",data,"application/x-www-form-urlencoded");
+  document.getElementById("inputcmd").value = "";
+  document.getElementById("inputcmd").focus();
+  window.location.reload();
 }
 
 /* clear agent's log */
