@@ -59,14 +59,30 @@ function delLog() {
 }
 
 /* show agent's log */
+let alreadySaidLogHasMessage = false;
+let currentLog = "";
 function showLog() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
 
   get("./agents/" + selectedAgent + "/log").then(function(resp) {
     var textarea = document.getElementById('log');
-    textarea.innerHTML = resp;
-    textarea.scrollTop = textarea.scrollHeight;
+    /*currentLog avoids differences between received and shown in textarea.innerHTML*/
+    if (currentLog != resp) {
+      /*do not update log area if the user has focused it*/
+      if (textarea != document.activeElement) {
+        textarea.innerHTML = resp;
+        currentLog = resp;
+        textarea.scrollTop = textarea.scrollHeight;
+        alreadySaidLogHasMessage = false;
+      } else {
+        if (!alreadySaidLogHasMessage) {
+          /*do not bother the user with too many messages*/
+          alreadySaidLogHasMessage = true;
+          instantMessage('Log has new message(s) to show.');
+        }
+      }
+    }
   });
 }
 
