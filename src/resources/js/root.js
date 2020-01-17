@@ -176,12 +176,25 @@ function createAlsEditor(content) {
   }, true);
 }
 
+/* update agents interface automatically */
+let agentsList = undefined;
+function setAutoUpdateAgInterface() {
+  /*do it immediately at first time*/
+  if (agentsList === undefined) getAgents();
+  
+  setInterval(function() {
+    getAgents();
+  }, 1000);
+}
 
 /*Get list of agent from backend*/
 function getAgents() {
   get("./agents").then(function(resp) {
-    updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
-    updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
+    if (agentsList != resp) {
+      agentsList = resp;
+      updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
+      updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
+    }
   });
 };
 
