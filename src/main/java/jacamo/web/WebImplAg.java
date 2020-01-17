@@ -26,6 +26,7 @@ import com.google.gson.Gson;
 import jacamo.rest.RestImplAg;
 import jason.asSemantics.Agent;
 import jason.asSemantics.GoalListenerForMetaEvents;
+import jason.asSyntax.parser.as2j;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
 
@@ -123,6 +124,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
                 System.out.println("restAPI://" + aslFileName);
                 System.out.println("uis: " + uploadedInputStream);
 
+                //Save new code
                 StringBuilder stringBuilder = new StringBuilder();
                 String line = null;
 
@@ -137,6 +139,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
                 outputFile.write(bytes);
                 outputFile.close();
 
+                //Reload agent with this new code
                 ag.getPL().clear();
 
                 ag.parseAS(new FileInputStream("src/agt/" + aslFileName), aslFileName);
@@ -155,5 +158,69 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
         }
 
         return Response.status(500).build();
+    }
+    
+    
+    
+    /**
+     * Parse an Jason agent code file (.asl) answering whether it has sintax errors
+     * of not
+     * 
+     * @param agName              name of the agent
+     * @param aslFileName         name of the file (including .asl extension)
+     * @param uploadedInputStream new content for the given asl file name
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    @Path("/{agentname}/parseAslfile/{aslfilename}")
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.TEXT_HTML)
+    public Response parseASLfileForm(@PathParam("agentname") String agName,
+            @PathParam("aslfilename") String aslFileName, @FormDataParam("aslfile") InputStream uploadedInputStream) {
+        System.out.println("xxx: " + agName);
+        try {
+            System.out.println("agent: " + agName);
+            System.out.println("aslfile: " + aslFileName);
+
+            // as2j parser = new as2j(uploadedInputStream);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            String line = null;
+            BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
+            while ((line = out.readLine()) != null) {
+                stringBuilder.append(line + "\n");
+            }
+
+            
+            String name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent("temp", null, null, null,
+                    null, null, null);
+            BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
+            Agent ag = getAgent("temp");
+            
+            File f = new File("src/agt/temp.asl");
+            
+            if (!f.exists()) f.createNewFile();
+
+            FileOutputStream outputFile = new FileOutputStream(f, false);
+            byte[] bytes = stringBuilder.toString().getBytes();
+            outputFile.write(bytes);
+            outputFile.close();
+
+            ag.load(new FileInputStream("src/agt/temp.asl"), "temp.asl");
+
+            //just print the content
+            System.out.println("parsed: " + stringBuilder.toString());
+
+            BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
+            return Response.ok("Agent reloaded with updated file. Old intentions were not affected.").build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("error on parsing");
+        BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
+        return Response.status(500, "Internal Server Error! Possible sintax error!").build();
     }
 }

@@ -134,6 +134,14 @@ function getCurrentAslContent() {
     cancel.setAttribute("onclick", "localStorage.setItem('agentBuffer', 'No changes made.'); window.history.back();");
     cancel.innerHTML = "Discard changes";
     document.getElementById("footer_menu").appendChild(cancel);
+
+    const check = document.createElement('button');
+    check.setAttribute("type", "button");
+    check.addEventListener("click", function() { sintaxCheck() });
+    check.innerHTML = "check";
+    document.getElementById("footer_menu").appendChild(check);
+
+
     const text = document.createElement('i');
     text.style.fontSize = "12px";
     text.innerHTML = "Editing: <b>" + selectedASLFile + "</b>";
@@ -145,27 +153,28 @@ function getCurrentAslContent() {
   });
 };
 
+let aslEditor = undefined;
 function createAlsEditor(content) {
   /* find the textarea */
   var textarea = document.querySelector("form textarea[name='aslfile']");
 
   /* create ace editor */
-  var editor = ace.edit();
-  editor.session.setValue(content);
-  editor.setTheme("ace/theme/textmate");
-  editor.session.setMode("ace/mode/erlang");
-  editor.setOptions({
+  aslEditor = ace.edit();
+  aslEditor.session.setValue(content);
+  aslEditor.setTheme("ace/theme/textmate");
+  aslEditor.session.setMode("ace/mode/erlang");
+  aslEditor.setOptions({
     enableBasicAutocompletion: true
   });
 
   /* replace textarea with ace */
-  textarea.parentNode.insertBefore(editor.container, textarea);
+  textarea.parentNode.insertBefore(aslEditor.container, textarea);
   textarea.style.display = "none";
   /* find the parent form and add submit event listener */
   var form = textarea;
   while (form && form.localName != "form") form = form.parentNode;
   form.addEventListener("submit", function(e) {
-    textarea.value = editor.getValue();
+    textarea.value = aslEditor.getValue();
     var selectedAgent = new URL(location.href).searchParams.get('agent');
     var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
     post("/agents/" + selectedAgent + "/aslfile/" + selectedASLFile, new FormData(e.target)).then(function(response) {
@@ -176,12 +185,62 @@ function createAlsEditor(content) {
   }, true);
 }
 
+/* sintax check */
+function sintaxCheck() {
+  var selectedAgent = new URL(location.href).searchParams.get('agent');
+  var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
+
+  const FD = new FormData();
+  const XHR = new XMLHttpRequest();
+  const boundary = "blob";
+  let data = "";
+  /*
+  data += "--" + boundary + "\r\n";
+        data += 'content-disposition: form-data; '
+              + 'name="'         + selectedAgent          + '"; '
+              + 'filename="'     + selectedASLFile + '"\r\n';
+        data += 'Content-Type: text/plain\r\n';
+        data += '\r\n';
+        data += aslEditor.getValue() + '\r\n';
+*/
+  data += "--" + boundary + "\r\n";
+  data += 'content-disposition: form-data; name=aslfile\r\n';
+  data += '\r\n';
+  data += aslEditor.getValue()  + "\r\n";
+  data += "--" + boundary + "--";
+
+
+  XHR.addEventListener( 'load', function( event ) {
+    alert( 'Yeah! Data sent and response loaded.' );
+  } );
+
+  XHR.addEventListener(' error', function( event ) {
+    alert( 'Oops! Something went wrong.' );
+  } );
+
+  XHR.open( 'POST', "/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile );
+  XHR.setRequestHeader( 'Content-Type','multipart/form-data; boundary=' + boundary );
+  alert(data);
+  XHR.send( data );
+
+  /*post("/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile, FD).then(function(response) {
+    alert( 'WOOORKED!' );
+  });*/
+}
+
+/* sintax checking */
+function setAutoSintaxChecking() {
+  setInterval(function() {
+    /*sintaxCheck();*/
+  }, 5000);
+}
+
 /* update agents interface automatically */
 let agentsList = undefined;
 function setAutoUpdateAgInterface() {
   /*do it immediately at first time*/
   if (agentsList === undefined) getAgents();
-  
+
   setInterval(function() {
     getAgents();
   }, 1000);
