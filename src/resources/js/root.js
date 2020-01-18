@@ -134,18 +134,24 @@ function getCurrentAslContent() {
     cancel.setAttribute("onclick", "localStorage.setItem('agentBuffer', 'No changes made.'); window.history.back();");
     cancel.innerHTML = "Discard changes";
     document.getElementById("footer_menu").appendChild(cancel);
-
+    /*
     const check = document.createElement('button');
     check.setAttribute("type", "button");
     check.addEventListener("click", function() { sintaxCheck() });
     check.innerHTML = "check";
     document.getElementById("footer_menu").appendChild(check);
-
+    */
 
     const text = document.createElement('i');
-    text.style.fontSize = "12px";
+    text.style.fontSize = "14px";
     text.innerHTML = "Editing: <b>" + selectedASLFile + "</b>";
     document.getElementById("footer_menu").appendChild(text);
+    const check = document.createElement('b');
+    check.setAttribute("id", "check");
+    check.style.fontSize = "14px";
+    check.style.color = "DarkGoldenRod"; /*FireBrick DarkGoldenRod ForestGreen*/
+    check.innerHTML = "&#160&#160&#160&#160&#160Parsing code...";
+    document.getElementById("footer_menu").appendChild(check);
 
     const form = document.getElementById("usrform");
     form.setAttribute("action", "/agents/" + selectedAgent + "/aslfile/" + selectedASLFile);
@@ -161,7 +167,7 @@ function createAlsEditor(content) {
   /* create ace editor */
   aslEditor = ace.edit();
   aslEditor.session.setValue(content);
-  aslEditor.setTheme("ace/theme/textmate");
+  aslEditor.setTheme("ace/theme/tomorrow");
   aslEditor.session.setMode("ace/mode/erlang");
   aslEditor.setOptions({
     enableBasicAutocompletion: true
@@ -193,46 +199,25 @@ function sintaxCheck() {
   const FD = new FormData();
   const XHR = new XMLHttpRequest();
   const boundary = "blob";
-  let data = "";
-  /*
-  data += "--" + boundary + "\r\n";
-        data += 'content-disposition: form-data; '
-              + 'name="'         + selectedAgent          + '"; '
-              + 'filename="'     + selectedASLFile + '"\r\n';
-        data += 'Content-Type: text/plain\r\n';
-        data += '\r\n';
-        data += aslEditor.getValue() + '\r\n';
-*/
-  data += "--" + boundary + "\r\n";
-  data += 'content-disposition: form-data; name=aslfile\r\n';
-  data += '\r\n';
-  data += aslEditor.getValue()  + "\r\n";
-  data += "--" + boundary + "--";
+  let data = "--" + boundary + "\r\ncontent-disposition: form-data; name=aslfile\r\n\r\n" + aslEditor.getValue() + "\r\n--" + boundary + "--";
 
-
-  XHR.addEventListener( 'load', function( event ) {
-    alert( 'Yeah! Data sent and response loaded.' );
-  } );
-
-  XHR.addEventListener(' error', function( event ) {
-    alert( 'Oops! Something went wrong.' );
-  } );
-
-  XHR.open( 'POST', "/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile );
-  XHR.setRequestHeader( 'Content-Type','multipart/form-data; boundary=' + boundary );
-  alert(data);
-  XHR.send( data );
-
-  /*post("/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile, FD).then(function(response) {
-    alert( 'WOOORKED!' );
-  });*/
+  var check = document.getElementById("check");
+  post("/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile, data, 'multipart/form-data; boundary=' + boundary).then(function(response) {
+    check.style.color = "ForestGreen"; /*FireBrick DarkGoldenRod ForestGreen*/
+    check.innerHTML = "&#160&#160&#160&#160&#160"+"Passed!";
+    aslEditor.setTheme("ace/theme/textmate");
+  }).catch(function(e) {
+    check.style.color = "FireBrick"; /*FireBrick DarkGoldenRod ForestGreen*/
+    check.innerHTML = "&#160&#160&#160&#160&#160"+"Syntax error!";
+    aslEditor.setTheme("ace/theme/katzenmilch");
+  });
 }
 
 /* sintax checking */
 function setAutoSintaxChecking() {
   setInterval(function() {
-    /*sintaxCheck();*/
-  }, 5000);
+    sintaxCheck();
+  }, 2000);
 }
 
 /* update agents interface automatically */

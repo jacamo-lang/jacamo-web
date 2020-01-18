@@ -207,13 +207,16 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             outputFile.write(bytes);
             outputFile.close();
 
-            ag.load(new FileInputStream("src/agt/temp.asl"), "temp.asl");
+            //ag.parseAS(new FileInputStream("src/agt/temp.asl"), "temp.asl");
+            
+            as2j parser = new as2j(new FileInputStream("src/agt/temp.asl"));
+            parser.agent(ag);
 
             //just print the content
             System.out.println("parsed: " + stringBuilder.toString());
 
             BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
-            return Response.ok("Agent reloaded with updated file. Old intentions were not affected.").build();
+            return Response.ok("Code parsed without errors.").build();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -221,6 +224,6 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
 
         System.out.println("error on parsing");
         BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
-        return Response.status(500, "Internal Server Error! Possible sintax error!").build();
+        return Response.status(500, "Internal Server Error or Error When Parding Jason Code!").build();
     }
 }
