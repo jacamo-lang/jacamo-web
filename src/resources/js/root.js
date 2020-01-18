@@ -204,11 +204,11 @@ function sintaxCheck() {
   var check = document.getElementById("check");
   post("/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile, data, 'multipart/form-data; boundary=' + boundary).then(function(response) {
     check.style.color = "ForestGreen"; /*FireBrick DarkGoldenRod ForestGreen*/
-    check.innerHTML = "&#160&#160&#160&#160&#160"+"Passed!";
+    check.innerHTML = "&#160&#160&#160&#160&#160"+response;
     aslEditor.setTheme("ace/theme/textmate");
   }).catch(function(e) {
     check.style.color = "FireBrick"; /*FireBrick DarkGoldenRod ForestGreen*/
-    check.innerHTML = "&#160&#160&#160&#160&#160"+"Syntax error!";
+    check.innerHTML = "&#160&#160&#160&#160&#160"+e;
     aslEditor.setTheme("ace/theme/katzenmilch");
   });
 }

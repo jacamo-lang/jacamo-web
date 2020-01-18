@@ -26,6 +26,14 @@ import com.google.gson.Gson;
 import jacamo.rest.RestImplAg;
 import jason.asSemantics.Agent;
 import jason.asSemantics.GoalListenerForMetaEvents;
+import jason.asSyntax.Atom;
+import jason.asSyntax.InternalActionLiteral;
+import jason.asSyntax.Literal;
+import jason.asSyntax.Plan;
+import jason.asSyntax.PlanBody;
+import jason.asSyntax.PlanLibrary;
+import jason.asSyntax.Term;
+import jason.asSyntax.parser.ParseException;
 import jason.asSyntax.parser.as2j;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
@@ -178,12 +186,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     @Produces(MediaType.TEXT_HTML)
     public Response parseASLfileForm(@PathParam("agentname") String agName,
             @PathParam("aslfilename") String aslFileName, @FormDataParam("aslfile") InputStream uploadedInputStream) {
-        System.out.println("xxx: " + agName);
         try {
-            System.out.println("agent: " + agName);
-            System.out.println("aslfile: " + aslFileName);
-
-            // as2j parser = new as2j(uploadedInputStream);
 
             StringBuilder stringBuilder = new StringBuilder();
             String line = null;
@@ -192,6 +195,16 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
                 stringBuilder.append(line + "\n");
             }
 
+            //TODO: Remove this killAgent command when Jason parser is fixed
+            //Jason parser throwing exception in errors like not closed quotes 
+            if (BaseCentralisedMAS.getRunner().getRuntimeServices().getAgentsNames().contains("temp")) {
+                boolean r = BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
+                if (r != true) new Exception("Kill agent operation failed!");
+                
+                // make sure you only answer after the agent was completely deleted
+                while (BaseCentralisedMAS.getRunner().getAg("temp") != null)
+                    ;
+            }
             
             String name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent("temp", null, null, null,
                     null, null, null);
@@ -207,23 +220,66 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             outputFile.write(bytes);
             outputFile.close();
 
-            //ag.parseAS(new FileInputStream("src/agt/temp.asl"), "temp.asl");
-            
             as2j parser = new as2j(new FileInputStream("src/agt/temp.asl"));
             parser.agent(ag);
 
-            //just print the content
-            System.out.println("parsed: " + stringBuilder.toString());
+            PlanLibrary pl = ag.getPL();
+            for (Plan plan : pl.getPlans()) {
+                
+                // skip plans from jar files (usually system's plans)
+                if (plan.getSource().startsWith("jar:file") || plan.getSource().equals("kqmlPlans.asl"))
+                    continue;
 
+                //TODO: A .send can also be in the context of the plan
+                
+                PlanBody pb = plan.getBody();
+                while (pb != null) {
+                    Term t = pb.getBodyTerm();
+                    //Check if the parsed code has any .send internal action
+                    if (t.isInternalAction() && ((InternalActionLiteral)t).getFunctor().equals(".send"))
+                    {
+                        // If the performative is achieve, check if the recipient has a plan to execute
+                        Term achieve = new Atom("achieve");
+                        if (((InternalActionLiteral)t).getTerm(1).equals(achieve)) {
+                            String recipientName = ((InternalActionLiteral)t).getTerm(0).toString();
+                            Agent recipient = getAgent(recipientName);
+                            Literal request = (Literal)((InternalActionLiteral)t).getTerm(2);
+                            PlanLibrary rpl = recipient.getPL();
+
+                            boolean recipientUnderstand = false;
+                            for (Plan rp : rpl.getPlans()) {
+                                // skip plans from jar files (usually system's plans)
+                                if (rp.getSource().startsWith("jar:file") || plan.getSource().equals("kqmlPlans.asl"))
+                                    continue;
+
+                                //TODO: Check if the arity is also compatible
+                                if (rp.getTrigger().getLiteral().getFunctor().equals(request.getFunctor())) 
+                                    recipientUnderstand = true;
+                            }
+                            if (!recipientUnderstand) 
+                                throw new ParseException("Agent '" + recipientName + "' doesn't understand '"
+                                        + request.getFunctor() + "'");
+                        }
+                    }
+                    pb = pb.getBodyNext();
+                }
+            }
+            
             BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
-            return Response.ok("Code parsed without errors.").build();
+            return Response.ok("Code looks correct.").build();
 
+        } catch (ParseException e) {
+            BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
+            e.printStackTrace();
+
+            String errorMsg = e.getMessage();
+            if (errorMsg.length() >= 150) errorMsg = errorMsg.substring(0, 150) + "...";
+            return Response.status(406, "Syntax Error! Message: " + errorMsg).build();
         } catch (Exception e) {
+            System.out.println("****\n****\n****");
             e.printStackTrace();
         }
-
-        System.out.println("error on parsing");
-        BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
-        return Response.status(500, "Internal Server Error or Error When Parding Jason Code!").build();
+        
+        return Response.status(500, "Internal Server Error!").build();
     }
 }
