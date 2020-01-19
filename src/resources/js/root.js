@@ -145,10 +145,24 @@ function getCurrentAslContent() {
     cancel.setAttribute("onclick", "localStorage.setItem('agentBuffer', 'No changes made.'); window.history.back();");
     cancel.innerHTML = "Discard changes";
     document.getElementById("footer_menu").appendChild(cancel);
+    /*
+    const check = document.createElement('button');
+    check.setAttribute("type", "button");
+    check.addEventListener("click", function() { sintaxCheck() });
+    check.innerHTML = "check";
+    document.getElementById("footer_menu").appendChild(check);
+    */
+
     const text = document.createElement('i');
-    text.style.fontSize = "12px";
+    text.style.fontSize = "14px";
     text.innerHTML = "Editing: <b>" + selectedASLFile + "</b>";
     document.getElementById("footer_menu").appendChild(text);
+    const check = document.createElement('b');
+    check.setAttribute("id", "check");
+    check.style.fontSize = "14px";
+    check.style.color = "DarkGoldenRod"; /*FireBrick DarkGoldenRod ForestGreen*/
+    check.innerHTML = "&#160&#160&#160&#160&#160Parsing code...";
+    document.getElementById("footer_menu").appendChild(check);
 
     const form = document.getElementById("usrform");
     form.setAttribute("action", "/agents/" + selectedAgent + "/aslfile/" + selectedASLFile);
@@ -156,27 +170,28 @@ function getCurrentAslContent() {
   });
 };
 
+let aslEditor = undefined;
 function createAlsEditor(content) {
   /* find the textarea */
   var textarea = document.querySelector("form textarea[name='aslfile']");
 
   /* create ace editor */
-  var editor = ace.edit();
-  editor.session.setValue(content);
-  editor.setTheme("ace/theme/textmate");
-  editor.session.setMode("ace/mode/erlang");
-  editor.setOptions({
+  aslEditor = ace.edit();
+  aslEditor.session.setValue(content);
+  aslEditor.setTheme("ace/theme/tomorrow");
+  aslEditor.session.setMode("ace/mode/erlang");
+  aslEditor.setOptions({
     enableBasicAutocompletion: true
   });
 
   /* replace textarea with ace */
-  textarea.parentNode.insertBefore(editor.container, textarea);
+  textarea.parentNode.insertBefore(aslEditor.container, textarea);
   textarea.style.display = "none";
   /* find the parent form and add submit event listener */
   var form = textarea;
   while (form && form.localName != "form") form = form.parentNode;
   form.addEventListener("submit", function(e) {
-    textarea.value = editor.getValue();
+    textarea.value = aslEditor.getValue();
     var selectedAgent = new URL(location.href).searchParams.get('agent');
     var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
     post("/agents/" + selectedAgent + "/aslfile/" + selectedASLFile, new FormData(e.target)).then(function(response) {
@@ -187,12 +202,54 @@ function createAlsEditor(content) {
   }, true);
 }
 
+/* sintax check */
+function sintaxCheck() {
+  var selectedAgent = new URL(location.href).searchParams.get('agent');
+  var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
+
+  const FD = new FormData();
+  const XHR = new XMLHttpRequest();
+  const boundary = "blob";
+  let data = "--" + boundary + "\r\ncontent-disposition: form-data; name=aslfile\r\n\r\n" + aslEditor.getValue() + "\r\n--" + boundary + "--";
+
+  var check = document.getElementById("check");
+  post("/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile, data, 'multipart/form-data; boundary=' + boundary).then(function(response) {
+    check.style.color = "ForestGreen"; /*FireBrick DarkGoldenRod ForestGreen*/
+    check.innerHTML = "&#160&#160&#160&#160&#160"+response;
+    aslEditor.setTheme("ace/theme/textmate");
+  }).catch(function(e) {
+    check.style.color = "FireBrick"; /*FireBrick DarkGoldenRod ForestGreen*/
+    check.innerHTML = "&#160&#160&#160&#160&#160"+e;
+    aslEditor.setTheme("ace/theme/katzenmilch");
+  });
+}
+
+/* sintax checking */
+function setAutoSintaxChecking() {
+  setInterval(function() {
+    sintaxCheck();
+  }, 2000);
+}
+
+/* update agents interface automatically */
+let agentsList = undefined;
+function setAutoUpdateAgInterface() {
+  /*do it immediately at first time*/
+  if (agentsList === undefined) getAgents();
+
+  setInterval(function() {
+    getAgents();
+  }, 1000);
+}
 
 /*Get list of agent from backend*/
 function getAgents() {
   get("./agents").then(function(resp) {
-    updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
-    updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
+    if (agentsList != resp) {
+      agentsList = resp;
+      updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
+      updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
+    }
   });
 };
 
