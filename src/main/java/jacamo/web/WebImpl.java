@@ -31,9 +31,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import jaca.CAgentArch;
 import jacamo.infra.JaCaMoLauncher;
@@ -252,7 +250,7 @@ public class WebImpl extends RestImpl {
             
             RevCommit rev = git.commit().setAmend(true).setAll(true)
                     .setAuthor("cleberjamaral", "cleberjamaral@gmail.com")
-                    .setMessage("Testing commit from jacamo-web").call();
+                    .setMessage("Added commit from jacamo-web").call();
 
             git.close();
             
