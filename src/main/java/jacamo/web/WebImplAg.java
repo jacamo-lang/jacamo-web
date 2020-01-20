@@ -24,6 +24,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import com.google.gson.Gson;
 
 import jacamo.rest.RestImplAg;
+import jacamo.web.exception.UnderstandabilityException;
+import jacamo.web.exception.UsefulnessException;
 import jason.asSemantics.Agent;
 import jason.asSemantics.GoalListenerForMetaEvents;
 import jason.asSyntax.Atom;
@@ -186,6 +188,9 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     @Produces(MediaType.TEXT_HTML)
     public Response parseASLfileForm(@PathParam("agentname") String agName,
             @PathParam("aslfilename") String aslFileName, @FormDataParam("aslfile") InputStream uploadedInputStream) {
+        
+        String errorMsg = "Unknown exception";
+        
         try {
 
             StringBuilder stringBuilder = new StringBuilder();
@@ -223,63 +228,109 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             as2j parser = new as2j(new FileInputStream("src/agt/temp.asl"));
             parser.agent(ag);
 
-            PlanLibrary pl = ag.getPL();
-            for (Plan plan : pl.getPlans()) {
-                
-                // skip plans from jar files (usually system's plans)
-                if (plan.getSource().startsWith("jar:file") || plan.getSource().equals("kqmlPlans.asl"))
-                    continue;
-
-                //TODO: A .send can also be in the context of the plan
-                
-                PlanBody pb = plan.getBody();
-                while (pb != null) {
-                    Term t = pb.getBodyTerm();
-                    //Check if the parsed code has any .send internal action
-                    if (t.isInternalAction() && ((InternalActionLiteral)t).getFunctor().equals(".send"))
-                    {
-                        // If the performative is achieve, check if the recipient has a plan to execute
-                        Term achieve = new Atom("achieve");
-                        if (((InternalActionLiteral)t).getTerm(1).equals(achieve)) {
-                            String recipientName = ((InternalActionLiteral)t).getTerm(0).toString();
-                            Agent recipient = getAgent(recipientName);
-                            Literal request = (Literal)((InternalActionLiteral)t).getTerm(2);
-                            PlanLibrary rpl = recipient.getPL();
-
-                            boolean recipientUnderstand = false;
-                            for (Plan rp : rpl.getPlans()) {
-                                // skip plans from jar files (usually system's plans)
-                                if (rp.getSource().startsWith("jar:file") || plan.getSource().equals("kqmlPlans.asl"))
-                                    continue;
-
-                                //TODO: Check if the arity is also compatible
-                                if (rp.getTrigger().getLiteral().getFunctor().equals(request.getFunctor())) 
-                                    recipientUnderstand = true;
-                            }
-                            if (!recipientUnderstand) 
-                                throw new ParseException("Agent '" + recipientName + "' doesn't understand '"
-                                        + request.getFunctor() + "'");
-                        }
-                    }
-                    pb = pb.getBodyNext();
-                }
-            }
+            lookForCollaborativeExceptions(ag);
             
-            BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
             return Response.ok("Code looks correct.").build();
 
-        } catch (ParseException e) {
-            BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
+        } catch (UsefulnessException e) {
             e.printStackTrace();
 
-            String errorMsg = e.getMessage();
-            if (errorMsg.length() >= 150) errorMsg = errorMsg.substring(0, 150) + "...";
-            return Response.status(406, "Syntax Error! Message: " + errorMsg).build();
-        } catch (Exception e) {
-            System.out.println("****\n****\n****");
+            errorMsg = "Usefulness warning. " + ((errorMsg.length() >= 150) ? errorMsg.substring(0, 150) + "..." : e.getMessage());
+            return Response.status(406, errorMsg).build();
+        } catch (UnderstandabilityException e) {
             e.printStackTrace();
+
+            errorMsg = "Understandability warning. " + ((errorMsg.length() >= 150) ? errorMsg.substring(0, 150) + "..." : e.getMessage());
+            return Response.status(406, errorMsg).build();
+        } catch (ParseException e) {
+            e.printStackTrace();
+
+            errorMsg = "Syntax mistake. " + ((errorMsg.length() >= 150) ? errorMsg.substring(0, 150) + "..." : e.getMessage());
+            return Response.status(406, errorMsg).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            errorMsg = "Unknown error. " + ((errorMsg.length() >= 150) ? errorMsg.substring(0, 150) + "..." : e.getMessage());
+            return Response.status(406, errorMsg).build();
+        } finally {
+            BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
+        }
+    }
+
+    private void lookForCollaborativeExceptions(Agent ag) throws UnderstandabilityException, UsefulnessException {
+        PlanLibrary pl = ag.getPL();
+        for (Plan plan : pl.getPlans()) {
+            
+            // skip plans from jar files (usually system's plans)
+            if (plan.getSource().startsWith("jar:file") || plan.getSource().equals("kqmlPlans.asl"))
+                continue;
+
+            //TODO: A .send can also be in the context of the plan
+            
+            PlanBody pb = plan.getBody();
+            while (pb != null) {
+                Term t = pb.getBodyTerm();
+                //Check if the parsed code has any .send internal action
+                if (t.isInternalAction() && ((InternalActionLiteral)t).getFunctor().equals(".send"))
+                {
+                    // If the performative is achieve, check if the recipient has a plan to execute
+                    Term achieve = new Atom("achieve");
+                    if (((InternalActionLiteral)t).getTerm(1).equals(achieve)) {
+                        checkUnderstandability(t);
+                    }
+                    
+                    // If the performative is achieve, check if the recipient use this info in anyway
+                    Term tell = new Atom("tell");
+                    if (((InternalActionLiteral)t).getTerm(1).equals(tell)) {
+                        checkUsefulness(t);
+                    }
+                }
+                pb = pb.getBodyNext();
+            }
+        }
+    }
+
+    private void checkUnderstandability(Term t) throws UnderstandabilityException {
+        String recipientName = ((InternalActionLiteral)t).getTerm(0).toString();
+        Agent recipient = getAgent(recipientName);
+        Literal request = (Literal)((InternalActionLiteral)t).getTerm(2);
+        PlanLibrary rpl = recipient.getPL();
+
+        boolean recipientUnderstand = false;
+        for (Plan rp : rpl.getPlans()) {
+            // skip plans from jar files (usually system's plans)
+            if (rp.getSource().startsWith("jar:file") || rp.getSource().equals("kqmlPlans.asl"))
+                continue;
+
+            //TODO: Check if the arity is also compatible
+            if (rp.getTrigger().getLiteral().getFunctor().equals(request.getFunctor())) 
+                recipientUnderstand = true;
+        }
+        if (!recipientUnderstand) 
+            throw new UnderstandabilityException("Agent '" + recipientName + "' doesn't understand '"
+                    + request.getFunctor() + "'");
+    }
+    
+    private void checkUsefulness(Term t) throws UsefulnessException {
+        String recipientName = ((InternalActionLiteral)t).getTerm(0).toString();
+        Agent recipient = getAgent(recipientName);
+        Literal request = (Literal)((InternalActionLiteral)t).getTerm(2);
+        PlanLibrary rpl = recipient.getPL();
+
+        boolean recipientUnderstand = false;
+        
+        for (Plan rp : rpl.getPlans()) {
+            // skip plans from jar files (usually system's plans)
+            if (rp.getSource().startsWith("jar:file") || rp.getSource().equals("kqmlPlans.asl"))
+                continue;
+
+            //TODO: Check if the arity is also compatible
+            if (rp.getTrigger().getLiteral().getFunctor().equals(request.getFunctor())) 
+                recipientUnderstand = true;
         }
         
-        return Response.status(500, "Internal Server Error!").build();
+        if (!recipientUnderstand) 
+            throw new UsefulnessException("Agent '" + recipientName + "' doesn't use '"
+                    + request.getFunctor() + "'");
     }
 }

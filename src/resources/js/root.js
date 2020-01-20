@@ -137,7 +137,7 @@ function getCurrentAslContent() {
     /*
     const check = document.createElement('button');
     check.setAttribute("type", "button");
-    check.addEventListener("click", function() { sintaxCheck() });
+    check.addEventListener("click", function() { syntaxCheck() });
     check.innerHTML = "check";
     document.getElementById("footer_menu").appendChild(check);
     */
@@ -192,7 +192,7 @@ function createAlsEditor(content) {
 }
 
 /* sintax check */
-function sintaxCheck() {
+function syntaxCheck() {
   var selectedAgent = new URL(location.href).searchParams.get('agent');
   var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
 
@@ -214,9 +214,9 @@ function sintaxCheck() {
 }
 
 /* sintax checking */
-function setAutoSintaxChecking() {
+function setAutoSyntaxChecking() {
   setInterval(function() {
-    sintaxCheck();
+    syntaxCheck();
   }, 2000);
 }
 
