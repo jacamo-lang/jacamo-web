@@ -291,11 +291,17 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
 }
 
 function commitChanges() {
-  post('/commit').then(function(r) {
-    alert("Commit result: "+r);
-  }).catch(function(e) {
-    alert(e);
-  });
+  var message = prompt("Please enter a commit message", "");
+
+  if (message == null || message == "") {
+    alert("Operation canceled.");
+  } else {
+    post('/commit').then(function(r) {
+      alert("Commit result: "+r);
+    }).catch(function(e) {
+      alert(e);
+    });
+  }
 }
 
 /* create agent */

@@ -235,22 +235,22 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
         } catch (UsefulnessException e) {
             e.printStackTrace();
 
-            errorMsg = "Usefulness warning. " + ((errorMsg.length() >= 150) ? errorMsg.substring(0, 150) + "..." : e.getMessage());
+            errorMsg = "Usefulness warning. " + ((e.getMessage().length() >= 150) ? e.getMessage().substring(0, 150) + "..." : e.getMessage());
             return Response.status(406, errorMsg).build();
         } catch (UnderstandabilityException e) {
             e.printStackTrace();
 
-            errorMsg = "Understandability warning. " + ((errorMsg.length() >= 150) ? errorMsg.substring(0, 150) + "..." : e.getMessage());
+            errorMsg = "Understandability warning. " + ((e.getMessage().length() >= 150) ? e.getMessage().substring(0, 150) + "..." : e.getMessage());
             return Response.status(406, errorMsg).build();
         } catch (ParseException e) {
             e.printStackTrace();
 
-            errorMsg = "Syntax mistake. " + ((errorMsg.length() >= 150) ? errorMsg.substring(0, 150) + "..." : e.getMessage());
+            errorMsg = "Syntax mistake. " + ((e.getMessage().length() >= 150) ? e.getMessage().substring(0, 150) + "..." : e.getMessage());
             return Response.status(406, errorMsg).build();
         } catch (Exception e) {
             e.printStackTrace();
 
-            errorMsg = "Unknown error. " + ((errorMsg.length() >= 150) ? errorMsg.substring(0, 150) + "..." : e.getMessage());
+            errorMsg = "Unknown error. " + ((e.getMessage().length() >= 150) ? e.getMessage().substring(0, 150) + "..." : e.getMessage());
             return Response.status(406, errorMsg).build();
         } finally {
             BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);

@@ -15,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.imageio.ImageIO;
 import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -31,9 +32,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import jaca.CAgentArch;
 import jacamo.infra.JaCaMoLauncher;
@@ -241,23 +240,21 @@ public class WebImpl extends RestImpl {
     
     @Path("/commit")
     @POST
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_HTML)
-    public Response commitChanges() {
+    public Response commitChanges(String message) {
         try {
             Git git = Git.open(new File(".git"));
 
-            System.out.println("\n\n***** " + git.getRepository().getFullBranch());
-            System.out.println("My repository: " + git.getRepository().toString());
-            System.out.println("****: " + git.toString());
+            System.out.println("Staging modified and deleted files to commit: " + git.getRepository().toString());
             
-            RevCommit rev = git.commit().setAmend(true).setAll(true)
+            RevCommit rev = git.commit().setAll(true).setAmend(true)
                     .setAuthor("cleberjamaral", "cleberjamaral@gmail.com")
-                    .setMessage("Testing commit from jacamo-web").call();
+                    .setMessage(message).call();
 
             git.close();
             
-            System.out.println(rev.getFullMessage());
-            return Response.ok(rev.getFullMessage()).build();
+            return Response.ok(rev.toString()).build();
         } catch (IOException | GitAPIException e) {
             e.printStackTrace();
         }
