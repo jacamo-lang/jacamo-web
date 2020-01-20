@@ -35,6 +35,9 @@ dependencies {
 	compile 'org.glassfish.tyrus:tyrus-server:1.1'
 	compile 'org.glassfish.tyrus:tyrus-container-grizzly:1.1'
 	
+	// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
+	compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.6.0.201912101111-r'
+	
 	// https://mvnrepository.com/artifact/net.openhft/compiler
 	compile group: 'net.openhft', name: 'compiler', version: '2.3.1'
 	//testCompile 'org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-bundle:+'
