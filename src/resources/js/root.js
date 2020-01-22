@@ -1151,6 +1151,23 @@ function getOrgNormGraph() {
   });
 }
 
+/** CREDENTIAL PROMPT */
+let usernameCookie = getCookieValue('username');
+let username = usernameCookie ? usernameCookie : prompt('Enter your username:');
+setCookie('username', username);
+
+let passwordCookie = getCookieValue('password');
+let password = passwordCookie ? passwordCookie : prompt('Enter your password:');
+setCookie('password', password);
+
+function setCookie(key, value) { return document.cookie = `${key}=${(value || '')}; path=/`; }
+
+/* function adjusted from: https://stackoverflow.com/questions/5639346/what-is-the-shortest-function-for-reading-a-cookie-by-name-in-javascript */
+function getCookieValue(key) {
+  let value = document.cookie.match(`(^|[^;]+)\\s*${key}\\s*=\\s*([^;]+)`);
+  return value ? value.pop() : '';
+}
+
 /**
  * END OF FILE
  */
