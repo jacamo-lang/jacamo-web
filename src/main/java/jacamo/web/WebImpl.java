@@ -248,7 +248,7 @@ public class WebImpl extends RestImpl {
 
             System.out.println("Staging modified and deleted files to commit: " + git.getRepository().toString());
             
-            RevCommit rev = git.commit().setAll(true).setAmend(true)
+            RevCommit rev = git.commit().setAll(true)
                     .setAuthor("cleberjamaral", "cleberjamaral@gmail.com")
                     .setMessage(message).call();
 
