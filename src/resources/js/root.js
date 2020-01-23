@@ -33,10 +33,13 @@ function get(url) {
 }
 
 /* POST ON A GIVEN URL, RETURN SERIALISED CONTENT */
-function post(url, data, type) {
+function post(url, data, type, username, password) {
   return new Promise(function(resolve, reject) {
     var req = new XMLHttpRequest();
-    req.open('POST', url);
+    if (username == undefined)
+      req.open('POST', url);
+    else
+    req.open('POST', url, async=true, username, password);
     if (type != undefined) req.setRequestHeader("Content-type", type);
     req.onload = function() {
       if (req.status == 200) {
@@ -288,6 +291,10 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
   lgc.addEventListener("click", function() { commitChanges() });
   lgc.innerHTML = "commit changes";
   document.getElementById(nav).appendChild(lgc);
+  var lgp = document.createElement('a');
+  lgp.addEventListener("click", function() { pushChanges() });
+  lgp.innerHTML = "push changes";
+  document.getElementById(nav).appendChild(lgp);
 }
 
 function commitChanges() {
@@ -304,6 +311,17 @@ function commitChanges() {
   }
 }
 
+
+
+function pushChanges() {
+  let usernameCookie = getCookieValue('username');
+  let passwordCookie = getCookieValue('password');
+  post('/push', "Pushing changes.", undefined, usernameCookie, passwordCookie).then(function(r) {
+      alert("Push result: "+r);
+    }).catch(function(e) {
+      alert(e);
+    });
+}
 /* create agent */
 function newAg() {
   post('/agents/' + document.getElementById('createAgent').value).then(function(r) {
