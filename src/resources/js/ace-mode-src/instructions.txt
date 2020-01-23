@@ -16,3 +16,4 @@ $ node ./Makefile.dryice.js -nc
 5) copy compiled mode-jason.js file from ace/build/src-noconflict folder to jacamo-web/resources/js/ace
 
 6) jacamo-rest/jacamo-web does not deal with double-slash comments, so remove from mode-jason.js any occurrence
+

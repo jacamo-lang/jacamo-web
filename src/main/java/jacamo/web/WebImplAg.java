@@ -199,18 +199,8 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             while ((line = out.readLine()) != null) {
                 stringBuilder.append(line + "\n");
             }
-
-            //TODO: Remove this killAgent command when Jason parser is fixed
-            //Jason parser throwing exception in errors like not closed quotes 
-            if (BaseCentralisedMAS.getRunner().getRuntimeServices().getAgentsNames().contains("temp")) {
-                boolean r = BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
-                if (r != true) new Exception("Kill agent operation failed!");
-                
-                // make sure you only answer after the agent was completely deleted
-                while (BaseCentralisedMAS.getRunner().getAg("temp") != null)
-                    ;
-            }
             
+            //Creating temporary agent to check plans coherence
             String name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent("temp", null, null, null,
                     null, null, null);
             BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
@@ -224,7 +214,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             byte[] bytes = stringBuilder.toString().getBytes();
             outputFile.write(bytes);
             outputFile.close();
-
+            
             as2j parser = new as2j(new FileInputStream("src/agt/temp.asl"));
             parser.agent(ag);
 
@@ -232,6 +222,11 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             
             return Response.ok("Code looks correct.").build();
 
+        } catch (jason.asSyntax.parser.TokenMgrError e) {
+            e.printStackTrace();
+
+            errorMsg = "Lexical mistake. " + ((e.getMessage().length() >= 150) ? e.getMessage().substring(0, 150) + "..." : e.getMessage());
+            return Response.status(406, errorMsg).build();
         } catch (UsefulnessException e) {
             e.printStackTrace();
 
@@ -253,7 +248,14 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             errorMsg = "Unknown error. " + ((e.getMessage().length() >= 150) ? e.getMessage().substring(0, 150) + "..." : e.getMessage());
             return Response.status(406, errorMsg).build();
         } finally {
-            BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
+            if (BaseCentralisedMAS.getRunner().getRuntimeServices().getAgentsNames().contains("temp")) {
+                boolean r = BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
+                if (r != true) new Exception("Kill agent operation failed!");
+                
+                // make sure you only answer after the agent was completely deleted
+                while (BaseCentralisedMAS.getRunner().getAg("temp") != null)
+                    ;
+            }
         }
     }
 
