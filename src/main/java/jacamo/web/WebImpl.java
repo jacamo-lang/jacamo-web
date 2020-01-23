@@ -31,8 +31,10 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import jaca.CAgentArch;
 import jacamo.infra.JaCaMoLauncher;
@@ -263,6 +265,40 @@ public class WebImpl extends RestImpl {
             git.close();
             
             return Response.ok(rev.toString()).build();
+        } catch (IOException | GitAPIException e) {
+            e.printStackTrace();
+        }
+        return Response.status(500).build();
+    }
+    
+    /**
+     * Stage all modified and deleted files committing then adding in comments the given message
+     * 
+     * @param message to add in git comments
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    @Path("/push")
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_HTML)
+    public Response pushChanges() {
+        try {
+            Git git = Git.open(new File(".git"));
+            PushCommand pushCommand = git.push();
+            
+            //Just to check if push is working - credentials must come from clients
+            File f = new File("push.temp");
+            BufferedReader in = new BufferedReader(new FileReader(f));
+            String username = in.readLine();
+            String password = in.readLine();
+
+            pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
+
+            pushCommand.call();
+            git.close();
+            
+            return Response.ok(pushCommand.toString()).build();
         } catch (IOException | GitAPIException e) {
             e.printStackTrace();
         }
