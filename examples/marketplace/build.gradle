@@ -1,0 +1,44 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url "http://jacamo.sourceforge.net/maven2" }
+    maven { url "https://raw.github.com/jacamo-lang/mvn-repo/master" }
+    maven { url "https://jade.tilab.com/maven/" }
+    flatDir {
+       dirs 'lib'
+    }
+}
+
+dependencies {
+	compile project(':jacamo-web')
+}
+
+sourceSets {
+	env {
+		java {
+            srcDir 'src/env'
+		}
+	}
+    main {
+        resources {
+            srcDir 'src/agt'
+            srcDir 'src/org'
+            srcDir 'src/resources'
+        }
+    }
+}
+
+task run (type: JavaExec, dependsOn: 'classes') {
+    group      ' JaCaMo'
+    description 'runs marketplace'
+    doFirst {
+        mkdir 'log'
+    }
+    main 'jacamo.infra.JaCaMoLauncher'
+    args 'marketplace.jcm'
+    classpath sourceSets.main.runtimeClasspath
+}

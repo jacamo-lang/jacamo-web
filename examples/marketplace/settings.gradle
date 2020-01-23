@@ -1,0 +1,4 @@
+rootProject.name = 'marketplace'
+
+include ':jacamo-web'
+project(':jacamo-web').projectDir = file('../../../jacamo-web')

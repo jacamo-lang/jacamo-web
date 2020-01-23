@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?xml-stylesheet href="http://moise.sourceforge.net/xml/os.xsl" type="text/xsl" ?>
+
+<organisational-specification id="jcmrest"
+    os-version="0.8" xmlns='http://moise.sourceforge.net/os'
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xsi:schemaLocation='http://moise.sourceforge.net/os
+                        http://moise.sourceforge.net/xml/os.xsd'>
+
+    <structural-specification>
+
+        <role-definitions>
+            <role id="rbuyer" />
+        </role-definitions>
+
+        <group-specification id="purchasesTeam">
+            <roles>
+                <role id="rbuyer" min="1" max="100" />
+            </roles>
+        </group-specification>
+
+    </structural-specification>
+
+    <normative-specification>
+    <properties>
+      <property id="default_management"  value="ignore" />
+    </properties>
+    </normative-specification>
+
+</organisational-specification>
