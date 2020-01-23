@@ -1,6 +1,7 @@
 package jacamo.web;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -8,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -192,7 +194,6 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
         String errorMsg = "Unknown exception";
         
         try {
-
             StringBuilder stringBuilder = new StringBuilder();
             String line = null;
             BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
@@ -206,16 +207,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
             Agent ag = getAgent("temp");
             
-            File f = new File("src/agt/temp.asl");
-            
-            if (!f.exists()) f.createNewFile();
-
-            FileOutputStream outputFile = new FileOutputStream(f, false);
-            byte[] bytes = stringBuilder.toString().getBytes();
-            outputFile.write(bytes);
-            outputFile.close();
-            
-            as2j parser = new as2j(new FileInputStream("src/agt/temp.asl"));
+            as2j parser = new as2j(new ByteArrayInputStream(stringBuilder.toString().getBytes(Charset.forName("UTF-8"))));
             parser.agent(ag);
 
             lookForCollaborativeExceptions(ag);
