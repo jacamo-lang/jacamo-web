@@ -39,6 +39,7 @@ import jacamo.infra.JaCaMoLauncher;
 import jacamo.project.JaCaMoProject;
 import jacamo.project.parser.ParseException;
 import jacamo.rest.RestImpl;
+import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
 import jason.infra.centralised.BaseCentralisedMAS;
@@ -238,6 +239,13 @@ public class WebImpl extends RestImpl {
         return null;
     }
     
+    /**
+     * Stage all modified and deleted files committing then adding in comments the given message
+     * 
+     * @param message to add in git comments
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
     @Path("/commit")
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
@@ -261,4 +269,38 @@ public class WebImpl extends RestImpl {
         return Response.status(500).build();
     }
 
+    /**
+     * Return ACE editor files. It is used because Jason grammar may be available only locally.
+     * 
+     * @param resourcepathfile the requested ACE file from its flat directory
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     * @throws ReceiverNotFoundException
+     */
+    @Path("/js/ace/{resourcepathfile}")
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public Response getAceResource(@PathParam("resourcepathfile") String resourcepathfile)
+            throws ReceiverNotFoundException {
+        StringBuilder so = new StringBuilder();
+        try {
+            BufferedReader in = null;
+            File f = new File("src/resources/js/ace/" + resourcepathfile);
+            if (f.exists()) {
+                in = new BufferedReader(new FileReader(f));
+            } else {
+                in = new BufferedReader(
+                        new InputStreamReader(RestImpl.class.getResource("/js/ace/" + resourcepathfile).openStream()));
+            }
+            String line = in.readLine();
+            while (line != null) {
+                so.append(line);
+                line = in.readLine();
+            }
+            return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.status(500).build();
+    }
 }

@@ -168,7 +168,7 @@ function createAlsEditor(content) {
   aslEditor = ace.edit();
   aslEditor.session.setValue(content);
   aslEditor.setTheme("ace/theme/tomorrow");
-  aslEditor.session.setMode("ace/mode/erlang");
+  aslEditor.session.setMode("ace/mode/jason");
   aslEditor.setOptions({
     enableBasicAutocompletion: true
   });

@@ -1,0 +1,18 @@
+Editing Jason grammar for ACE editor 
+
+1) Editing the grammar in jason_highlight_rules.js in the local folder ace-mode-src
+
+2) clone ace editor from github
+$ git clone https://github.com/ajaxorg/ace
+
+3) in ACE cloned repository install npm
+$ npm install
+
+3) add to ace/lib/ace/mode folder the files jason.js and jason_highlight_rules.js
+
+4) in ACE cloned repository compile ace
+$ node ./Makefile.dryice.js -nc
+
+5) copy compiled mode-jason.js file from ace/build/src-noconflict folder to jacamo-web/resources/js/ace
+
+6) jacamo-rest/jacamo-web does not deal with double-slash comments, so remove from mode-jason.js any occurrence
