@@ -251,7 +251,7 @@ public class WebImpl extends RestImpl {
     @Path("/commit")
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_HTML)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response commitChanges(String message) {
         try {
             Git git = Git.open(new File(".git"));
@@ -280,8 +280,7 @@ public class WebImpl extends RestImpl {
      */
     @Path("/push")
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_HTML)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response pushChanges() {
         try {
             Git git = Git.open(new File(".git"));
@@ -289,6 +288,7 @@ public class WebImpl extends RestImpl {
             
             //Just to check if push is working - credentials must come from clients
             File f = new File("push.temp");
+            @SuppressWarnings("resource")
             BufferedReader in = new BufferedReader(new FileReader(f));
             String username = in.readLine();
             String password = in.readLine();
@@ -315,7 +315,7 @@ public class WebImpl extends RestImpl {
      */
     @Path("/js/ace/{resourcepathfile}")
     @GET
-    @Produces(MediaType.TEXT_HTML)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getAceResource(@PathParam("resourcepathfile") String resourcepathfile)
             throws ReceiverNotFoundException {
         StringBuilder so = new StringBuilder();
@@ -333,7 +333,7 @@ public class WebImpl extends RestImpl {
                 so.append(line);
                 line = in.readLine();
             }
-            return Response.ok(so.toString(), MediaType.TEXT_HTML).cacheControl(cc).build();
+            return Response.ok(so.toString()).cacheControl(cc).build();
         } catch (IOException e) {
             e.printStackTrace();
         }
