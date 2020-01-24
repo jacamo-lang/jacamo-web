@@ -12,6 +12,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.inject.Singleton;
@@ -21,6 +25,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.EntityTag;
@@ -36,6 +41,8 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
+import com.google.gson.Gson;
+
 import jaca.CAgentArch;
 import jacamo.infra.JaCaMoLauncher;
 import jacamo.project.JaCaMoProject;
@@ -50,6 +57,8 @@ import jason.infra.centralised.BaseCentralisedMAS;
 @Path("/")
 public class WebImpl extends RestImpl {
 
+    Gson gson = new Gson();
+    
     private CacheControl cc = new CacheControl();
     {
         cc.setMaxAge(20);
@@ -258,9 +267,7 @@ public class WebImpl extends RestImpl {
 
             System.out.println("Staging modified and deleted files to commit: " + git.getRepository().toString());
             
-            RevCommit rev = git.commit().setAll(true)
-                    .setAuthor("cleberjamaral", "cleberjamaral@gmail.com")
-                    .setMessage(message).call();
+            RevCommit rev = git.commit().setAll(true).setMessage(message).call();
 
             git.close();
             
@@ -339,4 +346,65 @@ public class WebImpl extends RestImpl {
         }
         return Response.status(500).build();
     }
+    
+    
+    Map<String, Object> lockedFiles = new HashMap<>();
+    /**
+     * Lock an arbitrary resource. Used to check and inform user in multiple sessions
+     * that they are competing by same resources which brings potential conflicts.
+     * This method has an opposite end-point called unlock
+     *
+     * @param resource an arbitrary name of a resource given by the client
+     * @param username give by the client 
+     * @return HTTP 200 Response (ok status)
+     *         (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     *         a JSON containing resources and identification of users
+     *         output example: {file1: ['user1', 'user2'], file1: ['user3', 'user4']}
+     */
+    @SuppressWarnings("unchecked")
+    @Path("/lock/{resource}")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response lockAFile(@PathParam("resource") String resource, @QueryParam("username") String username) {
+        
+        List<String> s;
+        if (lockedFiles.containsKey(resource)) {
+            s = (List<String>)lockedFiles.get(resource);
+        } else {
+            s = new ArrayList<>();
+            lockedFiles.put(resource, s);
+        }
+        s.add(username);
+
+        return Response.ok(gson.toJson(lockedFiles)).build();
+    }
+    
+    /**
+     * Unlock an arbitrary resource. Used to check and inform user in multiple sessions
+     * that they are competing by same resources which brings potential conflicts.
+     * This method has an opposite end-point called lock
+     *
+     * @param resource an arbitrary name of a resource given by the client
+     * @param username give by the client 
+     * @return HTTP 200 Response (ok status) 
+     *         (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     *         a JSON containing resources and identification of users
+     *         output example: {file1: ['user1', 'user2'], file1: ['user3', 'user4']}
+     */
+    @SuppressWarnings("unchecked")
+    @Path("/unlock/{resource}")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response unlockAFile(@PathParam("resource") String resource, @QueryParam("username") String username) {
+        
+        List<String> s;
+        if (lockedFiles.containsKey(resource)) {
+            s = (ArrayList<String>)lockedFiles.get(resource);
+            s.remove(username);
+            if (s.size() == 0) lockedFiles.remove(resource);
+        }
+
+        return Response.ok(gson.toJson(lockedFiles)).build();
+    }
+    
 }

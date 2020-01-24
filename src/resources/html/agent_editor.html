@@ -63,12 +63,22 @@
   -->
   <script src="./js/ace/ext-language_tools.js"></script>
   <script src="./js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
-
   <script src="./js/root.js"></script>
+
   <script>
     setAutoUpdateAgInterface();
     getCurrentAslContent();
     setAutoSyntaxChecking();
+    window.onload = function() {
+      var selectedResource = new URL(location.href).searchParams.get('aslfile');
+      post('/lock/'+selectedResource+'?username='+getCookieValue('username'))
+        .then(function(r){alert(r);});
+    };
+    window.onbeforeunload = function () {
+      var selectedResource = new URL(location.href).searchParams.get('aslfile');
+      post('/unlock/'+selectedResource+'?username='+getCookieValue('username')).then(function(r){alert(r);});
+      return;
+    };
   </script>
 </body>
 
