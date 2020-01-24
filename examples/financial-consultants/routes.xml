@@ -3,11 +3,11 @@
   <route id="myPAproduces">
     <from uri="jason:toTelegram"/>
     <convertBodyTo type="java.lang.String"/>
-    <to uri="telegram:bots/724331900:AAH-1hK1nalKlZPt4U6cLKVkYo8rUUcqnQc?ChatId=-274694619"/>
+    <to uri="telegram:bots/BOT'S-TOKEN-HERE"/>
   </route>
 
   <route id="myPAconsumes">
-    <from uri="telegram:bots/724331900:AAH-1hK1nalKlZPt4U6cLKVkYo8rUUcqnQc"/>
+    <from uri="telegram:bots/BOT'S-TOKEN-HERE"/>
     <convertBodyTo type="java.lang.String"/>
     <to uri="jason:myPA?performative=achieve"/>
   </route>

@@ -4,7 +4,7 @@ This example intends to demonstrate jacamo-web, an on-the-fly programming IDE, h
 
 Each consultant uses a particular formula to recommend an asset or not. The assistant interacts with the user by telegram* sending a compiled suggestion about assets.
 
-![Alt text](https://g.gravizo.com/source/marketplaceOverview?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-rest%2Fmaster%2Fexamples%2Fmarketplace%2FREADME.md)
+![Alt text](https://g.gravizo.com/source/marketplaceOverview?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-web%2Fmaster%2Fexamples%2Fmarketplace%2FREADME.md)
 <details>
 <summary>Marketplace Agents Overview</summary>
 marketplaceOverview

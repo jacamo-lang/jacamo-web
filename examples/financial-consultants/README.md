@@ -5,7 +5,7 @@ Each consultant uses a particular formula to recommend an asset or not. The assi
 
 It was presented on [EMAS 2019 - 7th International Workshop on Engineering Multi-Agent Systems](http://cgi.csc.liv.ac.uk/~lad/emas2019/). [Slides available](https://pt.slideshare.net/clebercbr/jacamo-web-is-on-the-fly-an-interactive-multiagent-systems-programming-environment).
 
-![Alt text](https://g.gravizo.com/source/financialAgentsOverview?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-rest%2Fmaster%2Fexamples%2Ffinancial-consultants%2FREADME.md)
+![Alt text](https://g.gravizo.com/source/financialAgentsOverview?https%3A%2F%2Fraw.githubusercontent.com%2Fjacamo-lang%2Fjacamo-web%2Fmaster%2Fexamples%2Ffinancial-consultants%2FREADME.md)
 <details> 
 <summary>Financial Agents Overview</summary>
 financialAgentsOverview
@@ -60,11 +60,7 @@ financialAgentsOverview
 ```
 ProjectsFolder$ git clone https://github.com/jacamo-lang/jacamo-web
 ```
-2. Compiling jacamo-web to be used by financial agents example
-```
-ProjectsFolder/jacamo-web$ gradle build
-```
-3. Create a [Telegram Bot](https://core.telegram.org/bots) and add its token in routes.xml file
+2. Create a [Telegram Bot](https://core.telegram.org/bots) and add its token in routes.xml file
 ```
 <routes xmlns="http://camel.apache.org/schema/spring" >
   <route id="myPAproduces">
@@ -87,7 +83,7 @@ We will start with an empty system. On the first part we will create a simple ar
 ### Running the demo
 1. Run financial agents example
 ```
-ProjectsFolder/jacamo-web/examples/financial-consultants$ gradle run
+ProjectsFolder/jacamo-web/examples/financial-consultants$ ./gradlew run
 ```
 2. Creating dynamic.Account artifact filling it with:
 ```

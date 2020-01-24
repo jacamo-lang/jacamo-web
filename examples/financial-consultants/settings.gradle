@@ -1,0 +1,4 @@
+rootProject.name = 'financial-consultants'
+
+include ':jacamo-web'
+project(':jacamo-web').projectDir = file('../../../jacamo-web')
