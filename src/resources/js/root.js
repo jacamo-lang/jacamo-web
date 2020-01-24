@@ -1153,12 +1153,56 @@ function getOrgNormGraph() {
 
 /** CREDENTIAL PROMPT */
 let usernameCookie = getCookieValue('username');
-let username = usernameCookie ? usernameCookie : prompt('Enter your username:');
-setCookie('username', username);
+if (!usernameCookie) {
+  promptCredentialDialog();
+  var gitUsernameInput = document.querySelector('#git-username');
+  var gitPasswordInput = document.querySelector('#git-password');
+  gitUsernameInput.addEventListener('input', checkSaveActivation);
+  gitPasswordInput.addEventListener('input', checkSaveActivation);
+}
 
-let passwordCookie = getCookieValue('password');
-let password = passwordCookie ? passwordCookie : prompt('Enter your password:');
-setCookie('password', password);
+function promptCredentialDialog() {
+  document.body.innerHTML += `
+  <div id="git-dialog-full">
+    <div id="git-dialog-main">
+      <div id="git-dialog-body">
+        Enter your credentials for the jacamo-web git server: <br>
+        Username: <input id="git-username" placeholder="Username"> <br>
+        Password: &zwnj; <input type="password" id="git-password" placeholder="Password">
+      </div>
+      <button
+        class="git-button" id="git-credentials-cancel"
+        onClick="cancelDialog('git-dialog-full')"
+      >
+        Cancel
+      </button>
+      <button class="git-button" id="git-credential-save"  disabled onClick="storeCredentials()">
+        Save
+      </button>
+    </div>
+  </div>
+  `
+}
+
+function checkSaveActivation() {
+  let gitCredentialSaveButton = document.querySelector('#git-credential-save');
+  return gitUsernameInput.textLength && gitPasswordInput.textLength
+  ? gitCredentialSaveButton.disabled = false
+  : gitCredentialSaveButton.disabled = true;
+
+}
+
+function storeCredentials() {
+
+  cancelDialog('git-dialog-full');
+  setCookie('username', gitUsernameInput.value);
+  setCookie('password', gitPasswordInput.value);
+}
+
+function cancelDialog(id) {
+  let dialogElement = document.querySelector(`#${id}`);
+  dialogElement.parentNode.removeChild(dialogElement);
+}
 
 function setCookie(key, value) { return document.cookie = `${key}=${(value || '')}; path=/`; }
 
