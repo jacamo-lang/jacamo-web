@@ -303,15 +303,13 @@ function commitChanges() {
   if (message == null || message == "") {
     alert("Operation canceled.");
   } else {
-    post('/commit').then(function(r) {
+    post('/commit?email='+getCookieValue('username'), message).then(function(r) {
       alert("Commit result: "+r);
     }).catch(function(e) {
       alert(e);
     });
   }
 }
-
-
 
 function pushChanges() {
   let usernameCookie = getCookieValue('username');

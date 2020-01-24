@@ -261,16 +261,17 @@ public class WebImpl extends RestImpl {
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response commitChanges(String message) {
+    public Response commitChanges(String message, @QueryParam("email") String email) {
         try {
             Git git = Git.open(new File(".git"));
 
-            System.out.println("Staging modified and deleted files to commit: " + git.getRepository().toString());
-            
-            RevCommit rev = git.commit().setAll(true).setMessage(message).call();
+            System.out.println("Staging modified and deleted files to commit: " + git.getRepository().toString()
+                    + ". With message: " + message);
+
+            RevCommit rev = git.commit().setAll(true).setAuthor("", email).setMessage(message).call();
 
             git.close();
-            
+
             return Response.ok(rev.toString()).build();
         } catch (IOException | GitAPIException e) {
             e.printStackTrace();
