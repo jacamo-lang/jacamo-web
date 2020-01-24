@@ -9,9 +9,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -22,7 +25,10 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import cartago.ArtifactId;
+import cartago.CartagoService;
 import jacamo.rest.RestImplEnv;
+import jacamo.rest.TranslEnv;
 
 @Singleton
 @Path("/workspaces")
@@ -151,6 +157,43 @@ public class WebImplEnv extends RestImplEnv {
             e.printStackTrace();
         }
 
+        return Response.status(500).build();
+    }
+    
+    /**
+     * Dispose all artifatcs.
+     * 
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    @DELETE
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response disposeAllArtifacts() {
+        try {
+            //TODO: put this list in a REST call to be used by clients
+            List<String> systemArtifacts = Arrays.asList("cartago.WorkspaceArtifact", "cartago.tools.Console",
+                    "cartago.ManRepoArtifact", "cartago.tools.TupleSpace", "cartago.NodeArtifact",
+                    "ora4mas.nopl.GroupBoard", "ora4mas.nopl.OrgBoard", "ora4mas.nopl.SchemeBoard",
+                    "ora4mas.nopl.NormativeBoard", "cartago.AgentBodyArtifact", "ora4mas.light.LightOrgBoard",
+                    "ora4mas.light.LightNormativeBoard", "ora4mas.light.LightGroupBoard",
+                    "ora4mas.light.LightSchemeBoard");      
+            
+            TranslEnv tEnv = new TranslEnv();
+            for (String wrksName : tEnv.getWorkspaces()) {
+                for (ArtifactId aid : CartagoService.getController(wrksName).getCurrentArtifacts()) {
+                    if (!systemArtifacts.contains(aid.getArtifactType())) {
+                        System.out.println("disposing: " + aid.getName());
+                        CartagoService.getController(wrksName).removeArtifact(aid.getName());
+                    } else {
+                        System.out.println("keeping: " + aid.getName());
+                    }
+                }
+            }
+            
+            return Response.ok().entity("Artifacts disposed!").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return Response.status(500).build();
     }
 }
