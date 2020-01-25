@@ -1176,7 +1176,7 @@ function promptCredentialDialog() {
       >
         Cancel
       </button>
-      <button class="git-button" id="git-credential-save"  disabled onClick="storeCredentials()">
+      <button class="git-button" id="git-credential-save" disabled onClick="storeCredentials()">
         Save
       </button>
     </div>
@@ -1186,10 +1186,7 @@ function promptCredentialDialog() {
 
 function checkSaveActivation() {
   let gitCredentialSaveButton = document.querySelector('#git-credential-save');
-  return gitUsernameInput.textLength && gitPasswordInput.textLength
-  ? gitCredentialSaveButton.disabled = false
-  : gitCredentialSaveButton.disabled = true;
-
+  gitCredentialSaveButton.disabled = (gitUsernameInput.value.length === 0 && gitPasswordInput.value.length === 0);
 }
 
 function storeCredentials() {
