@@ -2309,3 +2309,13 @@ table.hoverable tr:hover, table.hoverable tr:hover > td, table.hoverable tr:focu
     background: var(--table-body-hover-back-color);
   }
 }
+
+.toast {
+  margin-top: 75px !important;
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+.toast-warning {
+  background-color:#D7B17C;
+}

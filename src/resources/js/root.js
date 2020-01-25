@@ -1268,6 +1268,29 @@ function getCookieValue(key) {
   return value ? value.pop() : '';
 }
 
+/** LOCK NOTIFICATIONS */
+toastr.options.preventDuplicates = true;
+
+let url = new URL(window.location.href);
+let file = url.searchParams.get('agent') || url.searchParams.get('artifact') || url.searchParams.get('organisation');
+
+if (file) {
+  post(`/lock/${file}?username=${username}`).then(function(response) {
+    let jResponse = JSON.parse(response);
+    if (jResponse[file] && jResponse[file].length > 1) {
+      let otherEditors = jResponse[file].slice(0, -1);
+      toastr.warning(
+        `The following user(s) are already editing this file: ${otherEditors.join(', ')}.`,
+        { timeOut: 10000 }
+      );
+    }
+  });
+}
+
+window.onbeforeunload = e => {
+  navigator.sendBeacon(`/unlock/${file}?username=${username}`);
+}
+
 /**
  * END OF FILE
  */
