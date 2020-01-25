@@ -103,6 +103,13 @@ const instantMessage = (msg) => {
   }
 };
 
+let createDefaultHR = () => {
+  var hr = document.createElement('hr');
+  hr.style.display = 'line';
+  hr.style.background = '#f8f8f8';
+  hr.style.borderBottom = '1px solid #ddd';
+  return hr;
+};
 
 /**
  * DF FUNCTIONS
@@ -280,8 +287,8 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
     }
     document.getElementById(nav).appendChild(lag);
   });
+  document.getElementById(nav).appendChild(createDefaultHR());
   var br = document.createElement("br");
-  document.getElementById(nav).appendChild(br);
   document.getElementById(nav).appendChild(br);
   var ldf = document.createElement('a');
   ldf.setAttribute("href", "./agents_df.html");
@@ -291,15 +298,7 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
   lnew.setAttribute("href", "./agent_new.html");
   lnew.innerHTML = "create agent";
   document.getElementById(nav).appendChild(lnew);
-  document.getElementById(nav).appendChild(br);
-  var lgc = document.createElement('a');
-  lgc.addEventListener("click", function() { commitChanges() });
-  lgc.innerHTML = "commit changes";
-  document.getElementById(nav).appendChild(lgc);
-  var lgp = document.createElement('a');
-  lgp.addEventListener("click", function() { pushChanges() });
-  lgp.innerHTML = "push changes";
-  document.getElementById(nav).appendChild(lgp);
+
 }
 
 function commitChanges() {
@@ -405,15 +404,13 @@ function newArt() {
  */
 
 
- /*Get list of agent from backend*/
- function getMASs() {
-   get("./jcm").then(function(resp) {
-     updateMASMenu("nav-drawer", JSON.parse(resp), true);
-   });
+ /*Get list of MAS from backend*/
+ function updateMASMenus() {
+   updateMASMenu("nav-drawer", true);
+   updateMASMenu("nav-drawer-frame", false);
  };
 
- function updateMASMenu(nav, jcms, addCloseButton) {
-
+ function updateMASMenu(nav, addCloseButton) {
    if (addCloseButton) {
      const closeButton = document.createElement('label');
      closeButton.setAttribute("for", "doc-drawer-checkbox");
@@ -423,18 +420,20 @@ function newArt() {
      h3.innerHTML = "&#160";
      document.getElementById(nav).appendChild(h3);
    }
-
-   jcms.forEach(function(n) {
-     var lag = document.createElement('a');
-     lag.setAttribute("href", "./index.html");
-     lag.onclick = function() { getaMAS(n); };
-     lag.innerHTML = "<h5>" + n.substr(0,n.length-4) + "</h5>";
-     document.getElementById(nav).appendChild(lag);
-   });
-
-   var br = document.createElement("br");
-   document.getElementById(nav).appendChild(br);
-   document.getElementById(nav).appendChild(br);
+   var lgl = document.createElement('a');
+   lgl.setAttribute("href", "./index_launch.html");
+   lgl.innerHTML = "launch a MAS";
+   document.getElementById(nav).appendChild(lgl);
+   document.getElementById(nav).appendChild(createDefaultHR());
+   var lgc = document.createElement('a');
+   lgc.addEventListener("click", function() { commitChanges() });
+   lgc.innerHTML = "commit changes";
+   document.getElementById(nav).appendChild(lgc);
+   var lgp = document.createElement('a');
+   lgp.addEventListener("click", function() { pushChanges() });
+   lgp.innerHTML = "push changes";
+   document.getElementById(nav).appendChild(lgp);
+/*
    var ldag = document.createElement('a');
    ldag.onclick = function() {
      if (confirm("Kill all agents?") === true) {
@@ -472,9 +471,53 @@ function newArt() {
        instantMessage("Operation cancelled!")
      };
    };
-   ldor.innerHTML = "disband all organisations";
+   ldor.innerHTML = "dismantle all organisations";
    document.getElementById(nav).appendChild(ldor);
+*/
  }
+
+ /*Get list of MAS from backend*/
+ function getMASs() {
+   get("./jcm").then(function(resp) {
+     let jcms = JSON.parse(resp);
+
+     Object.keys(jcms).forEach(function(f) {
+       var d = document.createElement('div');
+       d.setAttribute("class", "card fluid");
+       document.getElementById("doc-content").appendChild(d);
+       var h4 = document.createElement('h4');
+       h4.setAttribute("class", "section double-padded");
+       h4.innerHTML = "<b>"+jcms[f].jcm.substr(0,jcms[f].jcm.length-4)+"</b>&#160&#160&#160";
+       d.appendChild(h4);
+       var l = document.createElement('a');
+       l.setAttribute("href", "./index.html");
+       l.onclick = function() { getaMAS(jcms[f].jcm); };
+       l.innerHTML = "[launch]";
+       h4.appendChild(l);
+       var div = document.createElement('div');
+       d.appendChild(div);
+       var p = document.createElement('p');
+       div.appendChild(p);
+       var ia = document.createElement('i');
+       ia.innerHTML = "agents: " + jcms[f].agents.join("&#160  ");
+       p.appendChild(ia);
+       p.appendChild(document.createElement('br'));
+       var iw = document.createElement('i');
+       if (jcms[f].workspaces.length > 0) {
+         iw.innerHTML = "workspaces: " + jcms[f].workspaces.join("&#160  ");
+         p.appendChild(iw);
+         p.appendChild(document.createElement('br'));
+       }
+       if (jcms[f].organisations.length > 0) {
+         var io = document.createElement('i');
+         io.innerHTML = "organisations: " + jcms[f].organisations.join("&#160 ");
+         p.appendChild(io);
+       }
+     });
+   });
+
+
+ };
 
  function getaMAS(mas) {
    get("./jcm/" + mas).then(function(resp) {
@@ -563,6 +606,7 @@ function getMASAsDot() {
 
     /* Transition follows modal top down movement */
     var t = d3.transition().duration(750).ease(d3.easeLinear);
+    if (overview.agents.length === 0) dot = ["digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\"]\n noAg [label=<There is<br />no agents>]\n}\n"];
     d3.select("#overviewgraph").graphviz().transition(t).renderDot(dot.join(""));
   });
 }
@@ -773,9 +817,7 @@ function updateWorkspaceMenu(nav, ws, ar, addCloseButton) {
       /* Bypass for promisses challenge. Did I just printed the last element content? */
       setTimeout(function(f) {
         if (ws[ws.length -1] === n) {
-          var br = document.createElement("br");
-          document.getElementById(nav).appendChild(br);
-          document.getElementById(nav).appendChild(br);
+          document.getElementById(nav).appendChild(createDefaultHR());
           var lnew = document.createElement('a');
           lnew.setAttribute("href", "./artifact_new.html");
           lnew.innerHTML = "create template";
@@ -931,9 +973,7 @@ function updateOrganisationMenu(nav, set, addCloseButton) {
       document.getElementById(nav).appendChild(lag);
     }
   });
-  var br = document.createElement("br");
-  document.getElementById(nav).appendChild(br);
-  document.getElementById(nav).appendChild(br);
+  document.getElementById(nav).appendChild(createDefaultHR());
   var lnew = document.createElement('a');
   lnew.setAttribute("href", "./oe_role_new.html");
   lnew.innerHTML = "create role";
@@ -1253,12 +1293,54 @@ function getOrgNormGraph() {
 
 /** CREDENTIAL PROMPT */
 let usernameCookie = getCookieValue('username');
-let username = usernameCookie ? usernameCookie : prompt('Enter your username:');
-setCookie('username', username);
+if (!usernameCookie) {
+  promptCredentialDialog();
+  var gitUsernameInput = document.querySelector('#git-username');
+  var gitPasswordInput = document.querySelector('#git-password');
+  gitUsernameInput.addEventListener('input', checkSaveActivation);
+  gitPasswordInput.addEventListener('input', checkSaveActivation);
+}
 
-let passwordCookie = getCookieValue('password');
-let password = passwordCookie ? passwordCookie : prompt('Enter your password:');
-setCookie('password', password);
+function promptCredentialDialog() {
+  var div = document.createElement('div');
+  div.setAttribute('id', 'git-dialog-full');
+  div.innerHTML += `
+    <div id="git-dialog-main">
+      <div id="git-dialog-body">
+        Enter your credentials for the jacamo-web git server: <br>
+        Username: <input id="git-username" placeholder="Username"> <br>
+        Password: &zwnj; <input type="password" id="git-password" placeholder="Password">
+      </div>
+      <button
+        class="git-button" id="git-credentials-cancel"
+        onClick="cancelDialog('git-dialog-full')"
+      >
+        Cancel
+      </button>
+      <button class="git-button" id="git-credential-save" disabled onClick="storeCredentials()">
+        Save
+      </button>
+    </div>
+  `;
+  document.getElementById('doc-wrapper').appendChild(div);
+}
+
+function checkSaveActivation() {
+  let gitCredentialSaveButton = document.querySelector('#git-credential-save');
+  gitCredentialSaveButton.disabled = (gitUsernameInput.value.length === 0 && gitPasswordInput.value.length === 0);
+}
+
+function storeCredentials() {
+
+  cancelDialog('git-dialog-full');
+  setCookie('username', gitUsernameInput.value);
+  setCookie('password', gitPasswordInput.value);
+}
+
+function cancelDialog(id) {
+  let dialogElement = document.querySelector(`#${id}`);
+  dialogElement.parentNode.removeChild(dialogElement);
+}
 
 function setCookie(key, value) { return document.cookie = `${key}=${(value || '')}; path=/`; }
 

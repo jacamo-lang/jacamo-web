@@ -2319,3 +2319,29 @@ table.hoverable tr:hover, table.hoverable tr:hover > td, table.hoverable tr:focu
 .toast-warning {
   background-color:#D7B17C;
 }
+
+#git-dialog-full {
+  position: absolute;
+  height: 100vh;
+  width: 100vw;
+}
+
+#git-dialog-main {
+  width: 750px;
+  padding: 15px;
+  text-align: center;
+  background-color: #e6e6e6;
+  margin: auto;
+  margin-top: 150px;
+  border: solid 1px #686868;
+}
+
+.git-button {
+  background-color: #686868;
+  color: #FFF;
+}
+
+.git-button:disabled {
+  background-color: #aaa;
+  color: #686868;
+}
