@@ -283,6 +283,7 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
   var br = document.createElement("br");
   document.getElementById(nav).appendChild(br);
   document.getElementById(nav).appendChild(br);
+  document.getElementById(nav).appendChild(br);
   var ldf = document.createElement('a');
   ldf.setAttribute("href", "./agents_df.html");
   ldf.innerHTML = "directory facilitator";
@@ -291,15 +292,7 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
   lnew.setAttribute("href", "./agent_new.html");
   lnew.innerHTML = "create agent";
   document.getElementById(nav).appendChild(lnew);
-  document.getElementById(nav).appendChild(br);
-  var lgc = document.createElement('a');
-  lgc.addEventListener("click", function() { commitChanges() });
-  lgc.innerHTML = "commit changes";
-  document.getElementById(nav).appendChild(lgc);
-  var lgp = document.createElement('a');
-  lgp.addEventListener("click", function() { pushChanges() });
-  lgp.innerHTML = "push changes";
-  document.getElementById(nav).appendChild(lgp);
+
 }
 
 function commitChanges() {
@@ -436,6 +429,15 @@ function newArt() {
    var br = document.createElement("br");
    document.getElementById(nav).appendChild(br);
    document.getElementById(nav).appendChild(br);
+   var lgc = document.createElement('a');
+   lgc.addEventListener("click", function() { commitChanges() });
+   lgc.innerHTML = "commit changes";
+   document.getElementById(nav).appendChild(lgc);
+   var lgp = document.createElement('a');
+   lgp.addEventListener("click", function() { pushChanges() });
+   lgp.innerHTML = "push changes";
+   document.getElementById(nav).appendChild(lgp);
+/*
    var ldag = document.createElement('a');
    ldag.onclick = function() {
      if (confirm("Kill all agents?") === true) {
@@ -473,8 +475,9 @@ function newArt() {
        instantMessage("Operation cancelled!")
      };
    };
-   ldor.innerHTML = "disband all organisations";
+   ldor.innerHTML = "dismantle all organisations";
    document.getElementById(nav).appendChild(ldor);
+*/
  }
 
  function getaMAS(mas) {
