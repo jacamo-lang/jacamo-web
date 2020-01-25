@@ -2,11 +2,14 @@ package jacamo.web;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
@@ -29,8 +32,11 @@ import cartago.ArtifactId;
 import cartago.CartagoContext;
 import cartago.CartagoException;
 import cartago.CartagoService;
+import jacamo.project.JaCaMoOrgParameters;
 import jacamo.project.JaCaMoProject;
+import jacamo.project.JaCaMoWorkspaceParameters;
 import jacamo.project.parser.JaCaMoProjectParser;
+import jacamo.project.parser.ParseException;
 import jason.infra.centralised.RunCentralisedMAS;
 import jason.mas2j.AgentParameters;
 import jason.runtime.RuntimeServices;
@@ -105,18 +111,49 @@ public class WebImplJCM extends AbstractBinder {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProjectsJSON() {
         Gson gson = new Gson();
-        
-        FilenameFilter filter = new FilenameFilter() {
-            @Override
-            public boolean accept(File f, String name) {
-                return name.endsWith(".jcm");
+
+        try {
+            FilenameFilter filter = new FilenameFilter() {
+                @Override
+                public boolean accept(File f, String name) {
+                    return name.endsWith(".jcm");
+                }
+            };
+
+            File f = new File("src/jcm");
+            List<String> jcmFiles = new ArrayList<>(Arrays.asList(f.list(filter)));
+
+            List<Object> projects = new ArrayList<>();
+            for (String filename : jcmFiles) {
+                File fjcm = new File("src/jcm/" + filename);
+                BufferedReader in = new BufferedReader(new FileReader(fjcm));
+
+                JaCaMoProjectParser parser = new JaCaMoProjectParser(in);
+                JaCaMoProject project = new JaCaMoProject();
+                project = parser.parse("src/jcm/" + filename);
+                List<String> ags = new ArrayList<>();
+                for (AgentParameters ap : project.getAgents())
+                    ags.add(ap.getAgName());
+                List<String> wks = new ArrayList<>();
+                for (JaCaMoWorkspaceParameters wp : project.getWorkspaces())
+                    wks.add(wp.getName());
+                List<String> orgs = new ArrayList<>();
+                for (JaCaMoOrgParameters or : project.getOrgs())
+                    orgs.add(or.getName());
+
+                Map<String, Object> jcm = new HashMap<>();
+                jcm.put("jcm", filename);
+                jcm.put("agents", ags);
+                jcm.put("workspaces", wks);
+                jcm.put("organisations", orgs);
+                projects.add(jcm);
             }
-        };
 
-        File f = new File("src/jcm");
-        List<String> jcmFiles = new ArrayList<>(Arrays.asList(f.list(filter)));
-
-        return Response.ok().entity(gson.toJson(jcmFiles)).build();
+            return Response.ok().entity(gson.toJson(projects)).build();
+        } catch (FileNotFoundException | ParseException e) {
+            e.printStackTrace();
+        }
+        return Response.status(500).build();
     }
 
     /**

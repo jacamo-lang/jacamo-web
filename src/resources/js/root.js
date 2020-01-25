@@ -103,6 +103,13 @@ const instantMessage = (msg) => {
   }
 };
 
+let createDefaultHR = () => {
+  var hr = document.createElement('hr');
+  hr.style.display = 'line';
+  hr.style.background = '#f8f8f8';
+  hr.style.borderBottom = '1px solid #ddd';
+  return hr;
+};
 
 /**
  * DF FUNCTIONS
@@ -280,9 +287,8 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
     }
     document.getElementById(nav).appendChild(lag);
   });
+  document.getElementById(nav).appendChild(createDefaultHR());
   var br = document.createElement("br");
-  document.getElementById(nav).appendChild(br);
-  document.getElementById(nav).appendChild(br);
   document.getElementById(nav).appendChild(br);
   var ldf = document.createElement('a');
   ldf.setAttribute("href", "./agents_df.html");
@@ -398,16 +404,13 @@ function newArt() {
  */
 
 
- /*Get list of agent from backend*/
- function getMASs() {
-   get("./jcm").then(function(resp) {
-     updateMASMenu("nav-drawer", JSON.parse(resp), true);
-     updateMASMenu("nav-drawer-frame", JSON.parse(resp), false);
-   });
+ /*Get list of MAS from backend*/
+ function updateMASMenus() {
+   updateMASMenu("nav-drawer", true);
+   updateMASMenu("nav-drawer-frame", false);
  };
 
- function updateMASMenu(nav, jcms, addCloseButton) {
-
+ function updateMASMenu(nav, addCloseButton) {
    if (addCloseButton) {
      const closeButton = document.createElement('label');
      closeButton.setAttribute("for", "doc-drawer-checkbox");
@@ -417,18 +420,11 @@ function newArt() {
      h3.innerHTML = "&#160";
      document.getElementById(nav).appendChild(h3);
    }
-
-   jcms.forEach(function(n) {
-     var lag = document.createElement('a');
-     lag.setAttribute("href", "./index.html");
-     lag.onclick = function() { getaMAS(n); };
-     lag.innerHTML = "<h5>" + n.substr(0,n.length-4) + "</h5>";
-     document.getElementById(nav).appendChild(lag);
-   });
-
-   var br = document.createElement("br");
-   document.getElementById(nav).appendChild(br);
-   document.getElementById(nav).appendChild(br);
+   var lgl = document.createElement('a');
+   lgl.setAttribute("href", "./index_launch.html");
+   lgl.innerHTML = "launch a MAS";
+   document.getElementById(nav).appendChild(lgl);
+   document.getElementById(nav).appendChild(createDefaultHR());
    var lgc = document.createElement('a');
    lgc.addEventListener("click", function() { commitChanges() });
    lgc.innerHTML = "commit changes";
@@ -479,6 +475,49 @@ function newArt() {
    document.getElementById(nav).appendChild(ldor);
 */
  }
+
+ /*Get list of MAS from backend*/
+ function getMASs() {
+   get("./jcm").then(function(resp) {
+     let jcms = JSON.parse(resp);
+
+     Object.keys(jcms).forEach(function(f) {
+       var d = document.createElement('div');
+       d.setAttribute("class", "card fluid");
+       document.getElementById("doc-content").appendChild(d);
+       var h4 = document.createElement('h4');
+       h4.setAttribute("class", "section double-padded");
+       h4.innerHTML = "<b>"+jcms[f].jcm.substr(0,jcms[f].jcm.length-4)+"</b>&#160&#160&#160";
+       d.appendChild(h4);
+       var l = document.createElement('a');
+       l.setAttribute("href", "./index.html");
+       l.onclick = function() { getaMAS(jcms[f].jcm); };
+       l.innerHTML = "[launch]";
+       h4.appendChild(l);
+       var div = document.createElement('div');
+       d.appendChild(div);
+       var p = document.createElement('p');
+       div.appendChild(p);
+       var ia = document.createElement('i');
+       ia.innerHTML = "agents: " + jcms[f].agents.join("&#160  ");
+       p.appendChild(ia);
+       p.appendChild(document.createElement('br'));
+       var iw = document.createElement('i');
+       if (jcms[f].workspaces.length > 0) {
+         iw.innerHTML = "workspaces: " + jcms[f].workspaces.join("&#160  ");
+         p.appendChild(iw);
+         p.appendChild(document.createElement('br'));
+       }
+       if (jcms[f].organisations.length > 0) {
+         var io = document.createElement('i');
+         io.innerHTML = "organisations: " + jcms[f].organisations.join("&#160 ");
+         p.appendChild(io);
+       }
+     });
+   });
+
+
+ };
 
  function getaMAS(mas) {
    get("./jcm/" + mas).then(function(resp) {
@@ -778,9 +817,7 @@ function updateWorkspaceMenu(nav, ws, ar, addCloseButton) {
       /* Bypass for promisses challenge. Did I just printed the last element content? */
       setTimeout(function(f) {
         if (ws[ws.length -1] === n) {
-          var br = document.createElement("br");
-          document.getElementById(nav).appendChild(br);
-          document.getElementById(nav).appendChild(br);
+          document.getElementById(nav).appendChild(createDefaultHR());
           var lnew = document.createElement('a');
           lnew.setAttribute("href", "./artifact_new.html");
           lnew.innerHTML = "create template";
@@ -936,9 +973,7 @@ function updateOrganisationMenu(nav, set, addCloseButton) {
       document.getElementById(nav).appendChild(lag);
     }
   });
-  var br = document.createElement("br");
-  document.getElementById(nav).appendChild(br);
-  document.getElementById(nav).appendChild(br);
+  document.getElementById(nav).appendChild(createDefaultHR());
   var lnew = document.createElement('a');
   lnew.setAttribute("href", "./oe_role_new.html");
   lnew.innerHTML = "create role";
