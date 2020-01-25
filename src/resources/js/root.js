@@ -1267,8 +1267,9 @@ if (!usernameCookie) {
 }
 
 function promptCredentialDialog() {
-  document.body.innerHTML += `
-  <div id="git-dialog-full">
+  var div = document.createElement('div');
+  div.setAttribute('id', 'git-dialog-full');
+  div.innerHTML += `
     <div id="git-dialog-main">
       <div id="git-dialog-body">
         Enter your credentials for the jacamo-web git server: <br>
@@ -1285,8 +1286,8 @@ function promptCredentialDialog() {
         Save
       </button>
     </div>
-  </div>
-  `
+  `;
+  document.getElementById('doc-wrapper').appendChild(div);
 }
 
 function checkSaveActivation() {
