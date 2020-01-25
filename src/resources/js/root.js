@@ -409,6 +409,7 @@ function newArt() {
  function getMASs() {
    get("./jcm").then(function(resp) {
      updateMASMenu("nav-drawer", JSON.parse(resp), true);
+     updateMASMenu("nav-drawer-frame", JSON.parse(resp), false);
    });
  };
 
@@ -563,6 +564,7 @@ function getMASAsDot() {
 
     /* Transition follows modal top down movement */
     var t = d3.transition().duration(750).ease(d3.easeLinear);
+    if (overview.agents.length === 0) dot = ["digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\"]\n noAg [label=<There is<br />no agents>]\n}\n"];
     d3.select("#overviewgraph").graphviz().transition(t).renderDot(dot.join(""));
   });
 }
