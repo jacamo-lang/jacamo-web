@@ -1354,10 +1354,10 @@ function getCookieValue(key) {
 toastr.options.preventDuplicates = true;
 
 let url = new URL(window.location.href);
-let file = url.searchParams.get('agent') || url.searchParams.get('artifact') || url.searchParams.get('organisation');
+let file = url.searchParams.get('aslfile') || url.searchParams.get('javafile');
 
 if (file) {
-  post(`/lock/${file}?username=${username}`).then(function(response) {
+  post(`/lock/${file}?username=${usernameCookie}`).then(function(response) {
     let jResponse = JSON.parse(response);
     if (jResponse[file] && jResponse[file].length > 1) {
       let otherEditors = jResponse[file].slice(0, -1);
@@ -1370,7 +1370,7 @@ if (file) {
 }
 
 window.onbeforeunload = e => {
-  navigator.sendBeacon(`/unlock/${file}?username=${username}`);
+  navigator.sendBeacon(`/unlock/${file}?username=${usernameCookie}`);
 }
 
 /**

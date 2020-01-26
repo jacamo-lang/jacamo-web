@@ -71,16 +71,6 @@
     setAutoUpdateAgInterface();
     getCurrentAslContent();
     setAutoSyntaxChecking();
-    window.onload = function() {
-      var selectedResource = new URL(location.href).searchParams.get('aslfile');
-      post('/lock/'+selectedResource+'?username='+getCookieValue('username'))
-        .then(function(r){alert(r);});
-    };
-    window.onbeforeunload = function () {
-      var selectedResource = new URL(location.href).searchParams.get('aslfile');
-      post('/unlock/'+selectedResource+'?username='+getCookieValue('username')).then(function(r){alert(r);});
-      return;
-    };
   </script>
 </body>
 
