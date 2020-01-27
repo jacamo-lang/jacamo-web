@@ -588,9 +588,12 @@ function getMASAsDot() {
         dot.push("\t\t\"" + m.scheme + "\" [ " + "label = \"" + m.scheme + "\" shape=hexagon style=filled pencolor=black fillcolor=linen];\n");
         orglinks.push("\t\"" + m.scheme + "\"->\"" + a.agent + "\" [arrowtail=normal dir=back label=\"" + m.mission + "\"]\n");
         m.responsibles.forEach(function(r) {
-          orglinks.push("\t\"" + r + "\"->\"" + m.scheme +
-            "\" [arrowtail=normal arrowhead=open label=\"responsible\\nfor\"]\n");
-          dot.push("\t\t{rank=same \"" + r + "\" \"" + m.scheme + "\"};\n");
+          let resp = "\t\"" + r + "\"->\"" + m.scheme +
+            "\" [arrowtail=normal arrowhead=open label=\"responsible\"]\n";
+          if (!orglinks.includes(resp)) { /*avoid duplicates*/
+            orglinks.push(resp);
+            dot.push("\t\t{rank=same \"" + r + "\" \"" + m.scheme + "\"};\n");
+          }
         });
       });
     });
