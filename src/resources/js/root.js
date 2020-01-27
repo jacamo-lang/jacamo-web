@@ -304,14 +304,21 @@ function getAgents() {
 };
 
 function updateAgentsMenu(nav, agents, addCloseButton) {
+  navElement = document.getElementById(nav);
+  var child = navElement.lastElementChild;
+  while (child) {
+    navElement.removeChild(child);
+    child = navElement.lastElementChild;
+  };
+
   if (addCloseButton) {
     const closeButton = document.createElement('label');
     closeButton.setAttribute("for", "doc-drawer-checkbox");
     closeButton.setAttribute("class", "button drawer-close");
-    document.getElementById(nav).appendChild(closeButton);
+    navElement.appendChild(closeButton);
     var h3 = document.createElement("h3");
     h3.innerHTML = "&#160";
-    document.getElementById(nav).appendChild(h3);
+    navElement.appendChild(h3);
   }
 
   const params = new URL(location.href).searchParams;
@@ -325,19 +332,19 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
     } else {
       lag.innerHTML = "<h5>" + n + "</h5>";
     }
-    document.getElementById(nav).appendChild(lag);
+    navElement.appendChild(lag);
   });
-  document.getElementById(nav).appendChild(createDefaultHR());
+  navElement.appendChild(createDefaultHR());
   var br = document.createElement("br");
-  document.getElementById(nav).appendChild(br);
+  navElement.appendChild(br);
   var ldf = document.createElement('a');
   ldf.setAttribute("href", "./agents_df.html");
   ldf.innerHTML = "directory facilitator";
-  document.getElementById(nav).appendChild(ldf);
+  navElement.appendChild(ldf);
   var lnew = document.createElement('a');
   lnew.setAttribute("href", "./agent_new.html");
   lnew.innerHTML = "create agent";
-  document.getElementById(nav).appendChild(lnew);
+  navElement.appendChild(lnew);
 
 }
 
