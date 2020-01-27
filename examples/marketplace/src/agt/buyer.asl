@@ -2,23 +2,30 @@
 
 +!start <- .print("Hi").
 
-+!buyComponent <-
-    .print("Ordering components...");
++!makeBusiness <- .print("Here we go!").
+
++!buyItem <-
+    .print("Ordering item...");
     .wait(1000);
-    .send(seller,achieve,supplyComponent);
+    .send(seller,achieve,supplyItem);
     .
 
-+!payment[source(S)] <-
++!makePayment[source(S)] <-
     .print("Paying ", S);
     .wait(1000);
-    .abolish(componentDelivered);
+    .abolish(itemDelivered);
     .send(seller,tell,paid);
     .
 
-+componentDelivered[source(S)] <-
-    .print(S," delivered the component. Incrementing input stock...");
++itemDelivered[source(S)] <-
+    .print(S," delivered the item.");
+    .
+    
++!storeItem : itemDelivered <-
+    .print("Incrementing input stock...");
     inc;
     .
 
 { include("$jacamoJar/templates/common-cartago.asl") }
 { include("$jacamoJar/templates/common-moise.asl") }
+{ include("$moiseJar/asl/org-obedient.asl") }
