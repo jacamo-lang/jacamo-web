@@ -37,6 +37,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -268,6 +269,34 @@ public class WebImpl extends RestImpl {
         return Response.status(500).build();
     }
 
+    /**
+     * Return git status of jacamo-web repository
+     * 
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     *         JSON example: {"removed":[],"added":[],"missing":[],"modified":["src/main/java/jacamo/web/WebImpl.java"],"untracked":["bob.bb"],"changed":[]}
+     */
+    @Path("/status")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response gitStatus() {
+        try {
+            Git git = Git.open(new File(".git"));
+            Status stat = git.status().call();
+            Map<String, Object> s = new HashMap<>();
+            s.put("added", stat.getAdded());
+            s.put("changed", stat.getAdded());
+            s.put("missing", stat.getChanged());
+            s.put("modified", stat.getModified());
+            s.put("removed", stat.getRemoved());
+            s.put("untracked", stat.getUntracked());
+            return Response.ok(gson.toJson(s)).build();
+        } catch (IOException | GitAPIException e) {
+            e.printStackTrace();
+        }
+        return Response.status(500).build();
+    }
+    
     /**
      * Return ACE editor files. It is used because Jason grammar may be available only locally.
      * 
