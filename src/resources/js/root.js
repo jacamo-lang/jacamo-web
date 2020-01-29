@@ -45,7 +45,7 @@ function post(url, data, type, username, password) {
       if (req.status == 200) {
         resolve(req.response);
       } else {
-        reject(Error(req.statusText));
+        reject(req.statusText);
       }
     };
     req.onerror = function() {
@@ -187,7 +187,6 @@ function getCurrentAslContent() {
   get("/agents/" + selectedAgent + "/aslfile/" + selectedASLFile).then(function(response) {
     const submit = document.createElement('button');
     submit.setAttribute("type", "submit");
-    /*submit.setAttribute("onclick", "window.location.replace('./agent.html?agent=" + selectedAgent + "')");*/
     submit.innerHTML = "Save & Reload";
     document.getElementById("footer_menu").appendChild(submit);
     const cancel = document.createElement('button');
@@ -195,14 +194,6 @@ function getCurrentAslContent() {
     cancel.setAttribute("onclick", "localStorage.setItem('agentBuffer', 'No changes made.'); window.history.back();");
     cancel.innerHTML = "Discard changes";
     document.getElementById("footer_menu").appendChild(cancel);
-    /*
-    const check = document.createElement('button');
-    check.setAttribute("type", "button");
-    check.addEventListener("click", function() { syntaxCheck() });
-    check.innerHTML = "check";
-    document.getElementById("footer_menu").appendChild(check);
-    */
-
     const text = document.createElement('i');
     text.style.fontSize = "14px";
     text.innerHTML = "Editing: <b>" + selectedASLFile + "</b>";
@@ -210,7 +201,7 @@ function getCurrentAslContent() {
     const check = document.createElement('b');
     check.setAttribute("id", "check");
     check.style.fontSize = "14px";
-    check.style.color = "DarkGoldenRod"; /*FireBrick DarkGoldenRod ForestGreen*/
+    check.style.color = "Navy"; /*FireBrick DarkGoldenRod ForestGreen Navy*/
     check.innerHTML = "&#160&#160&#160&#160&#160Parsing code...";
     document.getElementById("footer_menu").appendChild(check);
 
@@ -268,9 +259,17 @@ function syntaxCheck() {
     check.innerHTML = "&#160&#160&#160&#160&#160"+response;
     aslEditor.setTheme("ace/theme/textmate");
   }).catch(function(e) {
-    check.style.color = "FireBrick"; /*FireBrick DarkGoldenRod ForestGreen*/
-    check.innerHTML = "&#160&#160&#160&#160&#160"+e;
-    aslEditor.setTheme("ace/theme/katzenmilch");
+    if (e.startsWith("Info")) {
+      check.style.color = "Navy"; /*FireBrick DarkGoldenRod ForestGreen*/
+      check.innerHTML = "&#160&#160&#160&#160&#160"+e;
+    } else if (e.startsWith("Warning")) {
+      check.style.color = "DarkGoldenRod"; /*FireBrick DarkGoldenRod ForestGreen*/
+      check.innerHTML = "&#160&#160&#160&#160&#160"+e;
+    } else {
+      check.style.color = "FireBrick"; /*FireBrick DarkGoldenRod ForestGreen*/
+      check.innerHTML = "&#160&#160&#160&#160&#160"+e;
+      aslEditor.setTheme("ace/theme/katzenmilch");
+    }
   });
 }
 
