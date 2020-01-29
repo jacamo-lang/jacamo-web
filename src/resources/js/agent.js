@@ -157,15 +157,15 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
   /* agent missions */
   agentinfo.missions.forEach(function(x) {
     dot.push(
-      "\t\t\"" + x.mission + "\" [ " + "\n\t\tlabel = \"" + x.mission + "\"",
+      "\t\t\"" + x.scheme + "\" [ " + "\n\t\tlabel = \"" + x.scheme + "\"",
       "\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n",
       "\t\t]\n");
     x.responsibles.forEach(function(y) {
-      dot.push("\t\"" + y + "\"->\"" + x.mission,
-        "\" [arrowtail=normal arrowhead=open label=\"responsible for\"]\n",
-        "\t{rank=same \"" + y + "\" \"" + x.mission + "\"}\n");
+      dot.push("\t\"" + y + "\"->\"" + x.scheme,
+        "\" [arrowtail=normal arrowhead=open label=\"responsible\"]\n",
+        "\t{rank=same \"" + y + "\" \"" + x.scheme + "\"}\n");
     });
-    dot.push("\t\"" + x.mission + "\"->\"" + agName, "\" [arrowtail=normal dir=back label=\"" + x.scheme + "\"]\n");
+    dot.push("\t\"" + x.scheme + "\"->\"" + agName, "\" [arrowtail=normal dir=back label=\"" + x.mission + "\"]\n");
   });
 
   /* agent workspaces */
