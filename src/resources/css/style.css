@@ -2320,7 +2320,13 @@ table.hoverable tr:hover, table.hoverable tr:hover > td, table.hoverable tr:focu
   background-color:#D7B17C;
 }
 
-#git-dialog-full {
+.toast-info {
+  width: 550px !important;
+  background-color:#73A790;
+  color: #fff !important;
+}
+
+#git-dialog-full, #commit-dialog-full {
   position: absolute;
   height: 100vh;
   width: 100vw;
@@ -2344,4 +2350,22 @@ table.hoverable tr:hover, table.hoverable tr:hover > td, table.hoverable tr:focu
 .git-button:disabled {
   background-color: #aaa;
   color: #686868;
+}
+
+.issue-check {
+  padding: 10px;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+.issue-check.correct {
+  background-color: #73A790;
+}
+
+.issue-check.error {
+  background-color: #EABAB9;
+}
+
+.agent-check-heading {
+  padding-bottom: 10px;
 }

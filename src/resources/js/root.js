@@ -348,29 +348,6 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
 
 }
 
-function commitChanges() {
-  var message = prompt("Please enter a commit message", "");
-
-  if (message == null || message == "") {
-    alert("Operation canceled.");
-  } else {
-    post('/commit?email='+getCookieValue('username'), message).then(function(r) {
-      alert("Commit result: "+r);
-    }).catch(function(e) {
-      alert(e);
-    });
-  }
-}
-
-function pushChanges() {
-  let usernameCookie = getCookieValue('username');
-  let passwordCookie = getCookieValue('password');
-  post('/push', "Pushing changes.", undefined, usernameCookie, passwordCookie).then(function(r) {
-      alert("Push result: "+r);
-    }).catch(function(e) {
-      alert(e);
-    });
-}
 /* create agent */
 function newAg() {
   post('/agents/' + document.getElementById('createAgent').value).then(function(r) {
@@ -473,11 +450,11 @@ function newArt() {
    document.getElementById(nav).appendChild(lgl);
    document.getElementById(nav).appendChild(createDefaultHR());
    var lgc = document.createElement('a');
-   lgc.addEventListener("click", function() { commitChanges() });
+   lgc.addEventListener("click", function() { promptCommitDialog() });
    lgc.innerHTML = "commit changes";
    document.getElementById(nav).appendChild(lgc);
    var lgp = document.createElement('a');
-   lgp.addEventListener("click", function() { pushChanges() });
+   lgp.addEventListener("click", function() { promptPushDialog() });
    lgp.innerHTML = "push changes";
    document.getElementById(nav).appendChild(lgp);
 /*
@@ -1419,8 +1396,101 @@ if (file) {
   });
 }
 
-window.onbeforeunload = e => {
+window.onbeforeunload = _ => {
   navigator.sendBeacon(`/unlock/${file}?username=${usernameCookie}`);
+};
+
+/** GIT COMMIT/PUSH DIALOG */
+function promptCommitDialog() {
+  var div = document.createElement('div');
+  div.setAttribute('id', 'commit-dialog-full');
+  div.innerHTML += `
+    <div id="git-dialog-main">
+      <div id="git-dialog-body">
+        Enter your commit message here: <br>
+        <input id="git-commit-message" placeholder="Commit message"> <br>
+        <div id="commit-dialog-issues">
+        </div>
+      </div>
+      <button
+        class="git-button" id="git-cancel"
+        onClick="cancelDialog('commit-dialog-full')"
+      >
+        Cancel
+      </button>
+      <button class="git-button" id="git-commit" disabled onClick="commitChanges()">
+        Commit
+      </button>
+    </div>
+  `;
+  document.getElementById('doc-wrapper').appendChild(div);
+  document.querySelector('#git-commit-message').addEventListener('input', checkCommitActivation);
+  get('status').then(response => renderIssueOverview(response));
+}
+
+function renderIssueOverview(response) {
+  jResponse = JSON.parse(response);
+  let affectedFiles = jResponse.added.filter(filter).concat(jResponse.modified.filter(filter)).map(
+    file => file.substring(file.lastIndexOf('/') + 1)
+  );
+  if (affectedFiles.length > 0) {
+    document.querySelector('#commit-dialog-issues').innerHTML
+      += '<h4 class="agent-check-heading">Agent Checks</h4>'
+  }
+  affectedFiles.forEach(
+    file => get(`/agents/${file.split('.')[0]}/aslfile/${file}`).then(agentCode => {
+      post(
+        `/agents/${file.split('.')[0]}/parseAslfile/${file}`,
+        `--blob\r\ncontent-disposition: form-data; name=aslfile\r\n\r\n${agentCode}\r\n--blob--`,
+        `multipart/form-data; boundary=blob`
+      ).then(result => {
+        let div = `<div class="issue-check correct">Agent ${file.split('.')[0]}: ${result}</div>`;
+        document.querySelector('#commit-dialog-issues').innerHTML += div;
+      }).catch(errror => {
+        let div = `<div class="issue-check error">Error: <strong>Agent ${file.split('.')[0]}</strong>: ${errror}</div>`;
+        document.querySelector('#commit-dialog-issues').innerHTML += div;
+      });
+    })
+  );
+  function filter(file) {
+    return file.endsWith('.asl')
+  }
+}
+
+function checkCommitActivation() {
+  let commitButton = document.querySelector('#git-commit');
+  let commitMessageInput = document.querySelector('#git-commit-message');
+  commitButton.disabled = commitMessageInput.value.length === 0;
+}
+
+function commitChanges() {
+  let message = document.querySelector('#git-commit-message').value;
+  cancelDialog('commit-dialog-full');
+  if (!message) {
+    toastr.error('Operation cancelled.', { timeOut: 10000 });
+  } else {
+    post('/commit?email='+getCookieValue('username'), message).then(function(response) {
+      toastr.info(`Commit result: ${response}`, { timeOut: 10000 });
+    }).catch(function(error) {
+      toastr.error(error, { timeOut: 10000 });
+    });
+  }
+}
+
+function pushChanges() {
+  let usernameCookie = getCookieValue('username');
+  let passwordCookie = getCookieValue('password');
+  post(
+    '/push',
+    'Pushing changes.',
+    undefined,
+    usernameCookie,
+    passwordCookie
+  ).then(function(response) {
+    toastr.info(`Push result: ${response}`, { timeOut: 10000 });
+  }).catch(function(error) {
+    toastr.error(error, { timeOut: 10000 });
+  });
 }
 
 /**
