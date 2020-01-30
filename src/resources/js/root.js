@@ -453,7 +453,7 @@ function newArt() {
    lgc.innerHTML = "commit changes";
    document.getElementById(nav).appendChild(lgc);
    var lgp = document.createElement('a');
-   lgp.addEventListener("click", function() { promptPushDialog() });
+   lgp.addEventListener("click", function() { pushChanges() });
    lgp.innerHTML = "push changes";
    document.getElementById(nav).appendChild(lgp);
 /*
