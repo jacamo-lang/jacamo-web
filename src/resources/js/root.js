@@ -33,13 +33,10 @@ function get(url) {
 }
 
 /* POST ON A GIVEN URL, RETURN SERIALISED CONTENT */
-function post(url, data, type, username, password) {
+function post(url, data, type) {
   return new Promise(function(resolve, reject) {
     var req = new XMLHttpRequest();
-    if (username == undefined)
-      req.open('POST', url);
-    else
-    req.open('POST', url, async=true, username, password);
+    req.open('POST', url);
     if (type != undefined) req.setRequestHeader("Content-type", type);
     req.onload = function() {
       if (req.status == 200) {
@@ -1479,13 +1476,8 @@ function commitChanges() {
 function pushChanges() {
   let usernameCookie = getCookieValue('username');
   let passwordCookie = getCookieValue('password');
-  post(
-    '/push',
-    'Pushing changes.',
-    undefined,
-    usernameCookie,
-    passwordCookie
-  ).then(function(response) {
+  post('/push?username='+usernameCookie+'&password='+btoa(passwordCookie))
+  .then(function(response) {
     toastr.info(`Push result: ${response}`, { timeOut: 10000 });
   }).catch(function(error) {
     toastr.error(error, { timeOut: 10000 });

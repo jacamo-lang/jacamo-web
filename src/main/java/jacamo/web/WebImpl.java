@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -249,7 +250,7 @@ public class WebImpl extends RestImpl {
     @Path("/push")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public Response pushChanges() {
+    public Response pushChanges(@QueryParam("username") String username, @QueryParam("password") String password) {
         try {
             File rep = getGitRepository();
             if (rep == null)
@@ -257,15 +258,10 @@ public class WebImpl extends RestImpl {
 
             Git git = Git.open(rep);
             PushCommand pushCommand = git.push();
-            
-            //Just to check if push is working - credentials must come from clients
-            File f = new File("push.temp");
-            @SuppressWarnings("resource")
-            BufferedReader in = new BufferedReader(new FileReader(f));
-            String username = in.readLine();
-            String password = in.readLine();
 
-            pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
+            byte[] decodedPassword = Base64.getDecoder().decode(password);
+            
+            pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, new String(decodedPassword)));
 
             pushCommand.call();
             git.close();
