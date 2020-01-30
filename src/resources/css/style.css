@@ -2362,6 +2362,10 @@ table.hoverable tr:hover, table.hoverable tr:hover > td, table.hoverable tr:focu
   background-color: #73A790;
 }
 
+.issue-check.warning {
+  background-color: #FFE599;
+}
+
 .issue-check.error {
   background-color: #EABAB9;
 }

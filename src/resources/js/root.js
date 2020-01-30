@@ -1442,8 +1442,13 @@ function renderIssueOverview(response) {
         let div = `<div class="issue-check correct">Agent ${file.split('.')[0]}: ${result}</div>`;
         document.querySelector('#commit-dialog-issues').innerHTML += div;
       }).catch(errror => {
-        let div = `<div class="issue-check error">Error: <strong>Agent ${file.split('.')[0]}</strong>: ${errror}</div>`;
-        document.querySelector('#commit-dialog-issues').innerHTML += div;
+        if (errror.startsWith("Warning")) {
+          let div = `<div class="issue-check warning">Warning: <strong>Agent ${file.split('.')[0]}</strong>: ${errror}</div>`;
+          document.querySelector('#commit-dialog-issues').innerHTML += div;
+        } else {
+          let div = `<div class="issue-check error">Error: <strong>Agent ${file.split('.')[0]}</strong>: ${errror}</div>`;
+          document.querySelector('#commit-dialog-issues').innerHTML += div;
+        }
       });
     })
   );
