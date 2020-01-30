@@ -219,7 +219,11 @@ public class WebImpl extends RestImpl {
     @Produces(MediaType.TEXT_PLAIN)
     public Response commitChanges(String message, @QueryParam("email") String email) {
         try {
-            Git git = Git.open(new File(".git"));
+            File rep = getGitRepository();
+            if (rep == null)
+                return Response.status(500, "Repository not found!").build();
+
+            Git git = Git.open(rep);
 
             System.out.println("Staging modified and deleted files to commit: " + git.getRepository().toString()
                     + ". With message: " + message);
@@ -247,7 +251,11 @@ public class WebImpl extends RestImpl {
     @Produces(MediaType.TEXT_PLAIN)
     public Response pushChanges() {
         try {
-            Git git = Git.open(new File(".git"));
+            File rep = getGitRepository();
+            if (rep == null)
+                return Response.status(500, "Repository not found!").build();
+
+            Git git = Git.open(rep);
             PushCommand pushCommand = git.push();
             
             //Just to check if push is working - credentials must come from clients
@@ -275,14 +283,21 @@ public class WebImpl extends RestImpl {
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      *         JSON example: {"removed":[],"added":[],"missing":[],"modified":["src/main/java/jacamo/web/WebImpl.java"],"untracked":["bob.bb"],"changed":[]}
+     *         
+     *         More information about jgit: https://github.com/eclipse/jgit/tree/master/org.eclipse.jgit.test/tst/org/eclipse/jgit
      */
     @Path("/status")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response gitStatus() {
         try {
-            Git git = Git.open(new File(".git"));
+            File rep = getGitRepository();
+            if (rep == null)
+                return Response.status(500, "Repository not found!").build();
+            
+            Git git = Git.open(rep);
             Status stat = git.status().call();
+            
             Map<String, Object> s = new HashMap<>();
             s.put("added", stat.getAdded());
             s.put("changed", stat.getAdded());
@@ -295,6 +310,30 @@ public class WebImpl extends RestImpl {
             e.printStackTrace();
         }
         return Response.status(500).build();
+    }
+
+    private File getGitRepository() throws IOException {
+        String relPath = "";
+        File rep = new File(relPath+".git");
+        
+        //count deepth
+        int deepth = 0;
+        for (int i = 0; i < rep.getAbsolutePath().length(); i++) {
+            if (rep.getAbsolutePath().charAt(i) == '/') deepth++;
+        }
+
+        while (!rep.exists()) {
+            //Searching for git repository in rep.getCanonicalPath()
+            relPath = "../"+relPath;
+            rep = new File(relPath+".git");
+            deepth--;
+
+            //Reached lowest level
+            if (deepth <= 0) {
+                return null;
+            }
+        }
+        return rep;
     }
     
     /**
