@@ -331,8 +331,6 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
     navElement.appendChild(lag);
   });
   navElement.appendChild(createDefaultHR());
-  var br = document.createElement("br");
-  navElement.appendChild(br);
   var ldf = document.createElement('a');
   ldf.setAttribute("href", "./agents_df.html");
   ldf.innerHTML = "directory facilitator";
@@ -801,53 +799,54 @@ function updateWorkspaceMenu(nav, ws, ar, addCloseButton) {
   const selectedWorkspace = params.get('workspace');
   const selectedArtifact = params.get('artifact');
 
+  let promisses = [];
   ws.sort().forEach(function(n) {
-    get("./workspaces/" + n).then(function(r) {
-      let ar = JSON.parse(r);
-      let validContent = 0;
-      Object.keys(ar.artifacts).sort().forEach(function(a) {
-        if (HIDDEN_ARTS.indexOf(ar.artifacts[a].type) < 0) {
-          validContent++;
-          /* if printing the first artifact, also print the workspace */
-          if (selectedWorkspace === n) {
-            if (validContent === 1) {
-              var lag = document.createElement('a');
-              lag.setAttribute("href", "./workspace.html?workspace=" + n);
-              lag.innerHTML = "<h5><b>" + n + "</b></h5>";
-              document.getElementById(nav).appendChild(lag);
-            }
-            /* Add artifacts on menu */
-            var lar = document.createElement('a');
-            if (selectedArtifact === a) {
-              lar.innerHTML = "<h5><b>&#160;&#160;&#160;" + a + "</b></h5>";
+    promisses.push(get("./workspaces/" + n));
+  });
+  Promise.all(promisses).then(function(r) {
+      console.log(r);
+      r.forEach(function(e) {
+        let ar = JSON.parse(e);
+        let validContent = 0;
+        Object.keys(ar.artifacts).sort().forEach(function(a) {
+          if (HIDDEN_ARTS.indexOf(ar.artifacts[a].type) < 0) {
+            validContent++;
+            /* if printing the first artifact, also print the workspace */
+            if (selectedWorkspace === ar.workspace) {
+              if (validContent === 1) {
+                var lag = document.createElement('a');
+                lag.setAttribute("href", "./workspace.html?workspace=" + ar.workspace);
+                lag.innerHTML = "<h5><b>" + ar.workspace + "</b></h5>";
+                document.getElementById(nav).appendChild(lag);
+              }
+              /* Add artifacts on menu */
+              var lar = document.createElement('a');
+              if (selectedArtifact === a) {
+                lar.innerHTML = "<h5><b>&#160;&#160;&#160;" + a + "</b></h5>";
+              } else {
+                lar.innerHTML = "<h5>&#160;&#160;&#160;" + a + "</h5>";
+              }
+              lar.setAttribute("href", "./artifact.html?workspace=" + ar.workspace + "&artifact=" + a +
+                "&javafile=" + ar.artifacts[a].type + ".java");
+              document.getElementById(nav).appendChild(lar);
             } else {
-              lar.innerHTML = "<h5>&#160;&#160;&#160;" + a + "</h5>";
-            }
-            lar.setAttribute("href", "./artifact.html?workspace=" + n + "&artifact=" + a +
-              "&javafile=" + ar.artifacts[a].type + ".java");
-            document.getElementById(nav).appendChild(lar);
-          } else {
-            /* if would print at least one artifact, also print the workspace */
-            if (validContent === 1) {
-              var lag = document.createElement('a');
-              lag.setAttribute("href", "./workspace.html?workspace=" + n);
-              lag.innerHTML = "<h5>" + n + "</h5>";
-              document.getElementById(nav).appendChild(lag);
+              /* if would print at least one artifact, also print the workspace */
+              if (validContent === 1) {
+                var lag = document.createElement('a');
+                lag.setAttribute("href", "./workspace.html?workspace=" + ar.workspace);
+                lag.innerHTML = "<h5>" + ar.workspace + "</h5>";
+                document.getElementById(nav).appendChild(lag);
+              }
             }
           }
-        }
+        });
       });
-      /* Bypass for promisses challenge. Did I just printed the last element content? */
-      setTimeout(function(f) {
-        if (ws[ws.length -1] === n) {
-          document.getElementById(nav).appendChild(createDefaultHR());
-          var lnew = document.createElement('a');
-          lnew.setAttribute("href", "./artifact_new.html");
-          lnew.innerHTML = "create template";
-          document.getElementById(nav).appendChild(lnew);
-        }
-      },500);
-    });
+  }).then(function(r){
+    document.getElementById(nav).appendChild(createDefaultHR());
+    var lnew = document.createElement('a');
+    lnew.setAttribute("href", "./artifact_new.html");
+    lnew.innerHTML = "create template";
+    document.getElementById(nav).appendChild(lnew);
   });
 }
 
