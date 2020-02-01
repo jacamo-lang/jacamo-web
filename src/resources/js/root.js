@@ -50,7 +50,7 @@ function post(url, data, type) {
     };
     req.send(data);
   });
-};
+}
 
 /* SEND A DELETE COMMAND TO A GIVEN RESOURCE */
 let deleteResource = (url) => {
@@ -136,15 +136,15 @@ function connectToWS() {
   myWebSocket.onerror = function(evt) {
     console.log("Error!");
   };
-};
+}
 
 function sendMsg() {
   myWebSocket.send("message");
-};
+}
 
 function closeConn() {
   myWebSocket.close();
-};
+}
 
 connectToWS();
 
@@ -206,7 +206,7 @@ function getCurrentAslContent() {
     form.setAttribute("action", "/agents/" + selectedAgent + "/aslfile/" + selectedASLFile);
     createAlsEditor(response);
   });
-};
+}
 
 let aslEditor = undefined;
 function createAlsEditor(content) {
@@ -297,7 +297,7 @@ function getAgents() {
       updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
     }
   });
-};
+}
 
 function updateAgentsMenu(nav, agents, addCloseButton) {
   navElement = document.getElementById(nav);
@@ -305,7 +305,7 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
   while (child) {
     navElement.removeChild(child);
     child = navElement.lastElementChild;
-  };
+  }
 
   if (addCloseButton) {
     const closeButton = document.createElement('label');
@@ -339,7 +339,6 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
   lnew.setAttribute("href", "./agent_new.html");
   lnew.innerHTML = "create agent";
   navElement.appendChild(lnew);
-
 }
 
 /* create agent */
@@ -376,7 +375,7 @@ function getCurrentJavaContent() {
     const form = document.getElementById("usrform");
     createJavaEditor(response);
   });
-};
+}
 
 function createJavaEditor(content) {
   /* find the textarea */
@@ -426,7 +425,7 @@ function newArt() {
  function updateMASMenus() {
    updateMASMenu("nav-drawer", true);
    updateMASMenu("nav-drawer-frame", false);
- };
+ }
 
  function updateMASMenu(nav, addCloseButton) {
    if (addCloseButton) {
@@ -461,7 +460,7 @@ function newArt() {
        });
      } else {
        instantMessage("Operation cancelled!")
-     };
+     }
    };
    ldag.innerHTML = "kill all agents";
    document.getElementById(nav).appendChild(ldag);
@@ -474,7 +473,7 @@ function newArt() {
        });
      } else {
        instantMessage("Operation cancelled!")
-     };
+     }
    };
    ldar.innerHTML = "dispose all artifacts";
    document.getElementById(nav).appendChild(ldar);
@@ -487,7 +486,7 @@ function newArt() {
        });
      } else {
        instantMessage("Operation cancelled!")
-     };
+     }
    };
    ldor.innerHTML = "dismantle all organisations";
    document.getElementById(nav).appendChild(ldor);
@@ -533,16 +532,14 @@ function newArt() {
        }
      });
    });
-
-
- };
+ }
 
  function getaMAS(mas) {
    get("./jcm/" + mas).then(function(resp) {
      window.location.assign("./index.html");
      window.location.reload();
    });
- };
+ }
 
 /* WHOLE SYSTEM AS DOT */
 function getMASAsDot() {
@@ -570,12 +567,12 @@ function getMASAsDot() {
             "\" [arrowtail=normal arrowhead=open label=\"responsible\"]\n";
           if (!orglinks.includes(resp)) { /*avoid duplicates*/
             orglinks.push(resp);
-            dot.push("\t\t{rank=same \"" + r + "\" \"" + m.scheme + "\"};\n");
+            dot.push("\t\t{rank=same \"" + r + "\" \"" + m.scheme + "\"}\n");
           }
         });
       });
     });
-    dot.push("\t};\n");
+    dot.push("\t}\n");
     dot.push(orglinks.join(" "));
 
     /* agents dimension */
@@ -587,8 +584,8 @@ function getMASAsDot() {
       var s1 = (x.agent.length <= MAX_LENGTH) ? x.agent : x.agent.substring(0, MAX_LENGTH) + " ...";
       dot.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
     });
-    if (ags.length > 0) dot.push("\t\t{rank=same \"" + ags.join("\" \"") + "\"};\n");
-    dot.push("\t};\n");
+    if (ags.length > 0) dot.push("\t\t{rank=same \"" + ags.join("\" \"") + "\"}\n");
+    dot.push("\t}\n");
 
     /* Environment dimension */
     dot.push("\tsubgraph cluster_env {\n");
@@ -615,13 +612,13 @@ function getMASAsDot() {
             }
           });
 
-          if (wksartifacts.length > 0) dot.push("\t\t\t{rank=same \"" + wksartifacts.join("\" \"") + "\"};\n");
-          dot.push("\t\t};\n");
+          if (wksartifacts.length > 0) dot.push("\t\t\t{rank=same \"" + wksartifacts.join("\" \"") + "\"}\n");
+          dot.push("\t\t}\n");
           dot.push(envlinks.join(" "));
         });
       }
     });
-    dot.push("\t};\n");
+    dot.push("\t}\n");
 
     dot.push("}\n");
 
@@ -782,7 +779,7 @@ function getWorkspaces() {
     updateWorkspaceMenu("nav-drawer", ws, undefined, true);
     updateWorkspaceMenu("nav-drawer-frame", ws, undefined, false);
   });
-};
+}
 
 function updateWorkspaceMenu(nav, ws, ar, addCloseButton) {
   if (addCloseButton) {
@@ -872,7 +869,7 @@ function getWorkspaceDetails() {
       }
     });
   });
-};
+}
 
 function getWksGraph() {
   const wksName = new URL(location.href).searchParams.get('workspace');
@@ -969,7 +966,7 @@ function getOE() {
     updateOrganisationMenu("nav-drawer", JSON.parse(resp), true);
     updateOrganisationMenu("nav-drawer-frame", JSON.parse(resp), false);
   });
-};
+}
 
 function updateOrganisationMenu(nav, set, addCloseButton) {
   if (addCloseButton) {
@@ -1020,6 +1017,7 @@ function newRole(org, gr) {
   window.location.assign('/oe.html');
 }
 
+/*
 function getOrganisationDetails() {
   var itemDetails = "";
   const selectedItem = new URL(location.href).searchParams.get('organisation');
@@ -1032,8 +1030,9 @@ function getOrganisationDetails() {
       itemDetails = JSON.parse(Http.responseText);
       updateTable(selectedItem, itemDetails);
     }
-  };
-};
+  }
+}
+*/
 
 function getOrganisationDetails() {
   const selectedItem = new URL(location.href).searchParams.get('organisation');
@@ -1282,6 +1281,7 @@ function getOrgSchemeGraph() {
     d3.select("#orgdiagram").graphviz().transition(t).renderDot(dot.join(""));
   });
 }
+
 function getOrgNormGraph() {
   const params = new URL(location.href).searchParams;
   const selectedOrganisation = params.get('organisation');
@@ -1353,7 +1353,6 @@ function checkSaveActivation() {
 }
 
 function storeCredentials() {
-
   cancelDialog('git-dialog-full');
   setCookie('username', gitUsernameInput.value);
   setCookie('password', gitPasswordInput.value);
@@ -1364,7 +1363,9 @@ function cancelDialog(id) {
   dialogElement.parentNode.removeChild(dialogElement);
 }
 
-function setCookie(key, value) { return document.cookie = `${key}=${(value || '')}; path=/`; }
+function setCookie(key, value) {
+  return document.cookie = `${key}=${(value || '')}; path=/`;
+}
 
 /* function adjusted from: https://stackoverflow.com/questions/5639346/what-is-the-shortest-function-for-reading-a-cookie-by-name-in-javascript */
 function getCookieValue(key) {
@@ -1430,7 +1431,7 @@ function renderIssueOverview(response) {
   );
   if (affectedFiles.length > 0) {
     document.querySelector('#commit-dialog-issues').innerHTML
-      += '<h4 class="agent-check-heading">Agent Checks</h4>'
+      += '<h4 class="agent-check-heading">Agent Checks</h4>';
   }
   affectedFiles.forEach(
     file => get(`/agents/${file.split('.')[0]}/aslfile/${file}`).then(agentCode => {
