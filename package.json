@@ -5,7 +5,38 @@
   "dependencies": {
     "d3-graphviz": "^2.6.1",
     "jquery": "^3.4.1",
-    "mini.css": "^3.0.1",
-    "phaser": "^3.20.1"
+    "toastr": "^2.1.4"
+  },
+  "version": "0.5.0",
+  "main": "src/js/app.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "webpack --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacamo-lang/jacamo-web.git"
+  },
+  "author": "Cleber Jorge Amaral",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jacamo-lang/jacamo-web/issues"
+  },
+  "homepage": "https://github.com/jacamo-lang/jacamo-web#readme",
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
+    "babel-jest": "^25.1.0",
+    "babel-loader": "^8.0.6",
+    "jest": "^24.9.0",
+    "regenerator-runtime": "^0.13.3",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.41.5",
+    "webpack-dev-server": "^3.1.11",
+    "webpack-cli": "^3.3.10"
   }
 }

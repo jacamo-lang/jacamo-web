@@ -5,42 +5,48 @@
    October 15, 2019
 */
 
+plugins {
+  id "com.moowork.node" version "1.3.1"
+}
+
 defaultTasks 'run'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
+
+apply plugin: 'base' /*used by moowork node plugin*/
+
 group   'org.jacamo'
-version '0.3-SNAPSHOT'
+version '0.4-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-    mavenCentral()
-    maven { url "http://jacamo.sourceforge.net/maven2" }
-    maven { url "https://raw.github.com/jacamo-lang/mvn-repo/master" }
-    maven { url "https://jade.tilab.com/maven/" }
-    flatDir {
-       dirs 'lib'
-    }
+	mavenCentral()
+	maven { url "http://jacamo.sourceforge.net/maven2" }
+	maven { url "https://raw.github.com/jacamo-lang/mvn-repo/master" }
+	maven { url "https://jade.tilab.com/maven/" }
+	flatDir {
+		dirs 'lib'
+	}
 }
 
 dependencies {
-    compile group: 'org.jacamo' , name: 'jacamo'   , version: '0.8'  , changing: true , transitive: true
+	compile group: 'org.jacamo' , name: 'jacamo'   , version: '0.9-SNAPSHOT'  , changing: true , transitive: true
 	compile 'org.jacamo:jacamo-rest:0.3-SNAPSHOT'
-	
-    //websockets for simulations	
+
+	//websockets for simulations
 	compile 'javax.websocket:javax.websocket-api:1.1'
 	compile 'org.glassfish.tyrus:tyrus-server:1.1'
 	compile 'org.glassfish.tyrus:tyrus-container-grizzly:1.1'
-	
+
 	// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
 	compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.6.0.201912101111-r'
-	
+
 	// https://mvnrepository.com/artifact/net.openhft/compiler
 	compile group: 'net.openhft', name: 'compiler', version: '2.3.1'
-	//testCompile 'org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-bundle:+'
 }
 
 sourceSets {
@@ -58,16 +64,11 @@ sourceSets {
     }
 }
 
-clean {
-    delete 'bin'
-    delete 'build'
-    delete 'log'
-}
-
-task copyToLib(type: Copy) {
-    into "$buildDir/libs"
-    from(configurations.compile)
-}
+/*
+ *
+ * JaCaMo projects for lauch configuration and tests
+ *
+ */
 
 task run (type: JavaExec, dependsOn: 'classes') {
     group      ' JaCaMo'
@@ -132,12 +133,29 @@ jar {
     }
 }
 
+/*
+ *
+ * Heroku support
+ *
+ */
+
+task copyToLib(type: Copy) {
+    into "$buildDir/libs"
+    from(configurations.compile)
+}
+
 task stage(dependsOn: ['jar', 'copyToLib', 'clean']) {
 	copyToLib.mustRunAfter clean
 	jar.mustRunAfter copyToLib
 }
 
 stage.dependsOn(copyToLib)
+
+/*
+ *
+ * Java Docs
+ *
+ */
 
 // the following lines is used to avoid errors while generating javadoc
 if (JavaVersion.current().isJava8Compatible()) {
@@ -153,6 +171,11 @@ task javadocJar (type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from '${docsDir}/../../doc/api'
 }
+/*
+ *
+ * Maven publication
+ *
+ */
 
 task sourceJar (type : Jar) {
     baseName 'jacamo-web'
@@ -193,4 +216,66 @@ task publishMavenSF(dependsOn: [ 'build', 'publishToMavenLocal']) {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+}
+
+/*
+ *
+ * NPM test javascripts
+ *
+ */
+
+node {
+    /* gradle-node-plugin configuration
+       https://github.com/srs/gradle-node-plugin/blob/master/docs/node.md
+       Task name pattern:
+       ./gradlew npm_<command> Executes an NPM command.
+    */
+    // Version of node to use.
+    version = '10.14.1'
+    // Version of npm to use.
+    npmVersion = '6.4.1'
+    // If true, it will download node using above parameters.
+    // If false, it will try to use globally installed node.
+    download = true
+}
+
+String testsExecutedMarkerName = "${projectDir}/.tests.executed"
+task testNpm(type: NpmTask) {
+    dependsOn assemble
+    // force Jest test runner to execute tests once and finish the process instead of starting watch mode
+    environment CI: 'true'
+    args = ['run', 'test']
+    inputs.files fileTree('src/js')
+    inputs.file 'package.json'
+    inputs.file 'package-lock.json'
+    // allows easy triggering re-tests
+    doLast {
+        new File(testsExecutedMarkerName).text = 'delete this file to force re-execution JavaScript tests'
+    }
+    outputs.file testsExecutedMarkerName
+}
+check.dependsOn testNpm
+
+task buildNpm(type: NpmTask) {
+    dependsOn assemble
+    // force Jest test runner to execute tests once and finish the process instead of starting watch mode
+    environment CI: 'true'
+    args = ['run', 'build']
+    inputs.files fileTree('src/js')
+    inputs.file 'package.json'
+    inputs.file 'package-lock.json'
+}
+build.dependsOn buildNpm
+
+/*
+ *
+ * Clean compiled files
+ *
+ */
+
+clean {
+    delete 'bin'
+    delete 'build'
+    delete 'log'
+    delete testsExecutedMarkerName /*Used on testNpm*/
 }

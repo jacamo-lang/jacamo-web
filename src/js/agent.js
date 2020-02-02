@@ -1,3 +1,187 @@
+/**
+ * IMPORTS
+ */
+
+const h = require('./helpers')
+const p = require('./parameters')
+const w = require('./websockets')
+
+/**
+ * AGENT FUNCTIONS
+ */
+
+/* Fill text area with current agent's asl code */
+function getCurrentAslContent() {
+  var selectedAgent = new URL(location.href).searchParams.get('agent');
+  var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
+
+  h.get("/agents/" + selectedAgent + "/aslfile/" + selectedASLFile).then(function(response) {
+    const submit = document.createElement('button');
+    submit.setAttribute("type", "submit");
+    submit.innerHTML = "Save & Reload";
+    document.getElementById("footer_menu").appendChild(submit);
+    const cancel = document.createElement('button');
+    cancel.setAttribute("type", "button");
+    cancel.setAttribute("onclick", "localStorage.setItem('agentBuffer', 'No changes made.'); window.history.back();");
+    cancel.innerHTML = "Discard changes";
+    document.getElementById("footer_menu").appendChild(cancel);
+    const text = document.createElement('i');
+    text.style.fontSize = "14px";
+    text.innerHTML = "Editing: <b>" + selectedASLFile + "</b>";
+    document.getElementById("footer_menu").appendChild(text);
+    const check = document.createElement('b');
+    check.setAttribute("id", "check");
+    check.style.fontSize = "14px";
+    check.style.color = "Navy"; /*FireBrick DarkGoldenRod ForestGreen Navy*/
+    check.innerHTML = "&#160&#160&#160&#160&#160Parsing code...";
+    document.getElementById("footer_menu").appendChild(check);
+
+    const form = document.getElementById("usrform");
+    form.setAttribute("action", "/agents/" + selectedAgent + "/aslfile/" + selectedASLFile);
+    createAlsEditor(response);
+  });
+}
+
+let aslEditor = undefined;
+function createAlsEditor(content) {
+  /* find the textarea */
+  var textarea = document.querySelector("form textarea[name='aslfile']");
+
+  /* create ace editor */
+  aslEditor = ace.edit();
+  aslEditor.session.setValue(content);
+  aslEditor.setTheme("ace/theme/tomorrow");
+  aslEditor.session.setMode("ace/mode/jason");
+  aslEditor.setOptions({
+    enableBasicAutocompletion: true
+  });
+
+  /* replace textarea with ace */
+  textarea.parentNode.insertBefore(aslEditor.container, textarea);
+  textarea.style.display = "none";
+  /* find the parent form and add submit event listener */
+  var form = textarea;
+  while (form && form.localName != "form") form = form.parentNode;
+  form.addEventListener("submit", function(e) {
+    textarea.value = aslEditor.getValue();
+    var selectedAgent = new URL(location.href).searchParams.get('agent');
+    var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
+    h.post("/agents/" + selectedAgent + "/aslfile/" + selectedASLFile, new FormData(e.target)).then(function(response) {
+      localStorage.setItem("agentBuffer", response);
+      window.location.replace("./agent.html?agent=" + selectedAgent);
+    });
+    e.preventDefault();
+  }, true);
+}
+
+/* sintax check */
+function syntaxCheck() {
+  var selectedAgent = new URL(location.href).searchParams.get('agent');
+  var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
+
+  const FD = new FormData();
+  const XHR = new XMLHttpRequest();
+  const boundary = "blob";
+  let data = "--" + boundary + "\r\ncontent-disposition: form-data; name=aslfile\r\n\r\n" + aslEditor.getValue() + "\r\n--" + boundary + "--";
+
+  var check = document.getElementById("check");
+  h.post("/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile, data, 'multipart/form-data; boundary=' + boundary).then(function(response) {
+    check.style.color = "ForestGreen"; /*FireBrick DarkGoldenRod ForestGreen*/
+    check.innerHTML = "&#160&#160&#160&#160&#160"+response;
+    aslEditor.setTheme("ace/theme/textmate");
+  }).catch(function(e) {
+    if (e.startsWith("Info")) {
+      check.style.color = "Navy"; /*FireBrick DarkGoldenRod ForestGreen*/
+      check.innerHTML = "&#160&#160&#160&#160&#160"+e;
+    } else if (e.startsWith("Warning")) {
+      check.style.color = "DarkGoldenRod"; /*FireBrick DarkGoldenRod ForestGreen*/
+      check.innerHTML = "&#160&#160&#160&#160&#160"+e;
+    } else {
+      check.style.color = "FireBrick"; /*FireBrick DarkGoldenRod ForestGreen*/
+      check.innerHTML = "&#160&#160&#160&#160&#160"+e;
+      aslEditor.setTheme("ace/theme/katzenmilch");
+    }
+  });
+}
+
+/* sintax checking */
+function setAutoSyntaxChecking() {
+  setInterval(function() {
+    syntaxCheck();
+  }, 2000);
+}
+
+/* update agents interface automatically */
+let agentsList = undefined;
+function setAutoUpdateAgInterface() {
+  /*do it immediately at first time*/
+  if (agentsList === undefined) getAgents();
+
+  setInterval(function() {
+    getAgents();
+  }, 1000);
+}
+
+/*Get list of agent from backend*/
+function getAgents() {
+  h.get("./agents").then(function(resp) {
+    if (agentsList != resp) {
+      agentsList = resp;
+      updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
+      updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
+    }
+  });
+}
+
+function updateAgentsMenu(nav, agents, addCloseButton) {
+  navElement = document.getElementById(nav);
+  var child = navElement.lastElementChild;
+  while (child) {
+    navElement.removeChild(child);
+    child = navElement.lastElementChild;
+  }
+
+  if (addCloseButton) {
+    const closeButton = document.createElement('label');
+    closeButton.setAttribute("for", "doc-drawer-checkbox");
+    closeButton.setAttribute("class", "button drawer-close");
+    navElement.appendChild(closeButton);
+    var h3 = document.createElement("h3");
+    h3.innerHTML = "&#160";
+    navElement.appendChild(h3);
+  }
+
+  const params = new URL(location.href).searchParams;
+  const selectedAgent = params.get('agent');
+  agents.forEach(function(n) {
+    var lag = document.createElement('a');
+    lag.setAttribute("href", "./agent.html?agent=" + n);
+    lag.setAttribute('onclick', '{window.location.assign("./agent.html?agent=' + n + '");window.location.reload();}');
+    if (selectedAgent === n) {
+      lag.innerHTML = "<h5><b>" + n + "</b></h5>";
+    } else {
+      lag.innerHTML = "<h5>" + n + "</h5>";
+    }
+    navElement.appendChild(lag);
+  });
+  navElement.appendChild(h.createDefaultHR());
+  var ldf = document.createElement('a');
+  ldf.setAttribute("href", "./agents_df.html");
+  ldf.innerHTML = "directory facilitator";
+  navElement.appendChild(ldf);
+  var lnew = document.createElement('a');
+  lnew.setAttribute("href", "./agent_new.html");
+  lnew.innerHTML = "create agent";
+  navElement.appendChild(lnew);
+}
+
+/* create agent */
+function newAg() {
+  h.post('/agents/' + document.getElementById('createAgent').value).then(function(r) {
+    window.location.assign('/agent.html?agent=' + document.getElementById('createAgent').value);
+  });
+}
+
 /* KILL AN AGENT */
 
 function killAg() {
@@ -6,11 +190,11 @@ function killAg() {
 
   var r = confirm("Kill agent '" + selectedAgent + "'?");
   if (r == true) {
-    deleteResource("./agents/" + selectedAgent).then(function(resp){
+    h.deleteResource("./agents/" + selectedAgent).then(function(resp){
       window.location.assign("./agents.html");
     });
   } else {
-    instantMessage("Don't worry, agent '" + selectedAgent + "' is still here.");
+    h.instantMessage("Don't worry, agent '" + selectedAgent + "' is still here.");
   }
 }
 
@@ -18,7 +202,7 @@ function killAg() {
 
 const showBuffer = () => {
   var buffer = localStorage.getItem("agentBuffer");
-  instantMessage(buffer);
+  h.instantMessage(buffer);
   localStorage.removeItem("agentBuffer");
 };
 
@@ -29,7 +213,7 @@ function runCMD() {
   const selectedAgent = params.get('agent');
 
   data = "c=" + encodeURIComponent(document.getElementById("inputcmd").value);
-  post("./agents/" + selectedAgent + "/cmd",data,"application/x-www-form-urlencoded");
+  h.post("./agents/" + selectedAgent + "/cmd",data,"application/x-www-form-urlencoded");
   document.getElementById("inputcmd").value = "";
   document.getElementById("inputcmd").focus();
   window.location.reload();
@@ -40,10 +224,10 @@ function delLog() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
 
-  deleteResource("./agents/" + selectedAgent + "/log").then(function(resp) {
+  h.deleteResource("./agents/" + selectedAgent + "/log").then(function(resp) {
     /* Keep focus on command box */
     document.getElementById("inputcmd").focus();
-    instantMessage('Log is empty.');
+    h.instantMessage('Log is empty.');
   });
 }
 
@@ -54,7 +238,7 @@ function showLog() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
 
-  get("./agents/" + selectedAgent + "/log").then(function(resp) {
+  h.get("./agents/" + selectedAgent + "/log").then(function(resp) {
     var textarea = document.getElementById('log');
     /*currentLog avoids differences between received and shown in textarea.innerHTML*/
     if (currentLog != resp) {
@@ -68,7 +252,7 @@ function showLog() {
         if (!alreadySaidLogHasMessage) {
           /*do not bother the user with too many messages*/
           alreadySaidLogHasMessage = true;
-          instantMessage('Log has new message(s) to show.');
+          h.instantMessage('Log has new message(s) to show.');
         }
       }
     }
@@ -85,33 +269,34 @@ function setAutoUpdateLog() {
 /* GET AGENT'S GRAPH */
 
 /* modal window */
-var modal = document.getElementById('modalinspection');
-var btnModal = document.getElementById("btninspection");
-var span = document.getElementsByClassName("close")[0];
-btnModal.onclick = function() {
-  getGraph();
-  modal.style.display = "block";
-};
-span.onclick = function() {
-  modal.style.display = "none";
-};
-window.onclick = function(event) {
-  if (event.target == modal) {
+function setGraphWindow() {
+  let modal = document.getElementById('modalinspection');
+  let btnModal = document.getElementById("btninspection");
+  let spanClose = document.getElementsByClassName("close")[0];
+  btnModal.onclick = function() {
+    getGraph();
+    modal.style.display = "block";
+  };
+  spanClose.onclick = function() {
     modal.style.display = "none";
-  }
-};
+  };
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+}
 
 function getGraph() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
 
-  get("./agents/" + selectedAgent).then(function(resp){
+  h.get("./agents/" + selectedAgent).then(function(resp){
     renderGraphvizFromAgentJson(selectedAgent, JSON.parse(resp));
   });
 }
 
 function renderGraphvizFromAgentJson(agName, agentinfo) {
-  const MAX_LENGTH = 35;
   var dot = [];
 
   /* Beginning of the graph */
@@ -138,7 +323,7 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
   });
 
   /* agent will be placed on center */
-  var s1 = (agName.length <= MAX_LENGTH) ? agName : agName.substring(0, MAX_LENGTH) + " ...";
+  var s1 = (agName.length <= p.MAX_LENGTH) ? agName : agName.substring(0, p.MAX_LENGTH) + " ...";
   dot.push(
     "\t\"" + agName + "\" [ " + "\n\t\tlabel = \"" + s1 + "\"\n",
     "\t\tshape = \"ellipse\" style=filled fillcolor=white\n",
@@ -175,19 +360,19 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
       "\t\tlabeljust=\"r\"\n",
       "\t\tgraph[style=dashed]\n");
     w.artifacts.forEach(function(a) {
-      if (HIDDEN_ARTS.indexOf(a.type) < 0) {
-        var str1 = (a.artifact.length <= MAX_LENGTH) ? a.artifact : a.artifact.substring(0, MAX_LENGTH) + " ...";
+      if (p.HIDDEN_ARTS.indexOf(a.type) < 0) {
+        var str1 = (a.artifact.length <= p.MAX_LENGTH) ? a.artifact : a.artifact.substring(0, p.MAX_LENGTH) + " ...";
         /* It is possible to have same artifact name in different workspaces */
         dot.push("\t\t\"" + w.workspace + "_" + a.artifact + "\" [ ",
           "\n\t\t\tlabel=\"" + str1 + " :\\n");
-        str1 = (a.type.length <= MAX_LENGTH) ? a.type : a.type.substring(0, MAX_LENGTH) + " ...";
+        str1 = (a.type.length <= p.MAX_LENGTH) ? a.type : a.type.substring(0, p.MAX_LENGTH) + " ...";
         dot.push(str1 + "\"\n");
         dot.push("\t\t\tshape=record style=filled fillcolor=white\n");
         dot.push("\t\t]\n");
       }
     });
     w.artifacts.forEach(function(a) {
-      if (HIDDEN_ARTS.indexOf(a.type) < 0) {
+      if (p.HIDDEN_ARTS.indexOf(a.type) < 0) {
         dot.push("\t\"" + agName + "\"->\"" + w.workspace + "_" + a.artifact + "\" [arrowhead=odot]\n");
       }
     });
@@ -213,7 +398,7 @@ function updateSuggestions() {
   var temp = parameters[0].split("=");
   selectedAgent = unescape(temp[1]);
 
-  get("./agents/" + selectedAgent + "/code").then(function(resp) {
+  h.get("./agents/" + selectedAgent + "/code").then(function(resp) {
     autocomplete(document.getElementById("inputcmd"), JSON.parse(resp));
   });
 }
@@ -316,7 +501,7 @@ function makeRequest(url, loadedData, property, elementToAddResult) {
     loadedData[property] = req.responseXML;
     if (checkLoaded(loadedData)) {
       displayResult(loadedData.xmlInput, loadedData.xsltSheet, elementToAddResult);
-    };
+    }
   };
   req.send();
 }
@@ -347,5 +532,39 @@ function displayResult(xmlInput, xsltSheet, elementToAddResult) {
 }
 
 /**
- * END OF THE FILE
+ * EXPORTS
+ */
+
+window.setAutoUpdateAgInterface = setAutoUpdateAgInterface;
+window.getCurrentAslContent = getCurrentAslContent;
+window.setAutoSyntaxChecking = setAutoSyntaxChecking;
+window.getInspectionDetails = getInspectionDetails;
+window.updateSuggestions = updateSuggestions;
+window.setAutoUpdateLog = setAutoUpdateLog;
+window.showBuffer = showBuffer;
+window.delLog = delLog;
+window.killAg = killAg;
+window.runCMD = runCMD;
+window.newAg = newAg;
+window.setGraphWindow = setGraphWindow;
+
+/**
+ * PREPARING FOR TESTS
+ */
+
+function sum(a, b){
+   return a + b
+}
+
+function division(a, b){
+   return a / b
+}
+
+module.exports = {
+  sum,
+  division
+}
+
+/**
+ * END OF FILE
  */
