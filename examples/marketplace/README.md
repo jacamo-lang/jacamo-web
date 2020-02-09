@@ -12,10 +12,20 @@ digraph G { graph [ rankdir="TB" bgcolor="transparent"]
 	subgraph cluster_org {
 		label="organisation" labeljust="r" pencolor=gray fontcolor=gray
 		"sales" [ label = "sales" shape=tab style=filled pencolor=black fillcolor=lightgrey];
+		"businessPartners" [ label = "businessPartners" shape=tab style=filled pencolor=black fillcolor=lightgrey];
+		"itemTransaction" [ label = "itemTransaction" shape=hexagon style=filled pencolor=black fillcolor=linen];
+		{rank=same "businessPartners" "itemTransaction"};
 		"purchases" [ label = "purchases" shape=tab style=filled pencolor=black fillcolor=lightgrey];
+		"businessPartners" [ label = "businessPartners" shape=tab style=filled pencolor=black fillcolor=lightgrey];
+		"itemTransaction" [ label = "itemTransaction" shape=hexagon style=filled pencolor=black fillcolor=linen];
 	};
 	"sales"->"seller" [arrowtail=normal dir=back label="rseller"]
+ 	"businessPartners"->"seller" [arrowtail=normal dir=back label="rrseller"]
+ 	"itemTransaction"->"seller" [arrowtail=normal dir=back label="msupply"]
+ 	"businessPartners"->"itemTransaction" [arrowtail=normal arrowhead=open label="responsible"]
  	"purchases"->"buyer" [arrowtail=normal dir=back label="rbuyer"]
+ 	"businessPartners"->"buyer" [arrowtail=normal dir=back label="rrbuyer"]
+ 	"itemTransaction"->"buyer" [arrowtail=normal dir=back label="mbuy"]
 	subgraph cluster_ag {
 		label="agents" labeljust="r" pencolor=gray fontcolor=gray
 		"seller" [label = "seller" shape = "ellipse" style=filled fillcolor=white];
@@ -26,6 +36,9 @@ digraph G { graph [ rankdir="TB" bgcolor="transparent"]
 		label="environment" labeljust="r" pencolor=gray fontcolor=gray
 		subgraph cluster_main {
 			label="main" labeljust="r" style=dashed pencolor=gray40 fontcolor=gray40
+		};
+		subgraph cluster_marketplace {
+			label="marketplace" labeljust="r" style=dashed pencolor=gray40 fontcolor=gray40
 		};
 		subgraph cluster_sellerStorehouse {
 			label="sellerStorehouse" labeljust="r" style=dashed pencolor=gray40 fontcolor=gray40
@@ -48,6 +61,10 @@ digraph G { graph [ rankdir="TB" bgcolor="transparent"]
 		"buyer"->"buyerStorehouse_inputStock" [arrowhead=odot]
 		subgraph cluster_factory {
 			label="factory" labeljust="r" style=dashed pencolor=gray40 fontcolor=gray40
+			{rank=same "buyerStorehouse_inputStock"};
+		};
+		subgraph cluster_marketplace {
+			label="marketplace" labeljust="r" style=dashed pencolor=gray40 fontcolor=gray40
 			{rank=same "buyerStorehouse_inputStock"};
 		};
 	};
