@@ -21,10 +21,8 @@ function getDF() {
         });
       });
     } else {
-      p = document.createElement('p');
-      p.innerText = "nothing to show";
-      let s = document.getElementById("dfsection");
-      s.appendChild(p);
+      var table = h.createTable("dfsection");
+      h.addTwoCellsInARow(table, "nothing to show", "");
     }
   });
 }
