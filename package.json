@@ -15,7 +15,8 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "webpack --config webpack.config.js"
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --config webpackWatch.config.js"
   },
   "repository": {
     "type": "git",
