@@ -47,7 +47,7 @@ function promptCredentialDialog() {
   butsave.setAttribute('class', 'git-button');
   butsave.setAttribute('id', 'git-credential-save');
   butsave.setAttribute('disabled', 'true');
-  butsave.innerText = "Commit";
+  butsave.innerText = "Save";
   butsave.addEventListener('click', function(r) { storeCredentials(); });
   divmain.appendChild(butsave);
 
@@ -159,10 +159,10 @@ function renderIssueOverview(response) {
         document.querySelector('#commit-dialog-issues').innerHTML += div;
       }).catch(errror => {
         if (errror.startsWith("Warning")) {
-          let div = `<div class="issue-check warning">Warning: <strong>Agent ${file.split('.')[0]}</strong>: ${errror}</div>`;
+          let div = `<div class="issue-check warning"><strong>Agent ${file.split('.')[0]}</strong>: ${errror}</div>`;
           document.querySelector('#commit-dialog-issues').innerHTML += div;
         } else {
-          let div = `<div class="issue-check error">Error: <strong>Agent ${file.split('.')[0]}</strong>: ${errror}</div>`;
+          let div = `<div class="issue-check error"><strong>Agent ${file.split('.')[0]}</strong>: ${errror}</div>`;
           document.querySelector('#commit-dialog-issues').innerHTML += div;
         }
       });
