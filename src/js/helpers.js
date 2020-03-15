@@ -2,6 +2,8 @@
  * HELPFUL FUNCTIONS
  */
 
+const $ = require('jquery')
+
 /* GET A GIVEN URL CONTENT */
 function get(url) {
   return new Promise(function(resolve, reject) {

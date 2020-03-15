@@ -1,7 +1,6 @@
 /**
  * IMPORTS
  */
-
 const h = require('./helpers')
 const p = require('./parameters')
 const w = require('./websockets')
@@ -82,6 +81,7 @@ function syntaxCheck() {
   const FD = new FormData();
   const XHR = new XMLHttpRequest();
   const boundary = "blob";
+  if (!aslEditor) return;
   let data = "--" + boundary + "\r\ncontent-disposition: form-data; name=aslfile\r\n\r\n" + aslEditor.getValue() + "\r\n--" + boundary + "--";
 
   var check = document.getElementById("check");

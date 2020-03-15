@@ -3,6 +3,7 @@
  */
 
 const h = require('./helpers')
+const toastr = require('toastr')
 
 /**
  * GIT INTEGRATION FUNCTIONS
