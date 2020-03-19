@@ -1,6 +1,8 @@
 /**
  * IMPORTS
  */
+const d3 = require('d3')
+const d3G = require('d3-graphviz')
 
 const h = require('./helpers')
 const p = require('./parameters')
@@ -214,7 +216,7 @@ function getMASAsDot() {
     /* Transition follows modal top down movement */
     var t = d3.transition().duration(750).ease(d3.easeLinear);
     if (overview.agents.length === 0) dot = ["digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\"]\n noAg [label=<There is<br />no agents>]\n}\n"];
-    d3.select("#overviewgraph").graphviz().transition(t).renderDot(dot.join(""));
+    d3G.graphviz("#overviewgraph").transition(t).renderDot(dot.join(""));
   });
 }
 

@@ -1,7 +1,6 @@
 /**
  * IMPORTS
  */
-
 const h = require('./helpers')
 const p = require('./parameters')
 

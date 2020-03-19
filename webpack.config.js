@@ -1,5 +1,5 @@
 const path = require('path');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
 
@@ -12,21 +12,7 @@ module.exports = {
     filename: 'jacamoweb.js'
   },
 
-  optimization: {
-    minimizer: [
-      new UglifyJSPlugin({
-        cache: true,
-        parallel: true,
-        uglifyOptions: {
-          compress: true,
-          ecma: 6,
-          keep_fnames: true,
-          keep_classnames: true,
-        },
-        sourceMap: true
-      })
-    ]
-  },
+  plugins: [new TerserPlugin()],
 
   module: {
     rules: [{
