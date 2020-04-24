@@ -35,7 +35,7 @@ function promptCredentialDialog() {
   divbody.appendChild(user);
   divbody.innerHTML += "Password: &zwnj;"
   var password = document.createElement('input');
-  password.setAttribute('id', 'git-username');
+  password.setAttribute('id', 'git-password');
   password.setAttribute('type', 'password');
   password.setAttribute('placeholder', 'Password');
   divbody.appendChild(password);
