@@ -32,7 +32,7 @@
 
     <functional-specification>
         <scheme id="transaction">
-            <goal id="makeBusiness">
+            <goal id="doBusiness">
                 <plan operator="sequence">
                     <goal id="buyItem" />
                     <goal id="supplyItem" />

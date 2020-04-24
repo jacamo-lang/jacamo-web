@@ -2,7 +2,7 @@
 
 +!start <- .print("Hi").
 
-+!makeBusiness <- .print("Here we go!").
++!doBusiness <- .print("Here we go!").
 
 +!buyItem <-
     .print("Ordering item...");
