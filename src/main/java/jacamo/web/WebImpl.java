@@ -56,7 +56,7 @@ import jason.asSemantics.Agent;
 public class WebImpl extends RestImpl {
 
     Gson gson = new Gson();
-    
+
     private CacheControl cc = new CacheControl();
     {
         cc.setMaxAge(20);
@@ -70,7 +70,7 @@ public class WebImpl extends RestImpl {
     /**
      * Get root content, returning index.html from resources/html folder using
      * chache control and etags
-     * 
+     *
      * @param request used to create etags
      * @return index.html content
      */
@@ -82,7 +82,7 @@ public class WebImpl extends RestImpl {
 
     /**
      * Get html from resources/html folder using chache control and etags
-     * 
+     *
      * @param file    to be retrieved
      * @param request used to create etags
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
@@ -139,7 +139,7 @@ public class WebImpl extends RestImpl {
     /**
      * Get XML, JS and CSS resources from corresponding folders /resources/xml,...
      * uses cache control and etags
-     * 
+     *
      * @param folder  xml, js or css
      * @param file    name of the file to be retrieved
      * @param request used to create etags
@@ -192,7 +192,7 @@ public class WebImpl extends RestImpl {
 
     /**
      * Get agent's CArtAgO architecture
-     * 
+     *
      * @param ag Agent object
      * @return agent's CArtAgO architecture
      */
@@ -206,10 +206,10 @@ public class WebImpl extends RestImpl {
         }
         return null;
     }
-    
+
     /**
      * Stage all modified and deleted files committing then adding in comments the given message
-     * 
+     *
      * @param message to add in git comments
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
@@ -239,10 +239,10 @@ public class WebImpl extends RestImpl {
         }
         return Response.status(500).build();
     }
-    
+
     /**
      * Stage all modified and deleted files committing then adding in comments the given message
-     * 
+     *
      * @param message to add in git comments
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
@@ -259,13 +259,14 @@ public class WebImpl extends RestImpl {
             Git git = Git.open(rep);
             PushCommand pushCommand = git.push();
 
-            byte[] decodedPassword = Base64.getDecoder().decode(password);
-            
-            pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, new String(decodedPassword)));
+            //byte[] decodedPassword = Base64.getDecoder().decode(password);
+
+            //pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, new String(decodedPassword)));
+            pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
 
             pushCommand.call();
             git.close();
-            
+
             return Response.ok(pushCommand.toString()).build();
         } catch (IOException | GitAPIException e) {
             e.printStackTrace();
@@ -275,11 +276,11 @@ public class WebImpl extends RestImpl {
 
     /**
      * Return git status of jacamo-web repository
-     * 
+     *
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      *         JSON example: {"removed":[],"added":[],"missing":[],"modified":["src/main/java/jacamo/web/WebImpl.java"],"untracked":["bob.bb"],"changed":[]}
-     *         
+     *
      *         More information about jgit: https://github.com/eclipse/jgit/tree/master/org.eclipse.jgit.test/tst/org/eclipse/jgit
      */
     @Path("/status")
@@ -290,10 +291,10 @@ public class WebImpl extends RestImpl {
             File rep = getGitRepository();
             if (rep == null)
                 return Response.status(500, "Repository not found!").build();
-            
+
             Git git = Git.open(rep);
             Status stat = git.status().call();
-            
+
             Map<String, Object> s = new HashMap<>();
             s.put("added", stat.getAdded());
             s.put("changed", stat.getAdded());
@@ -311,7 +312,7 @@ public class WebImpl extends RestImpl {
     private File getGitRepository() throws IOException {
         String relPath = "";
         File rep = new File(relPath+".git");
-        
+
         //count deepth
         int deepth = 0;
         for (int i = 0; i < rep.getAbsolutePath().length(); i++) {
@@ -331,10 +332,10 @@ public class WebImpl extends RestImpl {
         }
         return rep;
     }
-    
+
     /**
      * Return ACE editor files. It is used because Jason grammar may be available only locally.
-     * 
+     *
      * @param resourcepathfile the requested ACE file from its flat directory
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
@@ -366,8 +367,8 @@ public class WebImpl extends RestImpl {
         }
         return Response.status(500).build();
     }
-    
-    
+
+
     Map<String, Object> lockedFiles = new HashMap<>();
     /**
      * Lock an arbitrary resource. Used to check and inform user in multiple sessions
@@ -375,7 +376,7 @@ public class WebImpl extends RestImpl {
      * This method has an opposite end-point called unlock
      *
      * @param resource an arbitrary name of a resource given by the client
-     * @param username give by the client 
+     * @param username give by the client
      * @return HTTP 200 Response (ok status)
      *         (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      *         a JSON containing resources and identification of users
@@ -386,7 +387,7 @@ public class WebImpl extends RestImpl {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response lockAFile(@PathParam("resource") String resource, @QueryParam("username") String username) {
-        
+
         List<String> s;
         if (lockedFiles.containsKey(resource)) {
             s = (List<String>)lockedFiles.get(resource);
@@ -395,20 +396,20 @@ public class WebImpl extends RestImpl {
             lockedFiles.put(resource, s);
         }
         s.add(username);
-        
+
         JCMWeb.sendMessage(username+" locked "+resource);
 
         return Response.ok(gson.toJson(lockedFiles)).build();
     }
-    
+
     /**
      * Unlock an arbitrary resource. Used to check and inform user in multiple sessions
      * that they are competing by same resources which brings potential conflicts.
      * This method has an opposite end-point called lock
      *
      * @param resource an arbitrary name of a resource given by the client
-     * @param username give by the client 
-     * @return HTTP 200 Response (ok status) 
+     * @param username give by the client
+     * @return HTTP 200 Response (ok status)
      *         (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      *         a JSON containing resources and identification of users
      *         output example: {file1: ['user1', 'user2'], file1: ['user3', 'user4']}
@@ -418,7 +419,7 @@ public class WebImpl extends RestImpl {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response unlockAFile(@PathParam("resource") String resource, @QueryParam("username") String username) {
-        
+
         List<String> s;
         if (lockedFiles.containsKey(resource)) {
             s = (ArrayList<String>)lockedFiles.get(resource);
@@ -427,8 +428,8 @@ public class WebImpl extends RestImpl {
         }
 
         JCMWeb.sendMessage(username+" unlocked "+resource);
-        
+
         return Response.ok(gson.toJson(lockedFiles)).build();
     }
-   
+
 }
