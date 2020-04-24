@@ -34,7 +34,7 @@ repositories {
 
 dependencies {
 	implementation 'org.jacamo:jacamo:0.9-SNAPSHOT'
-	implementation 'org.jacamo:jacamo-rest:0.3-SNAPSHOT'
+	implementation 'org.jacamo:jacamo-rest:0.4-SNAPSHOT'
 
 	//websockets for simulations
 	implementation 'javax.websocket:javax.websocket-api:1.1'
