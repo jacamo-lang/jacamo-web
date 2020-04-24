@@ -9,6 +9,7 @@ plugins {
   id "java-library"
   id "eclipse"
   id "maven-publish"
+  id "com.github.johnrengelman.shadow" version "5.2.0"
   id "com.moowork.node" version "1.3.1"
 }
 
@@ -143,7 +144,7 @@ task copyToLib(type: Copy) {
     from(configurations.compile)
 }
 
-task stage(dependsOn: ['jar', 'copyToLib', 'clean']) {
+task stage(dependsOn: ['shadowJar', 'copyToLib', 'clean']) {
 	copyToLib.mustRunAfter clean
 	jar.mustRunAfter copyToLib
 }
