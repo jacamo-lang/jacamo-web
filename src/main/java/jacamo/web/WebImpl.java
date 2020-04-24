@@ -259,10 +259,10 @@ public class WebImpl extends RestImpl {
             Git git = Git.open(rep);
             PushCommand pushCommand = git.push();
 
-            //byte[] decodedPassword = Base64.getDecoder().decode(password);
+            byte[] decodedPassword = Base64.getDecoder().decode(password);
 
-            //pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, new String(decodedPassword)));
-            pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
+            pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, new String(decodedPassword)));
+            //pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
 
             pushCommand.call();
             git.close();
