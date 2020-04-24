@@ -2,7 +2,7 @@
 
 +!start <- .print("Hi").
 
-+!makeBusiness <- .print("Here we go!").
++!doBusiness <- .print("Here we go!").
 
 +!buyItem <-
     .print("Ordering item...");
@@ -19,6 +19,7 @@
 
 +itemDelivered[source(S)] <-
     .print(S," delivered the item.");
+    !!storeItem;
     .
     
 +!storeItem : itemDelivered <-

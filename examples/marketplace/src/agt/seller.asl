@@ -12,6 +12,7 @@
 +paid[source(S)] <-
     .print(S, " has paid the invoice.");
     .wait(1000);
+    !!deliverItem;
     .
     
 +!deliverItem : paid <-
