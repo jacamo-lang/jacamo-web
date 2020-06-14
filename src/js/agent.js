@@ -66,7 +66,7 @@ function createAlsEditor(content) {
     textarea.value = aslEditor.getValue();
     var selectedAgent = new URL(location.href).searchParams.get('agent');
     var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
-    h.post("/agents/" + selectedAgent + "/aslfile/" + selectedASLFile, new FormData(e.target)).then(function(response) {
+    h.put("/agents/" + selectedAgent + "/aslfile/" + selectedASLFile, new FormData(e.target)).then(function(response) {
       localStorage.setItem("agentBuffer", response);
       window.location.replace("./agent.html?agent=" + selectedAgent);
     });
@@ -86,7 +86,7 @@ function syntaxCheck() {
   let data = "--" + boundary + "\r\ncontent-disposition: form-data; name=aslfile\r\n\r\n" + aslEditor.getValue() + "\r\n--" + boundary + "--";
 
   var check = document.getElementById("check");
-  h.post("/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile, data, 'multipart/form-data; boundary=' + boundary).then(function(response) {
+  h.put("/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile, data, 'multipart/form-data; boundary=' + boundary).then(function(response) {
     check.style.color = "ForestGreen"; /*FireBrick DarkGoldenRod ForestGreen*/
     check.innerHTML = "&#160&#160&#160&#160&#160"+response;
     aslEditor.setTheme("ace/theme/textmate");
@@ -477,7 +477,7 @@ function getInspectionDetails() {
 
   inspection = document.getElementById('inspection');
   beliefs = document.createElement("details");
-  beliefs.innerHTML = "<summary>beliefs</summary>";
+  beliefs.innerHTML = "<summary>Beliefs</summary>";
   inspection.appendChild(beliefs);
   h.get("./agents/" + selectedAgent).then(function(resp){
     details = JSON.parse(resp);
@@ -488,17 +488,6 @@ function getInspectionDetails() {
     });
   });
 
-  intentions = document.createElement("details");
-  intentions.innerHTML = "<summary>intentions</summary>";
-  inspection.appendChild(intentions);
-  h.get("./agents/" + selectedAgent + '/status').then(function(resp){
-    status = JSON.parse(resp);
-    status.intentions.forEach(function(item) {
-      const text = document.createElement('i');
-      text.innerHTML = item + "<br>";
-      intentions.appendChild(text);
-    });
-  });
 }
 
 

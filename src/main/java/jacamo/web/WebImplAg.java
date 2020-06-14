@@ -20,6 +20,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -128,7 +129,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
     @Path("/{agentname}/aslfile/{aslfilename}")
-    @POST
+    @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
     public Response loadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName,
@@ -190,7 +191,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
     @Path("/{agentname}/parseAslfile/{aslfilename}")
-    @POST
+    @PUT
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
     public Response parseASLfileForm(@PathParam("agentname") String agName,

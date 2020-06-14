@@ -43,6 +43,26 @@ function post(url, data, type) {
   });
 }
 
+/* PUT ON A GIVEN URL, RETURN SERIALISED CONTENT */
+function put(url, data, type) {
+  return new Promise(function(resolve, reject) {
+    var req = new XMLHttpRequest();
+    req.open('PUT', url);
+    if (type != undefined) req.setRequestHeader("Content-type", type);
+    req.onload = function() {
+      if (req.status == 200) {
+        resolve(req.response);
+      } else {
+        reject(req.statusText);
+      }
+    };
+    req.onerror = function() {
+      reject(Error("Network Error"));
+    };
+    req.send(data);
+  });
+}
+
 /* SEND A DELETE COMMAND TO A GIVEN RESOURCE */
 let deleteResource = (url) => {
   return new Promise(function(resolve, reject) {
