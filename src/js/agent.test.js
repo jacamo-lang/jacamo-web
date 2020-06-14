@@ -1,4 +1,7 @@
 const index = require('./agent')
+/*
+sample file
+*/
 
 test('1 + 2 = 3', () => {
    expect(index.sum(1,2)).toEqual(3)

@@ -154,7 +154,7 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
 
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
-  agents.forEach(function(n) {
+  for (n in agents) {
     var lag = document.createElement('a');
     lag.setAttribute("href", "./agent.html?agent=" + n);
     lag.setAttribute('onclick', '{window.location.assign("./agent.html?agent=' + n + '");window.location.reload();}');
@@ -164,7 +164,7 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
       lag.innerHTML = "<h5>" + n + "</h5>";
     }
     navElement.appendChild(lag);
-  });
+  }
   navElement.appendChild(h.createDefaultHR());
   var ldf = document.createElement('a');
   ldf.setAttribute("href", "./agents_df.html");
@@ -179,7 +179,7 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
 /* create agent */
 function newAg() {
   h.post('/agents/' + document.getElementById('createAgent').value).then(function(r) {
-    window.location.assign('/agent.html?agent=' + document.getElementById('createAgent').value);
+    window.location.assign('/agents.html');
   });
 }
 
@@ -214,22 +214,10 @@ function runCMD() {
   const selectedAgent = params.get('agent');
 
   data = "c=" + encodeURIComponent(document.getElementById("inputcmd").value);
-  h.post("./agents/" + selectedAgent + "/cmd",data,"application/x-www-form-urlencoded");
+  h.post("./agents/" + selectedAgent + "/command",data,"application/x-www-form-urlencoded");
   document.getElementById("inputcmd").value = "";
   document.getElementById("inputcmd").focus();
   window.location.reload();
-}
-
-/* clear agent's log */
-function delLog() {
-  const params = new URL(location.href).searchParams;
-  const selectedAgent = params.get('agent');
-
-  h.deleteResource("./agents/" + selectedAgent + "/log").then(function(resp) {
-    /* Keep focus on command box */
-    document.getElementById("inputcmd").focus();
-    h.instantMessage('Log is empty.');
-  });
 }
 
 /* show agent's log */
@@ -479,58 +467,40 @@ function autocomplete(inp, arr) {
   });
 }
 
-/* AGENT'S MIND (XML FUNCTIONS) */
+/* AGENT'S DETAILS */
 
 function getInspectionDetails() {
-  /*var selectedAgent = window.location.hash.substr(1);*/
+  var selectedAgent = window.location.hash.substr(1);
   var parameters = location.search.substring(1).split("&");
   var temp = parameters[0].split("=");
   selectedAgent = unescape(temp[1]);
 
-  loadAndTransform('/agents/' + selectedAgent + '/mind', '/xml/agInspection.xsl', document.getElementById('inspection'));
+  inspection = document.getElementById('inspection');
+  beliefs = document.createElement("details");
+  beliefs.innerHTML = "<summary>beliefs</summary>";
+  inspection.appendChild(beliefs);
+  h.get("./agents/" + selectedAgent).then(function(resp){
+    details = JSON.parse(resp);
+    details.beliefs.forEach(function(item) {
+      const text = document.createElement('i');
+      text.innerHTML = item + "<br>";
+      beliefs.appendChild(text);
+    });
+  });
+
+  intentions = document.createElement("details");
+  intentions.innerHTML = "<summary>intentions</summary>";
+  inspection.appendChild(intentions);
+  h.get("./agents/" + selectedAgent + '/status').then(function(resp){
+    status = JSON.parse(resp);
+    status.intentions.forEach(function(item) {
+      const text = document.createElement('i');
+      text.innerHTML = item + "<br>";
+      intentions.appendChild(text);
+    });
+  });
 }
 
-/* TODO: Implement show/hide agent's properties on fullstack pure JS version */
-function makeRequest(url, loadedData, property, elementToAddResult) {
-  var req = new XMLHttpRequest();
-  req.open('GET', url);
-  /* to allow us doing XSLT in IE */
-  try {
-    req.responseType = "msxml-document"
-  } catch (ex) {}
-  req.onload = function() {
-    loadedData[property] = req.responseXML;
-    if (checkLoaded(loadedData)) {
-      displayResult(loadedData.xmlInput, loadedData.xsltSheet, elementToAddResult);
-    }
-  };
-  req.send();
-}
-
-function checkLoaded(loadedData) {
-  return loadedData.xmlInput != null && loadedData.xsltSheet != null;
-}
-
-function loadAndTransform(xml, xsl, elementToAddResult) {
-  var loadedData = {
-    xmlInput: null,
-    xsltSheet: null
-  };
-
-  makeRequest(xml, loadedData, 'xmlInput', elementToAddResult);
-  makeRequest(xsl, loadedData, 'xsltSheet', elementToAddResult);
-}
-
-function displayResult(xmlInput, xsltSheet, elementToAddResult) {
-  if (typeof XSLTProcessor !== 'undefined') {
-    var proc = new XSLTProcessor();
-    proc.importStylesheet(xsltSheet);
-    elementToAddResult.appendChild(proc.transformToFragment(xmlInput, document));
-
-  } else if (typeof xmlInput.transformNode !== 'undefined') {
-    elementToAddResult.innerHTML = xmlInput.transformNode(xsltSheet);
-  }
-}
 
 /**
  * EXPORTS
@@ -543,7 +513,6 @@ window.getInspectionDetails = getInspectionDetails;
 window.updateSuggestions = updateSuggestions;
 window.setAutoUpdateLog = setAutoUpdateLog;
 window.showBuffer = showBuffer;
-window.delLog = delLog;
 window.killAg = killAg;
 window.runCMD = runCMD;
 window.newAg = newAg;
