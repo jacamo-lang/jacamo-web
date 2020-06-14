@@ -17,7 +17,7 @@ import ora4mas.nopl.OrgBoard;
 import ora4mas.nopl.SchemeBoard;
 
 @Singleton
-@Path("/oe")
+@Path("/organisations")
 public class WebImplOrg extends RestImplOrg {
 
     @Override

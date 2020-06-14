@@ -12,7 +12,7 @@ const p = require('./parameters')
 
 /*Get Organisations */
 function getOE() {
-  h.get("./oe").then(function(resp) {
+  h.get("./organisations").then(function(resp) {
     updateOrganisationMenu("nav-drawer", JSON.parse(resp), true);
     updateOrganisationMenu("nav-drawer-frame", JSON.parse(resp), false);
   });
@@ -60,7 +60,7 @@ function newRole(org, gr) {
   var org = firstPart.substring(0, firstDot);
   var group = firstPart.substring(firstDot + 1);
 
-  http.open("POST", '/oe/' + org + '/group/' + group, false);
+  http.open("POST", '/organisations/' + org + '/groups/' + group + '/roles/' + role, false);
   http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   var data = "role=" + encodeURIComponent(role);
   http.send(data);
@@ -69,16 +69,12 @@ function newRole(org, gr) {
 
 function getOrganisationDetails() {
   const selectedItem = new URL(location.href).searchParams.get('organisation');
-  h.get("./oe/" + selectedItem + "/os/").then(function(r) {
+  h.get("./organisations/" + selectedItem).then(function(r) {
     item = JSON.parse(r);
     /* GROUPS */
     Object.keys(item.groups).forEach(function(g) {
       var table = h.createTable("groupssection");
-      h.addTwoCellsInARow(table, "group", item.groups[g].group +
-        "&#160;&#160;&#160;<a href='/oe/" + selectedItem + "/group/" + item.groups[g].group + "/" +
-        item.groups[g].group + ".npl'>[specification]</a>&#160;<a href='/oe/" + selectedItem +
-        "/group/" + item.groups[g].group + "/debug'>[instance]</a>"
-      );
+      h.addTwoCellsInARow(table, "group", item.groups[g].group);
       h.addTwoCellsInARow(table, "well formed", item.groups[g].isWellFormed);
       var roles = "";
       Object.keys(item.groups[g].roles).forEach(function(r) {
@@ -170,7 +166,7 @@ function getOrgGroupGraph() {
   const params = new URL(location.href).searchParams;
   const selectedOrganisation = params.get('organisation');
 
-  h.get("./oe/" + selectedOrganisation + "/os").then(function(serialOrg) {
+  h.get("./organisations/" + selectedOrganisation).then(function(serialOrg) {
     let dot = [];
     let org = JSON.parse(serialOrg);
 
@@ -247,7 +243,7 @@ function getOrgSchemeGraph() {
   const params = new URL(location.href).searchParams;
   const selectedOrganisation = params.get('organisation');
 
-  h.get("./oe/" + selectedOrganisation + "/os").then(function(serialOrg) {
+  h.get("./organisations/" + selectedOrganisation).then(function(serialOrg) {
     let dot = [];
     let org = JSON.parse(serialOrg);
 
@@ -317,7 +313,7 @@ function getOrgNormGraph() {
   const params = new URL(location.href).searchParams;
   const selectedOrganisation = params.get('organisation');
 
-  h.get("./oe/" + selectedOrganisation + "/os").then(function(serialOrg) {
+  h.get("./organisations/" + selectedOrganisation).then(function(serialOrg) {
     let dot = [];
     let org = JSON.parse(serialOrg);
 
