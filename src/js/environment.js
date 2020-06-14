@@ -84,7 +84,7 @@ function getArtifactDetails() {
   const selectedWorkspace = params.get('workspace');
   const selectedArtifact = params.get('artifact');
 
-  h.get("./workspaces/" + selectedWorkspace + "/" + selectedArtifact).then(function(artstr) {
+  h.get("./workspaces/" + selectedWorkspace + "/artifacts/" + selectedArtifact).then(function(artstr) {
     art = JSON.parse(artstr);
     if (Object.keys(art).length > 0) {
       var table = h.createTable("artsection");
@@ -129,7 +129,7 @@ function getArtGraph() {
   const selectedWorkspace = params.get('workspace');
   const selectedArtifact = params.get('artifact');
 
-  h.get("./workspaces/" + selectedWorkspace + "/" + selectedArtifact).then(function(serialArt) {
+  h.get("./workspaces/" + selectedWorkspace + "/artifacts/" + selectedArtifact).then(function(serialArt) {
     const MAX_LENGTH = 35;
     let dot = [];
     let art = JSON.parse(serialArt);
