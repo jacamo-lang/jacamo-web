@@ -258,14 +258,14 @@ node {
     // Version of node to use.
     version = '10.14.1'
     // Version of npm to use.
-    npmVersion = '6.4.1'
+    yarnVersion = '1.15.2'
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
     download = true
 }
 
 String testsExecutedMarkerName = "${projectDir}/.tests.executed"
-task testNpm(type: NpmTask) {
+task testYarn(type: YarnTask) {
     dependsOn assemble
     // force Jest test runner to execute tests once and finish the process instead of starting watch mode
     environment CI: 'true'
@@ -279,9 +279,9 @@ task testNpm(type: NpmTask) {
     }
     outputs.file testsExecutedMarkerName
 }
-check.dependsOn testNpm
+check.dependsOn testYarn
 
-task buildNpm(type: NpmTask) {
+task buildYarn(type: YarnTask) {
     dependsOn assemble
     // force Jest test runner to execute tests once and finish the process instead of starting watch mode
     environment CI: 'true'
@@ -290,7 +290,7 @@ task buildNpm(type: NpmTask) {
     inputs.file 'package.json'
     inputs.file 'package-lock.json'
 }
-build.dependsOn buildNpm
+build.dependsOn buildYarn
 
 /*
  *
@@ -302,5 +302,5 @@ clean {
     delete 'bin'
     delete 'build'
     delete 'log'
-    delete testsExecutedMarkerName /*Used on testNpm*/
+    delete testsExecutedMarkerName /*Used on testYarn*/
 }
