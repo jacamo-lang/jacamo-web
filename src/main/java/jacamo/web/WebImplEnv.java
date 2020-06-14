@@ -27,8 +27,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import cartago.ArtifactId;
 import cartago.CartagoService;
-import jacamo.rest.RestImplEnv;
-import jacamo.rest.TranslEnv;
+import jacamo.rest.implementation.RestImplEnv;
+import jacamo.rest.mediation.TranslEnv;
 
 @Singleton
 @Path("/workspaces")

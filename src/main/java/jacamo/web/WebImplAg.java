@@ -28,8 +28,6 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import com.google.common.reflect.ClassPath;
-import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.gson.Gson;
 
 import cartago.ArtifactId;
@@ -39,8 +37,9 @@ import cartago.CartagoService;
 import cartago.WorkspaceId;
 import jaca.CAgentArch;
 import jacamo.infra.JaCaMoLauncher;
-import jacamo.rest.RestImplAg;
-import jacamo.rest.TranslEnv;
+import jacamo.rest.implementation.RestImplAg;
+import jacamo.rest.mediation.TranslAg;
+import jacamo.rest.mediation.TranslEnv;
 import jacamo.web.exception.SystemOverloadException;
 import jacamo.web.exception.UnderstandabilityException;
 import jacamo.web.exception.UsefulnessException;
@@ -71,25 +70,12 @@ import jason.stdlib.print;
 @Path("/agents")
 public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImplAg and move some code to jacamo-rest
 
+    TranslAg tAg = new TranslAg();
     Gson gson = new Gson();
 
     @Override
     protected void configure() {
         bind(new WebImplAg()).to(WebImplAg.class);
-    }
-
-    /**
-     * Return agent object by agent's name
-     * 
-     * @param agName name of the agent
-     * @return Agent object
-     */
-    private Agent getAgent(String agName) {
-        CentralisedAgArch cag = BaseCentralisedMAS.getRunner().getAg(agName);
-        if (cag != null)
-            return cag.getTS().getAg();
-        else
-            return null;
     }
 
     /**
@@ -148,7 +134,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     public Response loadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName,
             @FormDataParam("aslfile") InputStream uploadedInputStream) {
         try {
-            Agent ag = getAgent(agName);
+            Agent ag = tAg.getAgent(agName);
             if (ag != null) {
                 System.out.println("agName: " + agName);
                 System.out.println("restAPI://" + aslFileName);
@@ -230,7 +216,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
                         // make sure you only answer after the agent was completely deleted
                         name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent(TEMP_AGENT_NAME, null, null, null, null, null, null);
                         if (name.equals(TEMP_AGENT_NAME)) {
-                            ag = getAgent(TEMP_AGENT_NAME);
+                            ag = tAg.getAgent(TEMP_AGENT_NAME);
                             
                             //Creating temporary agent to check plans coherence
                             BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
@@ -328,7 +314,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     public void getPlansSuggestions(String agName, Map<String, String> commands) {
         try {
             // get agent's plans
-            Agent ag = getAgent(agName);
+            Agent ag = tAg.getAgent(agName);
             if (ag != null) {
                 PlanLibrary pl = ag.getPL();
                 for (Plan plan : pl.getPlans()) {
@@ -378,10 +364,11 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     }
 
     public void getEASuggestions(String agName, Map<String, String> commands) throws CartagoException {
+        /*TODO: fix getCartagoArch is not exposed
         try {
-            Agent ag = getAgent(agName);
+            Agent ag = tAg.getAgent(agName);
             // get external actions (from focused artifacts)
-            CAgentArch cartagoAgArch = getCartagoArch(ag);
+            CAgentArch cartagoAgArch = tAg.getCartagoArch(ag);
             for (WorkspaceId wid : cartagoAgArch.getSession().getJoinedWorkspaces()) {
                 String wksName = wid.getName();
                 for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
@@ -412,6 +399,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
         } catch (CartagoException e) {
             e.printStackTrace();
         }
+        */
     }
     
     /**
@@ -419,7 +407,9 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
      * 
      * @return List of internal actions
      */
+    
     public void getIASuggestions(Map<String,String> cmds) {
+        /* TODO: fix fail on adding google guava
         try {
             ClassPath classPath = ClassPath.from(print.class.getClassLoader());
             Set<ClassInfo> allClasses = classPath.getTopLevelClassesRecursive("jason.stdlib");
@@ -432,20 +422,21 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
                         jason.stdlib.Manual annotation = (jason.stdlib.Manual) c
                                 .getAnnotation(jason.stdlib.Manual.class);
                         cmds.put(annotation.literal(), annotation.hint().replaceAll("\"", "`").replaceAll("'", "`"));
-					} else {
-						// add just the functor of the internal action
-						cmds.put("." + a.getSimpleName(), "");
-					}
+                    } else {
+                        // add just the functor of the internal action
+                        cmds.put("." + a.getSimpleName(), "");
+                    }
 
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			});
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    */
+    }
     
     private void lookForCollaborativeExceptions(Agent ag) throws UnderstandabilityException, UsefulnessException {
         PlanLibrary pl = ag.getPL();
@@ -482,7 +473,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
 
     private void checkUnderstandability(Term t) throws UnderstandabilityException {
         String recipientName = ((InternalActionLiteral)t).getTerm(0).toString();
-        Agent recipient = getAgent(recipientName);
+        Agent recipient = tAg.getAgent(recipientName);
         Literal request = (Literal)((InternalActionLiteral)t).getTerm(2);
         PlanLibrary rpl = recipient.getPL();
 
@@ -503,7 +494,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     
     private void checkUsefulness(Term t) throws UsefulnessException {
         String recipientName = ((InternalActionLiteral)t).getTerm(0).toString();
-        Agent recipient = getAgent(recipientName);
+        Agent recipient = tAg.getAgent(recipientName);
         Literal request = (Literal)((InternalActionLiteral)t).getTerm(2);
         PlanLibrary rpl = recipient.getPL();
 

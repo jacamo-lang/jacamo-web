@@ -30,7 +30,11 @@ public class JCMWeb extends JCMRest {
     private static Server ws;
     
     @Override
-    public HttpServer startRestServer(int port) {
+    public HttpServer startRestServer(int port, int tryc) {
+        if (tryc > 20) {
+            System.err.println("Error starting web server!");
+            return null;
+        }
         try {
             restServerURI = UriBuilder.fromUri("http://"+InetAddress.getLocalHost().getHostAddress()+"/").port(port).build();
             
@@ -45,12 +49,10 @@ public class JCMWeb extends JCMRest {
             
             ws = startWebsocketServer(8026);
             
-            //openBrowser();
-            
             return s;
-        } catch (javax.ws.rs.ProcessingException e) {  
-            System.out.println("trying next port for web server "+(port+1)+". e="+e);
-            return startRestServer(port+1);
+        } catch (javax.ws.rs.ProcessingException e) {           
+            System.out.println("trying next port for rest server "+(port+1)+". e="+e);
+            return startRestServer(port+1,tryc+1);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

@@ -9,7 +9,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import jacamo.rest.RestImplOrg;
+import jacamo.rest.implementation.RestImplOrg;
 import moise.os.OS;
 import moise.os.ns.Norm;
 import ora4mas.nopl.GroupBoard;

@@ -9,7 +9,7 @@ import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.EncodingFilter;
 
-import jacamo.rest.RestImplDF;
+import jacamo.rest.implementation.RestImplDF;
 
 @ApplicationPath("/")
 public class WebAppConfig extends ResourceConfig {

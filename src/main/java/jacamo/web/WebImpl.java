@@ -46,7 +46,7 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import com.google.gson.Gson;
 
 import jaca.CAgentArch;
-import jacamo.rest.RestImpl;
+import jacamo.rest.implementation.RestImpl;
 import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;
