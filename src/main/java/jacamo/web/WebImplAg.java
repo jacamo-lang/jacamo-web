@@ -297,6 +297,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
         
         String errorMsg = "Unknown exception";
         
+        String TEMP_AGENT_NAME = "__________temp";
         try {
             StringBuilder stringBuilder = new StringBuilder();
             String line = null;
@@ -306,35 +307,36 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             }
             
             //Prevents the creation of more than one temp agent. Tries to get agent 'temp' for a few times.
-            String TEMP_AGENT_NAME = "temp";
             String name = "";
             Agent ag = null;
             for (int i = 0; i < 3; i++) {
-                synchronized(this) {
-                    if (getAgent(TEMP_AGENT_NAME) == null) {
-                        // make sure you only answer after the agent was completely deleted
-                        name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent(TEMP_AGENT_NAME, null, null, null, null, null, null);
-                        if (name.equals(TEMP_AGENT_NAME)) {
-                            ag = tAg.getAgent(TEMP_AGENT_NAME);
-                            
-                            //Creating temporary agent to check plans coherence
-                            BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
-                            
-                            as2j parser = new as2j(new ByteArrayInputStream(stringBuilder.toString().getBytes(Charset.forName("UTF-8"))));
-                            parser.agent(ag);
+                synchronized (this) {
+                    // make sure you only answer after the agent was completely deleted
+                    name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent(TEMP_AGENT_NAME, null, null,
+                            null, null, null, null);
+                    if (name.equals(TEMP_AGENT_NAME)) {
+                        ag = tAg.getAgent(TEMP_AGENT_NAME);
 
-                            lookForCollaborativeExceptions(ag);
-                            
-                            return Response.ok("Code looks correct.").build();
-                        } else {
-                            ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(name, name, 0);
-                            while (BaseCentralisedMAS.getRunner().getAg(name) != null)
-                                ;
-                            return Response.status(500, "Error [Unknown]: Error creating structure for parser.").build();
-                        }
+                        // Creating temporary agent to check plans coherence
+                        BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
+
+                        as2j parser = new as2j(
+                                new ByteArrayInputStream(stringBuilder.toString().getBytes(Charset.forName("UTF-8"))));
+                        parser.agent(ag);
+
+                        lookForCollaborativeExceptions(ag);
+
+                        return Response.ok("Code looks correct.").build();
+                    } else {
+                        // A second agent was created, so kill it!
+                        BaseCentralisedMAS.getRunner().getAg(name).stopAg();
+                        ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(name, "web",
+                                0);
+                        while (BaseCentralisedMAS.getRunner().getAg(name) != null)
+                            ;
+                        return Response.status(500, "Error [Unknown]: Error creating structure for parser.").build();
                     }
                 }
-                Thread.sleep(100);
             }
             throw new SystemOverloadException("Info: System overload when parsing...");
 
@@ -368,11 +370,11 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             errorMsg = "Error [Unknown]: " + ((e.getMessage().length() >= 150) ? e.getMessage().substring(0, 150) + "..." : e.getMessage());
             return Response.status(406, errorMsg).build();
         } finally {
-            if (BaseCentralisedMAS.getRunner().getRuntimeServices().getAgentsNames().contains("temp")) {
-                BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent("temp", "web", 0);
+            if (BaseCentralisedMAS.getRunner().getRuntimeServices().getAgentsNames().contains(TEMP_AGENT_NAME)) {
+                BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(TEMP_AGENT_NAME, "web", 0);
                
                 // make sure you only answer after the agent was completely deleted
-                while (BaseCentralisedMAS.getRunner().getAg("temp") != null)
+                while (BaseCentralisedMAS.getRunner().getAg(TEMP_AGENT_NAME) != null)
                     ;
             }
         }
