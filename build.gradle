@@ -240,14 +240,13 @@ node {
 }
 
 String testsExecutedMarkerName = "${projectDir}/.tests.executed"
-task testYarn(type: YarnTask) {
+task testYarn(type: YarnTask, dependsOn: 'yarn') {
     dependsOn assemble
     // force Jest test runner to execute tests once and finish the process instead of starting watch mode
     environment CI: 'true'
     args = ['run', 'test']
     inputs.files fileTree('src/js')
-    inputs.file 'package.json'
-    inputs.file 'package-lock.json'
+    inputs.file 'yarn.lock'
     // allows easy triggering re-tests
     doLast {
         new File(testsExecutedMarkerName).text = 'delete this file to force re-execution JavaScript tests'
@@ -256,14 +255,13 @@ task testYarn(type: YarnTask) {
 }
 check.dependsOn testYarn
 
-task buildYarn(type: YarnTask) {
+task buildYarn(type: YarnTask, dependsOn: 'yarn') {
     dependsOn assemble
     // force Jest test runner to execute tests once and finish the process instead of starting watch mode
     environment CI: 'true'
     args = ['run', 'build']
     inputs.files fileTree('src/js')
-    inputs.file 'package.json'
-    inputs.file 'package-lock.json'
+    inputs.file 'yarn.lock'
 }
 build.dependsOn buildYarn
 
