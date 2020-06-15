@@ -18,6 +18,7 @@ function getCurrentAslContent() {
   h.get("/agents/" + selectedAgent + "/aslfiles/" + selectedASLFile).then(function(response) {
     const submit = document.createElement('button');
     submit.setAttribute("type", "submit");
+    submit.setAttribute("onclick", "window.location.href='./agent.html?agent=" + selectedAgent + "';");
     submit.innerHTML = "Save & Reload";
     document.getElementById("footer_menu").appendChild(submit);
     const cancel = document.createElement('button');
@@ -66,7 +67,7 @@ function createAlsEditor(content) {
     textarea.value = aslEditor.getValue();
     var selectedAgent = new URL(location.href).searchParams.get('agent');
     var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
-    h.put("/agents/" + selectedAgent + "/aslfiles/" + selectedASLFile, new FormData(e.target)).then(function(response) {
+    h.post("/agents/" + selectedAgent + "/aslfiles/" + selectedASLFile, new FormData(e.target)).then(function(response) {
       localStorage.setItem("agentBuffer", response);
       window.location.replace("./agent.html?agent=" + selectedAgent);
     });
