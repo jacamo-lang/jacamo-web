@@ -19,13 +19,13 @@ $ git clone https://github.com/jacamo-lang/jacamo-web.git
 $ cd jacamo-web
 $ ./gradlew run
 ```
-See http://yourIP:8080 for a web interface (see the console for the right IP:port). You can also try `gradle marcos`, `gradle bob`, and go to `/examples` for more sample projects and information about how to run them.
+See http://yourIP:8080 for a web interface (see the console for the right IP:port). You can also try `./gradlew run --args="src/jcm/marcos.jcm"`, `./gradlew run --args="src/jcm/bob.jcm"`, and go to `/examples` for more sample projects and information about how to run them.
 
 
 ### Making front end changes
-If you want to make changes to the jacamo-web front end, install [Node.js](https://nodejs.org/) and install the webpack client with ``npm install -g webpack client``.
-Then, install the jacamo-web front end dependencies by running ``npm install`` in the project's root repository.
-Run the webpack watch task with ``npm run watch``. All changes you make to JavaScript files will be automatically built and deployed to your local jacamo-web instance.
+If you want to make changes to the jacamo-web front end, install [Node.js](https://nodejs.org/) and install the webpack client with ``yarn install -g webpack client``.
+Then, install the jacamo-web front end dependencies by running ``yarn install`` in the project's root repository.
+Run the webpack watch task with ``yarn run watch``. All changes you make to JavaScript files will be automatically built and deployed to your local jacamo-web instance.
 
 ### Using a local docker
 
