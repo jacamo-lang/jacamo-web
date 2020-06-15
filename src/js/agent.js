@@ -15,7 +15,7 @@ function getCurrentAslContent() {
   var selectedAgent = new URL(location.href).searchParams.get('agent');
   var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
 
-  h.get("/agents/" + selectedAgent + "/aslfile/" + selectedASLFile).then(function(response) {
+  h.get("/agents/" + selectedAgent + "/aslfiles/" + selectedASLFile).then(function(response) {
     const submit = document.createElement('button');
     submit.setAttribute("type", "submit");
     submit.innerHTML = "Save & Reload";
@@ -37,7 +37,7 @@ function getCurrentAslContent() {
     document.getElementById("footer_menu").appendChild(check);
 
     const form = document.getElementById("usrform");
-    form.setAttribute("action", "/agents/" + selectedAgent + "/aslfile/" + selectedASLFile);
+    form.setAttribute("action", "./agents/" + selectedAgent + "/aslfiles/" + selectedASLFile);
     createAlsEditor(response);
   });
 }
@@ -66,7 +66,7 @@ function createAlsEditor(content) {
     textarea.value = aslEditor.getValue();
     var selectedAgent = new URL(location.href).searchParams.get('agent');
     var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
-    h.put("/agents/" + selectedAgent + "/aslfile/" + selectedASLFile, new FormData(e.target)).then(function(response) {
+    h.put("/agents/" + selectedAgent + "/aslfiles/" + selectedASLFile, new FormData(e.target)).then(function(response) {
       localStorage.setItem("agentBuffer", response);
       window.location.replace("./agent.html?agent=" + selectedAgent);
     });
@@ -86,7 +86,7 @@ function syntaxCheck() {
   let data = "--" + boundary + "\r\ncontent-disposition: form-data; name=aslfile\r\n\r\n" + aslEditor.getValue() + "\r\n--" + boundary + "--";
 
   var check = document.getElementById("check");
-  h.put("/agents/" + selectedAgent + "/parseAslfile/" + selectedASLFile, data, 'multipart/form-data; boundary=' + boundary).then(function(response) {
+  h.post("/agents/" + selectedAgent + "/aslfiles/" + selectedASLFile + "/parse", data, 'multipart/form-data; boundary=' + boundary).then(function(response) {
     check.style.color = "ForestGreen"; /*FireBrick DarkGoldenRod ForestGreen*/
     check.innerHTML = "&#160&#160&#160&#160&#160"+response;
     aslEditor.setTheme("ace/theme/textmate");
@@ -488,6 +488,23 @@ function getInspectionDetails() {
     });
   });
 
+  footMenu = document.getElementById('agentfootmenu');
+  h.get("./agents/" + selectedAgent + '/aslfiles').then(function(resp){
+    alsfiles = JSON.parse(resp);
+    alsfiles.forEach(function(item) {
+      editAsl = document.createElement("a");
+      if (item.lastIndexOf("/") > 0) {
+        var basename = item.substr(item.lastIndexOf("/") + 1, item.length - 1);
+        editAsl.innerHTML = 'edit ' + basename;
+        editAsl.setAttribute('href','./agent_editor.html?aslfile=' + basename + '&agent=' + selectedAgent);
+      } else {
+        editAsl.innerHTML = 'edit ' + item;
+        editAsl.setAttribute('href','./agent_editor.html?aslfile=' + item + '&agent=' + selectedAgent);
+      }
+      footMenu.appendChild(editAsl);
+      footMenu.innerHTML += "&#160;&#160;&#160";
+    });
+  });
 }
 
 

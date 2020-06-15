@@ -9,8 +9,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -18,15 +22,20 @@ import java.util.TreeMap;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
+import org.apache.tools.ant.filters.StringInputStream;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.google.gson.Gson;
@@ -36,6 +45,9 @@ import cartago.ArtifactInfo;
 import cartago.CartagoException;
 import cartago.CartagoService;
 import cartago.WorkspaceId;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import jaca.CAgentArch;
 import jacamo.infra.JaCaMoLauncher;
 import jacamo.rest.implementation.RestImplAg;
@@ -58,6 +70,7 @@ import jason.asSyntax.parser.ParseException;
 import jason.asSyntax.parser.as2j;
 import jason.infra.centralised.BaseCentralisedMAS;
 import jason.infra.centralised.CentralisedAgArch;
+import jason.runtime.RuntimeServicesFactory;
 import jason.stdlib.print;
 
 /**
@@ -80,6 +93,57 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     }
 
     /**
+     * Create an Agent. Produces PLAIN TEXT with HTTP response for this operation. If
+     * an ASL file with the given name exists, it will launch an agent with existing
+     * code. Otherwise, creates an agent that will start say 'Hi'.
+     * 
+     * @param agName name of the agent to be created
+     * @return HTTP 201 Response (created) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    /*
+    @Path("/{agentname}")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(value = "Create an Agent.")
+    @ApiResponses(value = { 
+            @ApiResponse(code = 201, message = "generated uri"),
+            @ApiResponse(code = 500, message = "internal error")
+    })
+    public Response postAgent(
+            @PathParam("agentname") String agName, 
+            @DefaultValue("false") @QueryParam("only_wp") boolean onlyWP, 
+            Map<String,String> metaData,
+            @Context UriInfo uriInfo) {
+        try {
+            String givenName = RuntimeServicesFactory.get().createAgent(agName, null, null, null, null, null, null);
+            RuntimeServicesFactory.get().startAgent(givenName);
+            // set some source for the agent
+            Agent ag = tAg.getAgent(givenName);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("//Agent created automatically\n\n");
+            stringBuilder.append("!start.\n\n");
+            stringBuilder.append("+!start <- .print(\"Hi\").\n\n");
+            stringBuilder.append("{ include(\"$jacamoJar/templates/common-cartago.asl\") }\n");
+            stringBuilder.append("{ include(\"$jacamoJar/templates/common-moise.asl\") }\n");
+            stringBuilder.append("// uncomment the include below to have an agent compliant with its organisation\n");
+            stringBuilder.append("//{ include(\"$moiseJar/asl/org-obedient.asl\") }");
+            ag.load(new StringInputStream( stringBuilder.toString()), "source-from-rest-api");
+            ag.setASLSrc("no-inicial.asl");
+            tAg.createAgLog(givenName, ag);
+
+            return Response
+                        .created(new URI(uriInfo.getBaseUri() + "agents/" + givenName))
+                        .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(500, e.getMessage()).build();
+        }
+    }*/
+    
+    /**
      * Returns PLAIN TEXT of the context of an Jason agent code file (.asl). Besides
      * the asl filename it wants the agent's name for agent's refreshing commands.
      * 
@@ -88,7 +152,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
-    @Path("/{agentname}/aslfile/{aslfilename}")
+    @Path("/{agentname}/aslfiles/{aslfilename}")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public Response getLoadASLfileForm(@PathParam("agentname") String agName,
@@ -117,6 +181,41 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
 
         return Response.status(500).build();
     }
+    
+    /**
+     * Returns PLAIN TEXT of the context of an Jason agent code file (.asl). Besides
+     * the asl filename it wants the agent's name for agent's refreshing commands.
+     * 
+     * @param agName      name of the agent
+     * @param aslFileName name of the file (including .asl extension)
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    @Path("/{agentname}/aslfiles")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response getASLfiles(@PathParam("agentname") String agName) {
+
+        // get agent's plans
+        Agent ag = tAg.getAgent(agName);
+
+        Set<String> files = new HashSet<>();
+        try {
+            PlanLibrary pl = ag.getPL();
+            for (Plan plan : pl.getPlans()) {
+                // skip plans from jar files (usually system's plans)
+                if (!(plan.getSource().startsWith("jar:file") || plan.getSource().equals("kqmlPlans.asl")))
+                    files.add(plan.getSource());
+            }
+            Gson json = new Gson();
+            return Response.ok(json.toJson(files)).build();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Response.status(500).build();
+    }
 
     /**
      * Updates an Jason agent code file (.asl) refreshing given agent's execution
@@ -128,10 +227,9 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
-    @Path("/{agentname}/aslfile/{aslfilename}")
-    @PUT
+    @Path("/{agentname}/aslfiles/{aslfilename}")
+    @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.TEXT_HTML)
     public Response loadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName,
             @FormDataParam("aslfile") InputStream uploadedInputStream) {
         try {
@@ -165,7 +263,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
 
                 ag.loadKqmlPlans();
 
-                return Response.ok("Agent reloaded with updated file. Old intentions were not affected.").build();
+                return Response.ok().build();
             }
 
             return Response.status(500, "Internal Server Error! Agent'" + agName + " Does not exists!").build();
@@ -190,8 +288,8 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
      *         500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
-    @Path("/{agentname}/parseAslfile/{aslfilename}")
-    @PUT
+    @Path("/{agentname}/aslfiles/{aslfilename}/parse")
+    @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
     public Response parseASLfileForm(@PathParam("agentname") String agName,
