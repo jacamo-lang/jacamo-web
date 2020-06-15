@@ -232,7 +232,7 @@ node {
     */
     // Version of node to use.
     version = '10.14.1'
-    // Version of npm to use.
+    // Version of yarn to use.
     yarnVersion = '1.15.2'
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
