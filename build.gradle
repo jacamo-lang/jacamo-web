@@ -106,40 +106,6 @@ task run (type: JavaExec, dependsOn: 'classes') {
     classpath sourceSets.main.runtimeClasspath
 }
 
-task bob (type: JavaExec, dependsOn: 'classes') {
-    group      ' JaCaMo'
-    description 'runs the JaCaMo application'
-    doFirst {
-        mkdir 'log'
-    }
-    main 'jacamo.infra.JaCaMoLauncher'
-    args 'src/jcm/bob.jcm'
-    classpath sourceSets.main.runtimeClasspath
-}
-
-// Bob for docker
-task bob_d (type: JavaExec, dependsOn: 'classes') {
-    group      ' JaCaMo'
-    description 'runs the JaCaMo application'
-    doFirst {
-        mkdir 'log'
-    }
-    main 'jacamo.infra.JaCaMoLauncher'
-    args 'src/jcm/bob-d.jcm'
-    classpath sourceSets.main.runtimeClasspath
-}
-
-task marcos (type: JavaExec, dependsOn: 'classes') {
-    group      ' JaCaMo'
-    description 'runs agent marcos'
-    doFirst {
-        mkdir 'log'
-    }
-    main 'jacamo.infra.JaCaMoLauncher'
-    args 'src/jcm/marcos.jcm'
-    classpath sourceSets.main.runtimeClasspath
-}
-
 task fixTab {
     ant.fixcrlf(eol: 'lf',  includes: '**/*.txt,**/*.bat, **/*.adoc', srcdir: '.')
     ant.fixcrlf(tab: 'remove', tablength: '4', javafiles: 'true', includes: '**/*.java,**/*.xml', srcdir: 'src')
@@ -257,7 +223,7 @@ node {
     */
     // Version of node to use.
     version = '10.14.1'
-    // Version of npm to use.
+    // Version of yarn to use.
     yarnVersion = '1.15.2'
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
@@ -265,14 +231,13 @@ node {
 }
 
 String testsExecutedMarkerName = "${projectDir}/.tests.executed"
-task testYarn(type: YarnTask) {
+task testYarn(type: YarnTask, dependsOn: 'yarn') {
     dependsOn assemble
     // force Jest test runner to execute tests once and finish the process instead of starting watch mode
     environment CI: 'true'
     args = ['run', 'test']
     inputs.files fileTree('src/js')
-    inputs.file 'package.json'
-    inputs.file 'package-lock.json'
+    inputs.file 'yarn.lock'
     // allows easy triggering re-tests
     doLast {
         new File(testsExecutedMarkerName).text = 'delete this file to force re-execution JavaScript tests'
@@ -281,14 +246,13 @@ task testYarn(type: YarnTask) {
 }
 check.dependsOn testYarn
 
-task buildYarn(type: YarnTask) {
+task buildYarn(type: YarnTask, dependsOn: 'yarn') {
     dependsOn assemble
     // force Jest test runner to execute tests once and finish the process instead of starting watch mode
     environment CI: 'true'
     args = ['run', 'build']
     inputs.files fileTree('src/js')
-    inputs.file 'package.json'
-    inputs.file 'package-lock.json'
+    inputs.file 'yarn.lock'
 }
 build.dependsOn buildYarn
 
