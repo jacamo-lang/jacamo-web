@@ -37,31 +37,6 @@ dependencies {
 	implementation 'org.jacamo:jacamo:0.9-SNAPSHOT'
 	implementation 'org.jacamo:jacamo-rest:0.5-SNAPSHOT'
 
-	implementation 'javax.xml.bind:jaxb-api:2.3.1'
-	implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
-	implementation 'com.sun.xml.bind:jaxb-impl:2.3.1'
-
-
-	implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.29.1'
-	implementation 'org.glassfish.jersey.containers:jersey-container-servlet-core:2.29.1'
-	implementation 'org.glassfish.jersey.inject:jersey-hk2:2.29.1'
-	implementation group: 'org.glassfish.jersey', name: 'jersey-bom', version: '2.29.1', ext: 'pom'
-
-	implementation 'org.glassfish.jersey.core:jersey-server:2.29.1'
-	implementation 'org.glassfish.jersey.core:jersey-client:2.29.1'
-	implementation 'org.glassfish.jersey.media:jersey-media-multipart:2.29.1'
-
-	implementation 'org.glassfish.jersey.media:jersey-media-json-jackson:2.29.1'
-
-
-	implementation 'com.google.code.gson:gson:2.8.5'
-	implementation 'commons-io:commons-io:2.6'
-	implementation group: 'com.google.guava', name: 'guava', version: '11.0.2'
-	implementation 'io.swagger:swagger-annotations:1.6.1'
-	// containers:
-	implementation 'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.29.1'
-	implementation 'org.glassfish.grizzly:grizzly-http-server:2.4.4'
-
 	//websockets for simulations
 	implementation 'javax.websocket:javax.websocket-api:1.1'
 	implementation 'org.glassfish.tyrus:tyrus-server:1.1'
