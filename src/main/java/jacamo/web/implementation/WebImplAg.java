@@ -56,6 +56,7 @@ import jacamo.rest.mediation.TranslEnv;
 import jacamo.web.exception.SystemOverloadException;
 import jacamo.web.exception.UnderstandabilityException;
 import jacamo.web.exception.UsefulnessException;
+import jacamo.web.mediation.TranslAgWeb;
 import jason.asSemantics.Agent;
 import jason.asSemantics.GoalListenerForMetaEvents;
 import jason.asSyntax.Atom;
@@ -84,13 +85,14 @@ import jason.stdlib.print;
 @Path("/agents")
 public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImplAg and move some code to jacamo-rest
 
-    TranslAg tAg = new TranslAg();
+    TranslAgWeb tAg = new TranslAgWeb();
     Gson gson = new Gson();
 
     @Override
     protected void configure() {
         bind(new WebImplAg()).to(WebImplAg.class);
     }
+    
 
     /**
      * Create an Agent. Produces PLAIN TEXT with HTTP response for this operation. If
@@ -101,7 +103,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
      * @return HTTP 201 Response (created) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
-    /*
+    @Override
     @Path("/{agentname}")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -117,31 +119,21 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             Map<String,String> metaData,
             @Context UriInfo uriInfo) {
         try {
-            String givenName = RuntimeServicesFactory.get().createAgent(agName, null, null, null, null, null, null);
-            RuntimeServicesFactory.get().startAgent(givenName);
-            // set some source for the agent
-            Agent ag = tAg.getAgent(givenName);
-
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("//Agent created automatically\n\n");
-            stringBuilder.append("!start.\n\n");
-            stringBuilder.append("+!start <- .print(\"Hi\").\n\n");
-            stringBuilder.append("{ include(\"$jacamoJar/templates/common-cartago.asl\") }\n");
-            stringBuilder.append("{ include(\"$jacamoJar/templates/common-moise.asl\") }\n");
-            stringBuilder.append("// uncomment the include below to have an agent compliant with its organisation\n");
-            stringBuilder.append("//{ include(\"$moiseJar/asl/org-obedient.asl\") }");
-            ag.load(new StringInputStream( stringBuilder.toString()), "source-from-rest-api");
-            ag.setASLSrc("no-inicial.asl");
-            tAg.createAgLog(givenName, ag);
-
-            return Response
-                        .created(new URI(uriInfo.getBaseUri() + "agents/" + givenName))
+            if (onlyWP) {
+                if (tAg.createWP(agName, metaData))
+                    return Response.created(new URI(uriInfo.getBaseUri() + "agents/" + agName)).build();
+                else
+                    return Response.status(500, "Agent "+agName+" already exists!").build();
+            } else {
+                return Response
+                        .created(new URI(uriInfo.getBaseUri() + "agents/" + tAg.createAgent(agName)))
                         .build();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(500, e.getMessage()).build();
         }
-    }*/
+    }
     
     /**
      * Returns PLAIN TEXT of the context of an Jason agent code file (.asl). Besides
