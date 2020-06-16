@@ -160,24 +160,32 @@ publishing {
     }
 }
 
-// transfer local maven artifact to our maven2 repository at sourceforge
-task publishMavenSF(dependsOn: [ 'build', 'publishToMavenLocal']) {
-  doLast {
-    def wdir = System.getProperty("user.home")+'/.m2/repository/org/jacamo/jacamo-web'
-    def tdir = 'jomifred,jacamo@web.sf.net:/home/project-web/jacamo/htdocs/maven2/org/jacamo/jacamo-web'
-    exec {
-        commandLine 'scp', '-r', project.version, tdir
-        workingDir wdir
-    }
-    exec {
-        commandLine 'cp', 'maven-metadata-local.xml', 'maven-metadata.xml'
-        workingDir wdir
-    }
-    exec {
-        commandLine 'scp', 'maven-metadata.xml', tdir
-        workingDir wdir
-    }
-  }
+// transfer local maven artifact to our maven2 repository at github
+task publishMavenGitHub(dependsOn: [ 'build', 'publishToMavenLocal']) {
+	doLast {
+	    def wdir = System.getProperty("user.home")+'/.m2/repository/org/jacamo/jacamo-web'
+	    def rdir = System.getProperty("user.home")+'/pro/jacamo-mvn-repo'
+	    exec {
+	        commandLine 'git', 'pull'
+	        workingDir rdir
+	    }
+	    copy {
+	        from wdir
+	        into rdir + '/org/jacamo/jacamo-web'
+	    }
+	    exec {
+	        commandLine 'git', 'add', '*'
+	        workingDir rdir
+	    }
+	    exec {
+	        commandLine 'git', 'commit', '-a', '-m', 'new version of jacamo web '+project.version
+	        workingDir rdir
+	    }
+	    exec {
+	        commandLine 'git', 'push'
+	        workingDir rdir
+	    }
+	}
 }
 
 tasks.withType(JavaCompile) {
