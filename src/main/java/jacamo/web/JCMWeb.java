@@ -21,6 +21,7 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.tyrus.server.Server;
 
 import jacamo.rest.JCMRest;
+import jacamo.web.config.WebAppConfig;
 
 @ServerEndpoint(value = "/messages")
 public class JCMWeb extends JCMRest {

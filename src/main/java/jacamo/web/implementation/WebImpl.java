@@ -1,4 +1,4 @@
-package jacamo.web;
+package jacamo.web.implementation;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -47,6 +47,7 @@ import com.google.gson.Gson;
 
 import jaca.CAgentArch;
 import jacamo.rest.implementation.RestImpl;
+import jacamo.web.JCMWeb;
 import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Agent;

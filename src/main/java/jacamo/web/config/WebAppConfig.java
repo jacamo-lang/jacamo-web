@@ -1,4 +1,4 @@
-package jacamo.web;
+package jacamo.web.config;
 
 import java.util.HashMap;
 
@@ -10,6 +10,11 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.EncodingFilter;
 
 import jacamo.rest.implementation.RestImplDF;
+import jacamo.web.implementation.WebImpl;
+import jacamo.web.implementation.WebImplAg;
+import jacamo.web.implementation.WebImplEnv;
+import jacamo.web.implementation.WebImplJCM;
+import jacamo.web.implementation.WebImplOrg;
 
 @ApplicationPath("/")
 public class WebAppConfig extends ResourceConfig {

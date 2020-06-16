@@ -1,4 +1,4 @@
-package jacamo.web;
+package jacamo.web.implementation;
 
 import java.io.BufferedReader;
 import java.io.File;
