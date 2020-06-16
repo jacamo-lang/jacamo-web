@@ -183,9 +183,8 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
 
 /* create agent */
 function newAg() {
-  h.post('/agents/' + document.getElementById('createAgent').value).then(function(r) {
-    window.location.assign('/agents.html');
-  });
+  h.post('/agents/' + document.getElementById('createAgent').value);
+  window.location.assign('./agent.html?agent=' + document.getElementById('createAgent').value);
 }
 
 /* KILL AN AGENT */
