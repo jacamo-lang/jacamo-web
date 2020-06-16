@@ -101,16 +101,6 @@ function addTwoCellsInARow(table, p, v) {
   cellDetail.innerHTML = v;
 }
 
-/* INSTANT MESSAGE - HTML must have a top-alert DIV with a top-alert-message LABEL */
-const instantMessage = (msg) => {
-  if (msg != null) {
-    $('#top-alert-message').text(msg);
-    $('#top-alert').fadeTo(2000+(msg.length*10), 500).slideUp(500, function() {
-      $('#top-alert').slideUp(500);
-    });
-  }
-};
-
 let createDefaultHR = () => {
   var hr = document.createElement('hr');
   hr.style.display = 'line';
@@ -129,7 +119,6 @@ module.exports = {
   deleteResource,
   createTable,
   addTwoCellsInARow,
-  instantMessage,
   createDefaultHR
 }
 

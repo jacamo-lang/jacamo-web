@@ -4,7 +4,11 @@
 const d3 = require('d3')
 const h = require('./helpers')
 const p = require('./parameters')
-const w = require('./websockets')
+//const w = require('./websockets')
+const toastr = require('toastr')
+
+/** LOCK NOTIFICATIONS */
+toastr.options.preventDuplicates = true;
 
 /**
  * AGENT FUNCTIONS
@@ -196,7 +200,7 @@ function killAg() {
       window.location.assign("./agents.html");
     });
   } else {
-    h.instantMessage("Don't worry, agent '" + selectedAgent + "' is still here.");
+    toastr.info("Don't worry, agent '" + selectedAgent + "' is still here.", { timeOut: 3000 });
   }
 }
 
@@ -204,7 +208,7 @@ function killAg() {
 
 const showBuffer = () => {
   var buffer = localStorage.getItem("agentBuffer");
-  h.instantMessage(buffer);
+  if ((typeof(buffer) == "string") && (buffer != "")) toastr.info(buffer, { timeOut: 3000 });
   localStorage.removeItem("agentBuffer");
 };
 
@@ -242,7 +246,7 @@ function showLog() {
         if (!alreadySaidLogHasMessage) {
           /*do not bother the user with too many messages*/
           alreadySaidLogHasMessage = true;
-          h.instantMessage('Log has new message(s) to show.');
+          toastr.warning('Log has new message(s) to show.', { timeOut: 3000 });
         }
       }
     }
@@ -496,10 +500,10 @@ function getInspectionDetails() {
       editAsl = document.createElement("a");
       if (item.lastIndexOf("/") > 0) {
         var basename = item.substr(item.lastIndexOf("/") + 1, item.length - 1);
-        editAsl.innerHTML = 'edit ' + basename;
+        editAsl.innerHTML = basename;
         editAsl.setAttribute('href','./agent_editor.html?aslfile=' + basename + '&agent=' + selectedAgent);
       } else {
-        editAsl.innerHTML = 'edit ' + item;
+        editAsl.innerHTML = item;
         editAsl.setAttribute('href','./agent_editor.html?aslfile=' + item + '&agent=' + selectedAgent);
       }
       footMenu.appendChild(editAsl);
