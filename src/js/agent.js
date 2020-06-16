@@ -264,10 +264,9 @@ function setGraphWindow() {
   let modal = document.getElementById('modalinspection');
   let btnModal = document.getElementById("btninspection");
   let spanClose = document.getElementsByClassName("close")[0];
-  btnModal.onclick = function() {
-    getGraph();
-    modal.style.display = "block";
-  };
+  modal.style.display = "block";
+  getGraph();
+
   spanClose.onclick = function() {
     modal.style.display = "none";
   };
