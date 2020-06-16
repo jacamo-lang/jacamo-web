@@ -1,9 +1,6 @@
 /**
  * IMPORTS
  */
-const d3 = require('d3')
-const d3G = require('d3-graphviz')
-
 const h = require('./helpers')
 const p = require('./parameters')
 const g = require('./git')
@@ -211,9 +208,13 @@ function getMASAsDot() {
     dot.push("}\n");
 
     /* Transition follows modal top down movement */
-    var t = d3.transition().duration(750).ease(d3.easeLinear);
-    if (overview.agents.length === 0) dot = ["digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\"]\n noAg [label=<There is<br />no agents>]\n}\n"];
-    d3.select("#overviewgraph").graphviz().transition(t).renderDot(dot.join(""));
+    import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
+      import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
+        var t = d3.transition().duration(750).ease(d3.easeLinear);
+        if (overview.agents.length === 0) dot = ["digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\"]\n noAg [label=<There is<br />no agents>]\n}\n"];
+        d3G.graphviz("#overviewgraph").transition(t).renderDot(dot.join(""));
+      });
+    });
   });
 }
 

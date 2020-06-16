@@ -1,7 +1,6 @@
 /**
  * IMPORTS
  */
-const d3 = require('d3')
 const h = require('./helpers')
 const p = require('./parameters')
 
@@ -187,8 +186,13 @@ function getArtGraph() {
     dot.push("}\n");
 
     /* Transition follows modal top down movement */
-    var t = d3.transition().duration(750).ease(d3.easeLinear);
-    d3.select("#artifactgraph").graphviz().transition(t).renderDot(dot.join(""));
+    import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
+      import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
+        var t = d3.transition().duration(750).ease(d3.easeLinear);
+        d3G.graphviz("#artifactgraph").transition(t).renderDot(dot.join(""));
+      });
+    });
+
   });
 }
 
@@ -377,8 +381,13 @@ function getWksGraph() {
     if (validContent <= 0) dot = ["digraph G {\"no artifacts\nto show\"}\n"];
 
     /* Transition follows modal top down movement */
-    var t = d3.transition().duration(750).ease(d3.easeLinear);
-    d3.select("#overviewgraph").graphviz().transition(t).renderDot(dot.join(""));
+    import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
+      import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
+        var t = d3.transition().duration(750).ease(d3.easeLinear);
+        d3G.graphviz("#workspacegraph").transition(t).renderDot(dot.join(""));
+      });
+    });
+
   });
 }
 

@@ -3,13 +3,17 @@ const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
 
-  entry: './src/js/app.js',
+  entry: {
+    jacamoweb: './src/js/app.js',
+  },
 
   target: 'web',
 
   output: {
     path: path.resolve(__dirname, 'src/resources/js'),
-    filename: 'jacamoweb.js'
+    publicPath: 'js/',
+    filename: '[name].js',
+    chunkFilename: '[name].js',
   },
 
   plugins: [new TerserPlugin()],
