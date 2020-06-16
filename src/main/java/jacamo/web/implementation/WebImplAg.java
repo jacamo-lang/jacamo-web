@@ -11,10 +11,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -25,7 +23,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -35,23 +32,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.tools.ant.filters.StringInputStream;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.google.gson.Gson;
 
 import cartago.ArtifactId;
-import cartago.ArtifactInfo;
 import cartago.CartagoException;
 import cartago.CartagoService;
-import cartago.WorkspaceId;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import jaca.CAgentArch;
 import jacamo.infra.JaCaMoLauncher;
 import jacamo.rest.implementation.RestImplAg;
-import jacamo.rest.mediation.TranslAg;
 import jacamo.rest.mediation.TranslEnv;
 import jacamo.web.exception.SystemOverloadException;
 import jacamo.web.exception.UnderstandabilityException;
@@ -70,9 +62,6 @@ import jason.asSyntax.Trigger.TEType;
 import jason.asSyntax.parser.ParseException;
 import jason.asSyntax.parser.as2j;
 import jason.infra.centralised.BaseCentralisedMAS;
-import jason.infra.centralised.CentralisedAgArch;
-import jason.runtime.RuntimeServicesFactory;
-import jason.stdlib.print;
 
 /**
  * Agent's REST implementation class

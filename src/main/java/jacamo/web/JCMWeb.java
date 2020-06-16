@@ -5,7 +5,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.websocket.OnClose;
@@ -16,12 +21,25 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.curator.x.async.WatchMode;
+import org.apache.zookeeper.CreateMode;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.tyrus.server.Server;
 
 import jacamo.rest.JCMRest;
+import jacamo.rest.JCMRuntimeServices;
+import jacamo.rest.config.RestAgArch;
 import jacamo.web.config.WebAppConfig;
+import jason.asSemantics.Unifier;
+import jason.asSyntax.ASSyntax;
+import jason.asSyntax.Atom;
+import jason.asSyntax.Literal;
+import jason.asSyntax.StringTermImpl;
+import jason.asSyntax.Term;
+import jason.asSyntax.UnnamedVar;
+import jason.runtime.DelegatedRuntimeServices;
+import jason.runtime.RuntimeServicesFactory;
 
 @ServerEndpoint(value = "/messages")
 public class JCMWeb extends JCMRest {
@@ -29,6 +47,68 @@ public class JCMWeb extends JCMRest {
     private final static Set<Session> sessions = new HashSet<>();
     @SuppressWarnings("unused")
     private static Server ws;
+    
+    @Override
+    public void init(String[] args) throws Exception {
+        
+        // change the runtimeservices
+        RuntimeServicesFactory.set( new JCMRuntimeServices() );
+        
+        // adds RestAgArch as default ag arch when using this platform
+        RuntimeServicesFactory.get().registerDefaultAgArch(WebAgArch.class.getName());
+        
+        int restPort = 3280;
+        int zkPort   = 2181;
+        boolean useZK = false;
+
+        // Used when deploying on heroku
+        String webPort = System.getenv("PORT");
+        if (webPort == null || webPort.isEmpty()) {
+            restPort = 8080;
+        } else {
+            restPort = Integer.parseInt(webPort);
+        }
+        
+        if (args.length > 0) {
+            String la = "";
+            for (String a: args[0].split(" ")) {
+                if (la.equals("--restPort"))
+                    try {
+                        restPort = Integer.parseInt(a);
+                    } catch (Exception e) {
+                        System.err.println("The argument for restPort is not a number.");
+                    }
+
+                if (a.equals("--main")) {
+                    useZK = true;
+                }
+                if (la.equals("--main"))
+                    try {
+                        zkPort = Integer.parseInt(a);
+                    } catch (Exception e) {
+                        System.err.println("The argument for restPort is not a number.");
+                    }
+
+                if (la.equals("--connect")) {
+                    zkHost = a;
+                    useZK = true;
+                }
+                la = a;
+            }           
+        }
+        
+        restHttpServer = startRestServer(restPort,0);
+        
+        if (useZK) {
+            if (zkHost == null) {
+                zkFactory  = startZookeeper(zkPort);
+                System.out.println("Platform (zookeeper) started on "+zkHost);
+            } else {
+                System.out.println("Platform (zookeeper) running on "+zkHost);
+            }
+        }
+        
+    }
     
     @Override
     public HttpServer startRestServer(int port, int tryc) {

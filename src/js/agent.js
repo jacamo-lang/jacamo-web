@@ -4,7 +4,6 @@
 const d3 = require('d3')
 const h = require('./helpers')
 const p = require('./parameters')
-//const w = require('./websockets')
 const toastr = require('toastr')
 
 /** LOCK NOTIFICATIONS */

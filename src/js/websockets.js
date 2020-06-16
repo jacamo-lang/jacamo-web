@@ -1,3 +1,4 @@
+const toastr = require('toastr')
 
 /**
  * WEBSOCKTES FUNCTIONS
@@ -12,10 +13,10 @@ function connectToWS() {
   }
   myWebSocket = new WebSocket(endpoint);
   myWebSocket.onmessage = function(event) {
-    if (event.data.startsWith("?")) {
-      /*do something*/
-    } else {
-      console.log("onmessage. content: " + event.data);
+    if (event.data.startsWith(".send")) {
+      let data = event.data;
+      let args = data.substring(5, data.length).replace("<","").replace(">","").split(",");
+      toastr.info(args[1] + " " + args[2] + " " + args[3] + " " + args[4], { timeOut: 1000 });
     }
   };
   myWebSocket.onopen = function(evt) {
