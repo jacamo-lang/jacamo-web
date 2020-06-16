@@ -3,7 +3,6 @@
 
 <head>
   <title>jacamo-web - agent</title>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta charset="UTF-8" http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
 </head>
@@ -43,13 +42,6 @@
 
       <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
 
-        <!-- Autohiding dialog -->
-        <div role="dialog" aria-labelledby="dialog-title" id="top-alert">
-          <div class="card fluid">
-            <label for="modal-control" class="modal-close" id="top-alert-message"></label>
-          </div>
-        </div>
-
         <!-- command box -->
         <div id="command" class="card fluid">
           <div class="autocomplete">
@@ -88,7 +80,7 @@
         <!-- footer -->
         <div id="agentfoot" class="card fluid">
           <div id="agentfootmenu" class="section">
-            <a href="#modalinspection" id="btninspection">diagram</a>&#160;&#160;&#160;
+            <a onclick='setGraphWindow()' href="#" id="btninspection">diagram</a>&#160;&#160;&#160;
             <a onclick='killAg()' id='btkillag'>kill agent</a>&#160;&#160;&#160;
           </div>
         </div>
@@ -98,16 +90,12 @@
   </div>
   <script src="/js/jacamoweb.js"></script>
   <script>
-    window.addEventListener('DOMContentLoaded', function(){
-      document.getElementById('top-alert').style.visibility = 'hidden';
-      getInspectionDetails();
-      updateSuggestions();
-      setAutoUpdateLog();
-      setAutoUpdateAgInterface();
-      document.getElementById("inputcmd").focus();
-      showBuffer();
-      setGraphWindow();
-    });
+    getInspectionDetails();
+    updateSuggestions();
+    setAutoUpdateLog();
+    setAutoUpdateAgInterface();
+    showBuffer();
+    document.getElementById("inputcmd").focus();
   </script>
 </body>
 
