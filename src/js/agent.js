@@ -514,6 +514,41 @@ function getInspectionDetails() {
   });
 }
 
+/* WHOLE AGENTS AS DOT */
+
+function getAgentsAsDot() {
+  let dot = [];
+
+  h.get('./overview').then(function(mas) {
+    let overview = JSON.parse(mas);
+
+    dot.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\"]\n");
+
+    let ags = [];
+    overview.agents.forEach(function(x) {
+      ags.push(x.agent);
+      var s1 = (x.agent.length <= p.MAX_LENGTH) ? x.agent : x.agent.substring(0, p.MAX_LENGTH) + " ...";
+      dot.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
+    });
+    dot.push("\t}\n");
+
+    var buffer = localStorage.getItem("agentArrow");
+    if ((typeof(buffer) == "string") && (buffer != "")) dot.push(buffer+"\n");
+    toastr.info(buffer);
+    localStorage.removeItem("agentArrow");
+
+    /* Transition follows modal top down movement */
+    import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
+      import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
+        var t = d3.transition().duration(750).ease(d3.easeLinear);
+        var graph = dot.join("");
+        d3G.graphviz("#agentsgraph").transition(t).renderDot(graph);
+        console.log(graph);
+      });
+    });
+
+  });
+}
 
 /**
  * EXPORTS
@@ -530,6 +565,7 @@ window.killAg = killAg;
 window.runCMD = runCMD;
 window.newAg = newAg;
 window.setGraphWindow = setGraphWindow;
+window.getAgentsAsDot = getAgentsAsDot;
 
 /**
  * PREPARING FOR TESTS

@@ -17,6 +17,7 @@ function connectToWS() {
       let data = event.data;
       let args = data.substring(5, data.length).replace("<","").replace(">","").split(",");
       toastr.info(args[1] + " " + args[2] + " " + args[3] + " " + args[4], { timeOut: 1000 });
+      localStorage.setItem("agentArrow", args[2] + "->" + args[3] + "[label =\"" + args[4] + "\"]");
     }
   };
   myWebSocket.onopen = function(evt) {
