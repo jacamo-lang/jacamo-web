@@ -158,7 +158,6 @@ function getMASAsDot() {
             "\" [arrowtail=normal arrowhead=open label=\"responsible\"]\n";
           if (!orglinks.includes(resp)) { /*avoid duplicates*/
             orglinks.push(resp);
-            dot.push("\t\t{rank=same \"" + r + "\" \"" + m.scheme + "\"}\n");
           }
         });
       });
@@ -175,7 +174,6 @@ function getMASAsDot() {
       var s1 = (x.agent.length <= p.MAX_LENGTH) ? x.agent : x.agent.substring(0, p.MAX_LENGTH) + " ...";
       dot.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
     });
-    if (ags.length > 0) dot.push("\t\t{rank=same \"" + ags.join("\" \"") + "\"}\n");
     dot.push("\t}\n");
 
     /* Environment dimension */
@@ -203,7 +201,6 @@ function getMASAsDot() {
             }
           });
 
-          if (wksartifacts.length > 0) dot.push("\t\t\t{rank=same \"" + wksartifacts.join("\" \"") + "\"}\n");
           dot.push("\t\t}\n");
           dot.push(envlinks.join(" "));
         });
@@ -216,7 +213,7 @@ function getMASAsDot() {
     /* Transition follows modal top down movement */
     var t = d3.transition().duration(750).ease(d3.easeLinear);
     if (overview.agents.length === 0) dot = ["digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\"]\n noAg [label=<There is<br />no agents>]\n}\n"];
-    d3G.graphviz("#overviewgraph").transition(t).renderDot(dot.join(""));
+    d3.select("#overviewgraph").graphviz().transition(t).renderDot(dot.join(""));
   });
 }
 
