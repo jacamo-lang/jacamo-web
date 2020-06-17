@@ -522,7 +522,7 @@ function getAgentsAsDot(addedArrow, removedArrow) {
   h.get('./overview').then(function(mas) {
     let overview = JSON.parse(mas);
 
-    dot.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\"]\n");
+    dot.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\" ranksep=0.25 ]\n");
 
     let ags = [];
     overview.agents.forEach(function(x) {
@@ -530,6 +530,14 @@ function getAgentsAsDot(addedArrow, removedArrow) {
       var s1 = (x.agent.length <= p.MAX_LENGTH) ? x.agent : x.agent.substring(0, p.MAX_LENGTH) + " ...";
       dot.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
     });
+
+    // Create invisible arrows for better presentation
+    for (i = 0; i < overview.agents.length; i++) {
+      if (i+1 < overview.agents.length)
+        dot.push("\"" + overview.agents[i].agent + "\"->\"" + overview.agents[i+1].agent + "\" [style=invis]");
+      else
+        dot.push("\"" + overview.agents[i].agent + "\"->\"" + overview.agents[0].agent + "\" [style=invis]");
+    }
 
     if (removedArrow !== "") {
       const index = arrows.indexOf(removedArrow);
@@ -574,8 +582,8 @@ function connectToWS() {
       let data = event.data;
       let args = data.substring(5, data.length).replace("<","").replace(">","").split(",");
       let color = "black";
-      if (args[1] == "tell") color = "darkgreen";
-      if (args[1] == "achieve") color = "brown";
+      if (args[2] == "tell") color = "darkgreen";
+      if (args[2] == "achieve") color = "brown";
       let buffer = args[1] + "->" + args[3] + "[label =\"" + args[4] + "\" color=" + color + "]";
 
       /* Add an arrow */
