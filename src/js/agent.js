@@ -515,8 +515,8 @@ function getInspectionDetails() {
 }
 
 /* WHOLE AGENTS AS DOT */
-
-function getAgentsAsDot() {
+let arrows = [];
+function getAgentsAsDot(addedArrow, removedArrow) {
   let dot = [];
 
   h.get('./overview').then(function(mas) {
@@ -530,12 +530,20 @@ function getAgentsAsDot() {
       var s1 = (x.agent.length <= p.MAX_LENGTH) ? x.agent : x.agent.substring(0, p.MAX_LENGTH) + " ...";
       dot.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
     });
-    dot.push("\t}\n");
 
-    var buffer = localStorage.getItem("agentArrow");
-    if ((typeof(buffer) == "string") && (buffer != "")) dot.push(buffer+"\n");
-    toastr.info(buffer);
-    localStorage.removeItem("agentArrow");
+    if (removedArrow !== "") {
+      const index = arrows.indexOf(removedArrow);
+      if (index > -1) {
+        arrows.splice(index, 1);
+      }
+    }
+    if (addedArrow !== "") {
+      arrows.push(addedArrow);
+    }
+
+    dot.push(arrows.join("\n"));
+
+    dot.push("\t}\n");
 
     /* Transition follows modal top down movement */
     import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
@@ -543,12 +551,45 @@ function getAgentsAsDot() {
         var t = d3.transition().duration(750).ease(d3.easeLinear);
         var graph = dot.join("");
         d3G.graphviz("#agentsgraph").transition(t).renderDot(graph);
-        console.log(graph);
       });
     });
 
   });
 }
+
+
+/**
+ * WEBSOCKTES FUNCTIONS
+ */
+var myWebSocket;
+
+function connectToWS() {
+  var endpoint = "ws://" + window.location.hostname + ":8026/ws/messages";
+  if (myWebSocket !== undefined) {
+    myWebSocket.close();
+  }
+  myWebSocket = new WebSocket(endpoint);
+  myWebSocket.onmessage = function(event) {
+    if (event.data.startsWith(".send")) {
+      let data = event.data;
+      let args = data.substring(5, data.length).replace("<","").replace(">","").split(",");
+      let color = "black";
+      if (args[1] == "tell") color = "darkgreen";
+      if (args[1] == "achieve") color = "brown";
+      let buffer = args[1] + "->" + args[3] + "[label =\"" + args[4] + "\" color=" + color + "]";
+
+      /* Add an arrow */
+      getAgentsAsDot(buffer,"");
+
+      /* Remove the arrow after delay */
+      setTimeout(function() {
+        getAgentsAsDot("",buffer);
+      }, 3000);
+    }
+  };
+}
+
+connectToWS();
 
 /**
  * EXPORTS

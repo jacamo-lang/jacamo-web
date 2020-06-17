@@ -14,11 +14,9 @@ function connectToWS() {
   myWebSocket = new WebSocket(endpoint);
   myWebSocket.onmessage = function(event) {
     if (event.data.startsWith(".send")) {
-      let data = event.data;
-      let args = data.substring(5, data.length).replace("<","").replace(">","").split(",");
-      toastr.info(args[1] + " " + args[2] + " " + args[3] + " " + args[4], { timeOut: 1000 });
-      localStorage.setItem("agentArrow", args[2] + "->" + args[3] + "[label =\"" + args[4] + "\"]");
+      /*do something*/
     }
+    console.log("received: " + event.data);
   };
   myWebSocket.onopen = function(evt) {
     console.log("onopen.");
