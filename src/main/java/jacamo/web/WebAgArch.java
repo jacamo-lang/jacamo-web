@@ -18,6 +18,7 @@ import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Message;
 import jason.infra.centralised.BaseCentralisedMAS;
+import jason.runtime.RuntimeServicesFactory;
 
 public class WebAgArch extends RestAgArch {
 
@@ -26,7 +27,7 @@ public class WebAgArch extends RestAgArch {
     CuratorFramework      zkClient = null;
     Client                restClient = null;
     
-    private Queue<Message>     mbox    = new ConcurrentLinkedQueue<>();
+    private Queue<Message>     mboxweb    = new ConcurrentLinkedQueue<>();
 
     @SuppressWarnings("unchecked")
     @Override
@@ -91,17 +92,28 @@ public class WebAgArch extends RestAgArch {
     }
     
     public void receiveMsg(Message m) {
-        mbox.offer(m);
+        mboxweb.offer(m);
     }
     
     @Override
     public void checkMail() {
         super.checkMail();
 
-        Message im = mbox.poll();
+        Message im = mboxweb.poll();
         while (im != null) {
             JCMWeb.sendMessage(".send" + im);
-            im = mbox.poll();
+            im = mboxweb.poll();
+        }
+    }
+    
+    @Override
+    public void broadcast(jason.asSemantics.Message m) throws Exception {
+        for (String agName: RuntimeServicesFactory.get().getAgentsNames()) {
+            if (!agName.equals(this.getAgName())) {
+                jason.asSemantics.Message newm = m.clone();
+                newm.setReceiver(agName);
+                getFirstAgArch().sendMsg(newm);
+            }
         }
     }
 }
