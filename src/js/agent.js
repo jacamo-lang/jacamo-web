@@ -516,53 +516,72 @@ function getInspectionDetails() {
 
 /* WHOLE AGENTS AS DOT */
 let arrows = [];
-function getAgentsAsDot(addedArrow, removedArrow) {
+agentGraphUpdateIsBusy= false;
+agentGraphPreventedFlood = false;
+function getAgentsAsDot(addedMsg) {
   let dot = [];
 
-  h.get('./overview').then(function(mas) {
-    let overview = JSON.parse(mas);
+  if (addedMsg !== undefined) {
+    let color = "black";
+    if (addedMsg[1] == "tell") color = "darkgreen";
+    if (addedMsg[1] == "achieve") color = "brown";
+    let msg = addedMsg[0] + "->" + addedMsg[2] + "[label =\"" + addedMsg[3] + "\" color=" + color + "]\n";
+    arrows.push(msg);
 
-    dot.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\" ranksep=0.25 ]\n");
-
-    let ags = [];
-    overview.agents.forEach(function(x) {
-      ags.push(x.agent);
-      var s1 = (x.agent.length <= p.MAX_LENGTH) ? x.agent : x.agent.substring(0, p.MAX_LENGTH) + " ...";
-      dot.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
-    });
-
-    // Create invisible arrows for better presentation
-    for (i = 0; i < overview.agents.length; i++) {
-      if (i+1 < overview.agents.length)
-        dot.push("\"" + overview.agents[i].agent + "\"->\"" + overview.agents[i+1].agent + "\" [style=invis]");
-      else
-        dot.push("\"" + overview.agents[i].agent + "\"->\"" + overview.agents[0].agent + "\" [style=invis]");
-    }
-
-    if (removedArrow !== "") {
-      const index = arrows.indexOf(removedArrow);
+    /* Remove the arrow after delay */
+    setTimeout(function() {
+      const index = arrows.indexOf(msg);
       if (index > -1) {
         arrows.splice(index, 1);
       }
-    }
-    if (addedArrow !== "") {
-      arrows.push(addedArrow);
-    }
 
-    dot.push(arrows.join("\n"));
+      getAgentsAsDot(undefined);
+    }, 3000);
+  }
 
-    dot.push("\t}\n");
+  if (!agentGraphUpdateIsBusy) {
+    agentGraphPreventedFlood = false;
+    agentGraphUpdateIsBusy= true;
 
-    /* Transition follows modal top down movement */
-    import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
-      import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
-        var t = d3.transition().duration(750).ease(d3.easeLinear);
-        var graph = dot.join("");
-        d3G.graphviz("#agentsgraph").transition(t).renderDot(graph);
+    h.get('./overview').then(function(mas) {
+      let overview = JSON.parse(mas);
+
+      dot.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\" ranksep=0.25 ]\n");
+
+      let ags = [];
+      overview.agents.forEach(function(x) {
+        ags.push(x.agent);
+        var s1 = (x.agent.length <= p.MAX_LENGTH) ? x.agent : x.agent.substring(0, p.MAX_LENGTH) + " ...";
+        dot.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
+      });
+
+      // Create invisible arrows for better presentation
+      for (i = 0; i < overview.agents.length; i++) {
+        if (i+1 < overview.agents.length)
+          dot.push("\"" + overview.agents[i].agent + "\"->\"" + overview.agents[i+1].agent + "\" [style=invis]");
+        else
+          dot.push("\"" + overview.agents[i].agent + "\"->\"" + overview.agents[0].agent + "\" [style=invis]");
+      }
+
+      dot.push(arrows.join("\n"));
+
+      dot.push("\t}\n");
+
+      /* Transition follows modal top down movement */
+      import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
+        import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
+          var t = d3.transition().duration(500).ease(d3.easeLinear);
+          var graph = dot.join("");
+          d3G.graphviz("#agentsgraph").transition(t).renderDot(graph);
+        });
+      }).then(() => {
+        agentGraphUpdateIsBusy= false;
+        if (agentGraphPreventedFlood) getAgentsAsDot(undefined);
       });
     });
-
-  });
+  } else {
+    agentGraphPreventedFlood = true;
+  }
 }
 
 
@@ -581,18 +600,10 @@ function connectToWS() {
     if (event.data.startsWith(".send")) {
       let data = event.data;
       let args = data.substring(5, data.length).replace("<","").replace(">","").split(",");
-      let color = "black";
-      if (args[2] == "tell") color = "darkgreen";
-      if (args[2] == "achieve") color = "brown";
-      let buffer = args[1] + "->" + args[3] + "[label =\"" + args[4] + "\" color=" + color + "]";
+      message = [args[1], args[2], args[3], args[4]]
 
       /* Add an arrow */
-      getAgentsAsDot(buffer,"");
-
-      /* Remove the arrow after delay */
-      setTimeout(function() {
-        getAgentsAsDot("",buffer);
-      }, 3000);
+      getAgentsAsDot(message);
     }
   };
 }
