@@ -525,6 +525,8 @@ function getAgentsNonVolatileGraph() {
 let arrows = [];
 let agentDataCache = undefined;
 let agentGraphCache = undefined;
+let preventingFloodOfCalls = false;
+let functionCallMissed = false;
 
 function addArrowToGraph(addedMsg) {
   if (addedMsg !== undefined) {
@@ -543,9 +545,17 @@ function addArrowToGraph(addedMsg) {
       addArrowToGraph(undefined);
     }, 3000);
   }
-  setTimeout(function() {
+  if (!preventingFloodOfCalls) {
+    preventingFloodOfCalls = true;
     getAgentsAsDot(undefined);
-  }, 100);
+    setTimeout(function() {
+      preventingFloodOfCalls = false;
+      if (functionCallMissed)
+        getAgentsAsDot(undefined);
+    }, 10);
+  } else {
+    functionCallMissed = true;
+  }
 }
 
 function getAgentsAsDot(nonVolatileMAS) {
