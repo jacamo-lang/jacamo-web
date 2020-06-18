@@ -526,7 +526,6 @@ let arrows = [];
 let agentDataCache = undefined;
 let agentGraphCache = undefined;
 let preventingFloodOfCalls = false;
-let functionCallMissed = false;
 
 function addArrowToGraph(addedMsg) {
   if (addedMsg !== undefined) {
@@ -547,14 +546,10 @@ function addArrowToGraph(addedMsg) {
   }
   if (!preventingFloodOfCalls) {
     preventingFloodOfCalls = true;
-    getAgentsAsDot(undefined);
     setTimeout(function() {
+      getAgentsAsDot(undefined);
       preventingFloodOfCalls = false;
-      if (functionCallMissed)
-        getAgentsAsDot(undefined);
     }, 10);
-  } else {
-    functionCallMissed = true;
   }
 }
 
@@ -593,7 +588,6 @@ function getAgentsAsDot(nonVolatileMAS) {
       import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
         var t = d3.transition().duration(500).ease(d3.easeLinear);
         d3G.graphviz("#agentsgraph").transition(t).renderDot(agentGraphCache);
-        console.log("updated");
       });
     });
   }
