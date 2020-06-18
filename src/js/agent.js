@@ -518,6 +518,7 @@ function getInspectionDetails() {
 let arrows = [];
 agentGraphUpdateIsBusy= false;
 agentGraphPreventedFlood = false;
+agentGraphCache = [];
 function getAgentsAsDot(addedMsg) {
   let dot = [];
 
@@ -563,15 +564,18 @@ function getAgentsAsDot(addedMsg) {
           dot.push("\"" + overview.agents[i].agent + "\"->\"" + overview.agents[0].agent + "\" [style=invis]");
       }
 
-      dot.push(arrows.join("\n"));
-
+      /* graph header */
+      dot = dot.join("");
+      /* middle of the graph */
+      arrows.join("\n");
+      /* graph footer */
       dot.push("\t}\n");
 
       /* Transition follows modal top down movement */
       import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
         import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
           var t = d3.transition().duration(500).ease(d3.easeLinear);
-          var graph = dot.join("");
+          var graph = dot[0].concat(arrows.concat(dot[1]));
           d3G.graphviz("#agentsgraph").transition(t).renderDot(graph);
         });
       }).then(() => {
