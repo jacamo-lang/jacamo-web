@@ -486,7 +486,7 @@ function getInspectionDetails() {
   beliefs = document.createElement("details");
   beliefs.innerHTML = "<summary>Beliefs</summary>";
   inspection.appendChild(beliefs);
-  h.get("./agents/" + selectedAgent).then(function(resp){
+  h.get("./agents/" + selectedAgent).then(function(resp) {
     details = JSON.parse(resp);
     details.beliefs.forEach(function(item) {
       const text = document.createElement('i');
@@ -496,17 +496,17 @@ function getInspectionDetails() {
   });
 
   footMenu = document.getElementById('agentfootmenu');
-  h.get("./agents/" + selectedAgent + '/aslfiles').then(function(resp){
+  h.get("./agents/" + selectedAgent + '/aslfiles').then(function(resp) {
     alsfiles = JSON.parse(resp);
     alsfiles.forEach(function(item) {
       editAsl = document.createElement("a");
       if (item.lastIndexOf("/") > 0) {
         var basename = item.substr(item.lastIndexOf("/") + 1, item.length - 1);
         editAsl.innerHTML = basename;
-        editAsl.setAttribute('href','./agent_editor.html?aslfile=' + basename + '&agent=' + selectedAgent);
+        editAsl.setAttribute('href', './agent_editor.html?aslfile=' + basename + '&agent=' + selectedAgent);
       } else {
         editAsl.innerHTML = item;
-        editAsl.setAttribute('href','./agent_editor.html?aslfile=' + item + '&agent=' + selectedAgent);
+        editAsl.setAttribute('href', './agent_editor.html?aslfile=' + item + '&agent=' + selectedAgent);
       }
       footMenu.appendChild(editAsl);
       footMenu.innerHTML += "&#160;&#160;&#160";
@@ -515,13 +515,18 @@ function getInspectionDetails() {
 }
 
 /* WHOLE AGENTS AS DOT */
-let arrows = [];
-agentGraphUpdateIsBusy= false;
-agentGraphPreventedFlood = false;
-agentGraphCache = [];
-function getAgentsAsDot(addedMsg) {
-  let dot = [];
 
+function getAgentsNonVolatileGraph() {
+  h.get('./overview').then(function(mas) {
+    getAgentsAsDot(JSON.parse(mas));
+  });
+}
+
+let arrows = [];
+let agentDataCache = undefined;
+let agentGraphCache = undefined;
+
+function addArrowToGraph(addedMsg) {
   if (addedMsg !== undefined) {
     let color = "black";
     if (addedMsg[1] == "tell") color = "darkgreen";
@@ -535,60 +540,54 @@ function getAgentsAsDot(addedMsg) {
       if (index > -1) {
         arrows.splice(index, 1);
       }
-
-      getAgentsAsDot(undefined);
+      addArrowToGraph(undefined);
     }, 3000);
   }
-
-  if (!agentGraphUpdateIsBusy) {
-    agentGraphPreventedFlood = false;
-    agentGraphUpdateIsBusy= true;
-
-    h.get('./overview').then(function(mas) {
-      let overview = JSON.parse(mas);
-
-      dot.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\" ranksep=0.25 ]\n");
-
-      let ags = [];
-      overview.agents.forEach(function(x) {
-        ags.push(x.agent);
-        var s1 = (x.agent.length <= p.MAX_LENGTH) ? x.agent : x.agent.substring(0, p.MAX_LENGTH) + " ...";
-        dot.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
-      });
-
-      // Create invisible arrows for better presentation
-      for (i = 0; i < overview.agents.length; i++) {
-        if (i+1 < overview.agents.length)
-          dot.push("\"" + overview.agents[i].agent + "\"->\"" + overview.agents[i+1].agent + "\" [style=invis]");
-        else
-          dot.push("\"" + overview.agents[i].agent + "\"->\"" + overview.agents[0].agent + "\" [style=invis]");
-      }
-
-      /* graph header */
-      dot = dot.join("");
-      /* middle of the graph */
-      arrows.join("\n");
-      /* graph footer */
-      dot.push("\t}\n");
-
-      /* Transition follows modal top down movement */
-      import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
-        import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
-          var t = d3.transition().duration(500).ease(d3.easeLinear);
-          var graph = dot[0].concat(arrows.concat(dot[1]));
-          d3G.graphviz("#agentsgraph").transition(t).renderDot(graph);
-        });
-      }).then(() => {
-        agentGraphUpdateIsBusy= false;
-        if (agentGraphPreventedFlood) getAgentsAsDot(undefined);
-      });
-    });
-  } else {
-    agentGraphPreventedFlood = true;
-  }
+  setTimeout(function() {
+    getAgentsAsDot(undefined);
+  }, 100);
 }
 
+function getAgentsAsDot(nonVolatileMAS) {
+  if (nonVolatileMAS != undefined)
+    agentDataCache = nonVolatileMAS;
 
+  /* graph header */
+  let header = [];
+  header.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\" ranksep=0.25 ]\n");
+
+  let ags = [];
+  agentDataCache.agents.forEach(function(x) {
+    ags.push(x.agent);
+    var s1 = (x.agent.length <= p.MAX_LENGTH) ? x.agent : x.agent.substring(0, p.MAX_LENGTH) + " ...";
+    header.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
+  });
+
+  // Create invisible arrows for better presentation
+  for (i = 0; i < agentDataCache.agents.length; i++) {
+    if (i + 1 < agentDataCache.agents.length)
+      header.push("\"" + agentDataCache.agents[i].agent + "\"->\"" + agentDataCache.agents[i + 1].agent + "\" [style=invis]");
+    else
+      header.push("\"" + agentDataCache.agents[i].agent + "\"->\"" + agentDataCache.agents[0].agent + "\" [style=invis]");
+  }
+
+  /* graph footer */
+  let footer = [];
+  footer.push("\t}\n");
+
+  let graph = header.join("").concat(arrows.join("\n").concat(footer.join("")));
+  if (graph !== agentGraphCache) {
+    agentGraphCache = graph;
+    /* Transition follows modal top down movement */
+    import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
+      import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
+        var t = d3.transition().duration(500).ease(d3.easeLinear);
+        d3G.graphviz("#agentsgraph").transition(t).renderDot(agentGraphCache);
+        console.log("updated");
+      });
+    });
+  }
+}
 /**
  * WEBSOCKTES FUNCTIONS
  */
@@ -607,7 +606,7 @@ function connectToWS() {
       message = [args[1], args[2], args[3], args[4]]
 
       /* Add an arrow */
-      getAgentsAsDot(message);
+      addArrowToGraph(message);
     }
   };
 }
@@ -629,7 +628,7 @@ window.killAg = killAg;
 window.runCMD = runCMD;
 window.newAg = newAg;
 window.setGraphWindow = setGraphWindow;
-window.getAgentsAsDot = getAgentsAsDot;
+window.getAgentsNonVolatileGraph = getAgentsNonVolatileGraph;
 
 /**
  * PREPARING FOR TESTS
