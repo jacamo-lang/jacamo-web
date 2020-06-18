@@ -5,12 +5,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.websocket.OnClose;
@@ -21,24 +16,13 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.curator.x.async.WatchMode;
-import org.apache.zookeeper.CreateMode;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.tyrus.server.Server;
 
 import jacamo.rest.JCMRest;
 import jacamo.rest.JCMRuntimeServices;
-import jacamo.rest.config.RestAgArch;
 import jacamo.web.config.WebAppConfig;
-import jason.asSemantics.Unifier;
-import jason.asSyntax.ASSyntax;
-import jason.asSyntax.Atom;
-import jason.asSyntax.Literal;
-import jason.asSyntax.StringTermImpl;
-import jason.asSyntax.Term;
-import jason.asSyntax.UnnamedVar;
-import jason.runtime.DelegatedRuntimeServices;
 import jason.runtime.RuntimeServicesFactory;
 
 @ServerEndpoint(value = "/messages")
@@ -180,24 +164,24 @@ public class JCMWeb extends JCMRest {
     
     @OnClose
     public void onClose(Session session) {
-        System.out.println("[Session {" + session.getId() + "}] Session has been closed.");
+        System.out.println("{" + session.getId() + "} Session has been closed.");
         JCMWeb.sessions.remove(session);
     }
 
     @OnError
     public void onError(Session session, Throwable t) {
-        System.out.println("[Session {" + session.getId() + "}] An error has been detected: {" + t.getMessage() + "}.");
+        System.out.println("{" + session.getId() + "} An error has been detected: " + t.getMessage());
     }
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        System.out.println("[Session {" + session.getId() + "}] message received: {" + message + "}");
+        System.out.println("{" + session.getId() + "} message received: {" + message + "}");
     }
 
     @OnOpen
     public void onOpen(Session session) {
         JCMWeb.sessions.add(session);
-        System.out.println("[Session {" + session.getId() + "}] Session has been opened.");
+        System.out.println("{" + session.getId() + "} Session opened.");
         try {
             session.getBasicRemote().sendText("Connection Established");
         } catch (IOException ex) {
@@ -209,11 +193,11 @@ public class JCMWeb extends JCMRest {
         try {
             if (JCMWeb.sessions.size() > 0) {
                 for (Session session: JCMWeb.sessions) {
-                    System.out.println("[Session {" + session.getId() + "} Sending message: "+message);
+                    System.out.println("{" + session.getId() + "} Sending message: " + message);
                     session.getBasicRemote().sendText(message);
                 }
             } else {
-                System.out.println("Could not send this message, session not found!");
+                System.out.println("There is no active websocket session to send the message: " + message);
             }
         } catch (IOException e) {
             e.printStackTrace();

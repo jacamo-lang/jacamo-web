@@ -398,8 +398,6 @@ public class WebImpl extends RestImpl {
         }
         s.add(username);
 
-        JCMWeb.sendMessage(username+" locked "+resource);
-
         return Response.ok(gson.toJson(lockedFiles)).build();
     }
 
@@ -427,8 +425,6 @@ public class WebImpl extends RestImpl {
             s.remove(username);
             if (s.size() == 0) lockedFiles.remove(resource);
         }
-
-        JCMWeb.sendMessage(username+" unlocked "+resource);
 
         return Response.ok(gson.toJson(lockedFiles)).build();
     }
