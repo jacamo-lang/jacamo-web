@@ -3,7 +3,6 @@
 
 <head>
   <title>jacamo-web - environment</title>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta charset="UTF-8" http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
 </head>
@@ -41,14 +40,12 @@
       </nav>
 
       <main class="col-xs-12 col-sm-12 col-md-10 col-lg-10" id="doc-content">
-        <div id="getting-started" class="card fluid">
-          <h4 class="section double-padded">Environment</h4>
+
+        <div class="card fluid" style="height: calc(100% - 20px)">
           <div class="section">
-            <p>
-              <a href="http://cartago.sourceforge.net" target="_blank">CArtAgO</a> is an <a href="https://github.com/cartago-lang/cartago" target="_blank">open-source</a> Java-based Framework for Programming Environments in Agent-oriented
-              Applications. Notice that the menu does not show empty workspaces.
-            </p>
-            <br />
+            <center>
+              <div id="workspacesgraph" style="height: 100%;"></div>
+            </center>
           </div>
         </div>
       </main>
@@ -57,6 +54,7 @@
   <script src="/js/jacamoweb.js"></script>
   <script>
     getWorkspaces();
+    getWorkspacesNonVolatileGraph();
   </script>
 </body>
 

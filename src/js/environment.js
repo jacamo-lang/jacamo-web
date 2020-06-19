@@ -410,6 +410,84 @@ function setWorkspaceModalWindow() {
   };
 }
 
+/* WHOLE AGENTS AS DOT */
+
+function getWorkspacesNonVolatileGraph() {
+  h.get('./overview').then(function(mas) {
+    getWorkspacesAsDot(JSON.parse(mas));
+  });
+}
+
+let wksDataCache = undefined;
+let wksGraphCache = undefined;
+
+function getWorkspacesAsDot(nonVolatileMAS) {
+  if (nonVolatileMAS != undefined)
+    wksDataCache = nonVolatileMAS;
+
+  /* graph header */
+  let header = [];
+  header.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\" ranksep=0.25 ]\n");
+
+  /* Environment dimension */
+  wksDataCache.agents.forEach(function(ag) {
+    if (Object.keys(ag.workspaces).length > 0) {
+      Object.keys(ag.workspaces).forEach(function(w) {
+        let envlinks = [];
+        let wks = ag.workspaces[w];
+        let wksName = wks.workspace;
+        header.push("\t\tsubgraph cluster_" + wksName + " {\n");
+        header.push("\t\t\tlabel=\"" + wksName + "\" labeljust=\"r\" style=dashed pencolor=gray40 fontcolor=gray40\n");
+        Object.keys(wks.artifacts).forEach(function(a) {
+          if (p.HIDDEN_ARTS.indexOf(wks.artifacts[a].type) < 0) {
+            s1 = (wks.artifacts[a].artifact.length <= p.MAX_LENGTH) ? wks.artifacts[a].artifact :
+              wks.artifacts[a].artifact.substring(0, p.MAX_LENGTH) + " ...";
+            header.push("\t\t\t\"" + wksName + "_" + wks.artifacts[a].artifact + "\" [label = \"" + s1 + ":\\n");
+            s1 = (wks.artifacts[a].type.length <= p.MAX_LENGTH) ? wks.artifacts[a].type :
+              wks.artifacts[a].type.substring(0, p.MAX_LENGTH) + " ...";
+            header.push(s1 + "\"shape=record style=filled fillcolor=white];\n");
+            envlinks.push("\t\t\"" + ag.agent + "\"->\"" + wksName + "_" + wks.artifacts[a].artifact + "\" [arrowhead=odot]\n");
+          }
+        });
+        header.push("\t\t}\n");
+        header.push(envlinks.join(" "));
+      });
+    }
+  });
+
+  /* graph footer */
+  let footer = [];
+  footer.push("}\n");
+
+  let graph = header.join("").concat(footer.join(""));
+  if (graph !== wksGraphCache) {
+    wksGraphCache = graph;
+    /* Transition follows modal top down movement */
+    import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
+      import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
+        var t = d3.transition().duration(500).ease(d3.easeLinear);
+        d3G.graphviz("#workspacesgraph").transition(t).renderDot(wksGraphCache);
+      });
+    });
+  }
+}
+
+/**
+ * WEBSOCKTES FUNCTIONS
+ */
+var myWebSocket;
+
+function connectToWS() {
+  var endpoint = "ws://" + window.location.hostname + ":8026/ws/messages";
+  if (myWebSocket !== undefined) {
+    myWebSocket.close();
+  }
+  myWebSocket = new WebSocket(endpoint);
+  myWebSocket.onmessage = function(event) { };
+}
+
+connectToWS();
+
 /**
  * EXPORTS
  */
@@ -422,6 +500,7 @@ window.setArtifactModalWindow = setArtifactModalWindow;
 window.newArt = newArt;
 window.getWorkspaceDetails = getWorkspaceDetails;
 window.setWorkspaceModalWindow = setWorkspaceModalWindow;
+window.getWorkspacesNonVolatileGraph = getWorkspacesNonVolatileGraph;
 
 /**
  * END OF FILE
