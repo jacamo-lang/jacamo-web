@@ -25,10 +25,8 @@ import jacamo.rest.JCMRuntimeServices;
 import jacamo.web.config.WebAppConfig;
 import jason.runtime.RuntimeServicesFactory;
 
-@ServerEndpoint(value = "/messages")
 public class JCMWeb extends JCMRest {
 
-    private final static Set<Session> sessions = new HashSet<>();
     @SuppressWarnings("unused")
     private static Server ws;
     
@@ -126,7 +124,7 @@ public class JCMWeb extends JCMRest {
     
     public Server startWebsocketServer(int port) {
         try {
-            Server ws = new Server(InetAddress.getLocalHost().getHostAddress(), port, "/ws", JCMWeb.class);
+            Server ws = new Server(InetAddress.getLocalHost().getHostAddress(), port, "/ws", Websockets.class);
             ws.start();            
 
             URI wsURI = UriBuilder.fromUri("http://"+InetAddress.getLocalHost().getHostAddress()+"/ws").port(port).build();
@@ -162,45 +160,4 @@ public class JCMWeb extends JCMRest {
         }
     }
     
-    @OnClose
-    public void onClose(Session session) {
-        System.out.println("{" + session.getId() + "} Session has been closed.");
-        JCMWeb.sessions.remove(session);
-    }
-
-    @OnError
-    public void onError(Session session, Throwable t) {
-        System.out.println("{" + session.getId() + "} An error has been detected: " + t.getMessage());
-    }
-
-    @OnMessage
-    public void onMessage(String message, Session session) {
-        System.out.println("{" + session.getId() + "} message received: {" + message + "}");
-    }
-
-    @OnOpen
-    public void onOpen(Session session) {
-        JCMWeb.sessions.add(session);
-        System.out.println("{" + session.getId() + "} Session opened.");
-        try {
-            session.getBasicRemote().sendText("Connection Established");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public static void sendMessage(String message) {
-        try {
-            if (JCMWeb.sessions.size() > 0) {
-                for (Session session: JCMWeb.sessions) {
-                    System.out.println("{" + session.getId() + "} Sending message: " + message);
-                    session.getBasicRemote().sendText(message);
-                }
-            } else {
-                System.out.println("There is no active websocket session to send the message: " + message);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }

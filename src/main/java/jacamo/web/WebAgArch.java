@@ -101,7 +101,7 @@ public class WebAgArch extends RestAgArch {
 
         Message im = mboxweb.poll();
         while (im != null) {
-            JCMWeb.sendMessage(".send" + im);
+            Websockets.broadcast(".send" + im);
             im = mboxweb.poll();
         }
     }
