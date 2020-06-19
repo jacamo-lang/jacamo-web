@@ -561,9 +561,7 @@ function getAgentsAsDot(nonVolatileMAS) {
   let header = [];
   header.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\" ranksep=0.25 ]\n");
 
-  let ags = [];
   agentDataCache.agents.forEach(function(x) {
-    ags.push(x.agent);
     var s1 = (x.agent.length <= p.MAX_LENGTH) ? x.agent : x.agent.substring(0, p.MAX_LENGTH) + " ...";
     header.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
   });
@@ -592,6 +590,7 @@ function getAgentsAsDot(nonVolatileMAS) {
     });
   }
 }
+
 /**
  * WEBSOCKTES FUNCTIONS
  */
