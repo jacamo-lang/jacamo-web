@@ -424,23 +424,6 @@ function getOrganisationsAsDot(nonVolatileMAS) {
 }
 
 /**
- * WEBSOCKTES FUNCTIONS
- */
-var myWebSocket;
-
-function connectToWS() {
-  var endpoint = "ws://" + window.location.hostname + ":8026/ws/messages";
-  if (myWebSocket !== undefined) {
-    myWebSocket.close();
-  }
-  myWebSocket = new WebSocket(endpoint);
-  myWebSocket.onmessage = function(event) {};
-}
-
-connectToWS();
-
-
-/**
  * EXPORTS
  */
 

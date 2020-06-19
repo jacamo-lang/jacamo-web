@@ -17,16 +17,16 @@ function connectToWS() {
       /*do something*/
     }
     console.log("received: " + event.data);
-  };
+  }
   myWebSocket.onopen = function(evt) {
     console.log("onopen.");
-  };
+  }
   myWebSocket.onclose = function(evt) {
     console.log("onclose.");
-  };
+  }
   myWebSocket.onerror = function(evt) {
     console.log("Error!");
-  };
+  }
 }
 
 function sendMsg() {

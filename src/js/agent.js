@@ -611,7 +611,10 @@ function connectToWS() {
       /* Add an arrow */
       addArrowToGraph(message);
     }
-  };
+  }
+  myWebSocket.onerror = function(evt) {
+    console.log("Error!");
+  }
 }
 
 connectToWS();
