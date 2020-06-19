@@ -355,6 +355,79 @@ function getOrgNormGraph() {
   });
 }
 
+/* WHOLE ORGANISATION AS DOT */
+
+function getOrganisationsNonVolatileGraph() {
+  h.get('./overview').then(function(mas) {
+    getOrganisationsAsDot(JSON.parse(mas));
+  });
+}
+
+let orgDataCache = undefined;
+let orgGraphCache = undefined;
+
+function getOrganisationsAsDot(nonVolatileMAS) {
+  if (nonVolatileMAS != undefined)
+    orgDataCache = nonVolatileMAS;
+
+  /* graph header */
+  let header = [];
+  header.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\" ranksep=0.25 ]\n");
+
+  let orglinks = [];
+  orgDataCache.agents.forEach(function(a) {
+    a.roles.forEach(function(r) {
+      header.push("\t\t\"" + r.group + "\" [ " + "label = \"" + r.group + "\" shape=tab style=filled pencolor=black fillcolor=lightgrey];\n");
+      orglinks.push("\t\"" + r.group + "\"->\"" + a.agent + "\" [arrowtail=normal dir=back label=\"" + r.role + "\"]\n");
+    });
+    a.missions.forEach(function(m) {
+      header.push("\t\t\"" + m.scheme + "\" [ " + "label = \"" + m.scheme + "\" shape=hexagon style=filled pencolor=black fillcolor=linen];\n");
+      orglinks.push("\t\"" + m.scheme + "\"->\"" + a.agent + "\" [arrowtail=normal dir=back label=\"" + m.mission + "\"]\n");
+      m.responsibles.forEach(function(r) {
+        let resp = "\t\"" + r + "\"->\"" + m.scheme +
+          "\" [arrowtail=normal arrowhead=open label=\"responsible\"]\n";
+        if (!orglinks.includes(resp)) { /*avoid duplicates*/
+          orglinks.push(resp);
+        }
+      });
+    });
+  });
+  header.push(orglinks.join(" "));
+
+  /* graph footer */
+  let footer = [];
+  footer.push("}\n");
+
+  let graph = header.join("").concat(footer.join(""));
+  if (graph !== orgGraphCache) {
+    orgGraphCache = graph;
+    /* Transition follows modal top down movement */
+    import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
+      import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
+        var t = d3.transition().duration(500).ease(d3.easeLinear);
+        d3G.graphviz("#organisationsgraph").transition(t).renderDot(orgGraphCache);
+      });
+    });
+  }
+}
+
+/**
+ * WEBSOCKTES FUNCTIONS
+ */
+var myWebSocket;
+
+function connectToWS() {
+  var endpoint = "ws://" + window.location.hostname + ":8026/ws/messages";
+  if (myWebSocket !== undefined) {
+    myWebSocket.close();
+  }
+  myWebSocket = new WebSocket(endpoint);
+  myWebSocket.onmessage = function(event) { };
+}
+
+connectToWS();
+
+
 /**
  * EXPORTS
  */
@@ -362,6 +435,7 @@ function getOrgNormGraph() {
 window.getOE = getOE;
 window.getOrganisationDetails = getOrganisationDetails;
 window.setOrganisationModalWindow = setOrganisationModalWindow;
+window.getOrganisationsNonVolatileGraph = getOrganisationsNonVolatileGraph;
 window.newRole = newRole;
 
 /**

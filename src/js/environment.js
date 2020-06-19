@@ -410,7 +410,7 @@ function setWorkspaceModalWindow() {
   };
 }
 
-/* WHOLE AGENTS AS DOT */
+/* WHOLE WORKSPACES AS DOT */
 
 function getWorkspacesNonVolatileGraph() {
   h.get('./overview').then(function(mas) {
