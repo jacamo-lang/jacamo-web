@@ -259,24 +259,6 @@ function setAutoUpdateLog() {
 
 /* GET AGENT'S GRAPH */
 
-/* modal window */
-function setGraphWindow() {
-  let modal = document.getElementById('modalinspection');
-  let btnModal = document.getElementById("btninspection");
-  let spanClose = document.getElementsByClassName("close")[0];
-  modal.style.display = "block";
-  getGraph();
-
-  spanClose.onclick = function() {
-    modal.style.display = "none";
-  };
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  };
-}
-
 function getGraph() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
@@ -374,7 +356,7 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
   /* Transition follows modal top down movement */
   import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
     import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
-      var t = d3.transition().duration(750).ease(d3.easeLinear);
+      var t = d3.transition().duration(500).ease(d3.easeLinear);
       var graph = dot.join("");
       d3G.graphviz("#agentdiagram").transition(t).renderDot(graph);
       console.log(graph);
@@ -633,8 +615,8 @@ window.showBuffer = showBuffer;
 window.killAg = killAg;
 window.runCMD = runCMD;
 window.newAg = newAg;
-window.setGraphWindow = setGraphWindow;
 window.getAgentsNonVolatileGraph = getAgentsNonVolatileGraph;
+window.getGraph = getGraph;
 
 /**
  * PREPARING FOR TESTS
