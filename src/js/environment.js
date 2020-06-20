@@ -77,42 +77,6 @@ function newArt() {
  * ARTIFACT FUNCTIONS
  */
 
-/* RETRIEVE DATA FROM DIRECTORY FACILITATOR */
-function getArtifactDetails() {
-  const params = new URL(location.href).searchParams;
-  const selectedWorkspace = params.get('workspace');
-  const selectedArtifact = params.get('artifact');
-
-  h.get("./workspaces/" + selectedWorkspace + "/artifacts/" + selectedArtifact).then(function(artstr) {
-    art = JSON.parse(artstr);
-    if (Object.keys(art).length > 0) {
-      var table = h.createTable("artsection");
-      Object.keys(art).forEach(function(p) {
-        if (typeof(art[p]) === "string") {
-          h.addTwoCellsInARow(table, p, art[p]);
-        } else {
-          let content = "";
-          Object.keys(art[p]).forEach(function(a) {
-            if (p === "properties") {
-              Object.keys(art[p][a]).forEach(function(b) {
-                content += b + "(" + art[p][a][b] + ")<br />";
-              });
-            } else {
-              content += art[p][a] + "<br />"
-            }
-          });
-          h.addTwoCellsInARow(table, p, content);
-        }
-      });
-    } else {
-      p = document.createElement('p');
-      p.innerText = "nothing to show";
-      let s = document.getElementById("artsection");
-      s.appendChild(p);
-    }
-  });
-}
-
 /* Setup edit artifact button */
 function setEditButton() {
   document.getElementById('btneditartifact').setAttribute(
@@ -194,25 +158,6 @@ function getArtGraph() {
     });
 
   });
-}
-
-/* modal window */
-function setArtifactModalWindow() {
-  var modal = document.getElementById('modalartgraph');
-  var btnModal = document.getElementById("btnartdiagram");
-  var span = document.getElementsByClassName("close")[0];
-  btnModal.onclick = function() {
-    getArtGraph();
-    modal.style.display = "block";
-  };
-  span.onclick = function() {
-    modal.style.display = "none";
-  };
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  };
 }
 
 /**
@@ -319,7 +264,7 @@ function getWksGraph() {
         var s1;
         s1 = (wks.artifacts[a].artifact.length <= p.MAX_LENGTH) ? wks.artifacts[a].artifact :
           wks.artifacts[a].artifact.substring(0, p.MAX_LENGTH) + " ...";
-        dot.push("\t\"" + wks.artifacts[a].artifact + "\" [ " + "\n\t\tlabel = \"" + s1 + ":\n");
+        dot.push("\t\"" + wks.artifacts[a].artifact + "\" [ " + "\n\t\tlabel = \"" + s1 + ":\\n");
         s1 = (wks.artifacts[a].type.length <= p.MAX_LENGTH) ? wks.artifacts[a].type :
           wks.artifacts[a].type.substring(0, p.MAX_LENGTH) + " ...";
         dot.push(s1 + "\"\n");
@@ -435,9 +380,8 @@ function getWorkspacesAsDot(nonVolatileMAS) {
 
 window.getCurrentJavaContent = getCurrentJavaContent;
 window.getWorkspaces = getWorkspaces;
-window.getArtifactDetails = getArtifactDetails;
 window.setEditButton = setEditButton;
-window.setArtifactModalWindow = setArtifactModalWindow;
+window.getArtGraph = getArtGraph;
 window.newArt = newArt;
 window.getWksGraph = getWksGraph;
 window.getWorkspacesNonVolatileGraph = getWorkspacesNonVolatileGraph;
