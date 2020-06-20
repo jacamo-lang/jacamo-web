@@ -67,13 +67,16 @@ function newRole(org, gr) {
   window.location.assign('/oe.html');
 }
 
-function getOrganisationDetails() {
+function getGroupsDetails() {
   const selectedItem = new URL(location.href).searchParams.get('organisation');
   h.get("./organisations/" + selectedItem).then(function(r) {
     item = JSON.parse(r);
     /* GROUPS */
     Object.keys(item.groups).forEach(function(g) {
-      var table = h.createTable("groupssection");
+      let s = document.getElementById("infodetailsection");
+      let child = s.firstElementChild;
+      while (child) { s.removeChild(child); child = s.firstElementChild; }
+      var table = h.createTable("infodetailsection");
       h.addTwoCellsInARow(table, "group", item.groups[g].group);
       h.addTwoCellsInARow(table, "well formed", item.groups[g].isWellFormed);
       var roles = "";
@@ -89,12 +92,24 @@ function getOrganisationDetails() {
     if (Object.keys(item.groups).length <= 0) {
       p = document.createElement('p');
       p.innerText = "nothing to show";
-      let s = document.getElementById("groupssection");
+      let s = document.getElementById("infodetailsection");
+      let child = s.firstElementChild;
+      while (child) { s.removeChild(child); child = s.firstElementChild; }
       s.appendChild(p);
     }
+  });
+}
+
+function getSchemesDetails() {
+  const selectedItem = new URL(location.href).searchParams.get('organisation');
+  h.get("./organisations/" + selectedItem).then(function(r) {
+    item = JSON.parse(r);
     /* SCHEMES */
     Object.keys(item.schemes).forEach(function(s) {
-      var table = h.createTable("schemessection");
+      let e = document.getElementById("infodetailsection");
+      let child = e.firstElementChild;
+      while (child) { e.removeChild(child); child = e.firstElementChild; }
+      var table = h.createTable("infodetailsection");
       h.addTwoCellsInARow(table, "scheme", item.schemes[s].scheme);
       h.addTwoCellsInARow(table, "well formed", item.schemes[s].isWellFormed);
       var goals = "";
@@ -117,17 +132,32 @@ function getOrganisationDetails() {
     if (Object.keys(item.schemes).length <= 0) {
       p = document.createElement('p');
       p.innerText = "nothing to show";
-      let s = document.getElementById("schemessection");
+      let s = document.getElementById("infodetailsection");
+      let child = s.firstElementChild;
+      while (child) { s.removeChild(child); child = s.firstElementChild; }
       s.appendChild(p);
     }
+  });
+}
+
+
+function getNormsDetails() {
+  const selectedItem = new URL(location.href).searchParams.get('organisation');
+  h.get("./organisations/" + selectedItem).then(function(r) {
+    item = JSON.parse(r);
     /* NORMS */
     if (Object.keys(item.norms).length <= 0) {
       p = document.createElement('p');
       p.innerText = "nothing to show";
-      let s = document.getElementById("normssection");
+      let s = document.getElementById("infodetailsection");
+      let child = s.firstElementChild;
+      while (child) { s.removeChild(child); child = s.firstElementChild; }
       s.appendChild(p);
     } else {
-      var table = h.createTable("normssection");
+      let s = document.getElementById("infodetailsection");
+      let child = s.firstElementChild;
+      while (child) { s.removeChild(child); child = s.firstElementChild; }
+      var table = h.createTable("infodetailsection");
       Object.keys(item.norms).forEach(function(n) {
         h.addTwoCellsInARow(table, "norm", item.norms[n].norm + ": " +
           item.norms[n].role + " -> " + item.norms[n].type + " -> " + item.norms[n].mission);
@@ -141,15 +171,15 @@ function setOrganisationModalWindow() {
   var modal = document.getElementById('modalorggraph');
   var span = document.getElementsByClassName("close")[0];
   document.getElementById("btngroupdiagram").onclick = function() {
-    getOrgGroupGraph();
+    getGroupsDetails();
     modal.style.display = "block";
   };
   document.getElementById("btnschemediagram").onclick = function() {
-    getOrgSchemeGraph();
+    getSchemesDetails();
     modal.style.display = "block";
   };
   document.getElementById("btnnormdiagram").onclick = function() {
-    getOrgNormGraph();
+    getNormsDetails();
     modal.style.display = "block";
   };
   span.onclick = function() {
@@ -237,7 +267,7 @@ function getOrgGroupGraph() {
     import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
       import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
         var t = d3.transition().duration(750).ease(d3.easeLinear);
-        d3G.graphviz("#orgdiagram").transition(t).renderDot(dot.join(""));
+        d3G.graphviz("#orggroupdiagram").transition(t).renderDot(dot.join(""));
       });
     });
 
@@ -313,7 +343,7 @@ function getOrgSchemeGraph() {
     import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
       import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
         var t = d3.transition().duration(750).ease(d3.easeLinear);
-        d3G.graphviz("#orgdiagram").transition(t).renderDot(dot.join(""));
+        d3G.graphviz("#orgschemediagram").transition(t).renderDot(dot.join(""));
       });
     });
 
@@ -348,7 +378,7 @@ function getOrgNormGraph() {
     import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
       import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
         var t = d3.transition().duration(750).ease(d3.easeLinear);
-        d3G.graphviz("#orgdiagram").transition(t).renderDot(dot.join(""));
+        d3G.graphviz("#orgnormdiagram").transition(t).renderDot(dot.join(""));
       });
     });
 
@@ -428,10 +458,12 @@ function getOrganisationsAsDot(nonVolatileMAS) {
  */
 
 window.getOE = getOE;
-window.getOrganisationDetails = getOrganisationDetails;
-window.setOrganisationModalWindow = setOrganisationModalWindow;
 window.getOrganisationsNonVolatileGraph = getOrganisationsNonVolatileGraph;
 window.newRole = newRole;
+window.getOrgGroupGraph = getOrgGroupGraph;
+window.getOrgSchemeGraph = getOrgSchemeGraph;
+window.getOrgNormGraph = getOrgNormGraph;
+window.setOrganisationModalWindow = setOrganisationModalWindow;
 
 /**
  * END OF FILE
