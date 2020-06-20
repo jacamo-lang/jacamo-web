@@ -100,38 +100,43 @@ window.onbeforeunload = _ => {
 
 /** GIT COMMIT/PUSH DIALOG */
 function promptCommitDialog() {
-  var div = document.createElement('div');
-  div.setAttribute('id', 'commit-dialog-full');
-  var divmain = document.createElement('div');
-  divmain.setAttribute('id', 'git-dialog-main');
-  div.appendChild(divmain);
-  var divbody = document.createElement('div');
-  divbody.setAttribute('id', 'git-dialog-body');
-  divbody.innerHTML = "Enter your commit message here: <br>";
-  divmain.appendChild(divbody);
-  var message = document.createElement('input');
-  message.setAttribute('id', 'git-commit-message');
-  message.setAttribute('placeholder', 'Commit message');
-  message.addEventListener('input', function(r) { checkCommitActivation(); } );
-  divbody.appendChild(message);
-  var divissues = document.createElement('div');
-  divissues.setAttribute('id', 'commit-dialog-issues');
-  divbody.appendChild(divissues);
-  var butcancel = document.createElement('button');
-  butcancel.setAttribute('class', 'git-button');
-  butcancel.addEventListener('click', function(r) { cancelDialog('commit-dialog-full'); });
-  butcancel.innerText = "Cancel";
-  divmain.appendChild(butcancel);
-  var butcommit = document.createElement('button');
-  butcommit.setAttribute('class', 'git-button');
-  butcommit.setAttribute('id', 'git-commit');
-  butcommit.setAttribute('disabled', 'true');
-  butcommit.innerText = "Commit";
-  butcommit.addEventListener('click', function(r) { commitChanges(); });
-  divmain.appendChild(butcommit);
+  return new Promise(function(resolve, reject) {
+    var div = document.createElement('div');
+    div.setAttribute('id', 'commit-dialog-full');
+    var divmain = document.createElement('div');
+    divmain.setAttribute('id', 'git-dialog-main');
+    div.appendChild(divmain);
+    var divbody = document.createElement('div');
+    divbody.setAttribute('id', 'git-dialog-body');
+    divbody.innerHTML = "Enter your commit message here: <br>";
+    divmain.appendChild(divbody);
+    var message = document.createElement('input');
+    message.setAttribute('id', 'git-commit-message');
+    message.setAttribute('placeholder', 'Commit message');
+    message.addEventListener('input', function(r) { checkCommitActivation(); } );
+    divbody.appendChild(message);
+    var divissues = document.createElement('div');
+    divissues.setAttribute('id', 'commit-dialog-issues');
+    divbody.appendChild(divissues);
+    var butcancel = document.createElement('button');
+    butcancel.setAttribute('class', 'git-button');
+    butcancel.addEventListener('click', function(r) {
+      cancelDialog('commit-dialog-full');
+      reject(new Error("canceled"));
+    });
+    butcancel.innerText = "Cancel";
+    divmain.appendChild(butcancel);
+    var butcommit = document.createElement('button');
+    butcommit.setAttribute('class', 'git-button');
+    butcommit.setAttribute('id', 'git-commit');
+    butcommit.setAttribute('disabled', 'true');
+    butcommit.innerText = "Commit";
+    butcommit.addEventListener('click', function(r) { resolve(true); });
+    divmain.appendChild(butcommit);
 
-  document.getElementById('doc-wrapper').appendChild(div);
-  h.get('status').then(response => renderIssueOverview(response));
+    document.getElementById('doc-wrapper').appendChild(div);
+    h.get('status').then(response => renderIssueOverview(response));
+  });
 }
 
 function renderIssueOverview(response) {
@@ -175,17 +180,41 @@ function checkCommitActivation() {
 }
 
 function commitChanges() {
-  let message = document.querySelector('#git-commit-message').value;
-  cancelDialog('commit-dialog-full');
-  if (!message) {
-    toastr.error('Operation cancelled.', { timeOut: 10000 });
-  } else {
-    h.post('/commit?email='+getCookieValue('username'), message).then(function(response) {
-      toastr.info(`Commit result: ${response}`, { timeOut: 10000 });
-    }).catch(function(error) {
-      toastr.error(error, { timeOut: 10000 });
-    });
-  }
+  let usernameCookie = getCookieValue('username');
+
+  let commit = new Promise(function(resolve, reject) {
+      if (!usernameCookie) {
+        promptCredentialDialog().then(
+          function(result) { resolve(result); },
+          function(error) { reject(new Error("no credentials")); }
+        );
+      } else {
+        resolve(true);
+      }
+    })
+    .then(promptCommitDialog)
+    .then(function(result) {
+        usernameCookie = getCookieValue('username');
+        if (usernameCookie) {
+          let message = document.querySelector('#git-commit-message').value;
+          cancelDialog('commit-dialog-full');
+          if (!message) {
+            toastr.error('Operation cancelled.', { timeOut: 10000 });
+          } else {
+            h.post('/commit?email=' + getCookieValue('username'), message).then(function(response) {
+              toastr.info(`Commit result: ${response}`, { timeOut: 10000 });
+            }).catch(function(error) {
+              toastr.error(error, { timeOut: 10000 });
+            });
+          }
+        } else {
+          toastr.info(`No user's credential found!`, { timeOut: 8000 });
+        }
+      },
+      function(error) {
+        toastr.info(`Operation canceled!`, { timeOut: 8000 });
+      }
+    );
 }
 
 function pushChanges() {
@@ -197,7 +226,7 @@ function pushChanges() {
       promptCredentialDialog().then(
         function(result) { resolve(result); },
         function(error) { reject(new Error("no credentials")); }
-      )
+      );
     } else {
       resolve(true);
     }

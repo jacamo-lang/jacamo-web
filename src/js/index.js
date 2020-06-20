@@ -31,7 +31,7 @@ const g = require('./git')
    document.getElementById(nav).appendChild(lgl);
    document.getElementById(nav).appendChild(h.createDefaultHR());
    var lgc = document.createElement('a');
-   lgc.addEventListener("click", function() { g.promptCommitDialog() });
+   lgc.addEventListener("click", function() { g.commitChanges() });
    lgc.innerHTML = "commit changes";
    document.getElementById(nav).appendChild(lgc);
    var lgp = document.createElement('a');
