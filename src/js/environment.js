@@ -295,35 +295,11 @@ function updateWorkspaceMenu(nav, ws, ar, addCloseButton) {
   });
 }
 
-function getWorkspaceDetails() {
-  const HIDDEN_ARTS = p.HIDDEN_ARTS;
-  const params = new URL(location.href).searchParams;
-  const selectedWorkspace = params.get('workspace');
-
-  h.get("./workspaces/" + selectedWorkspace).then(function(w) {
-    wks = JSON.parse(w);
-    var table = document.getElementById("wkstable");
-    Object.keys(wks).forEach(function(p) {
-
-      if (typeof(wks[p]) === "string") {
-        h.addTwoCellsInARow(table, p, wks[p]);
-      } else {
-        let content = "";
-        Object.keys(wks[p]).forEach(function(a) {
-          if (HIDDEN_ARTS.indexOf(wks.artifacts[a].type) < 0) {
-            content += a + "<br />";
-          }
-        });
-        h.addTwoCellsInARow(table, p, content);
-      }
-    });
-  });
-}
-
 function getWksGraph() {
   const wksName = new URL(location.href).searchParams.get('workspace');
 
   h.get("./workspaces/" + wksName).then(function(resp) {
+    wks = JSON.parse(resp);
     var dot = [];
     var validContent = 0;
     dot.push("digraph G {\n");
@@ -389,25 +365,6 @@ function getWksGraph() {
     });
 
   });
-}
-
-/* modal window */
-function setWorkspaceModalWindow() {
-  var modal = document.getElementById('modalwksgraph');
-  var btnModal = document.getElementById("btndiagram");
-  var span = document.getElementsByClassName("close")[0];
-  btnModal.onclick = function() {
-    getWksGraph();
-    modal.style.display = "block";
-  };
-  span.onclick = function() {
-    modal.style.display = "none";
-  };
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  };
 }
 
 /* WHOLE WORKSPACES AS DOT */
@@ -482,8 +439,7 @@ window.getArtifactDetails = getArtifactDetails;
 window.setEditButton = setEditButton;
 window.setArtifactModalWindow = setArtifactModalWindow;
 window.newArt = newArt;
-window.getWorkspaceDetails = getWorkspaceDetails;
-window.setWorkspaceModalWindow = setWorkspaceModalWindow;
+window.getWksGraph = getWksGraph;
 window.getWorkspacesNonVolatileGraph = getWorkspacesNonVolatileGraph;
 
 /**
