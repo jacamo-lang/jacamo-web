@@ -10,60 +10,51 @@ const toastr = require('toastr')
  */
 
 /** CREDENTIAL PROMPT */
-let usernameCookie = getCookieValue('username');
-if (!usernameCookie) {
-  promptCredentialDialog();
-  var gitUsernameInput = document.querySelector('#git-username');
-  var gitPasswordInput = document.querySelector('#git-password');
-  gitUsernameInput.addEventListener('input', checkSaveActivation);
-  gitPasswordInput.addEventListener('input', checkSaveActivation);
-}
-
 function promptCredentialDialog() {
-  var div = document.createElement('div');
-  div.setAttribute('id', 'git-dialog-full');
-  var divmain = document.createElement('div');
-  divmain.setAttribute('id', 'git-dialog-main');
-  div.appendChild(divmain);
-  var divbody = document.createElement('div');
-  divbody.setAttribute('id', 'git-dialog-body');
-  divbody.innerHTML = "Enter your credentials for the jacamo-web git server: <br>Username:";
-  divmain.appendChild(divbody);
-  var user = document.createElement('input');
-  user.setAttribute('id', 'git-username');
-  user.setAttribute('placeholder', 'Username');
-  divbody.appendChild(user);
-  divbody.innerHTML += "Password: &zwnj;"
-  var password = document.createElement('input');
-  password.setAttribute('id', 'git-password');
-  password.setAttribute('type', 'password');
-  password.setAttribute('placeholder', 'Password');
-  divbody.appendChild(password);
-  var butcancel = document.createElement('button');
-  butcancel.setAttribute('class', 'git-button');
-  butcancel.addEventListener('click', function(r) { cancelDialog('git-dialog-full'); });
-  butcancel.innerText = "Cancel";
-  divmain.appendChild(butcancel);
-  var butsave = document.createElement('button');
-  butsave.setAttribute('class', 'git-button');
-  butsave.setAttribute('id', 'git-credential-save');
-  butsave.setAttribute('disabled', 'true');
-  butsave.innerText = "Save";
-  butsave.addEventListener('click', function(r) { storeCredentials(); });
-  divmain.appendChild(butsave);
+  return new Promise(function(resolve, reject) {
+    var div = document.createElement('div');
+    div.setAttribute('id', 'git-dialog-full');
+    var divmain = document.createElement('div');
+    divmain.setAttribute('id', 'git-dialog-main');
+    div.appendChild(divmain);
+    var divbody = document.createElement('div');
+    divbody.setAttribute('id', 'git-dialog-body');
+    divbody.innerHTML = "Enter your credentials for the jacamo-web git server: <br>Username:";
+    divmain.appendChild(divbody);
+    var user = document.createElement('input');
+    user.setAttribute('id', 'git-username');
+    user.setAttribute('placeholder', 'Username');
+    divbody.appendChild(user);
+    divbody.innerHTML += "Password: &zwnj;"
+    var password = document.createElement('input');
+    password.setAttribute('id', 'git-password');
+    password.setAttribute('type', 'password');
+    password.setAttribute('placeholder', 'Password');
+    divbody.appendChild(password);
+    var butcancel = document.createElement('button');
+    butcancel.setAttribute('class', 'git-button');
+    butcancel.addEventListener('click', function(r) {
+      cancelDialog('git-dialog-full');
+      reject(new Error("canceled"));
+    });
+    butcancel.innerText = "Cancel";
+    divmain.appendChild(butcancel);
+    var butsave = document.createElement('button');
+    butsave.setAttribute('class', 'git-button');
+    butsave.setAttribute('id', 'git-credential-save');
+    //butsave.setAttribute('disabled', 'false');
+    butsave.innerText = "Save";
+    butsave.addEventListener('click', function(r) {
+      var username = document.getElementById("git-username");
+      setCookie('username', username.value);
+      setCookie('password', password.value);
+      cancelDialog('git-dialog-full');
+      resolve(true);
+    });
+    divmain.appendChild(butsave);
 
-  document.getElementById("doc-wrapper").appendChild(div);
-}
-
-function checkSaveActivation() {
-  let gitCredentialSaveButton = document.querySelector('#git-credential-save');
-  gitCredentialSaveButton.disabled = (gitUsernameInput.value.length === 0 && gitPasswordInput.value.length === 0);
-}
-
-function storeCredentials() {
-  cancelDialog('git-dialog-full');
-  setCookie('username', gitUsernameInput.value);
-  setCookie('password', gitPasswordInput.value);
+    document.getElementById("doc-wrapper").appendChild(div);
+  });
 }
 
 function cancelDialog(id) {
@@ -72,7 +63,10 @@ function cancelDialog(id) {
 }
 
 function setCookie(key, value) {
-  return document.cookie = `${key}=${(value || '')}; path=/`;
+  var d = new Date();
+  d.setTime(d.getTime() + (10*60*1000));
+  var expires = "expires="+ d.toUTCString();
+  return document.cookie = `${key}=${(value || '')}; ${expires} ;path=/`;
 }
 
 /* function adjusted from: https://stackoverflow.com/questions/5639346/what-is-the-shortest-function-for-reading-a-cookie-by-name-in-javascript */
@@ -197,12 +191,38 @@ function commitChanges() {
 function pushChanges() {
   let usernameCookie = getCookieValue('username');
   let passwordCookie = getCookieValue('password');
-  h.post('/push?username='+usernameCookie+'&password='+btoa(passwordCookie))
-  .then(function(response) {
-    toastr.info(`Push result: ${response}`, { timeOut: 10000 });
-  }).catch(function(error) {
-    toastr.error(error, { timeOut: 10000 });
-  });
+
+  let push = new Promise(function(resolve, reject) {
+    if (!usernameCookie) {
+      promptCredentialDialog().then(
+        function(result) { resolve(result); },
+        function(error) { reject(new Error("no credentials")); }
+      )
+    } else {
+      resolve(true);
+    }
+  }).then(
+    function(result) {
+      usernameCookie = getCookieValue('username');
+      passwordCookie = getCookieValue('password');
+      if (usernameCookie) {
+        h.post('/push?username=' + usernameCookie + '&password=' + btoa(passwordCookie))
+          .then(function(response) {
+            toastr.success(`Push result: ${response}`, { timeOut: 10000 });
+          }).catch(function(error) {
+            toastr.error("Error on git push<br>" + error, { timeOut: 8000 });
+            /* Reset cookies, so user can try new credentials */
+            setCookie('username', '');
+            setCookie('password', '');
+          });
+      } else {
+        toastr.info(`No user's credential found!`, { timeOut: 8000 });
+      }
+    },
+    function(error) {
+      toastr.info(`Operation canceled!`, { timeOut: 8000 });
+    }
+  )
 }
 
 /**
