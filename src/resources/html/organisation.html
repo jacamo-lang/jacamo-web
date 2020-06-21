@@ -3,7 +3,6 @@
 
 <head>
   <title>jacamo-web - environment</title>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
   <link rel="stylesheet" type="text/css" href="/css/style.css">
   <meta charset="UTF-8" http-equiv="Content-type" name="viewport" content="width=device-width,initial-scale=1">
 </head>
@@ -44,17 +43,29 @@
 
         <div id="groupscontent" class="card fluid">
           <h4 class="section double-padded">Groups</h4>
-          <div class="section" id="groupssection"></div>
+          <div class="section">
+            <center>
+              <div id="orggroupdiagram" style="height: 100%;"></div>
+            </center>
+          </div>
         </div>
 
         <div id="schemescontent" class="card fluid">
           <h4 class="section double-padded">Schemes</h4>
-          <div class="section" id="schemessection"></div>
+          <div class="section">
+            <center>
+              <div id="orgschemediagram" style="height: 100%;"></div>
+            </center>
+          </div>
         </div>
 
         <div id="normscontent" class="card fluid">
           <h4 class="section double-padded">Norms</h4>
-          <div class="section" id="normssection"></div>
+          <div class="section">
+            <center>
+              <div id="orgnormdiagram" style="height: 100%;"></div>
+            </center>
+          </div>
         </div>
 
         <!-- overview diagram -->
@@ -63,12 +74,13 @@
             <div class="modal-content">
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">organisation diagram</h4>
+                <h4 class="modal-title">organisation info</h4>
               </div>
-              <div class="modal-body">
-                <center><object id="orgdiagram" style="max-width:100%;"></object></center>
-                <!--<center><object id="overviewgraph" data="" type="image/svg+xml" </object></center><br />-->
+
+              <div class="card fluid">
+                <div class="section" id="infodetailsection"></div>
               </div>
+
             </div>
           </div>
         </div>
@@ -76,9 +88,9 @@
         <!-- footer -->
         <div id="foot" class="card fluid">
           <div id="footmenu" class="section">
-            <a id="btngroupdiagram">grougs diagram</a>&#160;&#160;&#160;
-            <a id="btnschemediagram">schemes diagram</a>&#160;&#160;&#160;
-            <a id="btnnormdiagram">norms diagram</a>&#160;&#160;&#160;
+            <a id="btngroupdiagram">grougs info</a>&#160;&#160;&#160;
+            <a id="btnschemediagram">schemes info</a>&#160;&#160;&#160;
+            <a id="btnnormdiagram">norms info</a>&#160;&#160;&#160;
           </div>
         </div>
       </main>
@@ -87,7 +99,9 @@
   <script src="/js/jacamoweb.js"></script>
   <script>
     getOE();
-    getOrganisationDetails();
+    getOrgGroupGraph();
+    getOrgSchemeGraph();
+    getOrgNormGraph();
     setOrganisationModalWindow();
   </script>
 </body>
