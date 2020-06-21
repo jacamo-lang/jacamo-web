@@ -425,7 +425,7 @@ function getOrganisationsAsDot(nonVolatileMAS) {
     header.push("\tsubgraph cluster_" + o.organisation + " {\n");
     header.push("\t\tlabel=\"" + o.organisation + "\" labeljust=\"r\" pencolor=gray fontcolor=gray\n");
     o.groups.forEach(function(g) {
-      header.push("\t\t\"" + g.group + "\" [ " + "label = \"" + g.group + "\" shape=tab style=filled pencolor=black fillcolor=lightgrey];\n");
+      header.push("\t\t\"" + g.id + "\" [ " + "label = \"" + g.id + "\" shape=tab style=filled pencolor=black fillcolor=lightgrey];\n");
     });
     o.schemes.forEach(function(s) {
       header.push("\t\t\"" + s.scheme + "\" [ " + "label = \"" + s.scheme + "\" shape=hexagon style=filled pencolor=black fillcolor=linen];\n");
