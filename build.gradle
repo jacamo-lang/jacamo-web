@@ -137,6 +137,7 @@ task javadocJar (type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from '${docsDir}/../../doc/api'
 }
+
 /*
  *
  * Maven publication
@@ -238,6 +239,20 @@ task buildYarn(type: YarnTask, dependsOn: 'yarn') {
     inputs.file 'yarn.lock'
 }
 build.dependsOn buildYarn
+
+
+/*
+ *
+ * Compile javascript if bundle does not exists
+ *
+ */
+
+if ( !file("src/resources/js/jacamoweb.js").exists() ) {
+	allprojects {
+    tasks.shadowJar.dependsOn tasks.build
+		tasks.run.dependsOn tasks.build
+	}
+}
 
 /*
  *
