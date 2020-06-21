@@ -208,7 +208,7 @@ function commitChanges() {
             toastr.error('Operation cancelled.', { timeOut: 10000 });
           } else {
             h.post('/commit?email=' + getCookieValue('username'), message).then(function(response) {
-              toastr.info(`Commit result: ${response}`, { timeOut: 10000 });
+              toastr.success(`Commit result: ${response}`, { timeOut: 10000 });
             }).catch(function(error) {
               toastr.error(error, { timeOut: 10000 });
             });
