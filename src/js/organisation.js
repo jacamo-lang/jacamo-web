@@ -5,6 +5,10 @@
 //const d3 = require('d3')
 const h = require('./helpers')
 const p = require('./parameters')
+const toastr = require('toastr')
+
+/** LOCK NOTIFICATIONS */
+toastr.options.preventDuplicates = true;
 
 /**
  * ORGANISATION FUNCTIONS
@@ -60,12 +64,24 @@ function newRole(org, gr) {
   var org = firstPart.substring(0, firstDot);
   var group = firstPart.substring(firstDot + 1);
 
-  http.open("POST", '/organisations/' + org + '/groups/' + group + '/roles/' + role, false);
-  http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   var data = "role=" + encodeURIComponent(role);
-  http.send(data);
-  window.location.assign('/oe.html');
+  h.post('/organisations/' + org + '/groups/' + group + '/roles/' + role, data, "application/x-www-form-urlencoded")
+  .then(
+    function(resolve) {
+      localStorage.setItem("organisationBuffer", `Role '${role}' on group '${group}' of organisation ${org} created!`);
+      window.location.assign('/oe.html');
+    },
+    function(error) { toastr.error(error, { timeOut: 10000 }); }
+  );
 }
+
+/* SHOW MESSAGE IN THE BUFFER IF EXISTS */
+
+const showBuffer = () => {
+  var buffer = localStorage.getItem("organisationBuffer");
+  if ((typeof(buffer) == "string") && (buffer != "")) toastr.info(buffer, { timeOut: 3000 });
+  localStorage.removeItem("organisationBuffer");
+};
 
 function getGroupsDetails() {
   const selectedItem = new URL(location.href).searchParams.get('organisation');
@@ -464,6 +480,7 @@ window.getOrgGroupGraph = getOrgGroupGraph;
 window.getOrgSchemeGraph = getOrgSchemeGraph;
 window.getOrgNormGraph = getOrgNormGraph;
 window.setOrganisationModalWindow = setOrganisationModalWindow;
+window.showBuffer = showBuffer;
 
 /**
  * END OF FILE
