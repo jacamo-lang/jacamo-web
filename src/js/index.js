@@ -141,22 +141,19 @@ function getMASAsDot() {
     /* Organisation dimension */
     dot.push("\tsubgraph cluster_org {\n");
     dot.push("\t\tlabel=\"organisation\" labeljust=\"r\" pencolor=gray fontcolor=gray\n");
+    overview.organisations.forEach(function(o) {
+      dot.push("\t\tsubgraph cluster_" + o.organisation + " {\n");
+      dot.push("\t\t\tlabel=\"" + o.organisation + "\" labeljust=\"r\" pencolor=gray40 fontcolor=gray40\n");
+      o.groups.forEach(function(g) {
+        dot.push("\t\t\t\"" + g.id + "\" [ " + "label = \"" + g.id + "\" shape=tab style=filled pencolor=black fillcolor=lightgrey];\n");
+      });
+      dot.push("\t\t}\n");
+    });
+
     let orglinks = [];
     overview.agents.forEach(function(a) {
       a.roles.forEach(function(r) {
-        dot.push("\t\t\"" + r.group + "\" [ " + "label = \"" + r.group + "\" shape=tab style=filled pencolor=black fillcolor=lightgrey];\n");
         orglinks.push("\t\"" + r.group + "\"->\"" + a.agent + "\" [arrowtail=normal dir=back label=\"" + r.role + "\"]\n");
-      });
-      a.missions.forEach(function(m) {
-        dot.push("\t\t\"" + m.scheme + "\" [ " + "label = \"" + m.scheme + "\" shape=hexagon style=filled pencolor=black fillcolor=linen];\n");
-        orglinks.push("\t\"" + m.scheme + "\"->\"" + a.agent + "\" [arrowtail=normal dir=back label=\"" + m.mission + "\"]\n");
-        m.responsibles.forEach(function(r) {
-          let resp = "\t\"" + r + "\"->\"" + m.scheme +
-            "\" [arrowtail=normal arrowhead=open label=\"responsible\"]\n";
-          if (!orglinks.includes(resp)) { /*avoid duplicates*/
-            orglinks.push(resp);
-          }
-        });
       });
     });
     dot.push("\t}\n");
