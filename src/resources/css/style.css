@@ -2312,7 +2312,7 @@ table.hoverable tr:hover, table.hoverable tr:hover > td, table.hoverable tr:focu
 
 .toast {
   margin-top: 75px !important;
-  color: #000 !important;
+  color: #030303 !important;
   opacity: 1 !important;
 }
 
@@ -2322,8 +2322,16 @@ table.hoverable tr:hover, table.hoverable tr:hover > td, table.hoverable tr:focu
 
 .toast-info {
   width: 550px !important;
-  background-color:#73A790;
+  background-color:#3276b1;
   color: #fff !important;
+}
+
+.toast-error {
+  background-color: #bd362f;
+}
+
+.toast-success {
+  background-color: #51a351;
 }
 
 #git-dialog-full, #commit-dialog-full {
