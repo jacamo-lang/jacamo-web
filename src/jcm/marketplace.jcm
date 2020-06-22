@@ -1,0 +1,60 @@
+/*
+In the 'buyer' agent, Moise coordination mechanism will set on 'marketplace.xml' will trigger 
+the goal 'buyitem' once, the goal 'supplyItem' in the 'seller', then the goal 'makePayment' again in the
+buyer to finally trigger 'deliverItem' in the seller.
+
+Besides the coordination mechanism, here we have redundant messages from agent to agent to illustrate
+jacamo-web message exchanging interface.
+
+@author Cleber Jorge Amaral
+*/
+
+mas marketplace {
+
+    agent seller {
+        focus: sellerStorehouse.outputStock
+    }
+    agent packer {
+        focus: sellerStorehouse.outputStock
+    }
+    agent collector
+
+    agent buyer {
+        focus: buyerStorehouse.inputStock
+    }
+    agent stocker {
+        focus: buyerStorehouse.inputStock
+    }
+    agent payer
+
+    workspace sellerStorehouse {
+        artifact outputStock: dynamic.Counter(1000)
+    }
+    workspace buyerStorehouse {
+        artifact inputStock: dynamic.Counter(0)
+    }
+    organisation supplier : supplier.xml {
+        group sales: salesTeam {
+            players: seller rseller
+                     collector rcollector
+                     packer rpacker
+        }
+    }
+    organisation factory : factory.xml {
+        group purchases: purchasesTeam {
+            players: buyer rbuyer
+                     stocker rstocker
+                     payer rpayer
+        }
+    }
+    organisation marketplace : marketplace.xml {
+        group businessPartners : business {
+            players: buyer rrbuyer
+                     seller rrseller
+            responsible-for: itemTransaction
+        }
+        scheme itemTransaction : transaction
+    }
+
+    platform: jacamo.web.JCMWeb("--main 2181 --restPort 8080") // connects to platform at 2181
+}
