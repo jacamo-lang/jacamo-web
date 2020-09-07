@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-	compile 'org.jacamo:jacamo:0.9-SNAPSHOT'
+	compile 'org.jacamo:jacamo:0.10-SNAPSHOT'
 	compile 'org.jacamo:jacamo-rest:0.5'
 
 	//websockets for simulations
