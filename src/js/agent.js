@@ -471,9 +471,22 @@ function getInspectionDetails() {
   h.get("./agents/" + selectedAgent).then(function(resp) {
     details = JSON.parse(resp);
     details.beliefs.forEach(function(item) {
-      const text = document.createElement('i');
-      text.innerHTML = item + "<br>";
-      beliefs.appendChild(text);
+      const belief = document.createElement('span');
+      belief.setAttribute("class", "belief");
+      const definition = document.createElement('span');
+      var matches = item.toString().match(/\[([^\]]+)\]$/g); /*Extract the annotation part*/
+      if (matches != null) {
+          definition.innerHTML = item.toString().substr(0,item.toString().indexOf(matches[0]));
+          belief.appendChild(definition);
+          const annotation = document.createElement('span');
+          annotation.setAttribute("class", "annotation");
+          annotation.innerHTML = matches[0] + "<br>";
+          belief.appendChild(annotation);
+      } else {
+          definition.innerHTML = item  + "<br>";
+          belief.appendChild(definition);
+      }
+      beliefs.appendChild(belief);
     });
   });
 
