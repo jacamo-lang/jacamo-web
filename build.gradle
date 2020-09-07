@@ -16,7 +16,7 @@ plugins {
 defaultTasks 'run'
 
 group   'org.jacamo'
-version '0.5-SNAPSHOT'
+version '0.5'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?xml-stylesheet href="http://moise.sourceforge.net/xml/os.xsl" type="text/xsl" ?>
+
+<organisational-specification id="jcmrest"
+    os-version="0.8" xmlns='http://moise.sourceforge.net/os'
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xsi:schemaLocation='http://moise.sourceforge.net/os
+                        http://moise.sourceforge.net/xml/os.xsd'>
+
+    <structural-specification>
+
+        <role-definitions>
+            <role id="rrseller" />
+            <role id="rrbuyer" />
+        </role-definitions>
+
+        <group-specification id="business">
+            <roles>
+                <role id="rrbuyer" min="1" max="1" />
+                <role id="rrseller" min="1" max="1" />
+            </roles>
+
+            <links>
+                <link from="rrbuyer" to="rrseller" type="communication"
+                    scope="intra-group" bi-dir="true" />
+            </links>
+        </group-specification>
+
+
+    </structural-specification>
+
+    <functional-specification>
+        <scheme id="transaction">
+            <goal id="doBusiness">
+                <plan operator="sequence">
+                    <goal id="buyItem" />
+                    <goal id="supplyItem" />
+                    <goal id="makePayment" />
+                    <goal id="deliverItem" />
+                </plan>
+            </goal>
+            <mission id="mbuy" min="1" max="1">
+                <goal id="buyItem" />
+                <goal id="makePayment" />
+            </mission>
+            <mission id="msupply" min="1" max="1">
+                <goal id="supplyItem" />
+                <goal id="deliverItem" />
+            </mission>
+        </scheme>
+    </functional-specification>
+
+    <normative-specification>
+        <properties>
+            <property id="default_management" value="ignore" />
+        </properties>
+        <norm id="normSeller" type="obligation" role="rrseller"
+            mission="msupply" />
+        <norm id="normBuyer" type="obligation" role="rrbuyer"
+            mission="mbuy" />
+    </normative-specification>
+
+</organisational-specification>
