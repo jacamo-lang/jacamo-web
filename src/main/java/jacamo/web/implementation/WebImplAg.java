@@ -185,8 +185,8 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             PlanLibrary pl = ag.getPL();
             for (Plan plan : pl.getPlans()) {
                 // skip plans from jar files (usually system's plans)
-                if (!(plan.getSource().startsWith("jar:file") || plan.getSource().equals("kqmlPlans.asl")))
-                    files.add(plan.getSource());
+                if (!(plan.getSourceFile().startsWith("jar:file") || plan.getSourceFile().equals("kqmlPlans.asl")))
+                    files.add(plan.getSourceFile());
             }
             Gson json = new Gson();
             return Response.ok(json.toJson(files)).build();
@@ -402,7 +402,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
                 for (Plan plan : pl.getPlans()) {
                     
                     // do not add plans that comes from jar files (usually system's plans)
-                    if (plan.getSource().startsWith("jar:file") || plan.getSource().equals("kqmlPlans.asl"))
+                    if (plan.getSourceFile().startsWith("jar:file") || plan.getSourceFile().equals("kqmlPlans.asl"))
                         continue;
 
                     // add namespace when it is not default
@@ -525,7 +525,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
         for (Plan plan : pl.getPlans()) {
             
             // skip plans from jar files (usually system's plans)
-            if (plan.getSource().startsWith("jar:file") || plan.getSource().equals("kqmlPlans.asl"))
+            if (plan.getSourceFile().startsWith("jar:file") || plan.getSourceFile().equals("kqmlPlans.asl"))
                 continue;
 
             //TODO: A .send can also be in the context of a plan
@@ -562,7 +562,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
         boolean recipientUnderstand = false;
         for (Plan rp : rpl.getPlans()) {
             // skip plans from jar files (usually system's plans)
-            if (rp.getSource().startsWith("jar:file") || rp.getSource().equals("kqmlPlans.asl"))
+            if (rp.getSourceFile().startsWith("jar:file") || rp.getSourceFile().equals("kqmlPlans.asl"))
                 continue;
 
             //TODO: Check if the arity is also compatible
@@ -584,7 +584,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
         
         for (Plan rp : rpl.getPlans()) {
             // skip plans from jar files (usually system's plans)
-            if (rp.getSource().startsWith("jar:file") || rp.getSource().equals("kqmlPlans.asl"))
+            if (rp.getSourceFile().startsWith("jar:file") || rp.getSourceFile().equals("kqmlPlans.asl"))
                 continue;
 
             //TODO: Check if the arity is also compatible
