@@ -359,7 +359,6 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
       var t = d3.transition().duration(500).ease(d3.easeLinear);
       var graph = dot.join("");
       d3G.graphviz("#agentdiagram").transition(t).renderDot(graph);
-      console.log(graph);
     });
   });
 }
@@ -456,53 +455,127 @@ function autocomplete(inp, arr) {
   });
 }
 
-/* AGENT'S DETAILS */
+/* Extract the namespace from a belief */
+getNamespace = (bbitem) => {
+    const REGEX_BB_NAMESPACE = /^\w*(?!\()[::]{2}/;
+    var ns = REGEX_BB_NAMESPACE.exec(bbitem);
+    if (ns === null) {
+        return "default";
+    } else {
+        return ns[0].slice(0,-2);
+    }
+}
 
+/* Extract the annotation part from a belief */
+getAnnotation = (bbitem) => {
+    const REGEX_BB_ANNOTATION = /\[([^\]]+)\]$/;
+    var annot = bbitem.match(REGEX_BB_ANNOTATION);
+    if (annot != null) {
+        return annot[0];
+    } else {
+        return null;
+    }
+}
+
+/* Extract the head of the rule */
+getRuleHead = (bbitem) => {
+    const REGEX_RULE_HEAD = /^.*[:]{1}[-]{1}/;
+    var head = bbitem.match(REGEX_RULE_HEAD);
+    if (head != null) {
+        return head[0].slice(0,-3);
+    } else {
+        return bbitem;
+    }
+}
+
+/* AGENT'S DETAILS */
 function getInspectionDetails() {
   var selectedAgent = window.location.hash.substr(1);
   var parameters = location.search.substring(1).split("&");
   var temp = parameters[0].split("=");
   selectedAgent = unescape(temp[1]);
 
-  inspection = document.getElementById('inspection');
-  beliefs = document.createElement("details");
-  beliefs.innerHTML = "<summary>Beliefs</summary>";
-  inspection.appendChild(beliefs);
   h.get("./agents/" + selectedAgent).then(function(resp) {
     details = JSON.parse(resp);
-    details.namespaces.forEach(function(ns) {
-        const nsdiv = document.createElement('div');
-        nsdiv.setAttribute("class", "namespace");
-        beliefs.appendChild(nsdiv);
-        var nsdetails = document.createElement("details");
-        nsdetails.innerHTML = "<summary>"+ns+"</summary>";
-        nsdetails.setAttribute("id", "ns"+ns);
-        nsdiv.appendChild(nsdetails);
-    });
     details.beliefs.forEach(function(item) {
-      var namespace = /([^::]*)/.exec(item)[1];
-      var bbitem = item.substring(namespace.length + 2);
-      if (namespace.length == item.length) {
-          namespace = "default";
-          bbitem = item;
+      var namespace = getNamespace(item.belief);
+      var bbitem = item.belief.substring(namespace.length + 2);
+      if (namespace === "default") {
+          bbitem = item.belief;
       }
-      const belief = document.createElement('span');
-      belief.setAttribute("class", "belief");
-      const definition = document.createElement('span');
-      var matches = bbitem.match(/\[([^\]]+)\]$/g); /*Extract the annotation part*/
-      if (matches != null) {
-          definition.innerHTML = bbitem.substr(0,bbitem.indexOf(matches[0]));
-          belief.appendChild(definition);
-          const annotation = document.createElement('span');
-          annotation.setAttribute("class", "annotation");
-          annotation.innerHTML = matches[0] + "<br>";
-          belief.appendChild(annotation);
-      } else {
-          definition.innerHTML = bbitem  + "<br>";
-          belief.appendChild(definition);
-      }
-      nsdetails = document.getElementById('ns'+namespace);
-      nsdetails.appendChild(belief);
+
+      inspection = document.getElementById('inspection');
+      // Add item and detail sections on beliefs area
+      if (item.isRule === false) {
+        var beliefs = document.getElementById('details-beliefs');
+        if (beliefs == null) {
+          beliefs = document.createElement("details");
+          beliefs.setAttribute("id", "details-beliefs");
+          beliefs.innerHTML = "<summary>Beliefs</summary>";
+          inspection.appendChild(beliefs);
+        }
+        var nsdetails = document.getElementById('details-nsbb-'+namespace);
+        if (nsdetails == null) {
+            const nsdiv = document.createElement('div');
+            nsdiv.setAttribute("class", "namespace");
+            beliefs.appendChild(nsdiv);
+            nsdetails = document.createElement("details");
+            nsdetails.innerHTML = "<summary>"+namespace+"</summary>";
+            nsdetails.setAttribute("id", 'details-nsbb-'+namespace);
+            nsdiv.appendChild(nsdetails);
+        }
+        const belief = document.createElement('span');
+        belief.setAttribute("class", "belief");
+        const definition = document.createElement('span');
+        var annot = getAnnotation(bbitem);
+        if (annot != null) {
+            definition.innerHTML = bbitem.substr(0,bbitem.indexOf(annot));
+            belief.appendChild(definition);
+            const annotation = document.createElement('span');
+            annotation.setAttribute("class", "annotation");
+            annotation.innerHTML = annot + "<br>";
+            belief.appendChild(annotation);
+        } else {
+            definition.innerHTML = bbitem  + "<br>";
+            belief.appendChild(definition);
+        }
+        nsdetails.appendChild(belief);
+    } else {
+        var rules = document.getElementById('details-rules');
+        if (rules == null) {
+          rules = document.createElement("details");
+          rules.setAttribute("id", "details-rules");
+          rules.innerHTML = "<summary>Rules</summary>";
+          inspection.appendChild(rules);
+        }
+        var nsdetails = document.getElementById('details-nsrule-'+namespace);
+        if (nsdetails == null) {
+            const nsdiv = document.createElement('div');
+            nsdiv.setAttribute("class", "namespace");
+            rules.appendChild(nsdiv);
+            nsdetails = document.createElement("details");
+            nsdetails.innerHTML = "<summary>"+namespace+"</summary>";
+            nsdetails.setAttribute("id", 'details-nsrule-'+namespace);
+            nsdiv.appendChild(nsdetails);
+        }
+        const belief = document.createElement('span');
+        belief.setAttribute("class", "belief");
+        const definition = document.createElement('span');
+
+        var annot = getAnnotation(bbitem);
+        if (annot != null) {
+            definition.innerHTML = bbitem.substr(0,bbitem.indexOf(annot));
+            belief.appendChild(definition);
+            const annotation = document.createElement('span');
+            annotation.setAttribute("class", "annotation");
+            annotation.innerHTML = annot + "<br>";
+            belief.appendChild(annotation);
+        } else {
+            definition.innerHTML = bbitem + "<br>";
+            belief.appendChild(definition);
+        }
+        nsdetails.appendChild(belief);
+    }
     });
   });
 
@@ -666,21 +739,8 @@ window.getAgentsNonVolatileGraph = getAgentsNonVolatileGraph;
 window.getGraph = getGraph;
 window.connectToWS = connectToWS;
 
-/**
- * PREPARING FOR TESTS
- */
-
-function sum(a, b){
-   return a + b
-}
-
-function division(a, b){
-   return a / b
-}
-
 module.exports = {
-  sum,
-  division
+  getNamespace
 }
 
 /**
