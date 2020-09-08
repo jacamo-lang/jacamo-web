@@ -470,23 +470,39 @@ function getInspectionDetails() {
   inspection.appendChild(beliefs);
   h.get("./agents/" + selectedAgent).then(function(resp) {
     details = JSON.parse(resp);
+    details.namespaces.forEach(function(ns) {
+        const nsdiv = document.createElement('div');
+        nsdiv.setAttribute("class", "namespace");
+        beliefs.appendChild(nsdiv);
+        var nsdetails = document.createElement("details");
+        nsdetails.innerHTML = "<summary>"+ns+"</summary>";
+        nsdetails.setAttribute("id", "ns"+ns);
+        nsdiv.appendChild(nsdetails);
+    });
     details.beliefs.forEach(function(item) {
+      var namespace = /([^::]*)/.exec(item)[1];
+      var bbitem = item.substring(namespace.length + 2);
+      if (namespace.length == item.length) {
+          namespace = "default";
+          bbitem = item;
+      }
       const belief = document.createElement('span');
       belief.setAttribute("class", "belief");
       const definition = document.createElement('span');
-      var matches = item.toString().match(/\[([^\]]+)\]$/g); /*Extract the annotation part*/
+      var matches = bbitem.match(/\[([^\]]+)\]$/g); /*Extract the annotation part*/
       if (matches != null) {
-          definition.innerHTML = item.toString().substr(0,item.toString().indexOf(matches[0]));
+          definition.innerHTML = bbitem.substr(0,bbitem.indexOf(matches[0]));
           belief.appendChild(definition);
           const annotation = document.createElement('span');
           annotation.setAttribute("class", "annotation");
           annotation.innerHTML = matches[0] + "<br>";
           belief.appendChild(annotation);
       } else {
-          definition.innerHTML = item  + "<br>";
+          definition.innerHTML = bbitem  + "<br>";
           belief.appendChild(definition);
       }
-      beliefs.appendChild(belief);
+      nsdetails = document.getElementById('ns'+namespace);
+      nsdetails.appendChild(belief);
     });
   });
 
