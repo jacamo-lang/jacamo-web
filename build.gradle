@@ -29,13 +29,14 @@ repositories {
 	maven { url "https://raw.github.com/jacamo-lang/mvn-repo/master" }
 	maven { url "https://jade.tilab.com/maven/" }
 	flatDir {
-		dirs 'lib'
+		dirs 'libs'
 	}
 }
 
 dependencies {
 	compile 'org.jacamo:jacamo:0.10-SNAPSHOT'
 	compile 'org.jacamo:jacamo-rest:0.6-SNAPSHOT'
+	compile files('libs/jacamo-rest-0.6-SNAPSHOT.jar')
 
 	//websockets for simulations
 	implementation 'javax.websocket:javax.websocket-api:1.1'

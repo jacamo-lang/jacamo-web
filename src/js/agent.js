@@ -506,76 +506,65 @@ function getInspectionDetails() {
 
       inspection = document.getElementById('inspection');
       // Add item and detail sections on beliefs area
-      if (item.isRule === false) {
-        var beliefs = document.getElementById('details-beliefs');
-        if (beliefs == null) {
-          beliefs = document.createElement("details");
-          beliefs.setAttribute("id", "details-beliefs");
-          beliefs.innerHTML = "<summary>Beliefs</summary>";
-          inspection.appendChild(beliefs);
-        }
-        var nsdetails = document.getElementById('details-nsbb-'+namespace);
-        if (nsdetails == null) {
-            const nsdiv = document.createElement('div');
-            nsdiv.setAttribute("class", "namespace");
-            beliefs.appendChild(nsdiv);
-            nsdetails = document.createElement("details");
-            nsdetails.innerHTML = "<summary>"+namespace+"</summary>";
-            nsdetails.setAttribute("id", 'details-nsbb-'+namespace);
-            nsdiv.appendChild(nsdetails);
-        }
-        const belief = document.createElement('span');
-        belief.setAttribute("class", "belief");
-        const definition = document.createElement('span');
-        var annot = getAnnotation(bbitem);
-        if (annot != null) {
-            definition.innerHTML = bbitem.substr(0,bbitem.indexOf(annot));
-            belief.appendChild(definition);
-            const annotation = document.createElement('span');
-            annotation.setAttribute("class", "annotation");
-            annotation.innerHTML = annot + "<br>";
-            belief.appendChild(annotation);
-        } else {
-            definition.innerHTML = bbitem  + "<br>";
-            belief.appendChild(definition);
-        }
-        nsdetails.appendChild(belief);
-    } else {
-        var rules = document.getElementById('details-rules');
-        if (rules == null) {
-          rules = document.createElement("details");
-          rules.setAttribute("id", "details-rules");
-          rules.innerHTML = "<summary>Rules</summary>";
-          inspection.appendChild(rules);
-        }
-        var nsdetails = document.getElementById('details-nsrule-'+namespace);
-        if (nsdetails == null) {
-            const nsdiv = document.createElement('div');
-            nsdiv.setAttribute("class", "namespace");
-            rules.appendChild(nsdiv);
-            nsdetails = document.createElement("details");
-            nsdetails.innerHTML = "<summary>"+namespace+"</summary>";
-            nsdetails.setAttribute("id", 'details-nsrule-'+namespace);
-            nsdiv.appendChild(nsdetails);
-        }
-        const belief = document.createElement('span');
-        belief.setAttribute("class", "belief");
-        const definition = document.createElement('span');
-
-        var annot = getAnnotation(bbitem);
-        if (annot != null) {
-            definition.innerHTML = bbitem.substr(0,bbitem.indexOf(annot));
-            belief.appendChild(definition);
-            const annotation = document.createElement('span');
-            annotation.setAttribute("class", "annotation");
-            annotation.innerHTML = annot + "<br>";
-            belief.appendChild(annotation);
-        } else {
-            definition.innerHTML = bbitem + "<br>";
-            belief.appendChild(definition);
-        }
-        nsdetails.appendChild(belief);
-    }
+      var beliefs = document.getElementById('details-beliefs');
+      if (beliefs == null) {
+        beliefs = document.createElement("details");
+        beliefs.setAttribute("id", "details-beliefs");
+        beliefs.innerHTML = "<summary>Beliefs</summary>";
+        inspection.appendChild(beliefs);
+      }
+      var nsdetails = document.getElementById('details-nsbb-'+namespace);
+      if (nsdetails == null) {
+          const nsdiv = document.createElement('div');
+          nsdiv.setAttribute("class", "namespace");
+          beliefs.appendChild(nsdiv);
+          nsdetails = document.createElement("details");
+          nsdetails.innerHTML = "<summary>"+namespace+"</summary>";
+          nsdetails.setAttribute("id", 'details-nsbb-'+namespace);
+          nsdiv.appendChild(nsdetails);
+      }
+      const belief = document.createElement('span');
+      belief.setAttribute("class", "belief");
+      const definition = document.createElement('span');
+      if (item.isRule) {
+          var annot = getAnnotation(getRuleHead(bbitem));
+          if (annot != null) {
+              definition.innerHTML =
+                getRuleHead(bbitem).substr(0,getRuleHead(bbitem).indexOf(annot)) +
+                "<br>&#160;&#160;&#160&#160;&#160;&#160" +
+                bbitem.substring(getRuleHead(bbitem).length);
+              belief.appendChild(definition);
+              const annotation = document.createElement('span');
+              annotation.setAttribute("class", "annotation");
+              annotation.innerHTML = annot + "<br>";
+              belief.appendChild(annotation);
+          } else {
+              definition.innerHTML = bbitem  + "<br>";
+              belief.appendChild(definition);
+          }
+      } else {
+          var annot = getAnnotation(bbitem);
+          if (annot != null) {
+              definition.innerHTML = bbitem.substr(0,bbitem.indexOf(annot));
+              belief.appendChild(definition);
+              const annotation = document.createElement('span');
+              annotation.setAttribute("class", "annotation");
+              annotation.innerHTML = annot + "<br>";
+              belief.appendChild(annotation);
+          } else {
+              definition.innerHTML = bbitem  + "<br>";
+              belief.appendChild(definition);
+          }
+      }
+      if ((item.isRule == true) && (item.deductions !== null) && (item.deductions !== undefined)) {
+        const deductionsdiv = document.createElement('div');
+        deductionsdiv.setAttribute("class", "namespace");
+        belief.appendChild(deductionsdiv);
+        const deductions = document.createElement('details');
+        deductions.innerHTML = "<summary>Deductions</summary>"+item.deductions;
+        deductionsdiv.appendChild(deductions);
+      }
+      nsdetails.appendChild(belief);
     });
   });
 
