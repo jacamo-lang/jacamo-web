@@ -633,4 +633,26 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
         }
         return Response.status(500).build();
     }
+    
+    /**
+     * Return the deductions from a given rulekey which is formed by the functor/arity
+     * 
+     * @param agName Name of the agent
+     * @param rulekey functor/arity
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    @Path("/{agentname}/deductions/{predicateIndicator}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDeductions(@PathParam("agentname") String agName, @PathParam("predicateIndicator") String predicateIndicator) {
+        try {
+            Gson json = new Gson();
+            return Response.ok(json.toJson(tAg.getDeductions(agName, predicateIndicator))).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Response.status(500, "Server Internal Error! Could not get deductions for "+predicateIndicator).build();
+    }
 }

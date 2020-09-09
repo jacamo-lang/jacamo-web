@@ -525,24 +525,37 @@ function getInspectionDetails() {
       }
       const belief = document.createElement('span');
       belief.setAttribute("class", "belief");
-      const definition = document.createElement('span');
       if (item.isRule) {
+          const definition = document.createElement('span');
           var annot = getAnnotation(getRuleHead(bbitem));
           if (annot != null) {
-              definition.innerHTML =
-                getRuleHead(bbitem).substr(0,getRuleHead(bbitem).indexOf(annot)) +
-                "<br>&#160;&#160;&#160&#160;&#160;&#160" +
-                bbitem.substring(getRuleHead(bbitem).length);
+              definition.innerHTML = getRuleHead(bbitem).substr(0,getRuleHead(bbitem).indexOf(annot));
               belief.appendChild(definition);
               const annotation = document.createElement('span');
               annotation.setAttribute("class", "annotation");
-              annotation.innerHTML = annot + "<br>";
+              annotation.innerHTML = annot + "&#160;&#160;&#160";
               belief.appendChild(annotation);
+              if (document.getElementById('span-belief-'+item.functor+item.arity) == null) {
+                  belief.setAttribute("id", 'span-belief-'+item.functor+item.arity);
+                  const deductions = document.createElement('button');
+                  deductions.setAttribute("type", "button");
+                  var predicateIndicator = "".concat(item.functor + "%2F" + item.arity);
+                  console.log(predicateIndicator);
+                  deductions.setAttribute("onclick", "{getDeductions('" + selectedAgent + "','" + predicateIndicator + "','" + 'span-belief-'+item.functor+item.arity + "');}");
+                  deductions.innerHTML = "[deductions]";
+                  belief.appendChild(deductions);
+              }
+              if (bbitem.substring(getRuleHead(bbitem).length) !== "") {
+                  const definition2 = document.createElement('span');
+                  definition2.innerHTML = "<br>&#160;&#160;&#160&#160;&#160;&#160" + bbitem.substring(getRuleHead(bbitem).length) + "<br>";
+                  belief.appendChild(definition2);
+              }
           } else {
               definition.innerHTML = bbitem  + "<br>";
               belief.appendChild(definition);
           }
       } else {
+          const definition = document.createElement('span');
           var annot = getAnnotation(bbitem);
           if (annot != null) {
               definition.innerHTML = bbitem.substr(0,bbitem.indexOf(annot));
@@ -555,14 +568,6 @@ function getInspectionDetails() {
               definition.innerHTML = bbitem  + "<br>";
               belief.appendChild(definition);
           }
-      }
-      if ((item.isRule == true) && (item.deductions !== null) && (item.deductions !== undefined)) {
-        const deductionsdiv = document.createElement('div');
-        deductionsdiv.setAttribute("class", "namespace");
-        belief.appendChild(deductionsdiv);
-        const deductions = document.createElement('details');
-        deductions.innerHTML = "<summary>Deductions</summary>"+item.deductions;
-        deductionsdiv.appendChild(deductions);
       }
       nsdetails.appendChild(belief);
     });
@@ -584,6 +589,23 @@ function getInspectionDetails() {
       footMenu.appendChild(editAsl);
       footMenu.innerHTML += "&#160;&#160;&#160";
     });
+  });
+}
+
+function getDeductions(agent, predicateIndicator, spanbeliefid) {
+  h.get("/agents/" + agent + "/deductions/" + predicateIndicator).then(function(deductions) {
+      var deductionsdetails = document.getElementById("span-deductions-"+predicateIndicator);
+      if (deductionsdetails == null) {
+          const deductionsdiv = document.createElement('div');
+          deductionsdiv.setAttribute("class", "namespace");
+          var belief = document.getElementById(spanbeliefid);
+          belief.appendChild(deductionsdiv);
+          deductionsdetails = document.createElement('span');
+          deductionsdetails.setAttribute("class", "belief");
+          deductionsdetails.setAttribute("id", "span-deductions-"+predicateIndicator);
+          deductionsdiv.appendChild(deductionsdetails);
+      }
+      deductionsdetails.innerHTML = "deductions: "+deductions;
   });
 }
 
@@ -716,6 +738,7 @@ function closeConn() {
 
 window.setAutoUpdateAgInterface = setAutoUpdateAgInterface;
 window.getCurrentAslContent = getCurrentAslContent;
+window.getDeductions = getDeductions;
 window.setAutoSyntaxChecking = setAutoSyntaxChecking;
 window.getInspectionDetails = getInspectionDetails;
 window.updateSuggestions = updateSuggestions;

@@ -4,10 +4,26 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import com.google.gson.JsonParser;
 
 import jacamo.rest.mediation.TranslAg;
 import jason.JasonException;
 import jason.asSemantics.Agent;
+import jason.asSemantics.Unifier;
+import jason.asSyntax.ASSyntax;
+import jason.asSyntax.ListTerm;
+import jason.asSyntax.ListTermImpl;
+import jason.asSyntax.Literal;
+import jason.asSyntax.Term;
+import jason.asSyntax.VarTerm;
+import jason.asSyntax.parser.TokenMgrError;
 import jason.runtime.RuntimeServicesFactory;
 
 public class TranslAgWeb extends TranslAg {
@@ -55,5 +71,44 @@ public class TranslAgWeb extends TranslAg {
         createAgLog(givenName, ag);
         return givenName;
     }
+    
+    /**
+     * get deductions from a given rule (by a predicateIndicator)
+     * 
+     * @param agName
+     * @param predicateIndicator (e.g. parent/2)
+     * @return
+     */
+    public Object getDeductions(String agName, String predicateIndicator) throws TokenMgrError, Exception {
+        Agent ag = getAgent(agName);
+        for (Literal l : ag.getBB()) {
+            if (predicateIndicator.equals(l.getFunctor() + "/" + l.getArity())) {
+                String terms = "";
+                if (l.getArity() > 0) {
+                    for (int i = 0; i < l.getArity(); i++) {
+                        if (i == 0)
+                            terms = "(";
+                        terms += l.getTerm(i).toString();
+                        if (i < l.getArity() - 1)
+                            terms += ", ";
+                        else
+                            terms += ")";
+                    }
+                }
+                Unifier u = execCmd(ag, ASSyntax.parsePlanBody(".findall("+l.getFunctor() + terms+","+l.getFunctor() + terms+",L)"));
+                String deductions = "";
+                for (VarTerm v : u) 
+                    deductions += u.get(v).toString();
+                ListTerm lt = ListTermImpl.parseList(deductions);
+                List<String> predicates = new ArrayList<>();
+                for (Term li : lt) {
+                    predicates.add(((Literal)li).toString());
+                }
+                return predicates;
+            }
+        }
+        return null;
+    }
+
 }
 
