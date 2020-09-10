@@ -3,18 +3,14 @@ package jacamo.web.mediation;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
-
-import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import jacamo.rest.mediation.TranslAg;
 import jason.JasonException;
@@ -37,23 +33,23 @@ public class TranslAgWeb extends TranslAg {
      * Return the agent name from a file path
      * e.g: from 'walking/goto' returns 'goto'
 	 * from './src/test/search/astar' returns 'astar'
-	 * @param agFile
+	 * @param agURI
 	 * @return the name of the agent
 	 */
-	public String getAgentName(String agFile) {
-        agFile = agFile.replaceAll("%2F", "/");
+	public String getAgentName(String agURI) {
+		String agName = agURI.replaceAll("%2F", "/");
 
-        if (agFile.endsWith(".asl")) 
-        	agFile = agFile.substring(0, agFile.lastIndexOf(".asl"));
+        if (agName.endsWith(".asl")) 
+        	agName = agName.substring(0, agName.lastIndexOf(".asl"));
         
-        return agFile.substring(agFile.lastIndexOf("/") + 1);
+        return agName.substring(agName.lastIndexOf("/") + 1);
 	}
 	
 	/**
 	 * Return a full path from a file path
 	 * e.g: from 'walking/goto' returns './src/agt/walking/'
 	 * from './src/test/search/astar' returns './src/test/search/'
-	 * @param agPath
+	 * @param agURI
 	 * @return a full path from './'
 	 */
 	public String getFullpath(String agURI) {
@@ -65,14 +61,23 @@ public class TranslAgWeb extends TranslAg {
         if (agPath.startsWith("/")) 
         	agPath = "." + agPath;
         
-        if (agPath.startsWith("./")) {
+        if (agPath.startsWith("./") || (isURI(agPath))) {
             return agPath.substring(0,agPath.lastIndexOf(getAgentName(agURI)));
         } else {
-            return "./src/agt/" + agPath.substring(0,agPath.lastIndexOf(getAgentName(agURI)));
+        	return "./src/agt/" + agPath.substring(0,agPath.lastIndexOf(getAgentName(agURI)));
         }
 	}
 
-    /**
+	/**
+	 * Return if the string is a URI (starts with http://
+	 * @param agURI
+	 * @return boolean
+	 */
+	public boolean isURI(String agURI) {
+        return agURI.startsWith("http");
+	}
+	
+	/**
      * Create agent and corresponding asl file with the agName if possible, or agName_1, agName_2,...
      * 
      * @param agURI
@@ -90,30 +95,40 @@ public class TranslAgWeb extends TranslAg {
         // set some source for the agent
         Agent ag = getAgent(givenName);
 
-        try {
-            File f = new File(filepath + "/" + agName + ".asl");
-            f.getParentFile().mkdirs();
-            if (!f.exists()) {
-                f.createNewFile();
-                FileOutputStream outputFile = new FileOutputStream(f, false);
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("//Agent created automatically\n\n");
-                stringBuilder.append("!start.\n\n");
-                stringBuilder.append("+!start <- .print(\"Hi\").\n\n");
-                stringBuilder.append("{ include(\"$jacamoJar/templates/common-cartago.asl\") }\n");
-                stringBuilder.append("{ include(\"$jacamoJar/templates/common-moise.asl\") }\n");
-                stringBuilder.append(
-                        "// uncomment the include below to have an agent compliant with its organisation\n");
-                stringBuilder.append("//{ include(\"$moiseJar/asl/org-obedient.asl\") }");
-                byte[] bytes = stringBuilder.toString().getBytes();
-                outputFile.write(bytes);
-                outputFile.close();
+        String agFile = filepath + agName + ".asl";
+        if (isURI(agURI)) {
+        	try {
+                URI uri = new URI(agFile);
+                ag.load(uri.toURL().openStream(), agFile);
+        	} catch (URISyntaxException e) {
+        		e.printStackTrace();
+        	}
+        } else {
+            try {
+                File f = new File(agFile);
+                f.getParentFile().mkdirs();
+                if (!f.exists()) {
+                    f.createNewFile();
+                    FileOutputStream outputFile = new FileOutputStream(f, false);
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append("//Agent created automatically\n\n");
+                    stringBuilder.append("!start.\n\n");
+                    stringBuilder.append("+!start <- .print(\"Hi\").\n\n");
+                    stringBuilder.append("{ include(\"$jacamoJar/templates/common-cartago.asl\") }\n");
+                    stringBuilder.append("{ include(\"$jacamoJar/templates/common-moise.asl\") }\n");
+                    stringBuilder.append(
+                            "// uncomment the include below to have an agent compliant with its organisation\n");
+                    stringBuilder.append("//{ include(\"$moiseJar/asl/org-obedient.asl\") }");
+                    byte[] bytes = stringBuilder.toString().getBytes();
+                    outputFile.write(bytes);
+                    outputFile.close();
+                }
+                ag.load(new FileInputStream(agFile), agFile);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        ag.load(new FileInputStream(filepath + "/" + agName + ".asl"), filepath + "/" + agName + ".asl");
+        
         // ag.setASLSrc("no-inicial.asl");
         createAgLog(givenName, ag);
         return givenName;
