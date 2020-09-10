@@ -41,3 +41,10 @@ out
 .DS_Store
 
 /node_modules/
+
+src/resources/js/d3-graphviz.js
+src/resources/js/d3.js
+src/resources/js/jacamoweb.js
+src/resources/js/vendors~d3-graphviz.js
+src/resources/js/vendors~d3.js
+src/resources/js/vendors~d3~d3-graphviz.js
