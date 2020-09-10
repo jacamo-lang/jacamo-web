@@ -23,6 +23,7 @@ import jason.asSyntax.ListTermImpl;
 import jason.asSyntax.Literal;
 import jason.asSyntax.Term;
 import jason.asSyntax.VarTerm;
+import jason.asSyntax.parser.ParseException;
 import jason.asSyntax.parser.TokenMgrError;
 import jason.runtime.RuntimeServicesFactory;
 
@@ -79,30 +80,37 @@ public class TranslAgWeb extends TranslAg {
      * @param predicateIndicator (e.g. parent/2)
      * @return
      */
-    public Object getDeductions(String agName, String predicateIndicator) throws TokenMgrError, Exception {
+    public Object getDeductions(String agName, String predicateIndicator) {
         Agent ag = getAgent(agName);
         for (Literal l : ag.getBB()) {
             if (predicateIndicator.equals(l.getFunctor() + "/" + l.getArity())) {
-                String terms = "";
-                if (l.getArity() > 0) {
-                    for (int i = 0; i < l.getArity(); i++) {
-                        if (i == 0)
-                            terms = "(";
-                        terms += l.getTerm(i).toString();
-                        if (i < l.getArity() - 1)
-                            terms += ", ";
-                        else
-                            terms += ")";
-                    }
-                }
-                Unifier u = execCmd(ag, ASSyntax.parsePlanBody(".findall("+l.getFunctor() + terms+","+l.getFunctor() + terms+",L)"));
-                String deductions = "";
-                for (VarTerm v : u) 
-                    deductions += u.get(v).toString();
-                ListTerm lt = ListTermImpl.parseList(deductions);
                 List<String> predicates = new ArrayList<>();
-                for (Term li : lt) {
-                    predicates.add(((Literal)li).toString());
+                try {
+                    String terms = "";
+                    if (l.getArity() > 0) {
+                        for (int i = 0; i < l.getArity(); i++) {
+                            if (i == 0)
+                                terms = "(";
+                            terms += l.getTerm(i).toString();
+                            if (i < l.getArity() - 1)
+                                terms += ", ";
+                            else
+                                terms += ")";
+                        }
+                    }
+                    Unifier u;
+                    u = execCmd(ag, ASSyntax.parsePlanBody(".findall("+l.getFunctor() + terms+","+l.getFunctor() + terms+",L)"));
+                    String deductions = "";
+                    for (VarTerm v : u) 
+                        deductions += u.get(v).toString();
+                    ListTerm lt = ListTermImpl.parseList(deductions);
+                    for (Term li : lt) {
+                        predicates.add(((Literal)li).toString());
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                } catch (TokenMgrError e) {
+                    e.printStackTrace();
                 }
                 return predicates;
             }

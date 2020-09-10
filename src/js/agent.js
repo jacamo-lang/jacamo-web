@@ -457,12 +457,12 @@ function autocomplete(inp, arr) {
 
 /* Extract the namespace from a belief */
 getNamespace = (bbitem) => {
-    const REGEX_BB_NAMESPACE = /^\w*(?!\()[::]{2}/;
+    const REGEX_BB_NAMESPACE = /^\w*(?=::)/;
     var ns = REGEX_BB_NAMESPACE.exec(bbitem);
     if (ns === null) {
         return "default";
     } else {
-        return ns[0].slice(0,-2);
+        return ns[0];
     }
 }
 
@@ -479,10 +479,10 @@ getAnnotation = (bbitem) => {
 
 /* Extract the head of the rule */
 getRuleHead = (bbitem) => {
-    const REGEX_RULE_HEAD = /^.*[:]{1}[-]{1}/;
+    const REGEX_RULE_HEAD = /^.*(?=\s:-)/;
     var head = bbitem.match(REGEX_RULE_HEAD);
     if (head != null) {
-        return head[0].slice(0,-3);
+        return head[0];
     } else {
         return bbitem;
     }
@@ -509,6 +509,7 @@ function getInspectionDetails() {
       var beliefs = document.getElementById('details-beliefs');
       if (beliefs == null) {
         beliefs = document.createElement("details");
+        beliefs.setAttribute("open", "");
         beliefs.setAttribute("id", "details-beliefs");
         beliefs.innerHTML = "<summary>Beliefs</summary>";
         inspection.appendChild(beliefs);
@@ -517,9 +518,13 @@ function getInspectionDetails() {
       if (nsdetails == null) {
           const nsdiv = document.createElement('div');
           nsdiv.setAttribute("class", "namespace");
-          beliefs.appendChild(nsdiv);
+          if (namespace !== "default") {
+              beliefs.appendChild(nsdiv);
+          } else {
+              beliefs.prepend(nsdiv);
+          }
           nsdetails = document.createElement("details");
-          nsdetails.innerHTML = "<summary>"+namespace+"</summary>";
+          nsdetails.innerHTML = "<summary>"+namespace+"::</summary>";
           nsdetails.setAttribute("id", 'details-nsbb-'+namespace);
           nsdiv.appendChild(nsdetails);
       }
@@ -535,19 +540,19 @@ function getInspectionDetails() {
               annotation.setAttribute("class", "annotation");
               annotation.innerHTML = annot + "&#160;&#160;&#160";
               belief.appendChild(annotation);
+              /* Experimental button 'deductions'
               if (document.getElementById('span-belief-'+item.functor+item.arity) == null) {
                   belief.setAttribute("id", 'span-belief-'+item.functor+item.arity);
                   const deductions = document.createElement('button');
                   deductions.setAttribute("type", "button");
                   var predicateIndicator = "".concat(item.functor + "%2F" + item.arity);
-                  console.log(predicateIndicator);
                   deductions.setAttribute("onclick", "{getDeductions('" + selectedAgent + "','" + predicateIndicator + "','" + 'span-belief-'+item.functor+item.arity + "');}");
                   deductions.innerHTML = "[deductions]";
                   belief.appendChild(deductions);
-              }
+              }*/
               if (bbitem.substring(getRuleHead(bbitem).length) !== "") {
                   const definition2 = document.createElement('span');
-                  definition2.innerHTML = "<br>&#160;&#160;&#160&#160;&#160;&#160" + bbitem.substring(getRuleHead(bbitem).length) + "<br>";
+                  definition2.innerHTML = ":-<br>&#160;&#160;&#160&#160;&#160;&#160" + bbitem.substring(getRuleHead(bbitem).length + 3) + "<br>";
                   belief.appendChild(definition2);
               }
           } else {
