@@ -1,21 +1,25 @@
 package jacamo.web.mediation;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
-import com.google.gson.JsonParser;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import jacamo.rest.mediation.TranslAg;
 import jason.JasonException;
 import jason.asSemantics.Agent;
+import jason.asSemantics.GoalListenerForMetaEvents;
 import jason.asSemantics.Unifier;
 import jason.asSyntax.ASSyntax;
 import jason.asSyntax.ListTerm;
@@ -30,23 +34,65 @@ import jason.runtime.RuntimeServicesFactory;
 public class TranslAgWeb extends TranslAg {
 
     /**
+     * Return the agent name from a file path
+     * e.g: from 'walking/goto' returns 'goto'
+	 * from './src/test/search/astar' returns 'astar'
+	 * @param agFile
+	 * @return the name of the agent
+	 */
+	public String getAgentName(String agFile) {
+        agFile = agFile.replaceAll("%2F", "/");
+
+        if (agFile.endsWith(".asl")) 
+        	agFile = agFile.substring(0, agFile.lastIndexOf(".asl"));
+        
+        return agFile.substring(agFile.lastIndexOf("/") + 1);
+	}
+	
+	/**
+	 * Return a full path from a file path
+	 * e.g: from 'walking/goto' returns './src/agt/walking/'
+	 * from './src/test/search/astar' returns './src/test/search/'
+	 * @param agPath
+	 * @return a full path from './'
+	 */
+	public String getFullpath(String agURI) {
+        String agPath = agURI.replaceAll("%2F", "/");
+        
+        if (agPath.endsWith(".asl")) 
+        	agPath = agPath.substring(0, agPath.lastIndexOf(".asl"));
+        
+        if (agPath.startsWith("/")) 
+        	agPath = "." + agPath;
+        
+        if (agPath.startsWith("./")) {
+            return agPath.substring(0,agPath.lastIndexOf(getAgentName(agURI)));
+        } else {
+            return "./src/agt/" + agPath.substring(0,agPath.lastIndexOf(getAgentName(agURI)));
+        }
+	}
+
+    /**
      * Create agent and corresponding asl file with the agName if possible, or agName_1, agName_2,...
      * 
-     * @param agName
+     * @param agURI
      * @return
      * @throws Exception
      * @throws JasonException
      */
     @Override
-    public String createAgent(String agName) throws Exception, JasonException {
+    public String createAgent(String agURI) throws Exception, JasonException {
+        String filepath = getFullpath(agURI);
+        String agName = getAgentName(agURI);
+
         String givenName = RuntimeServicesFactory.get().createAgent(agName, null, null, null, null, null, null);
         RuntimeServicesFactory.get().startAgent(givenName);
         // set some source for the agent
         Agent ag = getAgent(givenName);
 
         try {
-
-            File f = new File("src/agt/" + givenName + ".asl");
+            File f = new File(filepath + "/" + agName + ".asl");
+            f.getParentFile().mkdirs();
             if (!f.exists()) {
                 f.createNewFile();
                 FileOutputStream outputFile = new FileOutputStream(f, false);
@@ -67,7 +113,7 @@ public class TranslAgWeb extends TranslAg {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ag.load(new FileInputStream("src/agt/" + givenName + ".asl"), givenName + ".asl");
+        ag.load(new FileInputStream(filepath + "/" + agName + ".asl"), filepath + "/" + agName + ".asl");
         // ag.setASLSrc("no-inicial.asl");
         createAgLog(givenName, ag);
         return givenName;
@@ -118,5 +164,39 @@ public class TranslAgWeb extends TranslAg {
         return null;
     }
 
+	public void loadASLfileForm(String agName, String aslFileName, InputStream uploadedInputStream)
+			throws IOException, ParseException, JasonException {
+		Agent ag = getAgent(agName);
+		if (ag != null) {
+			System.out.println("agName: " + agName);
+			System.out.println("restAPI://" + aslFileName);
+			System.out.println("uis: " + uploadedInputStream);
+
+			// Save new code
+			StringBuilder stringBuilder = new StringBuilder();
+			String line = null;
+
+			FileOutputStream outputFile = new FileOutputStream(getFullpath(aslFileName), false);
+			BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
+
+			while ((line = out.readLine()) != null) {
+				stringBuilder.append(line + "\n");
+			}
+
+			byte[] bytes = stringBuilder.toString().getBytes();
+			outputFile.write(bytes);
+			outputFile.close();
+
+			// Reload agent with this new code
+			ag.getPL().clear();
+
+			ag.parseAS(new FileInputStream(getFullpath(aslFileName)), getFullpath(aslFileName));
+			if (ag.getPL().hasMetaEventPlans())
+				ag.getTS().addGoalListener(new GoalListenerForMetaEvents(ag.getTS()));
+
+			ag.loadKqmlPlans();
+		}
+
+	}
 }
 

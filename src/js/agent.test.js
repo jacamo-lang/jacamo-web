@@ -31,8 +31,16 @@ test('o-namespace', () => {
     });
 });
 
-test('default-namespace', () => {
-    defaultns.forEach(function(item) {
-        expect(getNamespace(item)).toBe('default');
-    });
+test('getAgentName', () => {
+    expect(getAgentName("./src/test/search/astar")).toBe('astar');
+    expect(getAgentName("walking/goto")).toBe('goto');
+    expect(getAgentName("bob.asl")).toBe('bob');
+    expect(getAgentName("/src/test/alice.asl")).toBe('alice');
+});
+
+test('getAgUri', () => {
+    expect(getAgUri("./src/test/search/astar")).toBe('.%2Fsrc%2Ftest%2Fsearch%2Fastar');
+    expect(getAgUri("walking/goto")).toBe('walking%2Fgoto');
+    expect(getAgUri("bob.asl")).toBe('bob');
+    expect(getAgUri("/src/test/alice.asl")).toBe('.%2Fsrc%2Ftest%2Falice');
 });

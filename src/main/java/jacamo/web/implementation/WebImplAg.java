@@ -214,38 +214,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     public Response loadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName,
             @FormDataParam("aslfile") InputStream uploadedInputStream) {
         try {
-            Agent ag = tAg.getAgent(agName);
-            if (ag != null) {
-                System.out.println("agName: " + agName);
-                System.out.println("restAPI://" + aslFileName);
-                System.out.println("uis: " + uploadedInputStream);
-
-                //Save new code
-                StringBuilder stringBuilder = new StringBuilder();
-                String line = null;
-
-                FileOutputStream outputFile = new FileOutputStream("src/agt/" + aslFileName, false);
-                BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
-
-                while ((line = out.readLine()) != null) {
-                    stringBuilder.append(line + "\n");
-                }
-
-                byte[] bytes = stringBuilder.toString().getBytes();
-                outputFile.write(bytes);
-                outputFile.close();
-
-                //Reload agent with this new code
-                ag.getPL().clear();
-
-                ag.parseAS(new FileInputStream("src/agt/" + aslFileName), aslFileName);
-                if (ag.getPL().hasMetaEventPlans())
-                    ag.getTS().addGoalListener(new GoalListenerForMetaEvents(ag.getTS()));
-
-                ag.loadKqmlPlans();
-
-                return Response.ok().build();
-            }
+            tAg.loadASLfileForm(agName, aslFileName, uploadedInputStream);
 
             return Response.status(500, "Internal Server Error! Agent'" + agName + " Does not exists!").build();
 

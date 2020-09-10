@@ -179,14 +179,38 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
   navElement.appendChild(lnew);
 }
 
+getAgentName = (agFile) => {
+    var agentName = agFile.replace(/\//g, "%2F");
+
+    if (agentName.endsWith(".asl"))
+        agentName = agentName.slice(0, -4);
+
+    if (agentName.lastIndexOf("%2F") > 0)
+        return agentName.substring(agentName.lastIndexOf("%2F") + 3);
+
+    return agentName;
+}
+
+getAgUri = (agFile) => {
+    var agentURI = agFile.replace(/\//g, "%2F");
+
+    if (agentURI.startsWith("%2F"))
+        agentURI = "." + agentURI;
+
+    if (agentURI.endsWith(".asl"))
+        agentURI = agentURI.slice(0, -4);
+
+    return agentURI;
+}
+
 /* create agent */
 function newAg() {
-  h.post('/agents/' + document.getElementById('createAgent').value);
-  window.location.assign('./agent.html?agent=' + document.getElementById('createAgent').value);
+    h.post('/agents/' + getAgUri(document.getElementById('createAgent').value));
+
+    window.location.assign('./agent.html?agent=' + getAgentName(document.getElementById('createAgent').value));
 }
 
 /* KILL AN AGENT */
-
 function killAg() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
@@ -457,7 +481,7 @@ function autocomplete(inp, arr) {
 
 /* Extract the namespace from a belief */
 getNamespace = (bbitem) => {
-    const REGEX_BB_NAMESPACE = /^\w*(?=::)/;
+    const REGEX_BB_NAMESPACE = /^\w*(?=::)/; // Code snippet: https://regexr.com/5bp9e
     var ns = REGEX_BB_NAMESPACE.exec(bbitem);
     if (ns === null) {
         return "default";
@@ -468,7 +492,7 @@ getNamespace = (bbitem) => {
 
 /* Extract the annotation part from a belief */
 getAnnotation = (bbitem) => {
-    const REGEX_BB_ANNOTATION = /\[([^\]]+)\]$/;
+    const REGEX_BB_ANNOTATION = /\[([^\]]+)\]$/; // Code snippet: https://regexr.com/5bpa9
     var annot = bbitem.match(REGEX_BB_ANNOTATION);
     if (annot != null) {
         return annot[0];
@@ -479,7 +503,7 @@ getAnnotation = (bbitem) => {
 
 /* Extract the head of the rule */
 getRuleHead = (bbitem) => {
-    const REGEX_RULE_HEAD = /^.*(?=\s:-)/;
+    const REGEX_RULE_HEAD = /^.*(?=\s:-)/; // Code snippet: https://regexr.com/5bpal
     var head = bbitem.match(REGEX_RULE_HEAD);
     if (head != null) {
         return head[0];
