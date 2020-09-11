@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -48,7 +49,6 @@ import jacamo.web.exception.UnderstandabilityException;
 import jacamo.web.exception.UsefulnessException;
 import jacamo.web.mediation.TranslAgWeb;
 import jason.asSemantics.Agent;
-import jason.asSemantics.GoalListenerForMetaEvents;
 import jason.asSyntax.Atom;
 import jason.asSyntax.InternalActionLiteral;
 import jason.asSyntax.Literal;
@@ -136,24 +136,10 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     @Produces(MediaType.TEXT_PLAIN)
     public Response getLoadASLfileForm(@PathParam("agentname") String agName,
             @PathParam("aslfilename") String aslFileName) {
-
-        StringBuilder so = new StringBuilder();
         try {
-            BufferedReader in = null;
-            File f = new File("src/agt/" + aslFileName);
-            if (f.exists()) {
-                in = new BufferedReader(new FileReader(f));
-            } else {
-                in = new BufferedReader(
-                        new InputStreamReader(WebImpl.class.getResource("../src/agt/" + aslFileName).openStream()));
-            }
-            String line = in.readLine();
-            while (line != null) {
-                so.append(line + "\n");
-                line = in.readLine();
-            }
-            return Response.ok(so.toString()).build();
 
+            return Response.ok(tAg.getASLFileContent(aslFileName)).build();
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -162,6 +148,32 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     }
     
     /**
+     * Updates an Jason agent code file (.asl) refreshing given agent's execution
+     * plans immediately. Current intentions are kept running with old code.
+     * 
+     * @param agName              name of the agent
+     * @param aslFileName         name of the file (including .asl extension)
+     * @param uploadedInputStream new content for the given asl file name
+     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
+     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
+     */
+    @Path("/{agentname}/aslfiles/{aslfilename}")
+    @PUT
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response loadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName,
+            @FormDataParam("aslfile") InputStream uploadedInputStream) {
+        try {
+            tAg.loadASLFileContent(agName, aslFileName, uploadedInputStream);
+
+            return Response.status(500, "Internal Server Error! Agent'" + agName + " Does not exists!").build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Response.status(500).build();
+    }
+
     /**
      * Returns json listing all agent's source files eg: ["file:src/agt/bob.asl"]
      * 
@@ -193,36 +205,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
         }
 
         return Response.status(500).build();
-    }
-
-    /**
-     * Updates an Jason agent code file (.asl) refreshing given agent's execution
-     * plans immediately. Current intentions are kept running with old code.
-     * 
-     * @param agName              name of the agent
-     * @param aslFileName         name of the file (including .asl extension)
-     * @param uploadedInputStream new content for the given asl file name
-     * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @Path("/{agentname}/aslfiles/{aslfilename}")
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response loadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName,
-            @FormDataParam("aslfile") InputStream uploadedInputStream) {
-        try {
-            tAg.loadASLfileForm(agName, aslFileName, uploadedInputStream);
-
-            return Response.status(500, "Internal Server Error! Agent'" + agName + " Does not exists!").build();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Response.status(500).build();
-    }
-    
-    
+    }    
     
     /**
      * Parse an Jason agent code file (.asl) answering whether it has sintax errors

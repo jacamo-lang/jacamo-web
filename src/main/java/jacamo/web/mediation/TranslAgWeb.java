@@ -3,16 +3,24 @@ package jacamo.web.mediation;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
+
 import jacamo.rest.mediation.TranslAg;
+import jacamo.web.implementation.WebImpl;
 import jason.JasonException;
 import jason.asSemantics.Agent;
 import jason.asSemantics.GoalListenerForMetaEvents;
@@ -26,18 +34,39 @@ import jason.asSyntax.VarTerm;
 import jason.asSyntax.parser.ParseException;
 import jason.asSyntax.parser.TokenMgrError;
 import jason.runtime.RuntimeServicesFactory;
+import jason.runtime.SourcePath;
 
 public class TranslAgWeb extends TranslAg {
 
     /**
+     * Converts the transport format to a valid URI
+     * eg.: 'src%2Ftest%2Fsearch' returns 'file:src/test/search.asl'
+	 * @param agURI
+	 * @return a formatted URI
+	 */
+	public String getFormattedURI(String agURI) {
+		String uri = agURI.replaceAll("%2F", "/");
+		
+		uri = uri.replaceAll("\\\\", "/");
+
+        if (!uri.endsWith(".asl")) 
+        	uri = uri + ".asl";
+
+		SourcePath aslSourcePath = new SourcePath();
+        uri = aslSourcePath.fixPath(uri);
+        
+        return uri;
+	}
+
+	/**
      * Return the agent name from a file path
      * e.g: from 'walking/goto' returns 'goto'
-	 * from './src/test/search/astar' returns 'astar'
+	 * from './src/test/search/astar.asl' returns 'astar'
 	 * @param agURI
 	 * @return the name of the agent
 	 */
 	public String getAgentName(String agURI) {
-		String agName = agURI.replaceAll("%2F", "/");
+		String agName = agURI;
 
         if (agName.endsWith(".asl")) 
         	agName = agName.substring(0, agName.lastIndexOf(".asl"));
@@ -46,34 +75,11 @@ public class TranslAgWeb extends TranslAg {
 	}
 	
 	/**
-	 * Return a full path from a file path
-	 * e.g: from 'walking/goto' returns './src/agt/walking/'
-	 * from './src/test/search/astar' returns './src/test/search/'
-	 * @param agURI
-	 * @return a full path from './'
-	 */
-	public String getFullpath(String agURI) {
-        String agPath = agURI.replaceAll("%2F", "/");
-        
-        if (agPath.endsWith(".asl")) 
-        	agPath = agPath.substring(0, agPath.lastIndexOf(".asl"));
-        
-        if (agPath.startsWith("/")) 
-        	agPath = "." + agPath;
-        
-        if (agPath.startsWith("./") || (isURI(agPath))) {
-            return agPath.substring(0,agPath.lastIndexOf(getAgentName(agURI)));
-        } else {
-        	return "./src/agt/" + agPath.substring(0,agPath.lastIndexOf(getAgentName(agURI)));
-        }
-	}
-
-	/**
 	 * Return if the string is a URI (starts with http://
 	 * @param agURI
 	 * @return boolean
 	 */
-	public boolean isURI(String agURI) {
+	public boolean isRemoteURI(String agURI) {
         return agURI.startsWith("http");
 	}
 	
@@ -87,7 +93,7 @@ public class TranslAgWeb extends TranslAg {
      */
     @Override
     public String createAgent(String agURI) throws Exception, JasonException {
-        String filepath = getFullpath(agURI);
+        String formattedURI = getFormattedURI(agURI);
         String agName = getAgentName(agURI);
 
         String givenName = RuntimeServicesFactory.get().createAgent(agName, null, null, null, null, null, null);
@@ -95,17 +101,17 @@ public class TranslAgWeb extends TranslAg {
         // set some source for the agent
         Agent ag = getAgent(givenName);
 
-        String agFile = filepath + agName + ".asl";
-        if (isURI(agURI)) {
+        if (isRemoteURI(agURI)) {
         	try {
-                URI uri = new URI(agFile);
-                ag.load(uri.toURL().openStream(), agFile);
+                URI uri = new URI(formattedURI);
+                ag.load(uri.toURL().openStream(), formattedURI);
+                ag.setASLSrc(formattedURI);
         	} catch (URISyntaxException e) {
         		e.printStackTrace();
         	}
         } else {
             try {
-                File f = new File(agFile);
+                File f = new File(formattedURI);
                 f.getParentFile().mkdirs();
                 if (!f.exists()) {
                     f.createNewFile();
@@ -123,7 +129,8 @@ public class TranslAgWeb extends TranslAg {
                     outputFile.write(bytes);
                     outputFile.close();
                 }
-                ag.load(new FileInputStream(agFile), agFile);
+                ag.load(new FileInputStream(formattedURI), formattedURI);
+                ag.setASLSrc(formattedURI);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -179,7 +186,17 @@ public class TranslAgWeb extends TranslAg {
         return null;
     }
 
-	public void loadASLfileForm(String agName, String aslFileName, InputStream uploadedInputStream)
+    /**
+     * Agent agName loads an asl file content
+     * 
+     * @param agName
+     * @param aslFileName
+     * @param uploadedInputStream
+     * @throws IOException
+     * @throws ParseException
+     * @throws JasonException
+     */
+	public void loadASLFileContent(String agName, String aslFileName, InputStream uploadedInputStream)
 			throws IOException, ParseException, JasonException {
 		Agent ag = getAgent(agName);
 		if (ag != null) {
@@ -191,7 +208,7 @@ public class TranslAgWeb extends TranslAg {
 			StringBuilder stringBuilder = new StringBuilder();
 			String line = null;
 
-			FileOutputStream outputFile = new FileOutputStream(getFullpath(aslFileName), false);
+			FileOutputStream outputFile = new FileOutputStream(getFormattedURI(aslFileName), false);
 			BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
 
 			while ((line = out.readLine()) != null) {
@@ -205,7 +222,7 @@ public class TranslAgWeb extends TranslAg {
 			// Reload agent with this new code
 			ag.getPL().clear();
 
-			ag.parseAS(new FileInputStream(getFullpath(aslFileName)), getFullpath(aslFileName));
+			ag.parseAS(new FileInputStream(getFormattedURI(aslFileName)), getFormattedURI(aslFileName));
 			if (ag.getPL().hasMetaEventPlans())
 				ag.getTS().addGoalListener(new GoalListenerForMetaEvents(ag.getTS()));
 
@@ -213,5 +230,53 @@ public class TranslAgWeb extends TranslAg {
 		}
 
 	}
+	
+	/**
+	 * Return the content of an asl file
+	 * 
+	 * @param aslURI
+	 * @return
+	 * @throws IOException
+	 */
+	public String getASLFileContent(String aslURI) throws IOException {
+		StringBuilder so = new StringBuilder();
+		BufferedReader in = getFileBuffer(aslURI);
+		String line = in.readLine();
+		while (line != null) {
+			so.append(line + "\n");
+			line = in.readLine();
+		}
+		return so.toString();
+	}
+	
+	/**
+	 * Return a buffer to a file from the given URI. If not exists returns null.
+	 * 
+	 * 
+	 * @param aslURI
+	 * @return a BufferedReader or null
+	 * @throws IOException
+	 */
+	public BufferedReader getFileBuffer(String aslURI) throws IOException {
+
+        String formattedURI = getFormattedURI(aslURI);
+        
+		BufferedReader in = null;
+		File f = new File(formattedURI);
+		if (f.exists()) {
+			in = new BufferedReader(new FileReader(f));
+		} else {
+            try {
+                URI uri = new URI(formattedURI);
+    			in = new BufferedReader(
+    					new InputStreamReader(uri.toURL().openStream()));
+            } catch (MalformedURLException | URISyntaxException e) {
+    			in = new BufferedReader(
+    					new InputStreamReader(WebImpl.class.getResource(formattedURI).openStream()));
+			}
+		}
+		return in;
+	}
+
 }
 
