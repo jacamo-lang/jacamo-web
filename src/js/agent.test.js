@@ -32,15 +32,19 @@ test('o-namespace', () => {
 });
 
 test('getAgentName', () => {
-    expect(getAgentName("./src/test/search/astar")).toBe('astar');
-    expect(getAgentName("walking/goto")).toBe('goto');
+    expect(getAgentName(".%2Fsrc%2Ftest%2Fsearch%2Fastar")).toBe('astar');
+    expect(getAgentName("walking%2Fgoto")).toBe('goto');
     expect(getAgentName("bob.asl")).toBe('bob');
-    expect(getAgentName("/src/test/alice.asl")).toBe('alice');
+    expect(getAgentName("%2Fsrc%2Ftest%2Falice.asl")).toBe('alice');
+    expect(getAgentName("http:%2F%2Facme.com%2Fbob_1")).toBe('bob_1');
+    expect(getAgentName("http:%2F%2Facme.com%2Falice.asl")).toBe('alice');
 });
 
-test('getAgUri', () => {
-    expect(getAgUri("./src/test/search/astar")).toBe('.%2Fsrc%2Ftest%2Fsearch%2Fastar');
-    expect(getAgUri("walking/goto")).toBe('walking%2Fgoto');
-    expect(getAgUri("bob.asl")).toBe('bob');
-    expect(getAgUri("/src/test/alice.asl")).toBe('.%2Fsrc%2Ftest%2Falice');
+test('getTransportURI', () => {
+    expect(getTransportURI("./src/test/search/astar")).toBe('.%2Fsrc%2Ftest%2Fsearch%2Fastar.asl');
+    expect(getTransportURI("walking/goto")).toBe('walking%2Fgoto.asl');
+    expect(getTransportURI("bob.asl")).toBe('bob.asl');
+    expect(getTransportURI("/src/test/alice.asl")).toBe('%2Fsrc%2Ftest%2Falice.asl');
+    expect(getTransportURI("http://acme.com/bob_1")).toBe('http:%2F%2Facme.com%2Fbob_1.asl');
+    expect(getTransportURI("http://acme.com/alice.asl")).toBe('http:%2F%2Facme.com%2Falice.asl');
 });

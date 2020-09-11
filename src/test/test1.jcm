@@ -1,0 +1,7 @@
+mas main {
+
+    agent one
+
+    platform: jacamo.web.JCMWeb("--main 2181") // starts platform on port 2181
+
+}

@@ -134,7 +134,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     @Path("/{agentname}/aslfiles/{aslfilename}")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public Response getLoadASLfileForm(@PathParam("agentname") String agName,
+    public Response getASLFileContent(@PathParam("agentname") String agName,
             @PathParam("aslfilename") String aslFileName) {
         try {
 
@@ -158,7 +158,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
     @Path("/{agentname}/aslfiles/{aslfilename}")
-    @PUT
+    @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response loadASLfileForm(@PathParam("agentname") String agName, @PathParam("aslfilename") String aslFileName,
             @FormDataParam("aslfile") InputStream uploadedInputStream) {

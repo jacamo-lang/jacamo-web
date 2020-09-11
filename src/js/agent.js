@@ -16,8 +16,7 @@ toastr.options.preventDuplicates = true;
 function getCurrentAslContent() {
   var selectedAgent = new URL(location.href).searchParams.get('agent');
   var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
-
-  h.get("/agents/" + selectedAgent + "/aslfiles/" + selectedASLFile).then(function(response) {
+  h.get("/agents/" + selectedAgent + "/aslfiles/" + getTransportURI(selectedASLFile)).then(function(response) {
     const submit = document.createElement('button');
     submit.setAttribute("type", "submit");
     submit.setAttribute("onclick", "window.location.href='./agent.html?agent=" + selectedAgent + "';");
@@ -40,7 +39,7 @@ function getCurrentAslContent() {
     document.getElementById("footer_menu").appendChild(check);
 
     const form = document.getElementById("usrform");
-    form.setAttribute("action", "./agents/" + selectedAgent + "/aslfiles/" + selectedASLFile);
+    form.setAttribute("action", "./agents/" + selectedAgent + "/aslfiles/" + getTransportURI(selectedASLFile));
     createAlsEditor(response);
   });
 }
@@ -69,10 +68,13 @@ function createAlsEditor(content) {
     textarea.value = aslEditor.getValue();
     var selectedAgent = new URL(location.href).searchParams.get('agent');
     var selectedASLFile = new URL(location.href).searchParams.get('aslfile');
-    h.post("/agents/" + selectedAgent + "/aslfiles/" + selectedASLFile, new FormData(e.target)).then(function(response) {
+    console.log("/agents/");
+    h.post("/agents/" + selectedAgent + "/aslfiles/" + getTransportURI(selectedASLFile), new FormData(e.target)).then(function(response) {
+      console.log("/agents/" + selectedAgent + "/aslfiles/" + getTransportURI(selectedASLFile));
       localStorage.setItem("agentBuffer", response);
       window.location.replace("./agent.html?agent=" + selectedAgent);
     });
+    console.log("/agents/");
     e.preventDefault();
   }, true);
 }
@@ -89,7 +91,7 @@ function syntaxCheck() {
   let data = "--" + boundary + "\r\ncontent-disposition: form-data; name=aslfile\r\n\r\n" + aslEditor.getValue() + "\r\n--" + boundary + "--";
 
   var check = document.getElementById("check");
-  h.post("/agents/" + selectedAgent + "/aslfiles/" + selectedASLFile + "/parse", data, 'multipart/form-data; boundary=' + boundary).then(function(response) {
+  h.post("/agents/" + selectedAgent + "/aslfiles/" + getTransportURI(selectedASLFile) + "/parse", data, 'multipart/form-data; boundary=' + boundary).then(function(response) {
     check.style.color = "ForestGreen"; /*FireBrick DarkGoldenRod ForestGreen*/
     check.innerHTML = "&#160&#160&#160&#160&#160"+response;
     aslEditor.setTheme("ace/theme/textmate");
@@ -180,7 +182,7 @@ function updateAgentsMenu(nav, agents, addCloseButton) {
 }
 
 getAgentName = (agFile) => {
-    var agentName = agFile.replace(/\//g, "%2F");
+    var agentName = agFile;
 
     if (agentName.endsWith(".asl"))
         agentName = agentName.slice(0, -4);
@@ -191,23 +193,20 @@ getAgentName = (agFile) => {
     return agentName;
 }
 
-getAgUri = (agFile) => {
+getTransportURI = (agFile) => {
     var agentURI = agFile.replace(/\//g, "%2F");
 
-    if (agentURI.startsWith("%2F"))
-        agentURI = "." + agentURI;
-
-    if (agentURI.endsWith(".asl"))
-        agentURI = agentURI.slice(0, -4);
+    if (!agentURI.endsWith(".asl"))
+        agentURI = agentURI + ".asl";
 
     return agentURI;
 }
 
 /* create agent */
 function newAg() {
-    h.post('/agents/' + getAgUri(document.getElementById('createAgent').value));
+    h.post('/agents/' + getTransportURI(document.getElementById('createAgent').value));
 
-    window.location.assign('./agent.html?agent=' + getAgentName(document.getElementById('createAgent').value));
+    window.location.assign('./agent.html?agent=' + getAgentName(getTransportURI(document.getElementById('createAgent').value)));
 }
 
 /* KILL AN AGENT */
@@ -608,12 +607,13 @@ function getInspectionDetails() {
     alsfiles.forEach(function(item) {
       editAsl = document.createElement("a");
       if (item.lastIndexOf("/") > 0) {
+        /* basename refers to a single file name eg: from "file:src/agt/bob.asl" it is "bob.asl" */
         var basename = item.substr(item.lastIndexOf("/") + 1, item.length - 1);
         editAsl.innerHTML = basename;
-        editAsl.setAttribute('href', './agent_editor.html?aslfile=' + basename + '&agent=' + selectedAgent);
+        editAsl.setAttribute('href', './agent_editor.html?agent=' + selectedAgent + '&aslfile=' + getTransportURI(item));
       } else {
         editAsl.innerHTML = item;
-        editAsl.setAttribute('href', './agent_editor.html?aslfile=' + item + '&agent=' + selectedAgent);
+        editAsl.setAttribute('href', './agent_editor.html?agent=' + selectedAgent + '&aslfile=' + getTransportURI(item));
       }
       footMenu.appendChild(editAsl);
       footMenu.innerHTML += "&#160;&#160;&#160";

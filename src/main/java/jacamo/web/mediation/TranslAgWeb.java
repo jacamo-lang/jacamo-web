@@ -5,22 +5,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
-
 import jacamo.rest.mediation.TranslAg;
-import jacamo.web.implementation.WebImpl;
 import jason.JasonException;
 import jason.asSemantics.Agent;
 import jason.asSemantics.GoalListenerForMetaEvents;
@@ -55,9 +48,26 @@ public class TranslAgWeb extends TranslAg {
 		SourcePath aslSourcePath = new SourcePath();
         uri = aslSourcePath.fixPath(uri);
         
+        if (!uri.contains("/"))
+        	uri = "src/agt/" + uri;
+        
         return uri;
 	}
 
+    /**
+     * Converts a uri like file:path/to to 
+     * a local path like path/to
+	 * @param uri as string
+	 * @return a local path
+	 */
+	public String uriToLocaPath(String uri) {
+		String path = uri;
+		
+        if (path.startsWith("file:"))
+        	path = path.substring(5);
+        
+        return path;
+	}
 	/**
      * Return the agent name from a file path
      * e.g: from 'walking/goto' returns 'goto'
@@ -75,15 +85,6 @@ public class TranslAgWeb extends TranslAg {
 	}
 	
 	/**
-	 * Return if the string is a URI (starts with http://
-	 * @param agURI
-	 * @return boolean
-	 */
-	public boolean isRemoteURI(String agURI) {
-        return agURI.startsWith("http");
-	}
-	
-	/**
      * Create agent and corresponding asl file with the agName if possible, or agName_1, agName_2,...
      * 
      * @param agURI
@@ -91,55 +92,46 @@ public class TranslAgWeb extends TranslAg {
      * @throws Exception
      * @throws JasonException
      */
-    @Override
-    public String createAgent(String agURI) throws Exception, JasonException {
-        String formattedURI = getFormattedURI(agURI);
-        String agName = getAgentName(agURI);
+	@Override
+	public String createAgent(String agURI) throws Exception, JasonException {
+		String formattedURI = getFormattedURI(agURI);
+		String agName = getAgentName(agURI);
 
-        String givenName = RuntimeServicesFactory.get().createAgent(agName, null, null, null, null, null, null);
-        RuntimeServicesFactory.get().startAgent(givenName);
-        // set some source for the agent
-        Agent ag = getAgent(givenName);
+		System.out.println(formattedURI);
 
-        if (isRemoteURI(agURI)) {
-        	try {
-                URI uri = new URI(formattedURI);
-                ag.load(uri.toURL().openStream(), formattedURI);
-                ag.setASLSrc(formattedURI);
-        	} catch (URISyntaxException e) {
-        		e.printStackTrace();
-        	}
-        } else {
-            try {
-                File f = new File(formattedURI);
-                f.getParentFile().mkdirs();
-                if (!f.exists()) {
-                    f.createNewFile();
-                    FileOutputStream outputFile = new FileOutputStream(f, false);
-                    StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.append("//Agent created automatically\n\n");
-                    stringBuilder.append("!start.\n\n");
-                    stringBuilder.append("+!start <- .print(\"Hi\").\n\n");
-                    stringBuilder.append("{ include(\"$jacamoJar/templates/common-cartago.asl\") }\n");
-                    stringBuilder.append("{ include(\"$jacamoJar/templates/common-moise.asl\") }\n");
-                    stringBuilder.append(
-                            "// uncomment the include below to have an agent compliant with its organisation\n");
-                    stringBuilder.append("//{ include(\"$moiseJar/asl/org-obedient.asl\") }");
-                    byte[] bytes = stringBuilder.toString().getBytes();
-                    outputFile.write(bytes);
-                    outputFile.close();
-                }
-                ag.load(new FileInputStream(formattedURI), formattedURI);
-                ag.setASLSrc(formattedURI);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        
-        // ag.setASLSrc("no-inicial.asl");
-        createAgLog(givenName, ag);
-        return givenName;
-    }
+		String givenName = RuntimeServicesFactory.get().createAgent(agName, null, null, null, null, null, null);
+		RuntimeServicesFactory.get().startAgent(givenName);
+		// set some source for the agent
+		Agent ag = getAgent(givenName);
+
+		InputStream in = getFileBuffer(agURI);
+		if (in != null) {
+			ag.load(in, formattedURI);
+			ag.setASLSrc(formattedURI);
+		} else {
+			File f = new File(formattedURI);
+			f.getParentFile().mkdirs();
+			f.createNewFile();
+			FileOutputStream outputFile = new FileOutputStream(f, false);
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("//Agent created automatically\n\n");
+			stringBuilder.append("!start.\n\n");
+			stringBuilder.append("+!start <- .print(\"Hi\").\n\n");
+			stringBuilder.append("{ include(\"$jacamoJar/templates/common-cartago.asl\") }\n");
+			stringBuilder.append("{ include(\"$jacamoJar/templates/common-moise.asl\") }\n");
+			stringBuilder.append("// uncomment the include below to have an agent compliant with its organisation\n");
+			stringBuilder.append("//{ include(\"$moiseJar/asl/org-obedient.asl\") }");
+			byte[] bytes = stringBuilder.toString().getBytes();
+			outputFile.write(bytes);
+			outputFile.close();
+			ag.load(new FileInputStream(formattedURI), formattedURI);
+			ag.setASLSrc(formattedURI);
+		}
+
+		// ag.setASLSrc("no-inicial.asl");
+		createAgLog(givenName, ag);
+		return givenName;
+	}
     
     /**
      * get deductions from a given rule (by a predicateIndicator)
@@ -200,15 +192,11 @@ public class TranslAgWeb extends TranslAg {
 			throws IOException, ParseException, JasonException {
 		Agent ag = getAgent(agName);
 		if (ag != null) {
-			System.out.println("agName: " + agName);
-			System.out.println("restAPI://" + aslFileName);
-			System.out.println("uis: " + uploadedInputStream);
-
 			// Save new code
 			StringBuilder stringBuilder = new StringBuilder();
 			String line = null;
 
-			FileOutputStream outputFile = new FileOutputStream(getFormattedURI(aslFileName), false);
+			FileOutputStream outputFile = new FileOutputStream(uriToLocaPath(aslFileName), false);
 			BufferedReader out = new BufferedReader(new InputStreamReader(uploadedInputStream));
 
 			while ((line = out.readLine()) != null) {
@@ -222,7 +210,7 @@ public class TranslAgWeb extends TranslAg {
 			// Reload agent with this new code
 			ag.getPL().clear();
 
-			ag.parseAS(new FileInputStream(getFormattedURI(aslFileName)), getFormattedURI(aslFileName));
+			ag.parseAS(new FileInputStream(uriToLocaPath(aslFileName)), uriToLocaPath(aslFileName));
 			if (ag.getPL().hasMetaEventPlans())
 				ag.getTS().addGoalListener(new GoalListenerForMetaEvents(ag.getTS()));
 
@@ -240,7 +228,7 @@ public class TranslAgWeb extends TranslAg {
 	 */
 	public String getASLFileContent(String aslURI) throws IOException {
 		StringBuilder so = new StringBuilder();
-		BufferedReader in = getFileBuffer(aslURI);
+		BufferedReader in = new BufferedReader(new InputStreamReader(getFileBuffer(aslURI)));
 		String line = in.readLine();
 		while (line != null) {
 			so.append(line + "\n");
@@ -252,30 +240,31 @@ public class TranslAgWeb extends TranslAg {
 	/**
 	 * Return a buffer to a file from the given URI. If not exists returns null.
 	 * 
-	 * 
 	 * @param aslURI
 	 * @return a BufferedReader or null
 	 * @throws IOException
 	 */
-	public BufferedReader getFileBuffer(String aslURI) throws IOException {
+	public InputStream getFileBuffer(String aslURI) {
+		String formattedURI = getFormattedURI(aslURI);
 
-        String formattedURI = getFormattedURI(aslURI);
-        
-		BufferedReader in = null;
 		File f = new File(formattedURI);
 		if (f.exists()) {
-			in = new BufferedReader(new FileReader(f));
+			try {
+				return new FileInputStream(f);
+			} catch (FileNotFoundException e) {
+				return null;
+			}
 		} else {
-            try {
-                URI uri = new URI(formattedURI);
-    			in = new BufferedReader(
-    					new InputStreamReader(uri.toURL().openStream()));
-            } catch (MalformedURLException | URISyntaxException e) {
-    			in = new BufferedReader(
-    					new InputStreamReader(WebImpl.class.getResource(formattedURI).openStream()));
+			try {
+				URI uri = new URI(formattedURI);
+				if (uri.isAbsolute()) {
+					return uri.toURL().openStream();
+				} 
+			} catch (URISyntaxException | IOException e) {
+				return null;
 			}
 		}
-		return in;
+		return null;
 	}
 
 }
