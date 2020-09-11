@@ -3,8 +3,6 @@ package jacamo.web.implementation;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -164,17 +162,16 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     }
     
     /**
-     * Returns PLAIN TEXT of the context of an Jason agent code file (.asl). Besides
-     * the asl filename it wants the agent's name for agent's refreshing commands.
+    /**
+     * Returns json listing all agent's source files eg: ["file:src/agt/bob.asl"]
      * 
      * @param agName      name of the agent
-     * @param aslFileName name of the file (including .asl extension)
      * @return HTTP 200 Response (ok status) or 500 Internal Server Error in case of
      *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
      */
     @Path("/{agentname}/aslfiles")
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getASLfiles(@PathParam("agentname") String agName) {
 
         // get agent's plans
