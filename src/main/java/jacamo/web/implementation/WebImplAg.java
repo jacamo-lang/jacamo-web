@@ -191,6 +191,10 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
 
         Set<String> files = new HashSet<>();
         try {
+        	// Adds agent's asl source
+        	files.add(ag.getASLSrc());
+        	
+        	// Adds all asl files in hich this agent has any plan from
             PlanLibrary pl = ag.getPL();
             for (Plan plan : pl.getPlans()) {
                 // skip plans from jar files (usually system's plans)
