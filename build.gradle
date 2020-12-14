@@ -25,9 +25,7 @@ java {
 
 repositories {
 	mavenCentral()
-	maven { url "http://jacamo.sourceforge.net/maven2" }
 	maven { url "https://raw.github.com/jacamo-lang/mvn-repo/master" }
-	maven { url "https://jade.tilab.com/maven/" }
 	flatDir {
 		dirs 'libs'
 	}
@@ -48,7 +46,7 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/net.openhft/compiler
 	implementation 'net.openhft:compiler:2.3.1'
-    testCompile group: 'junit', name: 'junit', version: '4.12'	
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 sourceSets {
