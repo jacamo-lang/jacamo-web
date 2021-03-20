@@ -8,13 +8,17 @@
 
     (see jacamo/doc/jcm.html for more information about what can be defined in this file)
 
-    JaCaMo <VERSION> <DATE>
+
+    * * * * * * * * * * * * * * * * * * * * * * WARNING * * * * * * * * * * * * * * * * * * * * * *
+    This project won't work without a valid telegram token!!!
+    Please, create a Telegram Bot and add its token in routes.xml file
+    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 */
 
 mas financial {
-/*
     agent one
 
+/*
     agent bazin         : bazin.asl {
         join:       financialorg
         roles:      consultant in financialteam 
@@ -23,7 +27,7 @@ mas financial {
         join:       financialorg
         roles:      consultant in financialteam
     }
-    agent grahan        : grahan.asl {
+    agent graham        : graham.asl {
         join:       financialorg
         roles:      consultant in financialteam
     }
@@ -46,8 +50,7 @@ mas financial {
     asl-path: src/agt
               src/agt/inc
               
-    platform:   jacamo.web.JCMWeb("--restPort 8080")
-                //jacamo.web.JCMWeb("--main 2181 --restPort 8080") // zookeeper
+    platform:   jacamo.web.JCMWeb("--main 2181 --restPort 8080") // zookeeper & restPort
                 jasonComponent.JasonCamel("routes.xml")
 }
 

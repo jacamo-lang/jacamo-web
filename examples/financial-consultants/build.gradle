@@ -22,6 +22,9 @@ ext {
 
 dependencies {
 	implementation 'org.jacamo:jacamo-web:0.6-SNAPSHOT'
+
+    // https://mvnrepository.com/artifact/org.jsoup/jsoup
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
 	// https://mvnrepository.com/artifact/commons-lang/commons-lang
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	// https://mvnrepository.com/artifact/org.apache.camel/camel-core
