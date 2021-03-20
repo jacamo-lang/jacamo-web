@@ -21,8 +21,7 @@ ext {
 }
 
 dependencies {
-	compile project(':jacamo-web')
-	
+	implementation 'org.jacamo:jacamo-web:0.6-SNAPSHOT'
 	// https://mvnrepository.com/artifact/commons-lang/commons-lang
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	// https://mvnrepository.com/artifact/org.apache.camel/camel-core

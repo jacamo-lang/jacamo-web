@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-	compile project(':jacamo-web')
+	implementation 'org.jacamo:jacamo-web:0.6-SNAPSHOT'
 }
 
 sourceSets {
