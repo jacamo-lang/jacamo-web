@@ -1,21 +1,21 @@
 # Dockerfile to run JaCaMo applications
-# based on JaCaMo SNAPSHOT release
+# based on JaCaMo
 
 # to build:
-#    docker build  -t jomifred/jacamo-runrest .
+#    docker build  -t jomifred/jacamo-web .
 
-FROM alpine
+FROM openjdk:8-jdk-alpine
 
-ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
+#ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 #ENV JACAMO_HOME=/jacamo/build
 ENV PATH $PATH:$JAVA_HOME/bin #:$JACAMO_HOME/scripts
 
-RUN apk add --update --no-cache git gradle openjdk8-jre bash fontconfig ttf-dejavu graphviz
+RUN apk add --update --no-cache git bash fontconfig ttf-dejavu graphviz
 
 # download and run jacamo-web (just to update local maven rep)
 RUN git clone https://github.com/jacamo-lang/jacamo-web.git && \
     cd jacamo-web && \
-    gradle build
+    ./gradlew build
 
 EXPOSE 3271
 EXPOSE 3272
