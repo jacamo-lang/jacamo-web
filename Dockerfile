@@ -15,8 +15,8 @@ RUN apk add --update --no-cache git bash fontconfig ttf-dejavu graphviz nodejs n
 # download and run jacamo-web (just to update local maven rep)
 RUN git clone https://github.com/jacamo-lang/jacamo-web.git && \
     cd jacamo-web && \
-    ./gradlew run # To deploy on heroku, use build instead
-#    ./gradlew build # To lauch jacamo-web automatically, use run instead
+#    ./gradlew run # To deploy on heroku, use build instead
+    ./gradlew build # To lauch jacamo-web automatically, use run instead
 
 
 EXPOSE 3271
