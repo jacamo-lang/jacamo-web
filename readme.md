@@ -31,13 +31,10 @@ Run the webpack watch task with ``yarn run watch``. All changes you make to Java
 ### Using a local docker
 
 ```sh
-$ docker build  -t jacamo-runrest .
-$ docker network create jcm_net
-$ docker run -ti --rm --net jcm_net  --name host1 -v "$(pwd)":/app jacamo-runrest gradle marcos
-$ docker run -ti --rm --net jcm_net  --name host2 -v "$(pwd)":/app jacamo-runrest gradle bob_d
+$ docker build  -t jomifred/jacamo-web .
 ```
 
-These commands build a docker image and launch marcos and bob projects. Usually super user privileges are necessary.
+Usually super user privileges are necessary. It will take some minutes to run everything since it will create a docker image and run a container with a basic jacamo-web application running. At the very end of the log, you should see a message similar to "jacamo-web Rest API is running on http://172.17.0.2:8080/", so you can open your browser on the referred URL.
 
 ### Deploying from local repository to Heroku
 

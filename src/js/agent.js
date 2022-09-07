@@ -579,27 +579,45 @@ function getAgentsAsDot(nonVolatileMAS) {
 var myWebSocket;
 
 function connectToWS() {
-  var endpoint = "ws://" + window.location.hostname + ":8026/ws/messages";
-  if (myWebSocket !== undefined) {
-    myWebSocket.close();
-  }
-  myWebSocket = new WebSocket(endpoint);
-  myWebSocket.onmessage = function(event) {
-    if (event.data.startsWith(".send")) {
-      let data = event.data;
-      let args = data.substring(5, data.length).replace("<","").replace(">","").split(",");
-      message = [args[1], args[2], args[3], args[4]]
-
-      /* Add an arrow */
-      addArrowToGraph(message);
+  return new Promise(function(resolve, reject) {
+    var endpoint = "ws://" + window.location.hostname + ":8026/ws/messages";
+    if (myWebSocket !== undefined) {
+      myWebSocket.close();
     }
-  }
-  myWebSocket.onerror = function(evt) {
-    console.log("Error!");
-  }
+    myWebSocket = new WebSocket(endpoint);
+    myWebSocket.onmessage = function(event) {
+      if (event.data.startsWith(".send")) {
+        let data = event.data;
+        let args = data.substring(5, data.length).replace("<","").replace(">","").split(",");
+        message = [args[1], args[2], args[3], args[4]]
+
+        /* Add an arrow */
+        addArrowToGraph(message);
+      }
+    }
+    myWebSocket.onerror = function(evt) {
+      console.log("Error on websockets!");
+      reject(new Error("canceled"));
+    }
+
+    myWebSocket.onopen = function(evt) {
+      resolve(true);
+    }
+    /*
+    myWebSocket.onclose = function(evt) {
+      console.log("onclose.");
+    }*/
+  });
+}
+/*
+function sendMsg() {
+  myWebSocket.send("message");
 }
 
-connectToWS();
+function closeConn() {
+  myWebSocket.close();
+}
+*/
 
 /**
  * EXPORTS
@@ -617,6 +635,7 @@ window.runCMD = runCMD;
 window.newAg = newAg;
 window.getAgentsNonVolatileGraph = getAgentsNonVolatileGraph;
 window.getGraph = getGraph;
+window.connectToWS = connectToWS;
 
 /**
  * PREPARING FOR TESTS

@@ -99,8 +99,6 @@ ProjectsFolder/jacamo-web$ gradle build
 Let us say we need to develop a marketplace application where suppliers and consumers can make business. We will start with a system containing two organisations: (i) the 'factory', an organisation that will produce something and needs to buy components to do so, (ii) the 'supplier', an organisation that sells components). The system will be launched with these two organisations, each one with one one agent, respectively, 'buyer' and 'seller'. In the environment, each one has one artefact, respectively, 'inputStock' and 'outputStock'. Our demo will show step by step how we could fill this agents with new plans to make then able to make an order, reply when paid, to finally receive the product. Let us say that this system will be developed by two developers, each one responsible for one organisation. We will show jacamo-web facilities to provide communication and coherence between these developers and what they are coding.
 
 ### Running the demo
-1. Run marketplace example
 ```
-ProjectsFolder/jacamo-web/examples/marketplace$ gradle run
+ProjectsFolder/jacamo-web/examples/marketplace$ ./gradlew run
 ```
-2. ...

@@ -65,7 +65,7 @@ public class WebImplJCM extends AbstractBinder {
             // create agents
             RuntimeServices rt = RunCentralisedMAS.getRunner().getRuntimeServices(); 
             for (AgentParameters ap: project.getAgents()) {
-                rt.createAgent(ap.getAgName(), ap.asSource.toString(), ap.agClass.getClassName(), ap.getAgArchClasses(), ap.getBBClass(), ap.getAsSetts(false, false), null);
+                rt.createAgent(ap.getAgName(), ap.getSource().toString(), ap.agClass.getClassName(), ap.getAgArchClasses(), ap.getBBClass(), ap.getAsSetts(false, false), null);
             }
             
             // TODO: create workspaces, orgs, ...
@@ -208,7 +208,7 @@ public class WebImplJCM extends AbstractBinder {
         RuntimeServices rt = RunCentralisedMAS.getRunner().getRuntimeServices();
         for (AgentParameters ap : project.getAgents()) {
             for (int i = 0; i < ap.getNbInstances(); i++)
-                rt.createAgent(ap.getAgName(), ap.asSource.toString(), ap.agClass.getClassName(),
+                rt.createAgent(ap.getAgName(), ap.getSource().toString(), ap.agClass.getClassName(),
                         ap.getAgArchClasses(), ap.getBBClass(), ap.getAsSetts(false, false), null);
         }
     }

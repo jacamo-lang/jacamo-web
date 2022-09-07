@@ -10,13 +10,13 @@ plugins {
   id "eclipse"
   id "maven-publish"
   id "com.github.johnrengelman.shadow" version "5.2.0"
-  id "com.moowork.node" version "1.3.1"
+  id "com.github.node-gradle.node" version "2.2.0"
 }
 
 defaultTasks 'run'
 
 group   'org.jacamo'
-version '0.5-SNAPSHOT'
+version '0.5'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -25,17 +25,15 @@ java {
 
 repositories {
 	mavenCentral()
-	maven { url "http://jacamo.sourceforge.net/maven2" }
-	maven { url "https://raw.github.com/jacamo-lang/mvn-repo/master" }
-	maven { url "https://jade.tilab.com/maven/" }
+	maven { url "https://raw.githubusercontent.com/jacamo-lang/mvn-repo/master" }
 	flatDir {
 		dirs 'lib'
 	}
 }
 
 dependencies {
-	compile 'org.jacamo:jacamo:0.9-SNAPSHOT'
-	compile 'org.jacamo:jacamo-rest:0.5-SNAPSHOT'
+	compile 'org.jacamo:jacamo:0.10-SNAPSHOT'
+	compile 'org.jacamo:jacamo-rest:0.5'
 
 	//websockets for simulations
 	implementation 'javax.websocket:javax.websocket-api:1.1'
@@ -47,6 +45,7 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/net.openhft/compiler
 	implementation 'net.openhft:compiler:2.3.1'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 sourceSets {
@@ -206,9 +205,9 @@ node {
        ./gradlew npm_<command> Executes an NPM command.
     */
     // Version of node to use.
-    version = '10.14.1'
+    version = '14.17.5'
     // Version of yarn to use.
-    yarnVersion = '1.15.2'
+    yarnVersion = '1.22.5'
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
     download = true
