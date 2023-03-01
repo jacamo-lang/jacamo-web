@@ -18,11 +18,6 @@ defaultTasks 'run'
 group   'org.jacamo'
 version '0.5'
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 repositories {
 	mavenCentral()
 	maven { url "https://raw.githubusercontent.com/jacamo-lang/mvn-repo/master" }
@@ -32,8 +27,9 @@ repositories {
 }
 
 dependencies {
-	compile 'org.jacamo:jacamo:0.10-SNAPSHOT'
-	compile 'org.jacamo:jacamo-rest:0.5'
+	implementation('org.jacamo:jacamo:0.10-SNAPSHOT')
+	//implementation('org.jacamo:jacamo:1.2-SNAPSHOT')
+	implementation('org.jacamo:jacamo-rest:0.5')
 
 	//websockets for simulations
 	implementation 'javax.websocket:javax.websocket-api:1.1'
@@ -45,7 +41,7 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/net.openhft/compiler
 	implementation 'net.openhft:compiler:2.3.1'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 sourceSets {
@@ -91,7 +87,7 @@ jar {
     baseName 'jacamo-web'
     manifest {
       attributes(
-        'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+        'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' '),
         'Main-Class': 'jacamo.infra.JaCaMoLauncher',
         'args': 'src/jcm/main.jcm'
       )
@@ -106,7 +102,7 @@ jar {
 
 task copyToLib(type: Copy) {
     into "$buildDir/libs"
-    from(configurations.compile)
+    from(configurations.runtimeClasspath)
 }
 
 task stage(dependsOn: ['shadowJar', 'copyToLib', 'clean']) {
