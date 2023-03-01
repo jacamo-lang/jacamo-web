@@ -18,11 +18,6 @@ defaultTasks 'run'
 group   'org.jacamo'
 version '0.5'
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 repositories {
 	mavenCentral()
 	maven { url "https://raw.githubusercontent.com/jacamo-lang/mvn-repo/master" }
