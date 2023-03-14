@@ -263,7 +263,7 @@ function getGraph() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
 
-  h.get("./agents/" + selectedAgent).then(function(resp){
+  h.get("./agents/" + selectedAgent + "/bb").then(function(resp){
     renderGraphvizFromAgentJson(selectedAgent, JSON.parse(resp));
   });
 }
@@ -468,7 +468,7 @@ function getInspectionDetails() {
   beliefs = document.createElement("details");
   beliefs.innerHTML = "<summary>Beliefs</summary>";
   inspection.appendChild(beliefs);
-  h.get("./agents/" + selectedAgent).then(function(resp) {
+  h.get("./agents/" + selectedAgent + "/bb").then(function(resp) {
     details = JSON.parse(resp);
     details.beliefs.forEach(function(item) {
       const text = document.createElement('i');
@@ -544,16 +544,16 @@ function getAgentsAsDot(nonVolatileMAS) {
   header.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\" ranksep=0.25 ]\n");
 
   agentDataCache.agents.forEach(function(x) {
-    var s1 = (x.agent.length <= p.MAX_LENGTH) ? x.agent : x.agent.substring(0, p.MAX_LENGTH) + " ...";
-    header.push("\t\t\"" + x.agent + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
+    var s1 = (x.agent.value.length <= p.MAX_LENGTH) ? x.agent.value : x.agent.value.substring(0, p.MAX_LENGTH) + " ...";
+    header.push("\t\t\"" + x.agent.value + "\" [label = \"" + s1 + "\" shape = \"ellipse\" style=filled fillcolor=white];\n");
   });
 
   // Create invisible arrows for better presentation
   for (i = 0; i < agentDataCache.agents.length; i++) {
     if (i + 1 < agentDataCache.agents.length)
-      header.push("\"" + agentDataCache.agents[i].agent + "\"->\"" + agentDataCache.agents[i + 1].agent + "\" [style=invis]");
+      header.push("\"" + agentDataCache.agents[i].agent.value + "\"->\"" + agentDataCache.agents[i + 1].agent.value + "\" [style=invis]");
     else
-      header.push("\"" + agentDataCache.agents[i].agent + "\"->\"" + agentDataCache.agents[0].agent + "\" [style=invis]");
+      header.push("\"" + agentDataCache.agents[i].agent.value + "\"->\"" + agentDataCache.agents[0].agent.value + "\" [style=invis]");
   }
 
   /* graph footer */
