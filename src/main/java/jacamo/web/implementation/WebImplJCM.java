@@ -29,9 +29,9 @@ import com.google.gson.Gson;
 
 import cartago.AgentIdCredential;
 import cartago.ArtifactId;
-import cartago.CartagoContext;
+//import cartago.CartagoContext;
 import cartago.CartagoException;
-import cartago.CartagoService;
+//import cartago.CartagoService;
 import jacamo.project.JaCaMoOrgParameters;
 import jacamo.project.JaCaMoProject;
 import jacamo.project.JaCaMoWorkspaceParameters;
@@ -45,7 +45,7 @@ import jason.runtime.RuntimeServices;
 @Path("/jcm")
 public class WebImplJCM extends AbstractBinder {
 
-    CartagoContext ctx = null;
+    //CartagoContext ctx = null;
     
     @Override
     protected void configure() {
@@ -166,6 +166,8 @@ public class WebImplJCM extends AbstractBinder {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public Response getProjectJSON(@PathParam("projectname") String projectName) {
+        //Todo: Fix CartagoService and CartagoContext
+        /*
         try {
             if (ctx == null)
                 ctx = CartagoService.startSession(new AgentIdCredential("jacamo-rest"));
@@ -192,6 +194,7 @@ public class WebImplJCM extends AbstractBinder {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        */
         return Response.status(500).build();
     }
 
@@ -256,9 +259,12 @@ public class WebImplJCM extends AbstractBinder {
     }
     
     public boolean artifactExists(String wksName, String artName) throws CartagoException {
+        //Todo: Fix CartagoServices and CartagoContext
+        /*
         for (ArtifactId aid : CartagoService.getController(wksName).getCurrentArtifacts()) {
             if (aid.getName().equals(artName)) return true;
         }
+        */
         return false;
     }
 

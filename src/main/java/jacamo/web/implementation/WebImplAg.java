@@ -38,13 +38,13 @@ import com.google.gson.Gson;
 
 import cartago.ArtifactId;
 import cartago.CartagoException;
-import cartago.CartagoService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import jacamo.infra.JaCaMoLauncher;
 import jacamo.rest.implementation.RestImplAg;
 import jacamo.rest.mediation.TranslEnv;
+import jacamo.rest.mediation.TranslAg;
 import jacamo.web.exception.SystemOverloadException;
 import jacamo.web.exception.UnderstandabilityException;
 import jacamo.web.exception.UsefulnessException;
@@ -61,7 +61,6 @@ import jason.asSyntax.Term;
 import jason.asSyntax.Trigger.TEType;
 import jason.asSyntax.parser.ParseException;
 import jason.asSyntax.parser.as2j;
-import jason.infra.centralised.BaseCentralisedMAS;
 
 /**
  * Agent's REST implementation class
@@ -74,54 +73,12 @@ import jason.infra.centralised.BaseCentralisedMAS;
 @Path("/agents")
 public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImplAg and move some code to jacamo-rest
 
-    TranslAgWeb tAg = new TranslAgWeb();
+    TranslAg tAg = new TranslAg();
     Gson gson = new Gson();
 
     @Override
     protected void configure() {
         bind(new WebImplAg()).to(WebImplAg.class);
-    }
-    
-
-    /**
-     * Create an Agent. Produces PLAIN TEXT with HTTP response for this operation. If
-     * an ASL file with the given name exists, it will launch an agent with existing
-     * code. Otherwise, creates an agent that will start say 'Hi'.
-     * 
-     * @param agName name of the agent to be created
-     * @return HTTP 201 Response (created) or 500 Internal Server Error in case of
-     *         error (based on https://tools.ietf.org/html/rfc7231#section-6.6.1)
-     */
-    @Override
-    @Path("/{agentname}")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    @ApiOperation(value = "Create an Agent.")
-    @ApiResponses(value = { 
-            @ApiResponse(code = 201, message = "generated uri"),
-            @ApiResponse(code = 500, message = "internal error")
-    })
-    public Response postAgent(
-            @PathParam("agentname") String agName, 
-            @DefaultValue("false") @QueryParam("only_wp") boolean onlyWP, 
-            Map<String,String> metaData,
-            @Context UriInfo uriInfo) {
-        try {
-            if (onlyWP) {
-                if (tAg.createWP(agName, metaData))
-                    return Response.created(new URI(uriInfo.getBaseUri() + "agents/" + agName)).build();
-                else
-                    return Response.status(500, "Agent "+agName+" already exists!").build();
-            } else {
-                return Response
-                        .created(new URI(uriInfo.getBaseUri() + "agents/" + tAg.createAgent(agName)))
-                        .build();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.status(500, e.getMessage()).build();
-        }
     }
     
     /**
@@ -293,13 +250,16 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             for (int i = 0; i < 3; i++) {
                 synchronized (this) {
                     // make sure you only answer after the agent was completely deleted
+                    //Todo: Fix BaseCentralisedMAS
+                    /*
                     name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent(TEMP_AGENT_NAME, null, null,
                             null, null, null, null);
+                    */
                     if (name.equals(TEMP_AGENT_NAME)) {
                         ag = tAg.getAgent(TEMP_AGENT_NAME);
 
                         // Creating temporary agent to check plans coherence
-                        BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
+                        //BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
 
                         as2j parser = new as2j(
                                 new ByteArrayInputStream(stringBuilder.toString().getBytes(Charset.forName("UTF-8"))));
@@ -310,11 +270,11 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
                         return Response.ok("Code looks correct.").build();
                     } else {
                         // A second agent was created, so kill it!
-                        BaseCentralisedMAS.getRunner().getAg(name).stopAg();
-                        ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(name, "web",
-                                0);
-                        while (BaseCentralisedMAS.getRunner().getAg(name) != null)
+                        //BaseCentralisedMAS.getRunner().getAg(name).stopAg();
+                        //((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(name, "web", 0);
+                        //while (BaseCentralisedMAS.getRunner().getAg(name) != null) 
                             ;
+                        
                         return Response.status(500, "Error [Unknown]: Error creating structure for parser.").build();
                     }
                 }
@@ -351,6 +311,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             errorMsg = "Error [Unknown]: " + ((e.getMessage().length() >= 150) ? e.getMessage().substring(0, 150) + "..." : e.getMessage());
             return Response.status(406, errorMsg).build();
         } finally {
+            /*
             if (BaseCentralisedMAS.getRunner().getRuntimeServices().getAgentsNames().contains(TEMP_AGENT_NAME)) {
                 BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(TEMP_AGENT_NAME, "web", 0);
                
@@ -358,6 +319,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
                 while (BaseCentralisedMAS.getRunner().getAg(TEMP_AGENT_NAME) != null)
                     ;
             }
+            */
         }
     }
 
@@ -607,6 +569,8 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     @Produces(MediaType.TEXT_PLAIN)
     public Response killAllAgents() {
         try {
+            //Todo: BaseCentralisedMAS
+            /*
             ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().getAgentsNames().forEach(a -> {
                 ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(a, a, 0);
 
@@ -627,6 +591,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
                     }
                 }
             });
+            */
             return Response.ok().entity("Agents deleted!").build();
         } catch (Exception e) {
             e.printStackTrace();

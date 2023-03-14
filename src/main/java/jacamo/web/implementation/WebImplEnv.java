@@ -26,7 +26,7 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import cartago.ArtifactId;
-import cartago.CartagoService;
+//import cartago.CartagoService;
 import jacamo.rest.implementation.RestImplEnv;
 import jacamo.rest.mediation.TranslEnv;
 
@@ -177,7 +177,8 @@ public class WebImplEnv extends RestImplEnv {
                     "ora4mas.nopl.NormativeBoard", "cartago.AgentBodyArtifact", "ora4mas.light.LightOrgBoard",
                     "ora4mas.light.LightNormativeBoard", "ora4mas.light.LightGroupBoard",
                     "ora4mas.light.LightSchemeBoard");      
-            
+            //Todo: Fix CartagoServices
+            /*
             TranslEnv tEnv = new TranslEnv();
             for (String wrksName : tEnv.getWorkspaces()) {
                 for (ArtifactId aid : CartagoService.getController(wrksName).getCurrentArtifacts()) {
@@ -189,7 +190,7 @@ public class WebImplEnv extends RestImplEnv {
                     }
                 }
             }
-            
+            */
             return Response.ok().entity("Artifacts disposed!").build();
         } catch (Exception e) {
             e.printStackTrace();

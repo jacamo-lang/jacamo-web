@@ -16,19 +16,51 @@ plugins {
 defaultTasks 'run'
 
 group   'org.jacamo'
-version '0.5'
+version '0.7-SNAPSHOT'
 
 repositories {
 	mavenCentral()
 	maven { url "https://raw.githubusercontent.com/jacamo-lang/mvn-repo/master" }
+	maven { url "https://repo.gradle.org/gradle/libs-releases" }
 	flatDir {
 		dirs 'lib'
 	}
 }
 
 dependencies {
-	implementation 'org.jacamo:jacamo:0.10-SNAPSHOT'
-	implementation 'org.jacamo:jacamo-rest:0.5'
+	implementation ('org.jacamo:jacamo:1.1-SNAPSHOT') {
+		exclude group: 'org.slf4j', module: 'slf4j-nop'
+		changing = true
+	}
+	implementation 'org.jacamo:jacamo-rest:0.7'
+	
+	//java.awt
+	implementation 'javax:javaee-web-api:8.0.1'
+	//org.apache.curator.framework
+	implementation 'org.apache.zookeeper:zookeeper:3.5.4-beta'
+	implementation 'org.apache.curator:curator-framework:4.0.1'
+	//com.google.gson
+	implementation 'com.google.code.gson:gson:2.8.5'
+	//org.glassfish.jersey.media.multipart
+	implementation 'org.glassfish.jersey.media:jersey-media-multipart:2.29.1'
+	//io.swagger.annotations
+	implementation 'io.swagger:swagger-annotations:1.6.5'
+	
+	//org.apache.tools.ant.filters - change to api on jacamo
+	implementation 'org.apache.ant:ant:1.10.5'
+	
+	//javax.xml.bind
+	implementation 'javax.xml.bind:jaxb-api:2.3.1'
+	//org.glassfish.jersey.server
+	implementation 'org.glassfish.jersey.core:jersey-server:2.29.1'
+	//org.glassfish.jersey.grizzly2.httpserver
+	implementation 'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.29.1'
+	
+	//org.gradle:gradle-tooling-api
+	implementation gradleApi()
+	
+	//implementation 'org.jacamo:jacamo-rest:0.5'
+	//implementation 'org.jason:jason:2.6-SNAPSHOT'
 
 	//websockets for simulations
 	implementation 'javax.websocket:javax.websocket-api:1.1'
@@ -86,7 +118,7 @@ jar {
     baseName 'jacamo-web'
     manifest {
       attributes(
-        'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' '),
+        'Class-Path': file(configurations.compileClasspath.find { it.name.startsWith("jason-") }).name,
         'Main-Class': 'jacamo.infra.JaCaMoLauncher',
         'args': 'src/jcm/main.jcm'
       )

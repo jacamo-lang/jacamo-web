@@ -17,8 +17,8 @@ import jacamo.rest.config.RestAgArch;
 import jason.ReceiverNotFoundException;
 import jason.architecture.AgArch;
 import jason.asSemantics.Message;
-import jason.infra.centralised.BaseCentralisedMAS;
 import jason.runtime.RuntimeServicesFactory;
+//import jason.infra.centralised.BaseCentralisedMAS;
 
 public class WebAgArch extends RestAgArch {
 
@@ -32,9 +32,11 @@ public class WebAgArch extends RestAgArch {
     @SuppressWarnings("unchecked")
     @Override
     public void sendMsg(Message m) throws Exception {
+        super.sendMsg(m);
+        //Todo: Fix BaseCentralisedMAS            
+        /*
         try {
             super.sendMsg(m);
-
             AgArch a = BaseCentralisedMAS.getRunner().getAg(m.getReceiver()).getFirstAgArch();
             while (a != null) {
                 if (a.getClass().equals(WebAgArch.class)) {
@@ -43,7 +45,6 @@ public class WebAgArch extends RestAgArch {
                 }
                 a = BaseCentralisedMAS.getRunner().getAg(m.getReceiver()).getNextAgArch();
             }
-            
             return;
         } catch (ReceiverNotFoundException e) {
             try {
@@ -89,6 +90,7 @@ public class WebAgArch extends RestAgArch {
                 throw e;
             }
         }
+*/            
     }
     
     public void receiveMsg(Message m) {
