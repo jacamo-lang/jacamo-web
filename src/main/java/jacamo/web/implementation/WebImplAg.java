@@ -38,6 +38,8 @@ import com.google.gson.Gson;
 
 import cartago.ArtifactId;
 import cartago.CartagoException;
+import cartago.CartagoEnvironment;
+import cartago.ICartagoController;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -49,6 +51,8 @@ import jacamo.web.exception.SystemOverloadException;
 import jacamo.web.exception.UnderstandabilityException;
 import jacamo.web.exception.UsefulnessException;
 import jacamo.web.mediation.TranslAgWeb;
+import jason.runtime.RuntimeServicesFactory;
+import jason.infra.local.BaseLocalMAS;
 import jason.asSemantics.Agent;
 import jason.asSemantics.GoalListenerForMetaEvents;
 import jason.asSyntax.Atom;
@@ -71,7 +75,7 @@ import jason.asSyntax.parser.as2j;
  */
 @Singleton
 @Path("/agents")
-public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImplAg and move some code to jacamo-rest
+public class WebImplAg extends RestImplAg {
 
     TranslAg tAg = new TranslAg();
     Gson gson = new Gson();
@@ -250,16 +254,13 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             for (int i = 0; i < 3; i++) {
                 synchronized (this) {
                     // make sure you only answer after the agent was completely deleted
-                    //Todo: Fix BaseCentralisedMAS
-                    /*
-                    name = BaseCentralisedMAS.getRunner().getRuntimeServices().createAgent(TEMP_AGENT_NAME, null, null,
-                            null, null, null, null);
-                    */
+                    name = RuntimeServicesFactory.get().createAgent(TEMP_AGENT_NAME, null, null, null, null, null, null);
+
                     if (name.equals(TEMP_AGENT_NAME)) {
                         ag = tAg.getAgent(TEMP_AGENT_NAME);
 
                         // Creating temporary agent to check plans coherence
-                        //BaseCentralisedMAS.getRunner().getRuntimeServices().startAgent(name);
+                        RuntimeServicesFactory.get().startAgent(name);
 
                         as2j parser = new as2j(
                                 new ByteArrayInputStream(stringBuilder.toString().getBytes(Charset.forName("UTF-8"))));
@@ -267,13 +268,12 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
 
                         lookForCollaborativeExceptions(ag);
 
+                        deleteAgent(name);
+
                         return Response.ok("Code looks correct.").build();
                     } else {
                         // A second agent was created, so kill it!
-                        //BaseCentralisedMAS.getRunner().getAg(name).stopAg();
-                        //((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(name, "web", 0);
-                        //while (BaseCentralisedMAS.getRunner().getAg(name) != null) 
-                            ;
+                        deleteAgent(name);
                         
                         return Response.status(500, "Error [Unknown]: Error creating structure for parser.").build();
                     }
@@ -311,15 +311,7 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
             errorMsg = "Error [Unknown]: " + ((e.getMessage().length() >= 150) ? e.getMessage().substring(0, 150) + "..." : e.getMessage());
             return Response.status(406, errorMsg).build();
         } finally {
-            /*
-            if (BaseCentralisedMAS.getRunner().getRuntimeServices().getAgentsNames().contains(TEMP_AGENT_NAME)) {
-                BaseCentralisedMAS.getRunner().getRuntimeServices().killAgent(TEMP_AGENT_NAME, "web", 0);
-               
-                // make sure you only answer after the agent was completely deleted
-                while (BaseCentralisedMAS.getRunner().getAg(TEMP_AGENT_NAME) != null)
-                    ;
-            }
-            */
+            deleteAgent(TEMP_AGENT_NAME);
         }
     }
 
@@ -569,29 +561,28 @@ public class WebImplAg extends RestImplAg { // TODO: replace by extends RestImpl
     @Produces(MediaType.TEXT_PLAIN)
     public Response killAllAgents() {
         try {
-            //Todo: BaseCentralisedMAS
-            /*
-            ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().getAgentsNames().forEach(a -> {
-                ((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getRuntimeServices().killAgent(a, a, 0);
-
+            ((JaCaMoLauncher) BaseLocalMAS.getRunner()).getRuntimeServices().getAgentsNames().forEach(a -> {
+                ((JaCaMoLauncher) BaseLocalMAS.getRunner()).getRuntimeServices().killAgent(a, a, 0);
+                
                 // make sure you only answer after the agent was completely deleted
-                while (((JaCaMoLauncher) BaseCentralisedMAS.getRunner()).getAg(a) != null)
+                while (((JaCaMoLauncher) BaseLocalMAS.getRunner()).getAg(a) != null)
                     ;
 
                 // make sure agent's body was disposed
                 TranslEnv tEnv = new TranslEnv();
                 for (String wrksName : tEnv.getWorkspaces()) {
                     try {
-                        for (ArtifactId aid : CartagoService.getController(wrksName).getCurrentArtifacts()) {
+                        ICartagoController ctrl = CartagoEnvironment.getInstance().getController(wrksName);
+                        for (ArtifactId aid : ctrl.getCurrentArtifacts()) {
                             if (aid.getName().equals(a + "-body"))
-                                CartagoService.getController(wrksName).removeArtifact(aid.getName());
+                                ctrl.removeArtifact(aid.getName());
                         }
                     } catch (CartagoException e) {
                         e.printStackTrace();
                     }
                 }
             });
-            */
+
             return Response.ok().entity("Agents deleted!").build();
         } catch (Exception e) {
             e.printStackTrace();
