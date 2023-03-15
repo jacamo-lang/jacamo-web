@@ -263,11 +263,12 @@ function getGraph() {
   const params = new URL(location.href).searchParams;
   const selectedAgent = params.get('agent');
 
-  h.get("./agents/" + selectedAgent + "/bb").then(function(resp){
+  h.get("./agents/" + selectedAgent).then(function(resp){
     renderGraphvizFromAgentJson(selectedAgent, JSON.parse(resp));
   });
 }
 
+let agGraphCache = undefined;
 function renderGraphvizFromAgentJson(agName, agentinfo) {
   var dot = [];
 
@@ -283,17 +284,20 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
   dot.push(
     "\tsubgraph cluster_mind {\n",
     "\t\tstyle=rounded\n");
+  /*
   agentinfo.namespaces.forEach(function(x) {
     dot.push(
       "\t\t\"" + x + "\" [ " + "\n\t\t\tlabel = \"" + x + "\"",
       "\n\t\t\tshape=\"box\" style=filled pencolor=black fillcolor=cornsilk\n",
       "\t\t]\n");
   });
+  */
   dot.push("\t}\n");
+  /*
   agentinfo.namespaces.forEach(function(x) {
     dot.push("\t\"" + agName + "\"->\"" + x + "\" [arrowhead=none constraint=false style=dotted]\n");
   });
-
+  */
   /* agent will be placed on center */
   var s1 = (agName.length <= p.MAX_LENGTH) ? agName : agName.substring(0, p.MAX_LENGTH) + " ...";
   dot.push(
@@ -317,25 +321,25 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
       "\t\t\"" + x.scheme + "\" [ " + "\n\t\tlabel = \"" + x.scheme + "\"",
       "\n\t\t\tshape=hexagon style=filled pencolor=black fillcolor=linen\n",
       "\t\t]\n");
-    x.responsibles.forEach(function(y) {
+    x["responsible-groups"].forEach(function(y) {
       dot.push("\t\"" + y + "\"->\"" + x.scheme,
         "\" [arrowtail=normal arrowhead=open label=\"responsible\"]\n",
         "\t{rank=same \"" + y + "\" \"" + x.scheme + "\"}\n");
     });
     dot.push("\t\"" + x.scheme + "\"->\"" + agName, "\" [arrowtail=normal dir=back label=\"" + x.mission + "\"]\n");
   });
-
   /* agent workspaces */
   agentinfo.workspaces.forEach(function(w) {
-    dot.push("\tsubgraph cluster_" + w.workspace + " {\n",
+    let wksName = w.workspace.replace(/\//g, "_"); //Replace forward slash by underscore
+    dot.push("\tsubgraph cluster_" + wksName + " {\n",
       "\t\tlabel=\"" + w.workspace + "\"\n",
       "\t\tlabeljust=\"r\"\n",
       "\t\tgraph[style=dashed]\n");
-    w.artifacts.forEach(function(a) {
+    if (w.artifacts != null) w.artifacts.forEach(function(a) {
       if (p.HIDDEN_ARTS.indexOf(a.type) < 0) {
         var str1 = (a.artifact.length <= p.MAX_LENGTH) ? a.artifact : a.artifact.substring(0, p.MAX_LENGTH) + " ...";
         /* It is possible to have same artifact name in different workspaces */
-        dot.push("\t\t\"" + w.workspace + "_" + a.artifact + "\" [ ",
+        dot.push("\t\t\"" + wksName + "_" + a.artifact + "\" [ ",
           "\n\t\t\tlabel=\"" + str1 + " :\\n");
         str1 = (a.type.length <= p.MAX_LENGTH) ? a.type : a.type.substring(0, p.MAX_LENGTH) + " ...";
         dot.push(str1 + "\"\n");
@@ -343,9 +347,9 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
         dot.push("\t\t]\n");
       }
     });
-    w.artifacts.forEach(function(a) {
+    if (w.artifacts != null) w.artifacts.forEach(function(a) {
       if (p.HIDDEN_ARTS.indexOf(a.type) < 0) {
-        dot.push("\t\"" + agName + "\"->\"" + w.workspace + "_" + a.artifact + "\" [arrowhead=odot]\n");
+        dot.push("\t\"" + agName + "\"->\"" + wksName + "_" + a.artifact + "\" [arrowhead=odot]\n");
       }
     });
     dot.push("\t}\n");
@@ -353,15 +357,18 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
 
   dot.push("}\n");
 
-  /* Transition follows modal top down movement */
-  import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
-    import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
-      var t = d3.transition().duration(500).ease(d3.easeLinear);
-      var graph = dot.join("");
-      d3G.graphviz("#agentdiagram").transition(t).renderDot(graph);
-      console.log(graph);
+  let graph = dot.join("");
+  console.log(graph);
+  if (graph !== agGraphCache) {
+    agGraphCache = graph;
+    /* Transition follows modal top down movement */
+    import( /* webpackChunkName: "d3" */ 'd3').then(function(d3) {
+      import( /* webpackChunkName: "d3-graphviz" */ 'd3-graphviz').then(function(d3G) {
+        var t = d3.transition().duration(500).ease(d3.easeLinear);
+        d3G.graphviz("#agentdiagram").transition(t).renderDot(graph);
+      });
     });
-  });
+  }
 }
 
 /* CODE COMPLETION FUNCTIONS */
