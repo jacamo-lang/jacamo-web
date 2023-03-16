@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import jacamo.rest.mediation.TranslAg;
+import jason.asSemantics.*;
 import jason.JasonException;
 import jason.asSemantics.Agent;
 import jason.runtime.RuntimeServicesFactory;
@@ -50,7 +51,14 @@ public class TranslAgWeb extends TranslAg {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ag.load(new FileInputStream("src/agt/" + givenName + ".asl"), givenName + ".asl");
+        
+        ag.parseAS(new FileInputStream("src/agt/" + givenName + ".asl"), givenName + ".asl");
+
+        if (ag.getPL().hasMetaEventPlans())
+            ag.getTS().addGoalListener(new GoalListenerForMetaEvents(ag.getTS()));
+
+        ag.addInitialBelsInBB();
+        ag.addInitialGoalsInTS();
         // ag.setASLSrc("no-inicial.asl");
         createAgLog(givenName, ag);
         return givenName;
