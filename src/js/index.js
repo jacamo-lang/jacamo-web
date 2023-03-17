@@ -25,6 +25,10 @@ const g = require('./git')
      h3.innerHTML = "&#160";
      document.getElementById(nav).appendChild(h3);
    }
+   /*
+    * launch a MAS, commit and push changes are being disabled 
+    * in 0.7 version. They require a revision to check whether
+    * these functions should be maintained or not
    var lgl = document.createElement('a');
    lgl.setAttribute("href", "./index_launch.html");
    lgl.innerHTML = "launch a MAS";
@@ -38,6 +42,7 @@ const g = require('./git')
    lgp.addEventListener("click", function() { g.pushChanges() });
    lgp.innerHTML = "push changes";
    document.getElementById(nav).appendChild(lgp);
+  */
 /*
    var ldag = document.createElement('a');
    ldag.onclick = function() {
