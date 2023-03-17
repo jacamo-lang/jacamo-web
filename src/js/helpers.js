@@ -109,6 +109,16 @@ let createDefaultHR = () => {
   return hr;
 };
 
+function orderByNameAsc(a,b) {
+  if (a.name.toLowerCase() < b.name.toLowerCase()) {
+      return -1;
+  }
+  if (a.name.toLowerCase() > b.name.toLowerCase()) {
+      return 1;
+  }
+  return 0;
+}
+
 /**
  * EXPORTS
  */
@@ -119,7 +129,8 @@ module.exports = {
   deleteResource,
   createTable,
   addTwoCellsInARow,
-  createDefaultHR
+  createDefaultHR,
+  orderByNameAsc
 }
 
 /**

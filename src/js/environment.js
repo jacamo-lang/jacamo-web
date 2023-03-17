@@ -163,7 +163,7 @@
  /**
   * WORKSPACE FUNCTIONS
   */
- 
+ /*
  function getWorkspaces() {
    const params = new URL(location.href).searchParams;
    const selectedWorkspace = params.get('workspace');
@@ -201,7 +201,7 @@
          Object.keys(ar.artifacts).sort().forEach(function(a) {
            //if (p.HIDDEN_ARTS.indexOf(ar.artifacts[a].type) < 0) {
              validContent++;
-             /* if printing the first artifact, also print the workspace */
+             // if printing the first artifact, also print the workspace
              if (selectedWorkspace === ar.workspace) {
                if (validContent === 1) {
                  var lag = document.createElement('a');
@@ -209,7 +209,7 @@
                  lag.innerHTML = "<h5><b>" + ar.workspace + "</b></h5>";
                  document.getElementById(nav).appendChild(lag);
                }
-               /* Add artifacts on menu */
+               // Add artifacts on menu 
                var lar = document.createElement('a');
                if (selectedArtifact === a) {
                  lar.innerHTML = "<h5><b>&#160;&#160;&#160;" + a + "</b></h5>";
@@ -221,7 +221,7 @@
                  );
                document.getElementById(nav).appendChild(lar);
              } else {
-               /* if would print at least one artifact, also print the workspace */
+               // if would print at least one artifact, also print the workspace 
                if (validContent === 1) {
                  var lag = document.createElement('a');
                  lag.setAttribute("href", "./workspace.html?workspace=" + ar.workspace);
@@ -240,7 +240,8 @@
      document.getElementById(nav).appendChild(lnew);
    });
  }
- 
+ */
+
  let wkGraphCache = undefined;
  function getWksGraph() {
    let dot = [];
@@ -256,7 +257,7 @@
  
      overview.agents.forEach(function(ag) {
        let wksartifacts = [];
-       if (Object.keys(ag.workspaces) != null) Object.keys(ag.workspaces).forEach(function(w) {
+       if (ag.workspaces != null) Object.keys(ag.workspaces).forEach(function(w) {
          let envlinks = [];
          let wks = ag.workspaces[w];
          let wksName = wks.workspace.value.replace(/\//g, "_"); //Replace forward slash by underscore
@@ -354,7 +355,7 @@
      }
    });
  }
- 
+
  /* WHOLE WORKSPACES AS DOT */
  
  function getWorkspacesNonVolatileGraph() {
@@ -422,7 +423,7 @@
   */
  
  window.getCurrentJavaContent = getCurrentJavaContent;
- window.getWorkspaces = getWorkspaces;
+ //window.getWorkspaces = getWorkspaces;
  window.setEditButton = setEditButton;
  window.getArtGraph = getArtGraph;
  window.newArt = newArt;
