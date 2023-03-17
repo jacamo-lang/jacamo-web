@@ -36,9 +36,6 @@ dependencies {
 	
 	//org.gradle:gradle-tooling-api
 	implementation gradleApi()
-	
-	//implementation 'org.jacamo:jacamo-rest:0.5'
-	//implementation 'org.jason:jason:2.6-SNAPSHOT'
 
 	//websockets for simulations
 	implementation 'javax.websocket:javax.websocket-api:1.1'
@@ -54,12 +51,10 @@ dependencies {
 }
 
 sourceSets {
-	env {
+    main {
 		java {
 			srcDir 'src/env'
 		}
-	}
-    main {
         resources {
             srcDir 'src/agt'
             srcDir 'src/org'
