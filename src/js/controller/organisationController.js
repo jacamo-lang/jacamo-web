@@ -7,6 +7,7 @@
 
 function getOrganisationsNonVolatileGraph() {
     let organisations = [];
+    let agents = [];
     h.get('./overview').then(function (resp) {
         let overview = JSON.parse(resp);
 
@@ -30,7 +31,38 @@ function getOrganisationsNonVolatileGraph() {
                 schemes.push(scheme);
             });
         });
-        view.getOrganisationsAsDot(organisations);
+
+        if (overview.agents != null) overview.agents.forEach(function (a) {
+            let roles = [];
+            let missions = [];
+            if (a.roles != null) a.roles.forEach(function (r) {
+                let role = new model.Role(
+                    r.role.value, 
+                    r.group.value
+                );
+                roles.push(role);
+            });
+            if (a.missions != null) a.missions.forEach(function (m) {
+                let responsibles = [];
+                if (m.responsibles != null) m.responsibles.forEach(function (r) {
+                    responsibles.push(r);
+                });
+                let mission = new model.Mission(
+                    m.mission.value, 
+                    m.scheme.value, 
+                    responsibles
+                );
+                missions.push(mission);
+            });
+            let agent = new model.Agent(
+                a.agent.value,
+                roles,
+                missions
+            )
+            agents.push(agent);
+        });
+
+        view.getOrganisationsAsDot(organisations, agents);
     });
 }
 

@@ -1,5 +1,5 @@
 let orgGraphCache = undefined;
-export function getOrganisationsAsDot(organisations) {
+export function getOrganisationsAsDot(organisations, agents) {
     /* graph header */
     let header = [];
     header.push("digraph G { graph [ rankdir=\"TB\" bgcolor=\"transparent\" ranksep=0.25 ]\n");
@@ -16,14 +16,14 @@ export function getOrganisationsAsDot(organisations) {
         });
         header.push("\t}\n");
     });
-/*
-    orgDataCache.agents.forEach(function (a) {
+
+    if (agents != null) agents.forEach(function (a) {
         a.roles.forEach(function (r) {
-            orglinks.push("\t\"" + r.group + "\"->\"" + a.agent + "\" [arrowtail=normal dir=back label=\"" + r.role + "\"]\n");
+            orglinks.push("\t\"" + r.group + "\"->\"" + a.name + "\" [arrowtail=normal dir=back label=\"" + r.role + "\"]\n");
         });
         a.missions.forEach(function (m) {
-            orglinks.push("\t\"" + m.scheme + "\"->\"" + a.agent + "\" [arrowtail=normal dir=back label=\"" + m.mission + "\"]\n");
-            m.responsibles.forEach(function (r) {
+            orglinks.push("\t\"" + m.scheme + "\"->\"" + a.name + "\" [arrowtail=normal dir=back label=\"" + m.mission + "\"]\n");
+            if (m.responsibles != null) m.responsibles.forEach(function (r) {
                 let resp = "\t\"" + r + "\"->\"" + m.scheme +
                     "\" [arrowtail=normal arrowhead=open label=\"responsible\"]\n";
                 if (!orglinks.includes(resp)) {
@@ -33,14 +33,14 @@ export function getOrganisationsAsDot(organisations) {
             });
         });
     });
-*/
+
     header.push(orglinks.join(" "));
 
     /* graph footer */
     let footer = [];
     footer.push("}\n");
-
     let graph = header.join("").concat(footer.join(""));
+    //console.log(graph);
     if (graph !== orgGraphCache) {
         orgGraphCache = graph;
         /* Transition follows modal top down movement */
