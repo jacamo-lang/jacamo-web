@@ -115,70 +115,6 @@ function setAutoSyntaxChecking() {
   }, 2000);
 }
 
-/* update agents interface automatically */
-let agentsList = undefined;
-function setAutoUpdateAgInterface() {
-  /*do it immediately at first time*/
-  if (agentsList === undefined) getAgents();
-
-  setInterval(function() {
-    getAgents();
-  }, 1000);
-}
-
-/*Get list of agent from backend*/
-function getAgents() {
-  h.get("./agents").then(function(resp) {
-    if (agentsList != resp) {
-      agentsList = resp;
-      updateAgentsMenu("nav-drawer", JSON.parse(resp), true);
-      updateAgentsMenu("nav-drawer-frame", JSON.parse(resp), false);
-    }
-  });
-}
-
-function updateAgentsMenu(nav, agents, addCloseButton) {
-  navElement = document.getElementById(nav);
-  var child = navElement.lastElementChild;
-  while (child) {
-    navElement.removeChild(child);
-    child = navElement.lastElementChild;
-  }
-
-  if (addCloseButton) {
-    const closeButton = document.createElement('label');
-    closeButton.setAttribute("for", "doc-drawer-checkbox");
-    closeButton.setAttribute("class", "button drawer-close");
-    navElement.appendChild(closeButton);
-    var h3 = document.createElement("h3");
-    h3.innerHTML = "&#160";
-    navElement.appendChild(h3);
-  }
-
-  const params = new URL(location.href).searchParams;
-  const selectedAgent = params.get('agent');
-  for (n in agents) {
-    var lag = document.createElement('a');
-    lag.setAttribute("href", "./agent.html?agent=" + n);
-    lag.setAttribute('onclick', '{window.location.assign("./agent.html?agent=' + n + '");window.location.reload();}');
-    if (selectedAgent === n) {
-      lag.innerHTML = "<h5><b>" + n + "</b></h5>";
-    } else {
-      lag.innerHTML = "<h5>" + n + "</h5>";
-    }
-    navElement.appendChild(lag);
-  }
-  navElement.appendChild(h.createDefaultHR());
-  var ldf = document.createElement('a');
-  ldf.setAttribute("href", "./agents_df.html");
-  ldf.innerHTML = "directory facilitator";
-  navElement.appendChild(ldf);
-  var lnew = document.createElement('a');
-  lnew.setAttribute("href", "./agent_new.html");
-  lnew.innerHTML = "create agent";
-  navElement.appendChild(lnew);
-}
-
 /* create agent */
 function newAg() {
   h.post('/agents/' + document.getElementById('createAgent').value);
@@ -358,7 +294,7 @@ function renderGraphvizFromAgentJson(agName, agentinfo) {
   dot.push("}\n");
 
   let graph = dot.join("");
-  console.log(graph);
+  //console.log(graph);
   if (graph !== agGraphCache) {
     agGraphCache = graph;
     /* Transition follows modal top down movement */
@@ -460,46 +396,6 @@ function autocomplete(inp, arr) {
 
   document.addEventListener("click", function(e) {
     closeAllLists(e.target);
-  });
-}
-
-/* AGENT'S DETAILS */
-
-function getInspectionDetails() {
-  var selectedAgent = window.location.hash.substr(1);
-  var parameters = location.search.substring(1).split("&");
-  var temp = parameters[0].split("=");
-  selectedAgent = unescape(temp[1]);
-
-  inspection = document.getElementById('inspection');
-  beliefs = document.createElement("details");
-  beliefs.innerHTML = "<summary>Beliefs</summary>";
-  inspection.appendChild(beliefs);
-  h.get("./agents/" + selectedAgent + "/bb").then(function(resp) {
-    details = JSON.parse(resp);
-    details.beliefs.forEach(function(item) {
-      const text = document.createElement('i');
-      text.innerHTML = item + "<br>";
-      beliefs.appendChild(text);
-    });
-  });
-
-  footMenu = document.getElementById('agentfootmenu');
-  h.get("./agents/" + selectedAgent + '/aslfiles').then(function(resp) {
-    alsfiles = JSON.parse(resp);
-    alsfiles.forEach(function(item) {
-      editAsl = document.createElement("a");
-      if (item.lastIndexOf("/") > 0) {
-        var basename = item.substr(item.lastIndexOf("/") + 1, item.length - 1);
-        editAsl.innerHTML = basename;
-        editAsl.setAttribute('href', './agent_editor.html?aslfile=' + basename + '&agent=' + selectedAgent);
-      } else {
-        editAsl.innerHTML = item;
-        editAsl.setAttribute('href', './agent_editor.html?aslfile=' + item + '&agent=' + selectedAgent);
-      }
-      footMenu.appendChild(editAsl);
-      footMenu.innerHTML += "&#160;&#160;&#160";
-    });
   });
 }
 
@@ -630,10 +526,8 @@ function closeConn() {
  * EXPORTS
  */
 
-window.setAutoUpdateAgInterface = setAutoUpdateAgInterface;
 window.getCurrentAslContent = getCurrentAslContent;
 window.setAutoSyntaxChecking = setAutoSyntaxChecking;
-window.getInspectionDetails = getInspectionDetails;
 window.updateSuggestions = updateSuggestions;
 window.setAutoUpdateLog = setAutoUpdateLog;
 window.showBuffer = showBuffer;

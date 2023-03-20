@@ -1,6 +1,7 @@
 /**
   * MODELS
   */
+ 
 export class Workspace {
     constructor(name, fullName, artifacts) {
         this.name = name;
