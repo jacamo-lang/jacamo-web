@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.jacamo:jacamo-rest:0.7.1-SNAPSHOT'
+	api 'org.jacamo:jacamo-rest:0.7.1-SNAPSHOT'
 	
 	//org.apache.curator.framework
 	implementation 'org.apache.zookeeper:zookeeper:3.5.4-beta'
