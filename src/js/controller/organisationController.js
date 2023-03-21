@@ -56,8 +56,8 @@ function getOrganisationsNonVolatileGraph() {
                 missions.push(mission);
             });
             let agent = new agentModel.Agent(a.agent.value);
-            agentModel.setRoles(roles);
-            agentModel.setMissons(missions);
+            agent.setRoles(roles);
+            agent.setMissions(missions);
             agents.push(agent);
         });
 
