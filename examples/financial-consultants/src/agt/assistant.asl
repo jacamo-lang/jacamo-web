@@ -1,5 +1,6 @@
-stocks::radar(['ABEV3','B3SA3','BBAS3','CYRE3','ECOR3','EGIE3','ELET3','VIVT4']).
+stocks::radar(["ABEV3","B3SA3","BBAS3","CYRE3","ECOR3","EGIE3","ELET3","VIVT4"]).
 
+/*
 !joinFinancialGroup.
 !acceptScheme.
 
@@ -17,6 +18,7 @@ stocks::radar(['ABEV3','B3SA3','BBAS3','CYRE3','ECOR3','EGIE3','ELET3','VIVT4'])
     s::lookupArtifact(financialsch, ScArtId);
     s::commitMission("mAssistant")[artifact_id(ScArtId)];
     .
+*/
 
 +!lookForOpportunities : stocks::radar(L) <-
 
@@ -33,7 +35,7 @@ stocks::radar(['ABEV3','B3SA3','BBAS3','CYRE3','ECOR3','EGIE3','ELET3','VIVT4'])
         
         //Why this wait is necessary?
         .wait(2000);
-    };
+    }
     .
 
 +!checkOpportunities : stocks::radar(L) <-
@@ -43,7 +45,7 @@ stocks::radar(['ABEV3','B3SA3','BBAS3','CYRE3','ECOR3','EGIE3','ELET3','VIVT4'])
 
     .print("Checking if there are good opportunities...");
     for (.member(T,L)) {
-        .term2string(T,Item)
+        .term2string(T,Item);
         .count(stocks::recommend(Item,comprar,_),N);
         if (N == 3) {
             .concat("Recomendado COMPRAR por todos os consultores: ",Item, CCC);
@@ -51,13 +53,13 @@ stocks::radar(['ABEV3','B3SA3','BBAS3','CYRE3','ECOR3','EGIE3','ELET3','VIVT4'])
         }
     };
     for (.member(T,L)) {
-        .term2string(T,Item)
+        .term2string(T,Item);
         .count(stocks::recommend(Item,comprar,_),N);
         if (N == 2) {
             .concat("Recomendado COMPRAR por 2/3 dos consultores: ",Item, CCC);
             .send(toTelegram,tell,CCC);
         }
-    };
+    }
     .
     
 +!getOpportunities <- 
@@ -86,7 +88,7 @@ stocks::radar(['ABEV3','B3SA3','BBAS3','CYRE3','ECOR3','EGIE3','ELET3','VIVT4'])
     & stocks::recommend(S,Y3,Z3)[source(greenblatt)] & .count(stocks::recommend(S,comprar,_),N) & N >= 2 
     <-
     .concat(Z1,"\n\n",Z2,"\n\n",Z3,"\n\nResumo: COMPRAR", CCC);
-    .send(toTelegram,tell,CCC);
+    .print(CCC);
     .
 
 +!reply(T) : 
@@ -95,12 +97,12 @@ stocks::radar(['ABEV3','B3SA3','BBAS3','CYRE3','ECOR3','EGIE3','ELET3','VIVT4'])
     & stocks::recommend(S,Y3,Z3)[source(greenblatt)] 
     <-
     .concat(Z1,"\n\n",Z2,"\n\n",Z3,"\n\nResumo: NAO COMPRAR", CCC);
-    .send(toTelegram,tell,CCC);
+    .print(CCC);
     .
 
 +!reply(T) : .term2string(T,S) <-
     .concat("Ocorreu um erro ao tentar obter as opinioes dos consultores em ",S, CCC);
-    .send(toTelegram,tell,CCC);
+    .print(CCC);
     .
 
 { include("$jacamoJar/templates/common-cartago.asl") }

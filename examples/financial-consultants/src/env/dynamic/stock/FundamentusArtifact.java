@@ -21,7 +21,7 @@ public class FundamentusArtifact extends Artifact {
     void getFundamentals(String stock) {
         URL url;
         try {
-            url = new URL("http://www.fundamentus.com.br/detalhes.php?papel=" + stock);
+            url = new URL("http://www.fundamentus.com.br/detalhes.php?papel=" + stock.toString());
             log(getCurrentOpAgentBody().getName()+" buscando fundamentos de " + url.toString());
             Document doc = (Document) Jsoup.parse(url, 3000);
 

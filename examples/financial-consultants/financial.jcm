@@ -16,26 +16,28 @@
 */
 
 mas financial {
-    agent one
+    //agent one
 
-/*
     agent bazin         : bazin.asl {
         join:       financialorg
         roles:      consultant in financialteam 
+        focus:      financialagents.fundamentus
     }
     agent greenblatt    : greenblatt.asl {
         join:       financialorg
         roles:      consultant in financialteam
+        focus:      financialagents.fundamentus
     }
     agent graham        : graham.asl {
         join:       financialorg
         roles:      consultant in financialteam
+        focus:      financialagents.fundamentus
     }
     agent myPA          : assistant.asl {
         join:       financialorg
         roles:      assistant in financialteam
     }
- 
+
     workspace financialagents {
         artifact fundamentus: dynamic.stock.FundamentusArtifact
     }
@@ -46,12 +48,12 @@ mas financial {
         }
         scheme financialsch : financialsch
     }
-*/ 
+ 
     asl-path: src/agt
               src/agt/inc
               
     platform:   jacamo.web.JCMWeb("--main 2181 --restPort 8080") // zookeeper & restPort
-                jasonComponent.JasonCamel("routes.xml")
+                //jasonComponent.JasonCamel("routes.xml")
 }
 
 /*

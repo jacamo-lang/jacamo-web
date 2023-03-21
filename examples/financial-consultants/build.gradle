@@ -27,23 +27,13 @@ dependencies {
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
 	// https://mvnrepository.com/artifact/commons-lang/commons-lang
 	implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
-	// https://mvnrepository.com/artifact/org.apache.camel/camel-core
-	implementation group: 'org.apache.camel', name: 'camel-core', version: versions.camel
-	// https://mvnrepository.com/artifact/org.apache.camel/camel-telegram
-	implementation group: 'org.apache.camel', name: 'camel-telegram', version: versions.camel
-	//Jason for Apache Camel
-	//implementation group: 'org.jacamo-lang',     name: 'camel-jason' ,   version: '1.0'
-	//Log4j is used by camel
-	implementation group: 'log4j', name: 'log4j', version: '1.2.17'
 }
 
 sourceSets {
-	main {
+    main {
 		java {
             srcDir 'src/env'
 		}
-	}
-    main {
         resources {
             srcDir 'src/agt'
             srcDir 'src/org'

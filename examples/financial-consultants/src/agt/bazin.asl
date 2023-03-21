@@ -3,7 +3,7 @@
 /* * * * initial beliefs * * * */
 
 /* * * * setup plans * * * */
-!makeFundamentusArtifact.
+//!makeFundamentusArtifact.
 
 /* * * * perceptions from artifact * * * */
 
@@ -19,24 +19,24 @@
     & fundamentals::divBrutaPatr(S,_)
     <- 
     .print("Getting cached fundamentals from ",S); 
-    !reply(S,Q);
+    !reply(T,Q);
     .
 
 // get Fundamentals again
 +!opinion(T)[source(Q)] : .term2string(T,S) & .date(YY,OO,DD) <- 
     .print("Getting fundamentals from ",S); 
-    getFundamentals(S);
+    getFundamentals(T);
     -+lastDate(YY,OO,DD);
-    !reply(S,Q);
+    !reply(T,Q);
     .
 
 +!reply(S,Q)[source(self)] : fundamentals::divYield(S,P) & fundamentals::divBrutaPatr(S,D) & P >= 6 & D < 1 <-
-    .concat("Baseado no metodo de Bazin, ", S," tem Yield >=6% (",P,"%) e Div./ Patr <=1 (",D,"): COMPRAR", CCC)
+    .concat("Baseado no metodo de Bazin, ", S," tem Yield >=6% (",P,"%) e Div./ Patr <=1 (",D,"): COMPRAR", CCC);
     .send(Q,tell,stocks::recommend(S,comprar,CCC));
     .
 
 +!reply(S,Q)[source(self)] : fundamentals::divYield(S,P) & fundamentals::divBrutaPatr(S,D) <-
-    .concat("Baseado no metodo de Bazin, ", S," NAO cumpre os requisitos de Yield >=6% (",P,"%) e Div./ Patr <=1 (",D,"): NAO COMPRAR", CCC)
+    .concat("Baseado no metodo de Bazin, ", S," NAO cumpre os requisitos de Yield >=6% (",P,"%) e Div./ Patr <=1 (",D,"): NAO COMPRAR", CCC);
     .send(Q,tell,stocks::recommend(S,neutro,CCC));
     .
 

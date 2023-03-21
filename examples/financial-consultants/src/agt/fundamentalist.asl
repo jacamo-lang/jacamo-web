@@ -2,18 +2,21 @@
 
 /* * * * setup plans * * * */
 
-!focusFundamentusArtifact.
-!joinFinancialGroup.
-!acceptScheme.
+//!focusFundamentusArtifact.
+//!joinFinancialGroup.
+//!acceptScheme.
 
 /* * * * plans * * * */
+
++!sayHi : .my_name(N) <-
+    .print("Hi! I am ",N).
 
 +!saveYourself : .my_name(N) & .concat("/tmp/",N,".asl",CC) <-
     .save_agent(CC).
 
 +!focusFundamentusArtifact <-
     joinWorkspace(financialagents,Omain); 
-    focusWhenAvailable("fundamentus")
+    focusWhenAvailable("fundamentus");
     .
 
 +!makeFundamentusArtifact <-

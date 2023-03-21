@@ -31,7 +31,7 @@
         <scheme id="financialsch">
             <goal id="getOpportunities">
                 <plan operator="sequence">
-                    <goal id="focusFundamentusArtifact" ttf="30 seconds" />
+                    <goal id="sayHi" ttf="30 seconds" />
                     <goal id="lookForOpportunities" ttf="20 minutes" />
                     <goal id="checkOpportunities" ttf="10 minutes" />
                 </plan>
@@ -41,7 +41,7 @@
                 <goal id="checkOpportunities" />
             </mission>
             <mission id="mConsultant" min="3" max="100">
-                <goal id="focusFundamentusArtifact" />
+                <goal id="sayHi" />
             </mission>
         </scheme>
     </functional-specification>

@@ -21,24 +21,24 @@
     & fundamentals::lpa(S,_) & fundamentals::vpa(S,_) 
     <- 
     .print("Getting cached fundamentals from ",S); 
-    !reply(S,Q);
+    !reply(T,Q);
     .
 
 // get Fundamentals again
 +!opinion(T)[source(Q)] : .term2string(T,S) & .date(YY,OO,DD) <- 
     .print("Getting fundamentals from ",S); 
-    getFundamentals(S);
+    getFundamentals(T);
     -+lastDate(YY,OO,DD);
-    !reply(S,Q);
+    !reply(T,Q);
     .
 
 +!reply(S,Q)[source(self)] : fundamentals::preco(S,P) & fundamentals::lpa(S,L) & fundamentals::vpa(S,V) & P < math.sqrt(22.5 * L * V) <-
-    .concat("Baseado no metodo de Grahan, ", S," tem Preco (",P,") menor que raiz quadrada de 22.5*",L,"*", V," (",math.round(math.sqrt(22.5 * L * V)*100)/100,"): COMPRAR", CCC)
+    .concat("Baseado no metodo de Grahan, ", S," tem Preco (",P,") menor que raiz quadrada de 22.5*",L,"*", V," (",math.round(math.sqrt(22.5 * L * V)*100)/100,"): COMPRAR", CCC);
     .send(Q,tell,stocks::recommend(S,comprar,CCC));
     .
 
 +!reply(S,Q)[source(self)] : fundamentals::preco(S,P) & fundamentals::lpa(S,L) & fundamentals::vpa(S,V) <-
-    .concat("Baseado no metodo de Grahan, ", S," NAO cumpre os requisitos de Preco (",P,") menor que raiz quadrada de 22.5*",L,"*", V," (",math.round(math.sqrt(22.5 * L * V)*100)/100,"): NAO COMPRAR", CCC)
+    .concat("Baseado no metodo de Grahan, ", S," NAO cumpre os requisitos de Preco (",P,") menor que raiz quadrada de 22.5*",L,"*", V," (",math.round(math.sqrt(22.5 * L * V)*100)/100,"): NAO COMPRAR", CCC);
     .send(Q,tell,stocks::recommend(S,neutro,CCC));
     .
 
