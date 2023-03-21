@@ -3,7 +3,7 @@
     .send(bob,tell,hi);
 .
 
-+!maryMe <-
++!marryMe <-
     .wait(2000);
     .send(bob,tell,iDontKnow);
 .
@@ -15,9 +15,9 @@
     .send(bob,tell,yes);
 .
 
-+blessYou.
+//+blessYou.
 
-+goInPeace.
+//+goInPeace.
 
 { include("$jacamoJar/templates/common-cartago.asl") }
 { include("$jacamoJar/templates/common-moise.asl") }

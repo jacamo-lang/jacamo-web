@@ -7,7 +7,7 @@
 
 +hi <-
     .wait(4000);
-    .send(alice,achieve,maryMe);
+    .send(alice,achieve,marryMe);
 .
 
 +iDontKnow <- 
@@ -15,18 +15,19 @@
     .send(alice,tell,iLoveYou);
 .
 
-+iLoveYouToo.
+//+iLoveYouToo.
 
 +yes <-
     .wait(2000);
     .send(one,achieve,yourBlessing);
 .
 
-+blessYou.
 
-+goInPeace.
+//+blessYou.
+
+//+goInPeace.
 
 { include("$jacamoJar/templates/common-cartago.asl") }
 { include("$jacamoJar/templates/common-moise.asl") }
-// uncomment the include below to have an agent compliant with its organisation
-//{ include("$moiseJar/asl/org-obedient.asl") }
+{ include("$moiseJar/asl/org-obedient.asl") }
+
