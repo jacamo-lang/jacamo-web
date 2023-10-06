@@ -3,14 +3,6 @@
 Jacamo-web is an interactive programming IDE based on [JaCaMo](http://jacamo.sourceforge.net/), a Multi-Agent System (MAS) Oriented Programming platform. The [interactive development](
 https://cgi.csc.liv.ac.uk/~lad/emas2019/accepted/EMAS2019_paper_8.pdf) allows making changes on instances of agents, artefacts and organisations, which means that the system can be updated while it is running.
 
-## Straightforward deploying to Heroku
-
-1. Fork this repository
-1. Go to heroku website, create an app giving any name to it
-1. On Deploy -> Deployment method choose github
-1. find your fork of 'jacamo-web'
-1. 'Deploy branch'
-
 ## Running locally
 
 ### Using a local gradle
@@ -34,25 +26,7 @@ Run the webpack watch task with ``yarn run watch``. All changes you make to Java
 $ docker build  -t jomifred/jacamo-web .
 ```
 
-Usually super user privileges are necessary. It will take some minutes to run everything since it will create a docker image and run a container with a basic jacamo-web application running. At the very end of the log, you should see a message similar to "jacamo-web Rest API is running on http://172.17.0.2:8080/", so you can open your browser on the referred URL.
-
-### Deploying from local repository to Heroku
-
-After installing the [Heroku Toolbelt](https://toolbelt.heroku.com/) you can test the app locally using heroku CLI:
-
-```sh
-$ ./gradlew stage
-$ heroku local web
-```
-Your app should now be running on [localhost:5000](http://localhost:5000/).
-
-### Deploying from local repository
-
-```sh
-$ heroku create
-$ git push heroku master
-$ heroku open
-```
+Usually super user privileges are necessary. It will take some minutes to run everything since it will create a docker image and run a container with a basic jacamo-web application running. At the very end of the log, you should see a message similar to "jacamo-web Rest API is running on http://yourIP:8080/" (e.g. http://172.17.0.2:8080/), so you can open your browser on the referred URL.
 
 # More about jacamo-web
 

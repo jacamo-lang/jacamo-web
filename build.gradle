@@ -95,24 +95,6 @@ jar {
 
 /*
  *
- * Heroku support
- *
- */
-
-task copyToLib(type: Copy) {
-    into "$buildDir/libs"
-    from(configurations.compileClasspath)
-}
-
-task stage(dependsOn: ['shadowJar', 'copyToLib', 'clean']) {
-	copyToLib.mustRunAfter clean
-	jar.mustRunAfter copyToLib
-}
-
-stage.dependsOn(copyToLib)
-
-/*
- *
  * Java Docs
  *
  */
