@@ -22,11 +22,19 @@ Run the webpack watch task with ``yarn run watch``. All changes you make to Java
 
 ### Using a local docker
 
+You can create a local docker image of jacamo-web. First, make sure you are in the `jacamo-web` root folder, then run the following command (super user privileges may be necessary):
+
 ```sh
-$ docker build  -t jomifred/jacamo-web .
+jacamo-web$ docker build -t jacamo-web:0.5 .
 ```
 
-Usually super user privileges are necessary. It will take some minutes to run everything since it will create a docker image and run a container with a basic jacamo-web application running. At the very end of the log, you should see a message similar to "jacamo-web Rest API is running on http://yourIP:8080/" (e.g. http://172.17.0.2:8080/), so you can open your browser on the referred URL.
+It will take some minutes to build the docker image. After finishing, the jacamo-web image should be listed by the command `docker image ls`. Execute the following command to launch a container based on jacamo-web docker image:
+
+```sh
+$ docker run -it --name jacamo-web jacamo-web:0.5
+```
+
+ At the very end of the log, you should see a message similar to "jacamo-web Rest API is running on http://yourIP:8080/" (e.g. http://172.17.0.2:8080/), so you can open your browser on the referred URL.
 
 # More about jacamo-web
 
