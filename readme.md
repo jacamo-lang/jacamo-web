@@ -34,7 +34,14 @@ It will take some minutes to build the docker image. After finishing, the jacamo
 $ docker run -it --name jacamo-web jacamo-web:0.5
 ```
 
- At the very end of the log, you should see a message similar to "jacamo-web Rest API is running on http://yourIP:8080/" (e.g. http://172.17.0.2:8080/), so you can open your browser on the referred URL.
+In the log you should see a message similar to "jacamo-web Rest API is running on http://yourIP:8080/" (e.g. http://172.17.0.2:8080/), so you can open your browser on the referred URL.
+
+To rerun `jacamo-web` after stopping the container execute:
+
+```sh
+$ docker container start -i jacamo-web
+```
+Alternativelly, you can remove the pre-generated `jacamo-web` container executing `docker container rm jacamo-web`.
 
 # More about jacamo-web
 
